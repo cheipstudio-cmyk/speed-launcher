@@ -15,6 +15,11 @@ import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 
+/**
+ * v8: due modalità.
+ * - Se dragOriginId è settato (icona pinnata sulla home), long-press = drag immediato
+ * - Se dragOriginId è vuoto (icona del drawer), long-press = menu
+ */
 class IconCellView(context: Context) : LinearLayout(context) {
 
     private val iconView = ImageView(context)
@@ -28,8 +33,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
     var onLaunch: ((AppInfo, View) -> Unit)? = null
     var onMenu: ((AppInfo, View) -> Unit)? = null
 
-    /** ID di origine per il drag, settato dal parent (es. "grid:5" o "dock:2") */
     var dragOriginId: String = ""
+        set(value) {
+            field = value
+            updateLongPressBehavior()
+        }
 
     init {
         orientation = VERTICAL
@@ -67,18 +75,26 @@ class IconCellView(context: Context) : LinearLayout(context) {
             postDelayed({ onLaunch?.invoke(a, this) }, 50)
         }
 
-        setOnLongClickListener {
-            val a = app ?: return@setOnLongClickListener false
-            onMenu?.invoke(a, this)
-            true
-        }
+        updateLongPressBehavior()
     }
 
-    fun beginDrag() {
-        val a = app ?: return
-        if (dragOriginId.isEmpty()) return
-        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
-        startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
+    private fun updateLongPressBehavior() {
+        if (dragOriginId.isNotEmpty()) {
+            // Sulla home: long-press = drag
+            setOnLongClickListener {
+                val a = app ?: return@setOnLongClickListener false
+                val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
+                startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
+                true
+            }
+        } else {
+            // Nel drawer: long-press = menu
+            setOnLongClickListener {
+                val a = app ?: return@setOnLongClickListener false
+                onMenu?.invoke(a, this)
+                true
+            }
+        }
     }
 
     fun bind(app: AppInfo) {

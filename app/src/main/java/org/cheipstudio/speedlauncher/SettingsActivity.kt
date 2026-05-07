@@ -3,6 +3,7 @@ package org.cheipstudio.speedlauncher
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings as AndroidSettings
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import org.cheipstudio.speedlauncher.databinding.ActivitySettingsBinding
 
@@ -23,7 +24,7 @@ class SettingsActivity : AppCompatActivity() {
         } catch (_: Throwable) { "1.0" }
         binding.versionValue.text = getString(R.string.version_value, versionName)
 
-        // ---- Setup griglia (radio) ----
+        // Griglia (radio)
         when {
             settings.gridCols.value == 4 && settings.gridRows.value == 4 -> binding.gridRadio4x4.isChecked = true
             settings.gridCols.value == 5 && settings.gridRows.value == 5 -> binding.gridRadio5x5.isChecked = true
@@ -37,17 +38,44 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        // ---- Toggle dock e widget ----
-        binding.switchShowDock.isChecked = settings.showDock.value == true
-        binding.switchShowDock.setOnCheckedChangeListener { _, checked ->
-            settings.setShowDock(checked)
-        }
+        // Toggle widget
         binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
         binding.switchShowWidget.setOnCheckedChangeListener { _, checked ->
             settings.setShowWidgetSlot(checked)
         }
 
-        // ---- Voci di sistema ----
+        // Toggle search bar
+        binding.switchShowSearch.isChecked = settings.showSearchBar.value == true
+        binding.switchShowSearch.setOnCheckedChangeListener { _, checked ->
+            settings.setShowSearchBar(checked)
+        }
+
+        // Toggle haptic
+        binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
+        binding.switchHaptic.setOnCheckedChangeListener { _, checked ->
+            settings.setHapticEnabled(checked)
+        }
+
+        // Reset layout
+        binding.itemResetLayout.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.settings_reset)
+                .setMessage(R.string.settings_reset_sub)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    settings.resetHomeLayout()
+                    finish()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+
+        // Mostra tutorial
+        binding.itemShowTutorial.setOnClickListener {
+            settings.resetTutorial()
+            finish()
+        }
+
+        // System
         binding.itemDefaultLauncher.setOnClickListener {
             try { startActivity(Intent(AndroidSettings.ACTION_HOME_SETTINGS)) } catch (_: Throwable) {}
         }

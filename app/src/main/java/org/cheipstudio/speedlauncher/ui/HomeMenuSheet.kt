@@ -10,8 +10,6 @@ import org.cheipstudio.speedlauncher.R
 
 class HomeMenuSheet : BottomSheetDialogFragment() {
 
-    var onWallpaper: (() -> Unit)? = null
-    var onAddWidget: (() -> Unit)? = null
     var onSettings: (() -> Unit)? = null
 
     override fun onCreateView(
@@ -28,10 +26,6 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
                 val intent = Intent(Intent.ACTION_SET_WALLPAPER)
                 startActivity(Intent.createChooser(intent, getString(R.string.menu_wallpaper)))
             } catch (_: Throwable) {}
-        }
-        view.findViewById<View>(R.id.menuWidget).setOnClickListener {
-            dismissAllowingStateLoss()
-            onAddWidget?.invoke()
         }
         view.findViewById<View>(R.id.menuSettings).setOnClickListener {
             dismissAllowingStateLoss()

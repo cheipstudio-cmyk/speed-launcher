@@ -1,5 +1,6 @@
 package org.cheipstudio.speedlauncher.ui
 
+import android.animation.LayoutTransition
 import android.content.Context
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -10,7 +11,6 @@ import android.view.View
 import android.widget.FrameLayout
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
-import org.cheipstudio.speedlauncher.data.HomeItem
 import org.cheipstudio.speedlauncher.data.HomeLayoutStore
 import org.cheipstudio.speedlauncher.databinding.ViewHomeBinding
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
@@ -53,6 +53,12 @@ class HomeView @JvmOverloads constructor(
     })
 
     init {
+        // Animazioni fluide su tutti i layout change
+        layoutTransition = LayoutTransition().apply {
+            enableTransitionType(LayoutTransition.CHANGING)
+            setDuration(180)
+        }
+
         binding.searchBar.setOnClickListener { onSearchTap?.invoke() }
         binding.iconGrid.onAppLaunch = { app, view ->
             SpeedApp.instance.appRepository.launch(app, view)
@@ -60,16 +66,8 @@ class HomeView @JvmOverloads constructor(
         binding.iconGrid.onAppLongPress = { app, _ ->
             onAppLongPressOnHome?.invoke(app)
         }
-        binding.dock.onAppLaunch = { app, view ->
-            SpeedApp.instance.appRepository.launch(app, view)
-        }
-        binding.dock.onAppLongPress = { app, _ ->
-            onAppLongPressOnHome?.invoke(app)
-        }
         binding.iconGrid.setLayout(layoutStore.load())
-        binding.dock.setLayout(layoutStore.loadDock())
 
-        // Registriamo il drag handler globale
         SpeedApp.instance.dragHandler = { origin, key, target ->
             handleDrag(origin, key, target)
         }
@@ -79,30 +77,15 @@ class HomeView @JvmOverloads constructor(
 
     private fun handleDrag(origin: String, key: String, target: String) {
         val app = SpeedApp.instance.appRepository.apps.value?.find { it.key == key } ?: return
-        when {
-            target.startsWith("grid:") -> {
-                val targetIdx = target.removePrefix("grid:").toIntOrNull() ?: return
-                // Rimuovi dall'origine se diverso, poi pin alla griglia
-                if (origin.startsWith("dock:")) {
-                    binding.dock.unpinApp(app)
-                }
-                // Per il target esatto: usa pinApp che mette al primo slot vuoto.
-                // (Per swap esatto servirebbe un metodo dedicato — semplifico).
-                binding.iconGrid.pinApp(app)
-            }
-            target.startsWith("dock:") -> {
-                val targetIdx = target.removePrefix("dock:").toIntOrNull() ?: return
-                if (origin.startsWith("grid:")) {
-                    binding.iconGrid.unpinApp(app)
-                }
-                binding.dock.placeAt(targetIdx, key)
-            }
+        if (target.startsWith("grid:")) {
+            val targetIdx = target.removePrefix("grid:").toIntOrNull() ?: return
+            binding.iconGrid.swapWith(key, targetIdx)
         }
     }
 
     private fun applySettings() {
-        binding.dock.visibility = if (settings.showDock.value == true) View.VISIBLE else View.GONE
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
+        binding.searchBar.visibility = if (settings.showSearchBar.value == true) View.VISIBLE else View.GONE
     }
 
     fun reapplySettings() {
@@ -123,36 +106,13 @@ class HomeView @JvmOverloads constructor(
 
     fun refreshApps(apps: List<AppInfo>) {
         binding.iconGrid.refresh(apps)
-        binding.dock.refresh(apps)
     }
 
     fun refreshDots() {
         binding.iconGrid.invalidate()
-        binding.dock.invalidate()
     }
 
-    /** Pin alla GRIGLIA */
     fun pinApp(app: AppInfo) = binding.iconGrid.pinApp(app)
-
-    /** Pin alla DOCK */
-    fun pinAppToDock(app: AppInfo) = binding.dock.pinApp(app)
-
-    /** Rimuovi sia da grid che da dock */
-    fun unpinApp(app: AppInfo) {
-        binding.iconGrid.unpinApp(app)
-        binding.dock.unpinApp(app)
-    }
-
-    fun isPinned(app: AppInfo) = binding.iconGrid.isPinned(app) || binding.dock.isPinned(app)
-    fun isInDock(app: AppInfo) = binding.dock.isPinned(app)
-    fun isInGrid(app: AppInfo) = binding.iconGrid.isPinned(app)
-
-    /** Avvia drag per una specifica app, dovunque essa sia */
-    fun beginDragFor(app: AppInfo) {
-        if (binding.iconGrid.isPinned(app)) {
-            binding.iconGrid.beginDragFor(app)
-        } else if (binding.dock.isPinned(app)) {
-            binding.dock.beginDragFor(app)
-        }
-    }
+    fun unpinApp(app: AppInfo) = binding.iconGrid.unpinApp(app)
+    fun isPinned(app: AppInfo) = binding.iconGrid.isPinned(app)
 }

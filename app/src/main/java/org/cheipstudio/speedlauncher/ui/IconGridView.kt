@@ -1,5 +1,6 @@
 package org.cheipstudio.speedlauncher.ui
 
+import android.animation.LayoutTransition
 import android.content.Context
 import android.util.AttributeSet
 import android.view.DragEvent
@@ -38,6 +39,12 @@ class IconGridView @JvmOverloads constructor(
         isClickable = false
         isFocusable = false
 
+        // Animazioni transizione fluide
+        layoutTransition = LayoutTransition().apply {
+            enableTransitionType(LayoutTransition.CHANGING)
+            setDuration(180)
+        }
+
         setOnDragListener { _, event -> handleDrag(event) }
     }
 
@@ -69,7 +76,7 @@ class IconGridView @JvmOverloads constructor(
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
         if (!initialized && apps.size > 5) {
-            val toAdd = apps.drop(5).take(cols * rows - 4)
+            val toAdd = apps.drop(5).take(cols * rows)
             for (i in toAdd.indices) pinnedKeys[i] = toAdd[i].key
             initialized = true
             persist()
@@ -97,26 +104,17 @@ class IconGridView @JvmOverloads constructor(
 
     fun isPinned(app: AppInfo): Boolean = pinnedKeys.contains(app.key)
 
-    /**
-     * Handler chiamato dall'esterno per richiedere drag su una cella specifica.
-     */
-    fun beginDragForCell(cellIndex: Int) {
-        if (cellIndex !in 0 until childCount) return
-        val cell = getChildAt(cellIndex) as? IconCellView ?: return
-        cell.beginDrag()
-    }
-
-    /**
-     * Cerca la cella corrispondente all'app passata e avvia il drag.
-     */
-    fun beginDragFor(app: AppInfo) {
-        for (i in 0 until childCount) {
-            val cell = getChildAt(i) as? IconCellView ?: continue
-            if (cell.packageName == app.packageName) {
-                cell.beginDrag()
-                return
-            }
-        }
+    /** Sposta key allo slot targetIdx, scambia con quello che c'era prima */
+    fun swapWith(key: String, targetIdx: Int) {
+        if (targetIdx !in 0 until cols * rows) return
+        val sourceIdx = pinnedKeys.indexOf(key)
+        if (sourceIdx == -1) return
+        if (sourceIdx == targetIdx) return
+        val tmp = pinnedKeys[targetIdx]
+        pinnedKeys[targetIdx] = key
+        pinnedKeys[sourceIdx] = tmp
+        persist()
+        rebuild()
     }
 
     private fun persist() {
@@ -131,7 +129,6 @@ class IconGridView @JvmOverloads constructor(
     private fun rebuild() {
         removeAllViews()
         if (allApps.isEmpty()) {
-            // riempi con celle vuote per non collassare
             for (i in 0 until cols * rows) addView(emptyCell(i), buildLayoutParams(i))
             return
         }
@@ -170,9 +167,8 @@ class IconGridView @JvmOverloads constructor(
     private fun handleDrag(event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> true
-            DragEvent.ACTION_DRAG_ENTERED -> true
+            DragEvent.ACTION_DRAG_ENTERED, DragEvent.ACTION_DRAG_EXITED -> true
             DragEvent.ACTION_DRAG_LOCATION -> true
-            DragEvent.ACTION_DRAG_EXITED -> true
             DragEvent.ACTION_DROP -> handleDrop(event)
             DragEvent.ACTION_DRAG_ENDED -> true
             else -> false
@@ -182,12 +178,10 @@ class IconGridView @JvmOverloads constructor(
     private fun handleDrop(event: DragEvent): Boolean {
         val targetCellIdx = findCellAt(event.x, event.y) ?: return false
         val text = (event.clipData?.getItemAt(0)?.text ?: return false).toString()
-        // Format: "grid:N|key" oppure "dock:N|key"
         val parts = text.split("|")
         if (parts.size != 2) return false
-        val (origin, draggedKey) = parts
-        // Comunica al gestore esterno (HomeView) di processare il drop
-        SpeedApp.instance.dragHandler?.invoke(origin, draggedKey, "grid:$targetCellIdx")
+        val draggedKey = parts[1]
+        swapWith(draggedKey, targetCellIdx)
         return true
     }
 
