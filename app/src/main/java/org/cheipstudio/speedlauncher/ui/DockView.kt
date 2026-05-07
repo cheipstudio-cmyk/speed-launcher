@@ -26,6 +26,9 @@ class DockView @JvmOverloads constructor(
     init {
         orientation = HORIZONTAL
         weightSum = SLOTS.toFloat()
+        // Spaziatura tra slot dock
+        val pad = (8 * resources.displayMetrics.density).toInt()
+        setPadding(pad, 0, pad, 0)
         setupDragListener()
     }
 
@@ -68,28 +71,51 @@ class DockView @JvmOverloads constructor(
         dockKeys[idx] = null
         persist()
         rebuild()
+        // Forza re-layout del parent per evitare layout fantasma
+        post { requestLayout() }
     }
 
     private fun persist() {
-        store.saveDock(dockKeys.filterNotNull())
+        // IMPORTANTE: salviamo tutti gli SLOTS includendo i null come stringa vuota
+        // così il numero di slot si mantiene
+        store.saveDock(dockKeys.map { it ?: "" })
     }
 
     private fun rebuild() {
         removeAllViews()
-        if (allApps.isEmpty()) return
+        if (allApps.isEmpty()) {
+            // Anche senza app, manteniamo gli slot vuoti per non collassare il layout
+            for (i in 0 until SLOTS) {
+                addView(emptyCell(i), LayoutParams(0, LayoutParams.MATCH_PARENT, 1f))
+            }
+            return
+        }
         val byKey = allApps.associateBy { it.key }
         for (i in 0 until SLOTS) {
-            val cell = dockKeys[i]?.let { byKey[it] }?.let { app ->
-                IconCellView(context).apply {
-                    bind(app)
-                    tag = i
-                    onLaunch = { a, v -> onAppLaunch?.invoke(a, v) }
-                    onMenu = { a, v -> onAppLongPress?.invoke(a, v) }
-                    onDragStart = { a, v -> startDragForCell(v, i, a) }
-                }
-            } ?: View(context).apply { tag = i }
+            val key = dockKeys[i]
+            val cell: View = if (key.isNullOrEmpty()) {
+                emptyCell(i)
+            } else {
+                byKey[key]?.let { app ->
+                    IconCellView(context).apply {
+                        bind(app)
+                        tag = i
+                        onLaunch = { a, v -> onAppLaunch?.invoke(a, v) }
+                        onMenu = { a, v -> onAppLongPress?.invoke(a, v) }
+                        onDragStart = { a, v -> startDragForCell(v, i, a) }
+                    }
+                } ?: emptyCell(i)
+            }
             val lp = LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
             addView(cell, lp)
+        }
+    }
+
+    private fun emptyCell(index: Int): View {
+        return View(context).apply {
+            tag = index
+            // dimensione minima per non collassare
+            minimumHeight = (56 * resources.displayMetrics.density).toInt()
         }
     }
 

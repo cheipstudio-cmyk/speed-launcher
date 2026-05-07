@@ -18,11 +18,10 @@ import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 
 /**
- * v4.1:
- * - Swipe-up area estesa: parte dal fondo schermo (240dp dal basso)
- * - Vibrazione leggera (CONTEXT_CLICK) invece di LONG_PRESS forte
- * - Quando rileviamo lo swipe, mandiamo ACTION_CANCEL ai figli (annulla animazione icone)
- * - Menu impostazioni cancellato in modo più aggressivo se c'è movimento
+ * v4.2:
+ * - Swipe-up funziona da qualsiasi punto della home (no zone)
+ * - Long-press home a 800ms (più affidabile, meno falsi positivi)
+ * - Soglia swipe più stringente per non confondersi con tap
  */
 class HomeView @JvmOverloads constructor(
     context: Context,
@@ -48,10 +47,9 @@ class HomeView @JvmOverloads constructor(
     private var downOverChild = false
 
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
-    private val swipeUpThreshold = resources.displayMetrics.density * 50f
-    // Zona estesa di trigger swipe: ultimi 280dp dal fondo dello schermo
-    private val swipeBottomZoneDp = resources.displayMetrics.density * 280f
+    // Long press a 800ms invece dei 500 di sistema
+    private val longPressTimeout = 800L
+    private val swipeUpThreshold = resources.displayMetrics.density * 70f
 
     private val handler = Handler(Looper.getMainLooper())
     private val longPressRunnable = Runnable {
@@ -84,7 +82,7 @@ class HomeView @JvmOverloads constructor(
 
     fun cancelHomeLongPress() {
         handler.removeCallbacks(longPressRunnable)
-        longPressFired = true // blocca anche se runnable già accodato
+        longPressFired = true
     }
 
     private fun isOverInteractiveChild(x: Float, y: Float): Boolean {
@@ -103,11 +101,6 @@ class HomeView @JvmOverloads constructor(
         val left = loc[0] - myLoc[0]
         val top = loc[1] - myLoc[1]
         return x >= left && x <= left + view.width && y >= top && y <= top + view.height
-    }
-
-    /** Lo swipe-up parte dalla zona bassa dello schermo (anche sopra dock e icone) */
-    private fun isInSwipeZone(y: Float): Boolean {
-        return y > height - swipeBottomZoneDp
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -132,10 +125,10 @@ class HomeView @JvmOverloads constructor(
                 if (dx > touchSlop || abs(dy) > touchSlop) {
                     handler.removeCallbacks(longPressRunnable)
                 }
-                // Swipe rilevato se: parte dalla zona bassa + movimento verticale forte
-                if (isInSwipeZone(downY) && dy > swipeUpThreshold && dy > dx * 1.2f) {
+                // Swipe-up rilevato da QUALSIASI parte della home, basta movimento verticale forte
+                if (dy > swipeUpThreshold && dy > dx * 1.3f) {
                     swipeDetected = true
-                    longPressFired = true // blocca eventuale long-press in pending
+                    longPressFired = true
                     return true
                 }
                 return false

@@ -40,6 +40,9 @@ class HomeLayoutStore(context: Context) {
         prefs.edit().putString(KEY_GRID, arr.toString()).apply()
     }
 
+    /**
+     * Carica la dock; le stringhe vuote rappresentano slot null mantenuti per posizione.
+     */
     fun loadDock(): List<String> {
         val raw = prefs.getString(KEY_DOCK, "[]") ?: "[]"
         val arr = JSONArray(raw)

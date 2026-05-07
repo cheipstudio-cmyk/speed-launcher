@@ -16,6 +16,7 @@ class AppRepository(private val context: Context) {
 
     private val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val ownPackage = context.packageName
 
     val apps = MutableLiveData<List<AppInfo>>(emptyList())
 
@@ -32,7 +33,6 @@ class AppRepository(private val context: Context) {
 
     private fun loadApps(): List<AppInfo> {
         val result = mutableListOf<AppInfo>()
-        // Per ora carichiamo solo lo user principale; multi-user/work profile arrivano dopo
         val users: List<UserHandle> = listOf(Process.myUserHandle())
         for (user in users) {
             val activities = try {
@@ -41,11 +41,14 @@ class AppRepository(private val context: Context) {
                 emptyList()
             }
             for (activity in activities) {
+                val pkg = activity.applicationInfo.packageName
+                // Filtra fuori Speed Launcher stesso dal proprio drawer
+                if (pkg == ownPackage) continue
                 result.add(
                     AppInfo(
-                        packageName = activity.applicationInfo.packageName,
+                        packageName = pkg,
                         componentName = activity.componentName.className,
-                        label = activity.label?.toString() ?: activity.applicationInfo.packageName,
+                        label = activity.label?.toString() ?: pkg,
                         icon = activity.getBadgedIcon(0),
                         userHandle = user
                     )
@@ -56,9 +59,6 @@ class AppRepository(private val context: Context) {
         return result.sortedWith(compareBy(collator) { it.label.lowercase() })
     }
 
-    /**
-     * Si registra ai cambi di package per ricaricare automaticamente.
-     */
     fun observePackageChanges() {
         launcherApps.registerCallback(object : LauncherApps.Callback() {
             override fun onPackageRemoved(packageName: String, user: UserHandle) = reload()
@@ -75,16 +75,10 @@ class AppRepository(private val context: Context) {
         try {
             launcherApps.startMainActivity(component, app.userHandle, sourceBounds, options?.toBundle())
         } catch (t: Throwable) {
-            // App rimossa o non più avviabile: ricarica
             reload()
         }
     }
 
-    /**
-     * Costruisce l'animazione di apertura "scale-up dall'icona" stile Pixel.
-     * Restituisce sia i bounds (per sourceBounds di startMainActivity) che le ActivityOptions.
-     * Se la view è null o non visibile, animazione di default.
-     */
     private fun buildLaunchAnimation(
         view: android.view.View?
     ): Pair<android.graphics.Rect?, android.app.ActivityOptions?> {

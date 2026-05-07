@@ -36,10 +36,11 @@
             android:windowSoftInputMode="adjustNothing"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|mcc|mnc|density|fontScale|fontWeightAdjustment|locale|layoutDirection|uiMode">
 
-            <!-- Solo HOME, niente LAUNCHER: l'app non appare nel drawer di sistema -->
+            <!-- HOME + LAUNCHER: l'app è un launcher E appare nel drawer di sistema -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
