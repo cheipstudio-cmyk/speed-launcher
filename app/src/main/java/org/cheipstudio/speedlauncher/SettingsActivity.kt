@@ -3,8 +3,9 @@ package org.cheipstudio.speedlauncher
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings as AndroidSettings
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.appcompat.app.AppCompatActivity
+import org.cheipstudio.speedlauncher.data.SettingsRepository
 import org.cheipstudio.speedlauncher.databinding.ActivitySettingsBinding
 
 class SettingsActivity : AppCompatActivity() {
@@ -16,7 +17,6 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         val versionName = try {
@@ -24,7 +24,7 @@ class SettingsActivity : AppCompatActivity() {
         } catch (_: Throwable) { "1.0" }
         binding.versionValue.text = getString(R.string.version_value, versionName)
 
-        // Griglia (radio)
+        // Grid
         when {
             settings.gridCols.value == 4 && settings.gridRows.value == 4 -> binding.gridRadio4x4.isChecked = true
             settings.gridCols.value == 5 && settings.gridRows.value == 5 -> binding.gridRadio5x5.isChecked = true
@@ -38,44 +38,39 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        // Toggle widget
+        // Search mode
+        binding.searchModeApps.isChecked = settings.searchMode.value == SettingsRepository.MODE_APPS
+        binding.searchModeGoogle.isChecked = settings.searchMode.value == SettingsRepository.MODE_GOOGLE
+        binding.searchModeGroup.setOnCheckedChangeListener { _, id ->
+            when (id) {
+                R.id.searchModeApps -> settings.setSearchMode(SettingsRepository.MODE_APPS)
+                R.id.searchModeGoogle -> settings.setSearchMode(SettingsRepository.MODE_GOOGLE)
+            }
+        }
+
         binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
-        binding.switchShowWidget.setOnCheckedChangeListener { _, checked ->
-            settings.setShowWidgetSlot(checked)
-        }
+        binding.switchShowWidget.setOnCheckedChangeListener { _, c -> settings.setShowWidgetSlot(c) }
 
-        // Toggle search bar
         binding.switchShowSearch.isChecked = settings.showSearchBar.value == true
-        binding.switchShowSearch.setOnCheckedChangeListener { _, checked ->
-            settings.setShowSearchBar(checked)
-        }
+        binding.switchShowSearch.setOnCheckedChangeListener { _, c -> settings.setShowSearchBar(c) }
 
-        // Toggle haptic
         binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
-        binding.switchHaptic.setOnCheckedChangeListener { _, checked ->
-            settings.setHapticEnabled(checked)
-        }
+        binding.switchHaptic.setOnCheckedChangeListener { _, c -> settings.setHapticEnabled(c) }
 
-        // Reset layout
         binding.itemResetLayout.setOnClickListener {
-            AlertDialog.Builder(this)
+            MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_reset)
                 .setMessage(R.string.settings_reset_sub)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    settings.resetHomeLayout()
-                    finish()
+                    settings.resetHomeLayout(); finish()
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
-
-        // Mostra tutorial
         binding.itemShowTutorial.setOnClickListener {
-            settings.resetTutorial()
-            finish()
+            settings.resetTutorial(); finish()
         }
 
-        // System
         binding.itemDefaultLauncher.setOnClickListener {
             try { startActivity(Intent(AndroidSettings.ACTION_HOME_SETTINGS)) } catch (_: Throwable) {}
         }

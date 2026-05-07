@@ -25,30 +25,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER,
             WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
         )
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         widgetHostController = WidgetHostController(this).also { it.start() }
         binding.homeView.attachWidgetHost(widgetHostController)
 
-        SpeedApp.instance.notificationCounter.counts.observe(this) {
-            binding.homeView.refreshDots()
-        }
-        SpeedApp.instance.appRepository.apps.observe(this) {
-            binding.homeView.refreshApps(it)
-        }
+        SpeedApp.instance.notificationCounter.counts.observe(this) { binding.homeView.refreshDots() }
+        SpeedApp.instance.appRepository.apps.observe(this) { binding.homeView.refreshApps(it) }
 
         binding.homeView.onSwipeUp = { openDrawer() }
         binding.homeView.onSearchTap = { openDrawerWithSearch() }
         binding.homeView.onHomeLongPress = { openHomeMenu() }
-        // v11: niente più onAppLongPressOnHome — long-press su icona = drag
+        binding.homeView.onAppMenuRequest = { app -> openAppActions(app) }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -112,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun openHomeMenu() {
+    private fun openHomeMenu() {
         if (homeMenuSheet?.isAdded == true) return
         homeMenuSheet = HomeMenuSheet().also {
             it.onSettings = {

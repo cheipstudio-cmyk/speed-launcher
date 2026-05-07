@@ -52,16 +52,13 @@ class IconGridView @JvmOverloads constructor(
     fun applyGridSize(newCols: Int, newRows: Int) {
         if (newCols == cols && newRows == rows) return
         val oldKeys = pinnedKeys.filterNotNull()
-        cols = newCols
-        rows = newRows
-        columnCount = cols
-        rowCount = rows
+        cols = newCols; rows = newRows
+        columnCount = cols; rowCount = rows
         pinnedKeys = MutableList(cols * rows) { null }
         for ((i, key) in oldKeys.withIndex()) {
             if (i < cols * rows) pinnedKeys[i] = key
         }
-        persist()
-        rebuild()
+        persist(); rebuild()
     }
 
     fun setLayout(items: List<HomeItem>) {
@@ -90,8 +87,7 @@ class IconGridView @JvmOverloads constructor(
         val emptyIdx = pinnedKeys.indexOfFirst { it == null }
         if (emptyIdx == -1) return false
         pinnedKeys[emptyIdx] = app.key
-        persist()
-        rebuild()
+        persist(); rebuild()
         return true
     }
 
@@ -99,39 +95,31 @@ class IconGridView @JvmOverloads constructor(
         val idx = pinnedKeys.indexOf(app.key)
         if (idx == -1) return
         pinnedKeys[idx] = null
-        persist()
-        rebuild()
+        persist(); rebuild()
     }
 
     fun isPinned(app: AppInfo): Boolean = pinnedKeys.contains(app.key)
-
-    /** v11: una pagina è piena se non ha più slot vuoti */
     fun isFull(): Boolean = pinnedKeys.all { it != null }
 
     fun swapWith(key: String, targetIdx: Int) {
         if (targetIdx !in 0 until cols * rows) return
         val sourceIdx = pinnedKeys.indexOf(key)
         if (sourceIdx == -1) {
-            // Drop da pagina diversa: aggiungi al targetIdx (anche se occupato → swap nel posto)
+            // Drop da pagina diversa
             if (pinnedKeys[targetIdx] == null) {
                 pinnedKeys[targetIdx] = key
             } else {
-                // Trova primo slot vuoto e metti lì
                 val emptyIdx = pinnedKeys.indexOfFirst { it == null }
-                if (emptyIdx != -1) {
-                    pinnedKeys[emptyIdx] = key
-                }
+                if (emptyIdx != -1) pinnedKeys[emptyIdx] = key
             }
-            persist()
-            rebuild()
+            persist(); rebuild()
             return
         }
         if (sourceIdx == targetIdx) return
         val tmp = pinnedKeys[targetIdx]
         pinnedKeys[targetIdx] = key
         pinnedKeys[sourceIdx] = tmp
-        persist()
-        rebuild()
+        persist(); rebuild()
     }
 
     private fun persist() {
@@ -163,22 +151,17 @@ class IconGridView @JvmOverloads constructor(
         }
     }
 
-    private fun emptyCell(index: Int): View {
-        return View(context).apply {
-            isClickable = false
-            isFocusable = false
-            isLongClickable = false
-            tag = "grid${pageIndex}:$index"
-        }
+    private fun emptyCell(index: Int): View = View(context).apply {
+        isClickable = false
+        isFocusable = false
+        isLongClickable = false
+        tag = "grid${pageIndex}:$index"
     }
 
     private fun buildLayoutParams(index: Int): LayoutParams {
         val row = index / cols
         val col = index % cols
-        return LayoutParams(spec(row, 1f), spec(col, 1f)).apply {
-            width = 0
-            height = 0
-        }
+        return LayoutParams(spec(row, 1f), spec(col, 1f)).apply { width = 0; height = 0 }
     }
 
     private fun handleDrag(event: DragEvent): Boolean {
@@ -197,22 +180,14 @@ class IconGridView @JvmOverloads constructor(
         val text = (event.clipData?.getItemAt(0)?.text ?: return false).toString()
         val parts = text.split("|")
         if (parts.size != 2) return false
-        val draggedKey = parts[1]
-        // Inoltra al gestore globale per il routing tra pagine
-        SpeedApp.instance.dragHandler?.invoke(
-            text.split("|")[0],
-            draggedKey,
-            "grid${pageIndex}:$targetCellIdx"
-        )
+        SpeedApp.instance.dragHandler?.invoke(parts[0], parts[1], "grid${pageIndex}:$targetCellIdx")
         return true
     }
 
     private fun findCellAt(x: Float, y: Float): Int? {
         for (i in 0 until childCount) {
             val child = getChildAt(i)
-            if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) {
-                return i
-            }
+            if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) return i
         }
         return null
     }

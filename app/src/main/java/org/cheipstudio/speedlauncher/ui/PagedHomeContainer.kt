@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.DragEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import kotlin.math.abs
@@ -25,6 +26,7 @@ class PagedHomeContainer @JvmOverloads constructor(
 
     private var startX = 0f
     private var startY = 0f
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var horizontalDragLikely = false
 
     private val handler = Handler(Looper.getMainLooper())
@@ -41,22 +43,12 @@ class PagedHomeContainer @JvmOverloads constructor(
         }
         addView(pagesContainer)
 
-        // Drag listener: durante il drag di un'icona, se il dito è al bordo, cambia pagina
         setOnDragListener { _, event ->
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> true
-                DragEvent.ACTION_DRAG_LOCATION -> {
-                    handleDragEdgeScroll(event.x)
-                    true
-                }
-                DragEvent.ACTION_DRAG_EXITED -> {
-                    cancelEdgeScroll()
-                    true
-                }
-                DragEvent.ACTION_DRAG_ENDED -> {
-                    cancelEdgeScroll()
-                    true
-                }
+                DragEvent.ACTION_DRAG_LOCATION -> { handleDragEdgeScroll(event.x); true }
+                DragEvent.ACTION_DRAG_EXITED -> { cancelEdgeScroll(); true }
+                DragEvent.ACTION_DRAG_ENDED -> { cancelEdgeScroll(); true }
                 else -> true
             }
         }
@@ -69,16 +61,8 @@ class PagedHomeContainer @JvmOverloads constructor(
         post { layoutPages() }
     }
 
-    fun removePageAt(index: Int) {
-        if (index in 0 until pagesContainer.childCount) {
-            pagesContainer.removeViewAt(index)
-            post { layoutPages() }
-        }
-    }
-
-    fun pageAt(index: Int): View? {
-        return if (index in 0 until pagesContainer.childCount) pagesContainer.getChildAt(index) else null
-    }
+    fun pageAt(index: Int): View? =
+        if (index in 0 until pagesContainer.childCount) pagesContainer.getChildAt(index) else null
 
     val pageCount: Int get() = pagesContainer.childCount
 
@@ -112,7 +96,7 @@ class PagedHomeContainer @JvmOverloads constructor(
     private fun handleDragEdgeScroll(x: Float) {
         val w = width.toFloat()
         if (w <= 0) return
-        val edgeZone = w * 0.12f
+        val edgeZone = w * 0.15f
         when {
             x < edgeZone && currentPage > 0 -> scheduleEdgeScroll(currentPage - 1)
             x > w - edgeZone && currentPage < pageCount - 1 -> scheduleEdgeScroll(currentPage + 1)
@@ -124,11 +108,9 @@ class PagedHomeContainer @JvmOverloads constructor(
         if (edgeScrollPending) return
         edgeScrollPending = true
         handler.postDelayed({
-            if (edgeScrollPending) {
-                snapToPage(targetPage, animate = true)
-            }
+            if (edgeScrollPending) snapToPage(targetPage, animate = true)
             edgeScrollPending = false
-        }, 600L)
+        }, 500L)
     }
 
     private fun cancelEdgeScroll() {
@@ -137,8 +119,7 @@ class PagedHomeContainer @JvmOverloads constructor(
     }
 
     /**
-     * v11: intercept solo se chiaramente orizzontale e supera il touch slop generosamente.
-     * Lasciamo passare i tocchi che potrebbero essere swipe-up verticali ai figli/HomeView.
+     * Intercept più reattivo: se è chiaramente orizzontale (slop superato + dx > dy), prendi.
      */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         when (ev.action) {
@@ -150,7 +131,7 @@ class PagedHomeContainer @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(ev.x - startX)
                 val dy = abs(ev.y - startY)
-                if (!horizontalDragLikely && dx > dy * 2f && dx > 32) {
+                if (!horizontalDragLikely && dx > touchSlop && dx > dy * 1.3f) {
                     horizontalDragLikely = true
                     return true
                 }

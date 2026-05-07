@@ -12,30 +12,31 @@ class WidgetHostController(private val activity: Activity) {
     val appWidgetManager: AppWidgetManager = AppWidgetManager.getInstance(activity)
     val host: AppWidgetHost = AppWidgetHost(activity, HOST_ID)
 
-    private var pendingPickCallback: ((AppWidgetHostView?) -> Unit)? = null
-
-    /** ID dell'ultimo widget aggiunto con successo, per la rimozione */
     var lastWidgetId: Int = -1
         private set
 
-    fun start() {
-        host.startListening()
+    /** Chi ha avviato il flusso bind/configure può aspettarsi una callback */
+    var pendingPlaceCallback: ((AppWidgetHostView?) -> Unit)? = null
+    var pendingBindWidget: AppWidgetProviderInfo? = null
+    var pendingBindAppWidgetId: Int = -1
+
+    fun start() { host.startListening() }
+    fun startListening() { try { host.startListening() } catch (_: Throwable) {} }
+    fun stopListening() { try { host.stopListening() } catch (_: Throwable) {} }
+    fun createView(id: Int, info: AppWidgetProviderInfo): AppWidgetHostView =
+        host.createView(activity, id, info)
+
+    fun markLastWidget(id: Int) { lastWidgetId = id }
+
+    fun deleteWidget(appWidgetId: Int) {
+        if (appWidgetId < 0) return
+        try { host.deleteAppWidgetId(appWidgetId) } catch (_: Throwable) {}
+        if (appWidgetId == lastWidgetId) lastWidgetId = -1
     }
 
-    fun startListening() {
-        try { host.startListening() } catch (_: Throwable) {}
-    }
-
-    fun stopListening() {
-        try { host.stopListening() } catch (_: Throwable) {}
-    }
-
-    fun createView(appWidgetId: Int, info: AppWidgetProviderInfo): AppWidgetHostView {
-        return host.createView(activity, appWidgetId, info)
-    }
-
+    /** Vecchio flusso ACTION_APPWIDGET_PICK - mantengo per compatibilità ma non usato dalla v12 */
     fun pickAndAddWidget(onPicked: (AppWidgetHostView?) -> Unit) {
-        pendingPickCallback = onPicked
+        pendingPlaceCallback = onPicked
         val appWidgetId = host.allocateAppWidgetId()
         val pickIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_PICK).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -43,91 +44,84 @@ class WidgetHostController(private val activity: Activity) {
         activity.startActivityForResult(pickIntent, REQ_PICK)
     }
 
-    fun deleteWidget(appWidgetId: Int) {
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID || appWidgetId < 0) return
-        try {
-            host.deleteAppWidgetId(appWidgetId)
-        } catch (_: Throwable) {}
-        if (appWidgetId == lastWidgetId) lastWidgetId = -1
-    }
-
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REQ_PICK -> {
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    handlePick(data)
-                } else {
-                    val appWidgetId = data?.getIntExtra(
-                        AppWidgetManager.EXTRA_APPWIDGET_ID,
-                        AppWidgetManager.INVALID_APPWIDGET_ID
-                    ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
-                    if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                        host.deleteAppWidgetId(appWidgetId)
+            REQ_BIND -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    val info = pendingBindWidget
+                    val id = pendingBindAppWidgetId
+                    if (info != null && id >= 0) {
+                        if (info.configure != null) {
+                            val configIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
+                                component = info.configure
+                                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+                            }
+                            activity.startActivityForResult(configIntent, REQ_CONFIGURE)
+                        } else {
+                            placeWidget(id, info)
+                        }
                     }
-                    pendingPickCallback?.invoke(null)
-                    pendingPickCallback = null
+                } else {
+                    if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
+                    pendingPlaceCallback?.invoke(null)
+                    pendingPlaceCallback = null
+                    pendingBindWidget = null
+                    pendingBindAppWidgetId = -1
                 }
             }
             REQ_CONFIGURE -> {
                 if (resultCode == Activity.RESULT_OK && data != null) {
-                    completeAdd(data)
+                    val id = data.getIntExtra(
+                        AppWidgetManager.EXTRA_APPWIDGET_ID,
+                        AppWidgetManager.INVALID_APPWIDGET_ID
+                    )
+                    val info = appWidgetManager.getAppWidgetInfo(id)
+                    if (id != AppWidgetManager.INVALID_APPWIDGET_ID && info != null) {
+                        placeWidget(id, info)
+                    } else {
+                        pendingPlaceCallback?.invoke(null)
+                        pendingPlaceCallback = null
+                    }
                 } else {
-                    pendingPickCallback?.invoke(null)
-                    pendingPickCallback = null
+                    pendingPlaceCallback?.invoke(null)
+                    pendingPlaceCallback = null
+                }
+            }
+            REQ_PICK -> {
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    val id = data.getIntExtra(
+                        AppWidgetManager.EXTRA_APPWIDGET_ID,
+                        AppWidgetManager.INVALID_APPWIDGET_ID
+                    )
+                    val info = appWidgetManager.getAppWidgetInfo(id)
+                    if (id != AppWidgetManager.INVALID_APPWIDGET_ID && info != null) {
+                        placeWidget(id, info)
+                    } else {
+                        pendingPlaceCallback?.invoke(null)
+                        pendingPlaceCallback = null
+                    }
+                } else {
+                    pendingPlaceCallback?.invoke(null)
+                    pendingPlaceCallback = null
                 }
             }
         }
     }
 
-    private fun handlePick(data: Intent) {
-        val appWidgetId = data.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID
-        )
-        val info = appWidgetManager.getAppWidgetInfo(appWidgetId)
-        if (info == null) {
-            pendingPickCallback?.invoke(null)
-            pendingPickCallback = null
-            return
-        }
-        if (info.configure != null) {
-            val configIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
-                component = info.configure
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            }
-            activity.startActivityForResult(configIntent, REQ_CONFIGURE)
-        } else {
-            completeAdd(data)
-        }
-    }
-
-    private fun completeAdd(data: Intent) {
-        val appWidgetId = data.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID
-        )
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-            pendingPickCallback?.invoke(null)
-            pendingPickCallback = null
-            return
-        }
-        val info = appWidgetManager.getAppWidgetInfo(appWidgetId)
-        if (info == null) {
-            host.deleteAppWidgetId(appWidgetId)
-            pendingPickCallback?.invoke(null)
-            pendingPickCallback = null
-            return
-        }
-        val view = createView(appWidgetId, info)
-        view.setAppWidget(appWidgetId, info)
-        lastWidgetId = appWidgetId
-        pendingPickCallback?.invoke(view)
-        pendingPickCallback = null
+    private fun placeWidget(id: Int, info: AppWidgetProviderInfo) {
+        val view = createView(id, info)
+        view.setAppWidget(id, info)
+        lastWidgetId = id
+        pendingPlaceCallback?.invoke(view)
+        pendingPlaceCallback = null
+        pendingBindWidget = null
+        pendingBindAppWidgetId = -1
     }
 
     companion object {
-        const val HOST_ID = 0x53504544 // "SPED"
+        const val HOST_ID = 0x53504544
         const val REQ_PICK = 1001
         const val REQ_CONFIGURE = 1002
+        const val REQ_BIND = 1003
     }
 }
