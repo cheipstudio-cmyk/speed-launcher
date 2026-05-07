@@ -167,7 +167,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- BARRA DI RICERCA -->
-            <com.google.android.material.card.MaterialCardView style="@style/SettingsCardAlt">
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
                 <LinearLayout style="@style/SettingsCardInner">
 
                     <LinearLayout style="@style/CardSectionHeader">
@@ -255,8 +255,46 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- CARTELLE (v22) -->
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
+                <LinearLayout style="@style/SettingsCardInner">
+
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_pin" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_folders" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_folder_bg" />
+                            <TextView android:id="@+id/folderBgLabel" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/folderBgGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp"
+                        android:paddingBottom="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/folderBgSystem" style="@style/CardRadio" android:text="@string/folder_bg_system" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/folderBgTransparent" style="@style/CardRadio" android:text="@string/folder_bg_transparent" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/folderBgDark" style="@style/CardRadio" android:text="@string/folder_bg_dark" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/folderBgLight" style="@style/CardRadio" android:text="@string/folder_bg_light" />
+                    </RadioGroup>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- GESTI -->
-            <com.google.android.material.card.MaterialCardView style="@style/SettingsCardAlt">
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
                 <LinearLayout style="@style/SettingsCardInner">
 
                     <LinearLayout style="@style/CardSectionHeader">
@@ -359,7 +397,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- SISTEMA -->
-            <com.google.android.material.card.MaterialCardView style="@style/SettingsCardAlt">
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
                 <LinearLayout style="@style/SettingsCardInner">
 
                     <LinearLayout style="@style/CardSectionHeader">

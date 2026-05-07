@@ -116,4 +116,11 @@
     <string name="drawer_grid4">4-column grid (medium)</string>
     <string name="drawer_grid5">5-column grid (compact)</string>
     <string name="drawer_list">Vertical list</string>
+
+    <string name="settings_section_folders">Folders</string>
+    <string name="settings_folder_bg">Folder background</string>
+    <string name="folder_bg_system">System (auto)</string>
+    <string name="folder_bg_transparent">Transparent blur</string>
+    <string name="folder_bg_dark">Dark</string>
+    <string name="folder_bg_light">Light</string>
 </resources>

@@ -47,7 +47,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private val handler = Handler(Looper.getMainLooper())
     private val moveSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
     /** v20: dopo armed serve un movimento più ampio per draggare, evita conflitto col menu */
-    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop * 5
+    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
     private var downX = 0f
     private var downY = 0f
     private var pressing = false

@@ -58,10 +58,33 @@ object FolderSheet {
             )
         }
 
+        // v22: bg cartella in base al setting
+        val bgStyle = SpeedApp.instance.settingsRepository.folderBgStyle.value
+            ?: SettingsRepository.FOLDER_BG_SYSTEM
+        val cardBgRes = when (bgStyle) {
+            SettingsRepository.FOLDER_BG_TRANSPARENT -> R.drawable.bg_folder_panel_transparent
+            SettingsRepository.FOLDER_BG_DARK -> R.drawable.bg_folder_panel_dark
+            SettingsRepository.FOLDER_BG_LIGHT -> R.drawable.bg_folder_panel_light
+            else -> R.drawable.bg_folder_panel  // system = colorSurfaceContainerHigh
+        }
+        // testo: bianco per dark/transparent (su scuro), nero per light, themed per system
+        val textColor = when (bgStyle) {
+            SettingsRepository.FOLDER_BG_DARK,
+            SettingsRepository.FOLDER_BG_TRANSPARENT -> Color.WHITE
+            SettingsRepository.FOLDER_BG_LIGHT -> Color.parseColor("#1A1A1A")
+            else -> resolveAttr(context, com.google.android.material.R.attr.colorOnSurface)
+        }
+        val hintColor = when (bgStyle) {
+            SettingsRepository.FOLDER_BG_DARK,
+            SettingsRepository.FOLDER_BG_TRANSPARENT -> Color.parseColor("#88FFFFFF")
+            SettingsRepository.FOLDER_BG_LIGHT -> Color.parseColor("#88000000")
+            else -> resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        }
+
         // Card con la cartella vera e propria
         val card = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            background = ContextCompat.getDrawable(context, R.drawable.bg_folder_panel)
+            background = ContextCompat.getDrawable(context, cardBgRes)
             elevation = 24 * density
             setPadding(
                 (24 * density).toInt(), (16 * density).toInt(),
@@ -87,9 +110,9 @@ object FolderSheet {
         val nameInput = EditText(context).apply {
             setText(folder.name)
             textSize = 24f
-            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
+            setTextColor(textColor)
             background = null
-            setHintTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant))
+            setHintTextColor(hintColor)
             hint = context.getString(R.string.folder_name_hint)
             setSingleLine(true)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -163,7 +186,7 @@ object FolderSheet {
             onLaunch(app)
             try { dialog.dismiss() } catch (_: Throwable) {}
         }
-        for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunchAndDismiss, onRemoveFromFolder))
+        for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunchAndDismiss, onRemoveFromFolder, textColor))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
             try {
                 val blur = RenderEffect.createBlurEffect(40f, 40f, Shader.TileMode.CLAMP)
@@ -196,7 +219,8 @@ object FolderSheet {
         context: Context,
         app: AppInfo,
         onLaunch: (AppInfo) -> Unit,
-        onRemoveFromFolder: (AppInfo) -> Unit
+        onRemoveFromFolder: (AppInfo) -> Unit,
+        labelTextColor: Int
     ): View {
         val density = context.resources.displayMetrics.density
         val cell = LinearLayout(context).apply {
@@ -232,7 +256,7 @@ object FolderSheet {
 
         val label = TextView(context).apply {
             text = app.label
-            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
+            setTextColor(labelTextColor)
             textSize = 11f
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END

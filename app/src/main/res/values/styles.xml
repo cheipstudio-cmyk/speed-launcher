@@ -27,7 +27,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:paddingVertical">8dp</item>
+        <item name="android:paddingVertical">4dp</item>
     </style>
 
     <style name="CardSectionHeader">
@@ -37,13 +37,13 @@
         <item name="android:orientation">horizontal</item>
         <item name="android:paddingStart">20dp</item>
         <item name="android:paddingEnd">20dp</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">10dp</item>
     </style>
 
     <style name="CardSectionIcon">
-        <item name="android:layout_width">18dp</item>
-        <item name="android:layout_height">18dp</item>
+        <item name="android:layout_width">16dp</item>
+        <item name="android:layout_height">16dp</item>
         <item name="android:layout_marginEnd">10dp</item>
         <item name="android:tint">?attr/colorPrimary</item>
     </style>
@@ -52,16 +52,16 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">?attr/colorPrimary</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">11sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:letterSpacing">0.06</item>
+        <item name="android:letterSpacing">0.08</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="CardRow">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">60dp</item>
+        <item name="android:minHeight">56dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:paddingStart">20dp</item>
@@ -79,8 +79,8 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="android:textSize">17sp</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="CardSubtitle">
@@ -89,6 +89,7 @@
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
         <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="CardRadio">

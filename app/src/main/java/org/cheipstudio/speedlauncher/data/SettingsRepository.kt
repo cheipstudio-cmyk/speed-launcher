@@ -21,7 +21,8 @@ class SettingsRepository(context: Context) {
     val iconShape = MutableLiveData(prefs.getString(KEY_ICON_SHAPE, SHAPE_ORIGINAL) ?: SHAPE_ORIGINAL)
     val dotColor = MutableLiveData(prefs.getInt(KEY_DOT_COLOR, DOT_DEFAULT))
     val animationStyle = MutableLiveData(prefs.getString(KEY_ANIM_STYLE, ANIM_EXPRESSIVE) ?: ANIM_EXPRESSIVE)
-    val drawerLayout = MutableLiveData(prefs.getString(KEY_DRAWER_LAYOUT, DRAWER_GRID4) ?: DRAWER_GRID4)
+    val drawerLayout = MutableLiveData(prefs.getString(KEY_DRAWER_LAYOUT, DRAWER_LIST) ?: DRAWER_LIST)
+    val folderBgStyle = MutableLiveData(prefs.getString(KEY_FOLDER_BG, FOLDER_BG_SYSTEM) ?: FOLDER_BG_SYSTEM)
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -59,6 +60,9 @@ class SettingsRepository(context: Context) {
     fun setDrawerLayout(layout: String) {
         prefs.edit().putString(KEY_DRAWER_LAYOUT, layout).apply(); drawerLayout.postValue(layout)
     }
+    fun setFolderBgStyle(style: String) {
+        prefs.edit().putString(KEY_FOLDER_BG, style).apply(); folderBgStyle.postValue(style)
+    }
     fun markTutorialSeen() {
         prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, true).apply(); tutorialSeen.postValue(true)
     }
@@ -76,7 +80,8 @@ class SettingsRepository(context: Context) {
         searchBarStyle.postValue(STYLE_SYSTEM); swipeDownNotifications.postValue(true)
         doubleTapLock.postValue(false); iconShape.postValue(SHAPE_ORIGINAL)
         dotColor.postValue(DOT_DEFAULT); animationStyle.postValue(ANIM_EXPRESSIVE)
-        drawerLayout.postValue(DRAWER_GRID4)
+        drawerLayout.postValue(DRAWER_LIST)
+        folderBgStyle.postValue(FOLDER_BG_SYSTEM)
     }
     fun resetEverything() {
         homeLayoutPrefs.edit().clear().apply()
@@ -120,6 +125,12 @@ class SettingsRepository(context: Context) {
         const val DRAWER_GRID4 = "grid4"
         const val DRAWER_GRID5 = "grid5"
         const val DRAWER_LIST = "list"
+
+        private const val KEY_FOLDER_BG = "folder_bg_style"
+        const val FOLDER_BG_SYSTEM = "system"
+        const val FOLDER_BG_TRANSPARENT = "transparent"
+        const val FOLDER_BG_DARK = "dark"
+        const val FOLDER_BG_LIGHT = "light"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange

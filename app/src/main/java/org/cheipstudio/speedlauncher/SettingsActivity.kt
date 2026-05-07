@@ -133,6 +133,25 @@ class SettingsActivity : AppCompatActivity() {
             settings.setDrawerLayout(layout)
         }
 
+        // v22: folder bg
+        when (settings.folderBgStyle.value) {
+            SettingsRepository.FOLDER_BG_TRANSPARENT -> binding.folderBgTransparent.isChecked = true
+            SettingsRepository.FOLDER_BG_DARK -> binding.folderBgDark.isChecked = true
+            SettingsRepository.FOLDER_BG_LIGHT -> binding.folderBgLight.isChecked = true
+            else -> binding.folderBgSystem.isChecked = true
+        }
+        updateFolderBgLabel()
+        binding.folderBgGroup.setOnCheckedChangeListener { _, id ->
+            val style = when (id) {
+                R.id.folderBgTransparent -> SettingsRepository.FOLDER_BG_TRANSPARENT
+                R.id.folderBgDark -> SettingsRepository.FOLDER_BG_DARK
+                R.id.folderBgLight -> SettingsRepository.FOLDER_BG_LIGHT
+                else -> SettingsRepository.FOLDER_BG_SYSTEM
+            }
+            settings.setFolderBgStyle(style)
+            updateFolderBgLabel()
+        }
+
         when (settings.searchBarStyle.value) {
             SettingsRepository.STYLE_SYSTEM -> binding.styleSystem.isChecked = true
             SettingsRepository.STYLE_TRANSPARENT -> binding.styleTransparent.isChecked = true
@@ -278,6 +297,16 @@ class SettingsActivity : AppCompatActivity() {
             else -> getString(R.string.anim_expressive)
         }
         binding.animStyleLabel.text = text
+    }
+
+    private fun updateFolderBgLabel() {
+        val text = when (settings.folderBgStyle.value) {
+            SettingsRepository.FOLDER_BG_TRANSPARENT -> getString(R.string.folder_bg_transparent)
+            SettingsRepository.FOLDER_BG_DARK -> getString(R.string.folder_bg_dark)
+            SettingsRepository.FOLDER_BG_LIGHT -> getString(R.string.folder_bg_light)
+            else -> getString(R.string.folder_bg_system)
+        }
+        binding.folderBgLabel.text = text
     }
 
     private fun updateStyleLabel() {

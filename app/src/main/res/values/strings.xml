@@ -116,4 +116,11 @@
     <string name="drawer_grid4">Griglia 4 colonne (medie)</string>
     <string name="drawer_grid5">Griglia 5 colonne (compatte)</string>
     <string name="drawer_list">Lista verticale</string>
+
+    <string name="settings_section_folders">Cartelle</string>
+    <string name="settings_folder_bg">Sfondo cartelle</string>
+    <string name="folder_bg_system">Sistema (auto)</string>
+    <string name="folder_bg_transparent">Trasparente sfocato</string>
+    <string name="folder_bg_dark">Scuro</string>
+    <string name="folder_bg_light">Chiaro</string>
 </resources>
