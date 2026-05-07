@@ -6,18 +6,17 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
-import android.os.Bundle
 
-/**
- * Gestisce l'AppWidgetHost del launcher.
- * Per la v1 supportiamo widget singoli pinnati sull'home, niente resize complesso.
- */
 class WidgetHostController(private val activity: Activity) {
 
     val appWidgetManager: AppWidgetManager = AppWidgetManager.getInstance(activity)
     val host: AppWidgetHost = AppWidgetHost(activity, HOST_ID)
 
     private var pendingPickCallback: ((AppWidgetHostView?) -> Unit)? = null
+
+    /** ID dell'ultimo widget aggiunto con successo, per la rimozione */
+    var lastWidgetId: Int = -1
+        private set
 
     fun start() {
         host.startListening()
@@ -35,10 +34,6 @@ class WidgetHostController(private val activity: Activity) {
         return host.createView(activity, appWidgetId, info)
     }
 
-    /**
-     * Avvia il flusso di pick + bind di un nuovo widget.
-     * Risultato consegnato via [onPicked].
-     */
     fun pickAndAddWidget(onPicked: (AppWidgetHostView?) -> Unit) {
         pendingPickCallback = onPicked
         val appWidgetId = host.allocateAppWidgetId()
@@ -46,6 +41,14 @@ class WidgetHostController(private val activity: Activity) {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         }
         activity.startActivityForResult(pickIntent, REQ_PICK)
+    }
+
+    fun deleteWidget(appWidgetId: Int) {
+        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID || appWidgetId < 0) return
+        try {
+            host.deleteAppWidgetId(appWidgetId)
+        } catch (_: Throwable) {}
+        if (appWidgetId == lastWidgetId) lastWidgetId = -1
     }
 
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -117,6 +120,7 @@ class WidgetHostController(private val activity: Activity) {
         }
         val view = createView(appWidgetId, info)
         view.setAppWidget(appWidgetId, info)
+        lastWidgetId = appWidgetId
         pendingPickCallback?.invoke(view)
         pendingPickCallback = null
     }

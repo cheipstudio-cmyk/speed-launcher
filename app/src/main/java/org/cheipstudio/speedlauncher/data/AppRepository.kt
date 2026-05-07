@@ -42,7 +42,6 @@ class AppRepository(private val context: Context) {
             }
             for (activity in activities) {
                 val pkg = activity.applicationInfo.packageName
-                // Filtra fuori Speed Launcher stesso dal proprio drawer
                 if (pkg == ownPackage) continue
                 result.add(
                     AppInfo(
@@ -69,31 +68,16 @@ class AppRepository(private val context: Context) {
         })
     }
 
+    /**
+     * v9: animazione di apertura app più leggera — usa l'animazione di sistema
+     * di default (è già fluida e nativa). Niente più makeScaleUpAnimation pesante.
+     */
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
         val component = android.content.ComponentName(app.packageName, app.componentName)
-        val (sourceBounds, options) = buildLaunchAnimation(sourceView)
         try {
-            launcherApps.startMainActivity(component, app.userHandle, sourceBounds, options?.toBundle())
+            launcherApps.startMainActivity(component, app.userHandle, null, null)
         } catch (t: Throwable) {
             reload()
         }
-    }
-
-    private fun buildLaunchAnimation(
-        view: android.view.View?
-    ): Pair<android.graphics.Rect?, android.app.ActivityOptions?> {
-        if (view == null || view.width == 0 || view.height == 0) {
-            return null to null
-        }
-        val loc = IntArray(2)
-        view.getLocationOnScreen(loc)
-        val bounds = android.graphics.Rect(
-            loc[0], loc[1],
-            loc[0] + view.width, loc[1] + view.height
-        )
-        val options = android.app.ActivityOptions.makeScaleUpAnimation(
-            view, 0, 0, view.width, view.height
-        )
-        return bounds to options
     }
 }
