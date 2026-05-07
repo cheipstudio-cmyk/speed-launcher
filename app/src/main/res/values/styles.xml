@@ -68,6 +68,20 @@
         <item name="android:tint">?attr/colorOnSurface</item>
     </style>
 
+    <!-- v39: Pixel-style colored settings icon: contenitore 32dp con bg colorato -->
+    <style name="PixelColoredIconWrap">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_marginEnd">18dp</item>
+        <item name="android:padding">7dp</item>
+    </style>
+    <!-- L'icona dentro: 18dp, tint nero pieno (contrasto sui pastelli) -->
+    <style name="PixelColoredIcon">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:tint">#1B1B1F</item>
+    </style>
+
     <!-- Titolo riga 17sp medium -->
     <style name="PixelItemTitle">
         <item name="android:layout_width">wrap_content</item>
