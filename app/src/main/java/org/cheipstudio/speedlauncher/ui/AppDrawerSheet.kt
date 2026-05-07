@@ -22,13 +22,16 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     private var _binding: SheetAppDrawerBinding? = null
     private val binding get() = _binding!!
 
-    var onAppLongPress: ((AppInfo) -> Unit)? = null
-
     private lateinit var adapter: AppListAdapter
     private var allApps: List<AppInfo> = emptyList()
 
+    /** v20: callback per long-press dal drawer */
+    var onAppLongPress: ((AppInfo) -> Unit)? = null
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _binding = SheetAppDrawerBinding.inflate(inflater, container, false)
         return binding.root
@@ -42,12 +45,11 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 SpeedApp.instance.appRepository.launch(app, source)
                 dismissAllowingStateLoss()
             },
-            onLongClick = { app, _ ->
-                dismissAllowingStateLoss()
+            onLongPress = { app ->
                 onAppLongPress?.invoke(app)
             }
         )
-        binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4)
+        applyDrawerLayout()
         binding.recycler.adapter = adapter
 
         SpeedApp.instance.appRepository.apps.observe(viewLifecycleOwner) { apps ->
@@ -68,6 +70,29 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 binding.searchInput.requestFocus()
                 requireContext().getSystemService<InputMethodManager>()
                     ?.showSoftInput(binding.searchInput, 0)
+            }
+        }
+    }
+
+    private fun applyDrawerLayout() {
+        val layout = SpeedApp.instance.settingsRepository.drawerLayout.value
+            ?: org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID4
+        when (layout) {
+            org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID3 -> {
+                adapter.listMode = false
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 3)
+            }
+            org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID5 -> {
+                adapter.listMode = false
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 5)
+            }
+            org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_LIST -> {
+                adapter.listMode = true
+                binding.recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+            }
+            else -> {
+                adapter.listMode = false
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4)
             }
         }
     }
@@ -94,6 +119,17 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 behavior.skipCollapsed = true
                 behavior.isHideable = true
                 it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+
+                // Slide callback per fade fluido dei contenuti durante drag
+                behavior.addBottomSheetCallback(object : com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback() {
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {}
+                    override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                        // slideOffset: -1 (hidden) → 0 (collapsed) → 1 (expanded)
+                        val alpha = ((slideOffset + 1f).coerceIn(0f, 1f))
+                        _binding?.recycler?.alpha = alpha
+                        _binding?.searchInput?.alpha = alpha
+                    }
+                })
             }
         }
         return dialog

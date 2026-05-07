@@ -50,7 +50,7 @@ class IconGridView @JvmOverloads constructor(
         isClickable = false; isFocusable = false
         layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
-            setDuration(160)
+            setDuration(100)
         }
         setOnDragListener { _, event -> handleDrag(event) }
     }

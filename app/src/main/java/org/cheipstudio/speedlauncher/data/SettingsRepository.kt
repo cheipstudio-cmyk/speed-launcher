@@ -21,6 +21,7 @@ class SettingsRepository(context: Context) {
     val iconShape = MutableLiveData(prefs.getString(KEY_ICON_SHAPE, SHAPE_ORIGINAL) ?: SHAPE_ORIGINAL)
     val dotColor = MutableLiveData(prefs.getInt(KEY_DOT_COLOR, DOT_DEFAULT))
     val animationStyle = MutableLiveData(prefs.getString(KEY_ANIM_STYLE, ANIM_EXPRESSIVE) ?: ANIM_EXPRESSIVE)
+    val drawerLayout = MutableLiveData(prefs.getString(KEY_DRAWER_LAYOUT, DRAWER_GRID4) ?: DRAWER_GRID4)
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -55,6 +56,9 @@ class SettingsRepository(context: Context) {
     fun setAnimationStyle(style: String) {
         prefs.edit().putString(KEY_ANIM_STYLE, style).apply(); animationStyle.postValue(style)
     }
+    fun setDrawerLayout(layout: String) {
+        prefs.edit().putString(KEY_DRAWER_LAYOUT, layout).apply(); drawerLayout.postValue(layout)
+    }
     fun markTutorialSeen() {
         prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, true).apply(); tutorialSeen.postValue(true)
     }
@@ -72,6 +76,7 @@ class SettingsRepository(context: Context) {
         searchBarStyle.postValue(STYLE_SYSTEM); swipeDownNotifications.postValue(true)
         doubleTapLock.postValue(false); iconShape.postValue(SHAPE_ORIGINAL)
         dotColor.postValue(DOT_DEFAULT); animationStyle.postValue(ANIM_EXPRESSIVE)
+        drawerLayout.postValue(DRAWER_GRID4)
     }
     fun resetEverything() {
         homeLayoutPrefs.edit().clear().apply()
@@ -109,6 +114,12 @@ class SettingsRepository(context: Context) {
         const val ANIM_STANDARD = "standard"
         const val ANIM_EXPRESSIVE = "expressive"
         const val ANIM_NONE = "none"
+
+        private const val KEY_DRAWER_LAYOUT = "drawer_layout"
+        const val DRAWER_GRID3 = "grid3"
+        const val DRAWER_GRID4 = "grid4"
+        const val DRAWER_GRID5 = "grid5"
+        const val DRAWER_LIST = "list"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange

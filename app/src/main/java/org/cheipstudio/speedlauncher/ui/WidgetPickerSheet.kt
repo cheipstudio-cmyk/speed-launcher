@@ -8,6 +8,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,14 +20,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.cheipstudio.speedlauncher.R
 
 /**
- * v18: niente filtro per altezza widget (tanto lo slot si adatta).
- * Filtriamo solo per larghezza > slot.
+ * v20: full screen + filtro reale (larghezza E altezza dello slot disponibile).
  */
 class WidgetPickerSheet : BottomSheetDialogFragment() {
 
     var onWidgetSelected: ((AppWidgetProviderInfo) -> Unit)? = null
     var slotWidthPx: Int = 0
-    var slotMaxHeightPx: Int = 0  // ora "max" non vincolante
+    var slotHeightPx: Int = 0
 
     private lateinit var adapter: WidgetAdapter
     private var allItems: List<AppWidgetProviderInfo> = emptyList()
@@ -62,10 +62,14 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
         val ctx = requireContext()
         val manager = AppWidgetManager.getInstance(ctx)
         val all = manager.installedProviders
-        // v18: solo filtro larghezza, l'altezza lo slot se la gestisce
+        // v20: filtro per dimensioni reali dello slot, con un margine di tolleranza del 15%
+        val tolerance = 1.15f
         val filtered = all.filter { info ->
             val minW = info.minWidth.coerceAtLeast(1)
-            slotWidthPx == 0 || minW <= slotWidthPx + 32
+            val minH = info.minHeight.coerceAtLeast(1)
+            val widthOk = slotWidthPx == 0 || minW <= slotWidthPx * tolerance
+            val heightOk = slotHeightPx == 0 || minH <= slotHeightPx * tolerance
+            widthOk && heightOk
         }.sortedBy { it.loadLabel(ctx.packageManager).lowercase() }
 
         allItems = filtered
@@ -88,13 +92,17 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
             val sheet = (d as BottomSheetDialog).findViewById<View>(
                 com.google.android.material.R.id.design_bottom_sheet
             ) ?: return@setOnShowListener
-            val targetHeight = (resources.displayMetrics.heightPixels * 0.85f).toInt()
-            sheet.layoutParams = sheet.layoutParams.apply { height = targetHeight }
+            // v20: full screen vero
+            val displayMetrics = resources.displayMetrics
+            val fullHeight = displayMetrics.heightPixels
+            sheet.layoutParams = sheet.layoutParams.apply {
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+            }
             val behavior = BottomSheetBehavior.from(sheet)
             behavior.skipCollapsed = true
             behavior.isFitToContents = false
             behavior.expandedOffset = 0
-            behavior.peekHeight = targetHeight
+            behavior.peekHeight = fullHeight
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         return dialog
@@ -138,10 +146,10 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(slotWidthPx: Int, slotMaxHeightPx: Int): WidgetPickerSheet {
+        fun newInstance(slotWidthPx: Int, slotHeightPx: Int): WidgetPickerSheet {
             return WidgetPickerSheet().apply {
                 this.slotWidthPx = slotWidthPx
-                this.slotMaxHeightPx = slotMaxHeightPx
+                this.slotHeightPx = slotHeightPx
             }
         }
     }

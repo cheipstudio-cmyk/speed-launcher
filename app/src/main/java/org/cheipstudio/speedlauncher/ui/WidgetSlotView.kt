@@ -115,9 +115,8 @@ class WidgetSlotView @JvmOverloads constructor(
 
     private fun showCustomPicker() {
         val activity = context as? FragmentActivity ?: return
-        // v18: passiamo larghezza ma altezza max possibile (così appaiono tutti i widget)
-        val maxH = (280 * density).toInt()
-        val sheet = WidgetPickerSheet.newInstance(width, maxH)
+        // v20: passiamo larghezza E altezza dello slot per filtrare correttamente
+        val sheet = WidgetPickerSheet.newInstance(width, height)
         sheet.onWidgetSelected = { info -> bindAndAdd(info) }
         sheet.show(activity.supportFragmentManager, "widget_picker")
     }

@@ -1,96 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- v18: section header con icona e label, più espressivo -->
-    <style name="MotoSectionRow">
+    <!-- v21: Settings Card stile Pixel/Material Expressive -->
+    <style name="SettingsCard" parent="Widget.Material3.CardView.Filled">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginVertical">6dp</item>
+        <item name="cardCornerRadius">28dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainer</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <!-- alternativo con sfondo leggermente diverso -->
+    <style name="SettingsCardAlt" parent="Widget.Material3.CardView.Filled">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginVertical">6dp</item>
+        <item name="cardCornerRadius">28dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainerHigh</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <style name="SettingsCardInner">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingVertical">8dp</item>
+    </style>
+
+    <style name="CardSectionHeader">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:paddingStart">28dp</item>
-        <item name="android:paddingEnd">28dp</item>
-        <item name="android:paddingTop">28dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">16dp</item>
         <item name="android:paddingBottom">12dp</item>
     </style>
 
-    <style name="MotoSectionIcon">
+    <style name="CardSectionIcon">
         <item name="android:layout_width">18dp</item>
         <item name="android:layout_height">18dp</item>
-        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
         <item name="android:tint">?attr/colorPrimary</item>
     </style>
 
-    <style name="MotoSectionLabel">
+    <style name="CardSectionLabel">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">?attr/colorPrimary</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:letterSpacing">0.04</item>
+        <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
-    <style name="MotoSection">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingStart">28dp</item>
-        <item name="android:paddingEnd">28dp</item>
-        <item name="android:paddingTop">28dp</item>
-        <item name="android:paddingBottom">12dp</item>
-        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="MotoDivider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_marginStart">28dp</item>
-        <item name="android:layout_marginEnd">28dp</item>
-        <item name="android:background">?attr/colorOutlineVariant</item>
-        <item name="android:alpha">0.4</item>
-    </style>
-
-    <style name="MotoRow">
+    <style name="CardRow">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">68dp</item>
+        <item name="android:minHeight">60dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:paddingStart">28dp</item>
-        <item name="android:paddingEnd">28dp</item>
-        <item name="android:paddingVertical">12dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingVertical">10dp</item>
     </style>
 
-    <style name="MotoRowClickable" parent="MotoRow">
+    <style name="CardRowClickable" parent="CardRow">
         <item name="android:background">?attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
 
-    <style name="MotoTitle">
+    <style name="CardTitle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="android:textSize">19sp</item>
+        <item name="android:textSize">17sp</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
-    <style name="MotoSubtitle">
+    <style name="CardSubtitle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">13sp</item>
     </style>
 
-    <style name="MotoRadio">
+    <style name="CardRadio">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_height">42dp</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:textSize">14sp</item>
     </style>
 
-    <!-- v19: dim opaco al 70% e niente wallpaper sotto -->
+    <style name="CardInnerDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">20dp</item>
+        <item name="android:layout_marginEnd">20dp</item>
+        <item name="android:layout_marginVertical">4dp</item>
+        <item name="android:background">?attr/colorOutlineVariant</item>
+        <item name="android:alpha">0.3</item>
+    </style>
+
+    <!-- Vecchi stili Moto* mantenuti per compatibilità (non più usati ma cite-safe) -->
+    <style name="MotoSectionRow" parent="CardSectionHeader" />
+    <style name="MotoSectionIcon" parent="CardSectionIcon" />
+    <style name="MotoSectionLabel" parent="CardSectionLabel" />
+    <style name="MotoSection" parent="CardSectionLabel" />
+    <style name="MotoDivider" parent="CardInnerDivider" />
+    <style name="MotoRow" parent="CardRow" />
+    <style name="MotoRowClickable" parent="CardRowClickable" />
+    <style name="MotoTitle" parent="CardTitle" />
+    <style name="MotoSubtitle" parent="CardSubtitle" />
+    <style name="MotoRadio" parent="CardRadio" />
+
     <style name="WidgetPickerSheetTheme" parent="Theme.Material3.DayNight.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/WidgetPickerSheetStyle</item>
         <item name="android:windowShowWallpaper">false</item>

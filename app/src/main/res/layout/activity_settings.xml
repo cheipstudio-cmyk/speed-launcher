@@ -28,366 +28,435 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:paddingHorizontal="16dp"
             android:paddingBottom="32dp">
 
-            <!-- Title XL espressivo -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="28dp"
-                android:paddingEnd="28dp"
-                android:paddingTop="40dp"
-                android:paddingBottom="28dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="32dp"
+                android:paddingBottom="20dp"
                 android:text="@string/settings_title"
                 android:textColor="?attr/colorOnSurface"
-                android:textSize="48sp"
+                android:textSize="44sp"
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="-0.02" />
 
             <!-- ASPETTO -->
-            <LinearLayout style="@style/MotoSectionRow">
-                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_palette" />
-                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_appearance" />
-            </LinearLayout>
-            <View style="@style/MotoDivider" />
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_grid_size" />
-                    <TextView android:id="@+id/gridValueLabel" style="@style/MotoSubtitle" />
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_palette" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_appearance" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_grid_size" />
+                            <TextView android:id="@+id/gridValueLabel" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/gridRadioGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/gridRadio4x4" style="@style/CardRadio" android:text="@string/settings_grid_4x4" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/gridRadio5x5" style="@style/CardRadio" android:text="@string/settings_grid_5x5" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/gridRadio5x6" style="@style/CardRadio" android:text="@string/settings_grid_5x6" />
+                    </RadioGroup>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_icon_shape" />
+                            <TextView android:id="@+id/iconShapeLabel" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/iconShapeGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/shapeOriginal" style="@style/CardRadio" android:text="@string/shape_original" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/shapeSquircle" style="@style/CardRadio" android:text="@string/shape_squircle" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/shapeCircle" style="@style/CardRadio" android:text="@string/shape_circle" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/shapeSquare" style="@style/CardRadio" android:text="@string/shape_square" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/shapeTeardrop" style="@style/CardRadio" android:text="@string/shape_teardrop" />
+                    </RadioGroup>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_dot_color" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_dot_color_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/dotColorRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingBottom="12dp"
+                        android:gravity="start" />
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <TextView
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" style="@style/CardTitle"
+                            android:text="@string/settings_show_widget" />
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchShowWidget"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_anim_style" />
+                            <TextView android:id="@+id/animStyleLabel" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/animStyleGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp"
+                        android:paddingBottom="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/animExpressive" style="@style/CardRadio" android:text="@string/anim_expressive" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/animStandard" style="@style/CardRadio" android:text="@string/anim_standard" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/animNone" style="@style/CardRadio" android:text="@string/anim_none" />
+                    </RadioGroup>
+
                 </LinearLayout>
-            </LinearLayout>
-
-            <RadioGroup
-                android:id="@+id/gridRadioGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/gridRadio4x4" style="@style/MotoRadio"
-                    android:text="@string/settings_grid_4x4" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/gridRadio5x5" style="@style/MotoRadio"
-                    android:text="@string/settings_grid_5x5" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/gridRadio5x6" style="@style/MotoRadio"
-                    android:text="@string/settings_grid_5x6" />
-            </RadioGroup>
-
-            <!-- Forma icone -->
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_icon_shape" />
-                    <TextView android:id="@+id/iconShapeLabel" style="@style/MotoSubtitle" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <RadioGroup
-                android:id="@+id/iconShapeGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="8dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/shapeOriginal" style="@style/MotoRadio"
-                    android:text="@string/shape_original" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/shapeSquircle" style="@style/MotoRadio"
-                    android:text="@string/shape_squircle" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/shapeCircle" style="@style/MotoRadio"
-                    android:text="@string/shape_circle" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/shapeSquare" style="@style/MotoRadio"
-                    android:text="@string/shape_square" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/shapeTeardrop" style="@style/MotoRadio"
-                    android:text="@string/shape_teardrop" />
-            </RadioGroup>
-
-            <!-- Colore dot -->
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_dot_color" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_dot_color_sub" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/dotColorRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="28dp"
-                android:paddingBottom="20dp"
-                android:gravity="start" />
-
-            <LinearLayout style="@style/MotoRow">
-                <TextView
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" style="@style/MotoTitle"
-                    android:text="@string/settings_show_widget" />
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchShowWidget"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <!-- Animazioni -->
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_anim_style" />
-                    <TextView android:id="@+id/animStyleLabel" style="@style/MotoSubtitle" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <RadioGroup
-                android:id="@+id/animStyleGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="8dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/animExpressive" style="@style/MotoRadio"
-                    android:text="@string/anim_expressive" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/animStandard" style="@style/MotoRadio"
-                    android:text="@string/anim_standard" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/animNone" style="@style/MotoRadio"
-                    android:text="@string/anim_none" />
-            </RadioGroup>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- BARRA DI RICERCA -->
-            <LinearLayout style="@style/MotoSectionRow">
-                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_search" />
-                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_searchbar" />
-            </LinearLayout>
-            <View style="@style/MotoDivider" />
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCardAlt">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_searchbar_style" />
-                    <TextView android:id="@+id/styleValueLabel" style="@style/MotoSubtitle" />
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_search" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_searchbar" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_searchbar_style" />
+                            <TextView android:id="@+id/styleValueLabel" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/searchStyleGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/styleSystem" style="@style/CardRadio" android:text="@string/style_system" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/styleTransparent" style="@style/CardRadio" android:text="@string/style_transparent" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/styleDark" style="@style/CardRadio" android:text="@string/style_dark" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/styleLight" style="@style/CardRadio" android:text="@string/style_light" />
+                    </RadioGroup>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <TextView style="@style/CardTitle" android:text="@string/settings_search_mode" />
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/searchModeGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp"
+                        android:paddingBottom="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/searchModeApps" style="@style/CardRadio" android:text="@string/settings_search_apps" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/searchModeGoogle" style="@style/CardRadio" android:text="@string/settings_search_google" />
+                    </RadioGroup>
+
                 </LinearLayout>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <RadioGroup
-                android:id="@+id/searchStyleGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="8dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleSystem" style="@style/MotoRadio" android:text="@string/style_system" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleTransparent" style="@style/MotoRadio" android:text="@string/style_transparent" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleDark" style="@style/MotoRadio" android:text="@string/style_dark" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleLight" style="@style/MotoRadio" android:text="@string/style_light" />
-            </RadioGroup>
+            <!-- DRAWER -->
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <LinearLayout style="@style/MotoRow">
-                <TextView style="@style/MotoTitle" android:text="@string/settings_search_mode" />
-            </LinearLayout>
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_widgets" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_drawer" />
+                    </LinearLayout>
 
-            <RadioGroup
-                android:id="@+id/searchModeGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="8dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/searchModeApps" style="@style/MotoRadio" android:text="@string/settings_search_apps" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/searchModeGoogle" style="@style/MotoRadio" android:text="@string/settings_search_google" />
-            </RadioGroup>
+                    <LinearLayout style="@style/CardRow">
+                        <TextView style="@style/CardTitle" android:text="@string/settings_drawer_layout" />
+                    </LinearLayout>
+
+                    <RadioGroup
+                        android:id="@+id/drawerLayoutGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp"
+                        android:paddingBottom="8dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/drawerLayoutGrid3" style="@style/CardRadio" android:text="@string/drawer_grid3" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/drawerLayoutGrid4" style="@style/CardRadio" android:text="@string/drawer_grid4" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/drawerLayoutGrid5" style="@style/CardRadio" android:text="@string/drawer_grid5" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/drawerLayoutList" style="@style/CardRadio" android:text="@string/drawer_list" />
+                    </RadioGroup>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- GESTI -->
-            <LinearLayout style="@style/MotoSectionRow">
-                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_swipe_up" />
-                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_gestures" />
-            </LinearLayout>
-            <View style="@style/MotoDivider" />
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCardAlt">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_swipe_down" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_swipe_down_sub" />
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_swipe_up" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_gestures" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_swipe_down" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_swipe_down_sub" />
+                        </LinearLayout>
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchSwipeDown"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_double_tap_lock" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_double_tap_lock_sub" />
+                        </LinearLayout>
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchDoubleTapLock"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <TextView
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" style="@style/CardTitle"
+                            android:text="@string/settings_haptic" />
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchHaptic"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                    </LinearLayout>
+
                 </LinearLayout>
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchSwipeDown"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_double_tap_lock" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_double_tap_lock_sub" />
-                </LinearLayout>
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchDoubleTapLock"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout style="@style/MotoRow">
-                <TextView
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" style="@style/MotoTitle"
-                    android:text="@string/settings_haptic" />
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchHaptic"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- AVANZATE -->
-            <LinearLayout style="@style/MotoSectionRow">
-                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_settings" />
-                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_advanced" />
-            </LinearLayout>
-            <View style="@style/MotoDivider" />
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <LinearLayout android:id="@+id/itemShowTutorial" style="@style/MotoRowClickable">
-                <TextView
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" style="@style/MotoTitle"
-                    android:text="@string/settings_show_tutorial" />
-            </LinearLayout>
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_settings" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_advanced" />
+                    </LinearLayout>
 
-            <LinearLayout android:id="@+id/itemResetLayout" style="@style/MotoRowClickable">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_reset_layout" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_reset_layout_sub" />
+                    <LinearLayout android:id="@+id/itemShowTutorial" style="@style/CardRowClickable">
+                        <TextView
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" style="@style/CardTitle"
+                            android:text="@string/settings_show_tutorial" />
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout android:id="@+id/itemResetLayout" style="@style/CardRowClickable">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_reset_layout" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_reset_layout_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout android:id="@+id/itemResetSettings" style="@style/CardRowClickable">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_reset_settings" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_reset_settings_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout android:id="@+id/itemResetEverything" style="@style/CardRowClickable">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_reset_everything"
+                                android:textColor="?attr/colorError" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_reset_everything_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
                 </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/itemResetSettings" style="@style/MotoRowClickable">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_reset_settings" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_reset_settings_sub" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/itemResetEverything" style="@style/MotoRowClickable">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_reset_everything"
-                        android:textColor="#E04545" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_reset_everything_sub" />
-                </LinearLayout>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- SISTEMA -->
-            <LinearLayout style="@style/MotoSectionRow">
-                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_widgets" />
-                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_general" />
-            </LinearLayout>
-            <View style="@style/MotoDivider" />
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCardAlt">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <LinearLayout android:id="@+id/itemDefaultLauncher" style="@style/MotoRowClickable">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_default_launcher" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_default_launcher_sub" />
+                    <LinearLayout style="@style/CardSectionHeader">
+                        <ImageView style="@style/CardSectionIcon" android:src="@drawable/ic_widgets" />
+                        <TextView style="@style/CardSectionLabel" android:text="@string/settings_section_general" />
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/itemDefaultLauncher" style="@style/CardRowClickable">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_default_launcher" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_default_launcher_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout android:id="@+id/itemNotificationAccess" style="@style/CardRowClickable">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/settings_notification_access" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/settings_notification_access_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout android:id="@+id/itemAppInfo" style="@style/CardRowClickable">
+                        <TextView
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" style="@style/CardTitle"
+                            android:text="@string/settings_app_info" />
+                    </LinearLayout>
+
                 </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/itemNotificationAccess" style="@style/MotoRowClickable">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_notification_access" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_notification_access_sub" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/itemAppInfo" style="@style/MotoRowClickable">
-                <TextView
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" style="@style/MotoTitle"
-                    android:text="@string/settings_app_info" />
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- INFO -->
-            <LinearLayout style="@style/MotoSectionRow">
-                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_pin" />
-                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_info" />
-            </LinearLayout>
-            <View style="@style/MotoDivider" />
+            <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
+                <LinearLayout style="@style/SettingsCardInner">
 
-            <!-- v19: app icon header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingTop="20dp"
-                android:paddingBottom="12dp">
-                <ImageView
-                    android:id="@+id/appIconInfo"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/app_name"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="20sp"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:paddingTop="20dp"
+                        android:paddingBottom="12dp">
+                        <ImageView
+                            android:id="@+id/appIconInfo"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/app_name"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="22sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
 
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/info_version_label" />
-                    <TextView android:id="@+id/versionValue" style="@style/MotoSubtitle" />
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/info_version_label" />
+                            <TextView android:id="@+id/versionValue" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout style="@style/CardRow">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/info_build_label" />
+                            <TextView android:id="@+id/buildValue" style="@style/CardSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View style="@style/CardInnerDivider" />
+
+                    <LinearLayout android:id="@+id/itemCheipStudio" style="@style/CardRowClickable">
+                        <LinearLayout
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/CardTitle" android:text="@string/info_studio_label" />
+                            <TextView style="@style/CardSubtitle" android:text="@string/info_studio_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
                 </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/info_build_label" />
-                    <TextView android:id="@+id/buildValue" style="@style/MotoSubtitle" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/itemCheipStudio" style="@style/MotoRowClickable">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/info_studio_label" />
-                    <TextView style="@style/MotoSubtitle" android:text="@string/info_studio_sub" />
-                </LinearLayout>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

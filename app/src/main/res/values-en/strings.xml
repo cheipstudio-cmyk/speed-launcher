@@ -109,4 +109,11 @@
     <string name="tutorial_next">Next</string>
     <string name="tutorial_done">Let\'s go</string>
     <string name="tutorial_skip">Skip</string>
+
+    <string name="settings_section_drawer">App drawer</string>
+    <string name="settings_drawer_layout">Layout</string>
+    <string name="drawer_grid3">3-column grid (large icons)</string>
+    <string name="drawer_grid4">4-column grid (medium)</string>
+    <string name="drawer_grid5">5-column grid (compact)</string>
+    <string name="drawer_list">Vertical list</string>
 </resources>

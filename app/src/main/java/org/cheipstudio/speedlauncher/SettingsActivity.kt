@@ -116,6 +116,23 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        // v20: drawer layout
+        when (settings.drawerLayout.value) {
+            SettingsRepository.DRAWER_GRID3 -> binding.drawerLayoutGrid3.isChecked = true
+            SettingsRepository.DRAWER_GRID4 -> binding.drawerLayoutGrid4.isChecked = true
+            SettingsRepository.DRAWER_GRID5 -> binding.drawerLayoutGrid5.isChecked = true
+            SettingsRepository.DRAWER_LIST -> binding.drawerLayoutList.isChecked = true
+        }
+        binding.drawerLayoutGroup.setOnCheckedChangeListener { _, id ->
+            val layout = when (id) {
+                R.id.drawerLayoutGrid3 -> SettingsRepository.DRAWER_GRID3
+                R.id.drawerLayoutGrid5 -> SettingsRepository.DRAWER_GRID5
+                R.id.drawerLayoutList -> SettingsRepository.DRAWER_LIST
+                else -> SettingsRepository.DRAWER_GRID4
+            }
+            settings.setDrawerLayout(layout)
+        }
+
         when (settings.searchBarStyle.value) {
             SettingsRepository.STYLE_SYSTEM -> binding.styleSystem.isChecked = true
             SettingsRepository.STYLE_TRANSPARENT -> binding.styleTransparent.isChecked = true

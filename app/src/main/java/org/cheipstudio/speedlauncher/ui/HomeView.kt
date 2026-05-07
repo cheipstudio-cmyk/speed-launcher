@@ -88,6 +88,29 @@ class HomeView @JvmOverloads constructor(
     init {
         // v18: animazione layout dipende dallo stile selezionato
         applyAnimationStyle()
+        // v20: gestione 3 bottoni nav bar - aggiungo solo il bottom inset al container interno
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            val bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            // Trova il primo LinearLayout figlio (il container di view_home)
+            val child = (0 until childCount).firstNotNullOfOrNull {
+                getChildAt(it) as? android.widget.LinearLayout
+            }
+            child?.let { ll ->
+                val basePadTop = ll.paddingTop
+                val basePadBottom = ll.paddingBottom
+                // applica una sola volta usando tag
+                if (ll.tag != "insets-applied") {
+                    ll.setPadding(
+                        ll.paddingLeft,
+                        basePadTop + bars.top,
+                        ll.paddingRight,
+                        basePadBottom + bars.bottom
+                    )
+                    ll.tag = "insets-applied"
+                }
+            }
+            insets
+        }
 
         binding.searchBar.setOnTouchListener { _, ev ->
             searchBarDoubleTapDetector.onTouchEvent(ev)
@@ -119,14 +142,14 @@ class HomeView @JvmOverloads constructor(
             SettingsRepository.ANIM_STANDARD -> {
                 layoutTransition = LayoutTransition().apply {
                     enableTransitionType(LayoutTransition.CHANGING)
-                    setDuration(120)
+                    setDuration(80)
                 }
             }
             else -> {
-                // ANIM_EXPRESSIVE: più overshoot, più lungo
+                // ANIM_EXPRESSIVE: più espressivo ma comunque rapido
                 layoutTransition = LayoutTransition().apply {
                     enableTransitionType(LayoutTransition.CHANGING)
-                    setDuration(180)
+                    setDuration(120)
                 }
             }
         }

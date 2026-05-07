@@ -87,9 +87,9 @@ object FolderSheet {
         val nameInput = EditText(context).apply {
             setText(folder.name)
             textSize = 24f
-            setTextColor(Color.WHITE)
+            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
             background = null
-            setHintTextColor(Color.parseColor("#88FFFFFF"))
+            setHintTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant))
             hint = context.getString(R.string.folder_name_hint)
             setSingleLine(true)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -121,8 +121,8 @@ object FolderSheet {
             )
             layoutParams = lp
         }
-        for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunch, onRemoveFromFolder))
         card.addView(grid)
+        // popolato sotto dopo aver creato il dialog
 
         val deleteBtn = TextView(context).apply {
             text = context.getString(R.string.folder_delete)
@@ -157,6 +157,13 @@ object FolderSheet {
 
         // BLUR del decor sottostante (API 31+)
         val decor = activity.window?.decorView
+
+        // v21: popola grid con onLaunch che dismiss anche il dialog
+        val onLaunchAndDismiss: (AppInfo) -> Unit = { app ->
+            onLaunch(app)
+            try { dialog.dismiss() } catch (_: Throwable) {}
+        }
+        for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunchAndDismiss, onRemoveFromFolder))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
             try {
                 val blur = RenderEffect.createBlurEffect(40f, 40f, Shader.TileMode.CLAMP)
@@ -179,6 +186,12 @@ object FolderSheet {
         dialog.show()
     }
 
+    private fun resolveAttr(context: Context, attr: Int): Int {
+        val tv = android.util.TypedValue()
+        context.theme.resolveAttribute(attr, tv, true)
+        return tv.data
+    }
+
     private fun buildAppCell(
         context: Context,
         app: AppInfo,
@@ -192,6 +205,7 @@ object FolderSheet {
             val pad = (8 * density).toInt()
             setPadding(pad, pad, pad, pad)
             isClickable = true; isFocusable = true
+            background = null  // v21: nessun bg sulla cella, il ripple sta sull'icona
         }
         val lp = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f))
         lp.width = 0; lp.height = (96 * density).toInt()
@@ -200,21 +214,29 @@ object FolderSheet {
         val settings = SpeedApp.instance.settingsRepository
         val shape = settings.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
 
+        // v21: wrapper con ripple rotondo invece di rettangolo giallo
+        val iconWrap = android.widget.FrameLayout(context).apply {
+            background = ContextCompat.getDrawable(context, R.drawable.bg_app_icon_ripple)
+            val s = (54 * density).toInt()
+            layoutParams = LinearLayout.LayoutParams(s, s)
+            isClickable = false
+            isFocusable = false
+        }
         val icon = ImageView(context).apply {
             setImageDrawable(IconShaper.shape(app.icon, shape))
             val s = (44 * density).toInt()
-            layoutParams = LinearLayout.LayoutParams(s, s)
+            layoutParams = android.widget.FrameLayout.LayoutParams(s, s, Gravity.CENTER)
         }
-        cell.addView(icon)
+        iconWrap.addView(icon)
+        cell.addView(iconWrap)
 
         val label = TextView(context).apply {
             text = app.label
-            setTextColor(Color.WHITE)
+            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
             textSize = 11f
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
             gravity = Gravity.CENTER
-            setShadowLayer(2f, 0f, 1f, Color.argb(160, 0, 0, 0))
             val tlp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             tlp.topMargin = (4 * density).toInt()
             layoutParams = tlp

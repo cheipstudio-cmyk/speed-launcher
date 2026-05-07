@@ -22,6 +22,7 @@ object WidgetRemoveSheet {
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
+            background = ContextCompat.getDrawable(context, R.drawable.bg_modal_sheet)
             setPadding(
                 (28 * density).toInt(), (12 * density).toInt(),
                 (28 * density).toInt(), (28 * density).toInt()
@@ -97,7 +98,7 @@ object WidgetRemoveSheet {
             text = context.getString(R.string.widget_remove_confirm)
             textSize = 15f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(Color.WHITE)
+            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnPrimary))
             gravity = Gravity.CENTER
             background = ContextCompat.getDrawable(context, R.drawable.bg_modal_btn_solid)
             setPadding(0, (14 * density).toInt(), 0, (14 * density).toInt())

@@ -46,6 +46,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
 
     private val handler = Handler(Looper.getMainLooper())
     private val moveSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
+    /** v20: dopo armed serve un movimento più ampio per draggare, evita conflitto col menu */
+    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop * 5
     private var downX = 0f
     private var downY = 0f
     private var pressing = false
@@ -119,17 +121,17 @@ class IconCellView(context: Context) : LinearLayout(context) {
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(event.x - downX)
                 val dy = abs(event.y - downY)
-                if (dx > moveSlop || dy > moveSlop) {
-                    if (armed && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
-                        // ARMED + movimento = drag
+                if (armed && !dragFired && !menuFired) {
+                    // dopo armed: serve movimento ampio (dragSlop) per evitare di rubare il menu
+                    if ((dx > dragSlop || dy > dragSlop) && dragOriginId.isNotEmpty()) {
                         dragFired = true
                         handler.removeCallbacks(menuRunnable)
                         val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
                         startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
-                    } else if (!armed) {
-                        // Movimento prima dell'arm = scroll/tap cancellato
-                        cancelAll()
                     }
+                } else if (!armed && (dx > moveSlop || dy > moveSlop)) {
+                    // movimento prima dell'arm = è uno scroll, cancella tutto
+                    cancelAll()
                 }
                 return true
             }
