@@ -1,0 +1,16 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/app/release
+/app/debug
+# debug.keystore committata di proposito (signing condiviso APK debug)
+# Le chiavi RELEASE vere NON vanno qui - usare GitHub Secrets
+*.jks
+release.keystore

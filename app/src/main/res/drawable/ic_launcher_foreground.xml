@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Lampo "Speed" - design pulito, centrato, ben visibile dopo masking adaptive icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M62,28
+                          L40,58
+                          L52,58
+                          L46,80
+                          L70,48
+                          L58,48
+                          L66,28
+                          Z"
+        android:strokeWidth="0" />
+</vector>

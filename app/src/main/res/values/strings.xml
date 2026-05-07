@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Speed Launcher</string>
+    <string name="search_apps">Cerca app</string>
+    <string name="notification_listener_label">Speed Launcher — pallini di notifica</string>
+    <string name="menu_wallpaper">Cambia sfondo</string>
+    <string name="menu_widgets">Aggiungi widget</string>
+    <string name="menu_settings">Impostazioni Speed</string>
+    <string name="action_pin">Aggiungi a home</string>
+    <string name="action_unpin">Rimuovi da home</string>
+    <string name="action_info">Informazioni app</string>
+    <string name="action_uninstall">Disinstalla</string>
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_section_general">Generale</string>
+    <string name="settings_default_launcher">Imposta come launcher predefinito</string>
+    <string name="settings_default_launcher_sub">Apre le impostazioni di sistema</string>
+    <string name="settings_notification_access">Accesso alle notifiche</string>
+    <string name="settings_notification_access_sub">Necessario per i pallini di notifica</string>
+    <string name="settings_app_info">Informazioni app di sistema</string>
+    <string name="version_value">Versione %1$s</string>
+    <string name="cheip_studio_credit">A Cheip Studio project</string>
+</resources>
