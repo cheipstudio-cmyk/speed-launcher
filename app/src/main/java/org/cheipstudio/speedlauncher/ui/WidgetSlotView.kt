@@ -6,10 +6,16 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -18,7 +24,16 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
+import kotlin.math.abs
+import kotlin.math.max
 
+/**
+ * v18: slot widget adaptive.
+ * Default altezza 170dp ma se il widget richiede più, lo slot si espande fino a 280dp.
+ * Sotto 170dp di richiesta lo slot resta a 170dp (centrato).
+ *
+ * Il widget viene istruito con updateAppWidgetSize per accomodarsi alla nostra dimensione.
+ */
 class WidgetSlotView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -29,7 +44,17 @@ class WidgetSlotView @JvmOverloads constructor(
     private var currentWidgetView: View? = null
     private var currentWidgetId: Int = -1
     private val placeholder: LinearLayout
-    private val removeButton: FrameLayout
+    private val density = resources.displayMetrics.density
+
+    private var pressX = 0f
+    private var pressY = 0f
+    private val holdHandler = Handler(Looper.getMainLooper())
+    private val holdRunnable = Runnable {
+        if (currentWidgetView != null) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            WidgetRemoveSheet.show(context) { removeWidget() }
+        }
+    }
 
     init {
         placeholder = LinearLayout(context).apply {
@@ -41,8 +66,7 @@ class WidgetSlotView @JvmOverloads constructor(
             setImageResource(R.drawable.ic_widgets)
             setColorFilter(Color.parseColor("#88FFFFFF"))
             layoutParams = LinearLayout.LayoutParams(
-                (28 * resources.displayMetrics.density).toInt(),
-                (28 * resources.displayMetrics.density).toInt()
+                (28 * density).toInt(), (28 * density).toInt()
             )
         }
         placeholder.addView(icon)
@@ -55,50 +79,45 @@ class WidgetSlotView @JvmOverloads constructor(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.topMargin = (6 * resources.displayMetrics.density).toInt()
+            lp.topMargin = (6 * density).toInt()
             layoutParams = lp
         }
         placeholder.addView(text)
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
-        // v14: bottone X dentro un cerchio elevato, stile FAB miniaturizzato
-        removeButton = FrameLayout(context).apply {
-            background = ContextCompat.getDrawable(context, R.drawable.bg_remove_button)
-            elevation = 8 * resources.displayMetrics.density
-            val size = (32 * resources.displayMetrics.density).toInt()
-            val margin = (6 * resources.displayMetrics.density).toInt()
-            layoutParams = LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
-                topMargin = margin
-                rightMargin = margin
-            }
-            visibility = GONE
-            isClickable = true
-            isFocusable = true
-            setOnClickListener {
-                WidgetRemoveSheet.show(context) { removeWidget() }
-            }
-        }
-        val xIcon = ImageView(context).apply {
-            setImageResource(R.drawable.ic_close_x)
-            val s = (16 * resources.displayMetrics.density).toInt()
-            layoutParams = LayoutParams(s, s, Gravity.CENTER)
-            setColorFilter(Color.WHITE)
-        }
-        removeButton.addView(xIcon)
-        addView(removeButton)
-
         setOnLongClickListener {
-            if (currentWidgetView == null) showCustomPicker()
-            true
+            if (currentWidgetView == null) { showCustomPicker(); true } else false
         }
         isLongClickable = true
     }
 
     fun setHostController(controller: WidgetHostController) { hostController = controller }
 
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (currentWidgetView != null) {
+            when (ev.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    pressX = ev.x; pressY = ev.y
+                    holdHandler.postDelayed(holdRunnable, 700L)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = abs(ev.x - pressX); val dy = abs(ev.y - pressY)
+                    val slop = ViewConfiguration.get(context).scaledTouchSlop * 2
+                    if (dx > slop || dy > slop) holdHandler.removeCallbacks(holdRunnable)
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    holdHandler.removeCallbacks(holdRunnable)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
     private fun showCustomPicker() {
         val activity = context as? FragmentActivity ?: return
-        val sheet = WidgetPickerSheet.newInstance(width, height)
+        // v18: passiamo larghezza ma altezza max possibile (così appaiono tutti i widget)
+        val maxH = (280 * density).toInt()
+        val sheet = WidgetPickerSheet.newInstance(width, maxH)
         sheet.onWidgetSelected = { info -> bindAndAdd(info) }
         sheet.show(activity.supportFragmentManager, "widget_picker")
     }
@@ -115,7 +134,7 @@ class WidgetSlotView @JvmOverloads constructor(
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
-            controller.pendingPlaceCallback = { v -> placeWidgetView(v) }
+            controller.pendingPlaceCallback = { v -> placeWidgetView(v, info) }
             activity.startActivityForResult(bindIntent, WidgetHostController.REQ_BIND)
             return
         }
@@ -124,24 +143,64 @@ class WidgetSlotView @JvmOverloads constructor(
                 component = info.configure
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             }
-            controller.pendingPlaceCallback = { v -> placeWidgetView(v) }
+            controller.pendingPlaceCallback = { v -> placeWidgetView(v, info) }
             activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
         } else {
             val view = controller.createView(appWidgetId, info)
             view.setAppWidget(appWidgetId, info)
             controller.markLastWidget(appWidgetId)
-            placeWidgetView(view)
+            placeWidgetView(view, info)
         }
     }
 
-    private fun placeWidgetView(view: View?) {
+    /**
+     * v18: imposta dimensioni dello slot in base al widget e notifica il widget.
+     */
+    private fun placeWidgetView(view: View?, info: AppWidgetProviderInfo? = null) {
         view ?: return
         currentWidgetView = view
         currentWidgetId = hostController?.lastWidgetId ?: -1
+
+        // calcola altezza ottimale
+        val targetH = calcOptimalHeight(info)
+        val lp = layoutParams
+        if (lp != null && lp.height != targetH) {
+            lp.height = targetH
+            layoutParams = lp
+        }
+
         removeAllViews()
-        addView(view)
-        addView(removeButton)
-        removeButton.visibility = VISIBLE
+        addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+
+        // notifica widget di adattarsi
+        if (info != null && currentWidgetId != -1) {
+            try {
+                val mgr = AppWidgetManager.getInstance(context)
+                val widthDp = (width / density).toInt().coerceAtLeast(1)
+                val heightDp = (targetH / density).toInt().coerceAtLeast(1)
+                val opts = Bundle().apply {
+                    putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
+                    putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
+                    putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
+                    putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
+                }
+                mgr.updateAppWidgetOptions(currentWidgetId, opts)
+            } catch (_: Throwable) {}
+        }
+    }
+
+    private fun calcOptimalHeight(info: AppWidgetProviderInfo?): Int {
+        val defaultH = (170 * density).toInt()
+        val maxH = (280 * density).toInt()
+        if (info == null) return defaultH
+        // info.minHeight è in pixel, ma rappresenta dp. Su API moderni convert.
+        val requestedPx = info.minHeight
+        return when {
+            requestedPx <= 0 -> defaultH
+            requestedPx <= defaultH -> defaultH
+            requestedPx >= maxH -> maxH
+            else -> requestedPx
+        }
     }
 
     private fun removeWidget() {
@@ -151,11 +210,13 @@ class WidgetSlotView @JvmOverloads constructor(
             currentWidgetId = -1
         }
         currentWidgetView = null
+        // ripristina dimensione default
+        val lp = layoutParams
+        if (lp != null) {
+            lp.height = (170 * density).toInt()
+            layoutParams = lp
+        }
         removeAllViews()
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
-        addView(removeButton)
-        removeButton.visibility = GONE
     }
-
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean = false
 }

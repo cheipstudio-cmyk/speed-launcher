@@ -1,6 +1,7 @@
 package org.cheipstudio.speedlauncher.ui
 
 import android.animation.LayoutTransition
+import android.app.Activity
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -39,24 +40,26 @@ class HomeView @JvmOverloads constructor(
     var onSearchTap: (() -> Unit)? = null
     var onHomeLongPress: (() -> Unit)? = null
     var onAppMenuRequest: ((AppInfo) -> Unit)? = null
+    /** v18: double tap su searchbar = blocca schermo */
+    var onLockScreen: (() -> Unit)? = null
 
     private var trackStartX = 0f
     private var trackStartY = 0f
     private var tracking = false
-    private val swipeThreshold = resources.displayMetrics.density * 60f
+    // v18: threshold più reattivo (45dp invece di 60dp)
+    private val swipeThreshold = resources.displayMetrics.density * 45f
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            // swipe up — drawer
-            if (vy < -1100f && abs(vy) > abs(vx) * 1.3f) {
+            // v18: threshold velocità abbassato a 700f, ratio 1.2 (era 1100/1.4)
+            if (vy < -700f && abs(vy) > abs(vx) * 1.2f) {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 onSwipeUp?.invoke()
                 return true
             }
-            // v16: swipe down — notifiche (se abilitato)
             if (settings.swipeDownNotifications.value == true &&
-                vy > 1100f && abs(vy) > abs(vx) * 1.3f) {
+                vy > 700f && abs(vy) > abs(vx) * 1.2f) {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 StatusBarHelper.expandNotifications(context)
                 return true
@@ -65,12 +68,31 @@ class HomeView @JvmOverloads constructor(
         }
     })
 
-    init {
-        layoutTransition = LayoutTransition().apply {
-            enableTransitionType(LayoutTransition.CHANGING)
-            setDuration(160)
+    /** v18: doppio tap detector sulla searchbar */
+    private val searchBarDoubleTapDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            handleSearchTap()
+            return true
         }
-        binding.searchBar.setOnClickListener { handleSearchTap() }
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            if (settings.doubleTapLock.value == true) {
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                val act = context as? Activity
+                if (act != null) ScreenLockHelper.lockScreen(act)
+                return true
+            }
+            return false
+        }
+    })
+
+    init {
+        // v18: animazione layout dipende dallo stile selezionato
+        applyAnimationStyle()
+
+        binding.searchBar.setOnTouchListener { _, ev ->
+            searchBarDoubleTapDetector.onTouchEvent(ev)
+            true
+        }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
         updateSearchBarText()
@@ -82,12 +104,32 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
-        // v16: tap su dot del page indicator
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
         applySettings()
+    }
+
+    private fun applyAnimationStyle() {
+        when (settings.animationStyle.value) {
+            SettingsRepository.ANIM_NONE -> {
+                layoutTransition = null
+            }
+            SettingsRepository.ANIM_STANDARD -> {
+                layoutTransition = LayoutTransition().apply {
+                    enableTransitionType(LayoutTransition.CHANGING)
+                    setDuration(160)
+                }
+            }
+            else -> {
+                // ANIM_EXPRESSIVE: più overshoot, più lungo
+                layoutTransition = LayoutTransition().apply {
+                    enableTransitionType(LayoutTransition.CHANGING)
+                    setDuration(240)
+                }
+            }
+        }
     }
 
     private fun applySearchBarStyle() {
@@ -174,14 +216,11 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
     }
 
-    /** v16: rimuove pagine vuote in coda (mantiene almeno 1 pagina) */
     private fun trimEmptyPages() {
         while (pages.size > 1 && pages.last().isEmpty()) {
-            val last = pages.removeAt(pages.size - 1)
-            binding.pagedHome.removePage(pages.size)  // size dopo removeAt è già il vecchio idx
-            // pulisci storage
+            pages.removeAt(pages.size - 1)
+            binding.pagedHome.removePage(pages.size)
             layoutStore.savePage(pages.size, emptyList())
-            // se ero su questa pagina, vai alla precedente
             if (binding.pagedHome.currentPage >= pages.size) {
                 binding.pagedHome.snapToPage(pages.size - 1, true)
             }
@@ -216,13 +255,9 @@ class HomeView @JvmOverloads constructor(
 
         targetGrid.handleIncomingDrop(key, fromGrid, fromIdx, targetIdx)
         maybeCreateNextPage()
-        // v16: se la pagina sorgente è ora vuota e non è la prima, rimuovila
         post { trimEmptyPages() }
     }
 
-    /**
-     * v16: apri folder con possibilità di rinominare/rimuovere/eliminare.
-     */
     private fun openFolder(folder: HomeItem) {
         FolderSheet.show(
             context = context,
@@ -237,22 +272,17 @@ class HomeView @JvmOverloads constructor(
                 pages.forEach { grid ->
                     grid.updateFolder(folder.key) { f ->
                         val newApps = f.folderApps - app.key
-                        // se rimane vuota, elimina; se rimane 1 app, dissolvi
                         when {
                             newApps.isEmpty() -> null
-                            newApps.size == 1 -> {
-                                // sostituisci con app singola al posto suo
-                                HomeItem(
-                                    key = newApps[0], page = f.page,
-                                    cellX = f.cellX, cellY = f.cellY,
-                                    type = HomeItem.TYPE_APP
-                                )
-                            }
+                            newApps.size == 1 -> HomeItem(
+                                key = newApps[0], page = f.page,
+                                cellX = f.cellX, cellY = f.cellY,
+                                type = HomeItem.TYPE_APP
+                            )
                             else -> f.copy(folderApps = newApps)
                         }
                     }
                 }
-                // ripin l'app rimossa in una cella libera
                 val appInfo = SpeedApp.instance.appRepository.apps.value?.find { it.key == app.key }
                 if (appInfo != null && pages.none { it.isPinned(appInfo) }) {
                     pinApp(appInfo)
@@ -270,13 +300,18 @@ class HomeView @JvmOverloads constructor(
         binding.searchBar.visibility = View.VISIBLE
         updateSearchBarText()
         applySearchBarStyle()
+        applyAnimationStyle()
     }
 
     fun reapplySettings() {
         applySettings()
         val cols = settings.gridCols.value ?: 4
         val rows = settings.gridRows.value ?: 4
-        for (page in pages) page.applyGridSize(cols, rows)
+        for (page in pages) {
+            page.applyGridSize(cols, rows)
+            // refresh icone per nuova forma/colore dot
+            SpeedApp.instance.appRepository.apps.value?.let { page.refresh(it) }
+        }
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -298,15 +333,15 @@ class HomeView @JvmOverloads constructor(
                 val dx = abs(ev.x - trackStartX)
                 val dy = ev.y - trackStartY
                 gestureDetector.onTouchEvent(ev)
-                if (dy < -swipeThreshold && abs(dy) > dx * 1.3f) {
+                // v18: ratio 1.2 invece di 1.3
+                if (dy < -swipeThreshold && abs(dy) > dx * 1.2f) {
                     tracking = false
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     onSwipeUp?.invoke()
                     return true
                 }
-                // v16: swipe down on the home (slow gesture, not just fling)
                 if (settings.swipeDownNotifications.value == true &&
-                    dy > swipeThreshold && abs(dy) > dx * 1.3f) {
+                    dy > swipeThreshold && abs(dy) > dx * 1.2f) {
                     tracking = false
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     StatusBarHelper.expandNotifications(context)

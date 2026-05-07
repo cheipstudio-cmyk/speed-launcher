@@ -2,11 +2,14 @@ package org.cheipstudio.speedlauncher.ui
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import android.provider.Settings
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -15,6 +18,13 @@ import androidx.core.content.ContextCompat
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 
+/**
+ * v18: tutorial più espressivo:
+ * - Card con icona dentro un cerchio gradient
+ * - Animazione overshoot per l'icona (bounce-in)
+ * - 5 step (l'ultimo con bottone "Imposta come predefinito")
+ * - Pulsante "Avanti" con effetto press
+ */
 class TutorialOverlay @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -27,15 +37,16 @@ class TutorialOverlay @JvmOverloads constructor(
     private val iconView: ImageView
     private val nextBtn: TextView
     private val skipBtn: TextView
+    private val setDefaultBtn: TextView
     private val dotsContainer: LinearLayout
 
     private var step = 0
-    // v16: 4 step (settings al posto di longpress_home, pages aggiornato per cartelle)
     private val steps = listOf(
         Triple(R.string.tutorial_swipe_title, R.string.tutorial_swipe_desc, R.drawable.ic_swipe_up),
         Triple(R.string.tutorial_longpress_icon_title, R.string.tutorial_longpress_icon_desc, R.drawable.ic_pin),
         Triple(R.string.tutorial_settings_title, R.string.tutorial_settings_desc, R.drawable.ic_settings),
-        Triple(R.string.tutorial_pages_title, R.string.tutorial_pages_desc, R.drawable.ic_pages)
+        Triple(R.string.tutorial_pages_title, R.string.tutorial_pages_desc, R.drawable.ic_pages),
+        Triple(R.string.tutorial_default_title, R.string.tutorial_default_desc, R.drawable.ic_widgets)
     )
 
     init {
@@ -60,13 +71,13 @@ class TutorialOverlay @JvmOverloads constructor(
 
         val iconWrapper = FrameLayout(context).apply {
             background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_icon)
-            val size = (88 * density).toInt()
+            val size = (96 * density).toInt()
             layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                bottomMargin = (20 * density).toInt()
+                bottomMargin = (24 * density).toInt()
             }
         }
         iconView = ImageView(context).apply {
-            val size = (40 * density).toInt()
+            val size = (44 * density).toInt()
             layoutParams = LayoutParams(size, size, Gravity.CENTER)
             setColorFilter(Color.WHITE)
         }
@@ -74,7 +85,7 @@ class TutorialOverlay @JvmOverloads constructor(
         card.addView(iconWrapper)
 
         titleView = TextView(context).apply {
-            textSize = 22f
+            textSize = 24f
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
             setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -82,7 +93,7 @@ class TutorialOverlay @JvmOverloads constructor(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.bottomMargin = (10 * density).toInt()
+            lp.bottomMargin = (12 * density).toInt()
             layoutParams = lp
         }
         card.addView(titleView)
@@ -102,6 +113,34 @@ class TutorialOverlay @JvmOverloads constructor(
             layoutParams = lp
         }
         card.addView(descView)
+
+        // bottone "Imposta come predefinito" (visibile solo all'ultimo step)
+        setDefaultBtn = TextView(context).apply {
+            text = context.getString(R.string.tutorial_set_default_btn)
+            setTextColor(Color.parseColor("#1A1A1A"))
+            textSize = 15f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+            background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_set_default_btn)
+            setPadding((24 * density).toInt(), (14 * density).toInt(), (24 * density).toInt(), (14 * density).toInt())
+            isClickable = true; isFocusable = true
+            visibility = View.GONE
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = (16 * density).toInt()
+            layoutParams = lp
+            setOnClickListener {
+                try {
+                    val intent = Intent(Settings.ACTION_HOME_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                } catch (_: Throwable) {}
+            }
+        }
+        card.addView(setDefaultBtn)
 
         dotsContainer = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -169,11 +208,14 @@ class TutorialOverlay @JvmOverloads constructor(
         rebuildDots()
         updateStep()
 
+        // entrata espressiva con overshoot
         card.alpha = 0f
+        card.scaleX = 0.85f
+        card.scaleY = 0.85f
         card.translationY = 60f
         card.animate()
-            .alpha(1f).translationY(0f).setDuration(350)
-            .setInterpolator(DecelerateInterpolator()).start()
+            .alpha(1f).scaleX(1f).scaleY(1f).translationY(0f).setDuration(420)
+            .setInterpolator(OvershootInterpolator(0.6f)).start()
     }
 
     private fun rebuildDots() {
@@ -209,6 +251,11 @@ class TutorialOverlay @JvmOverloads constructor(
         anim.addListener(object : android.animation.AnimatorListenerAdapter() {
             override fun onAnimationEnd(a: android.animation.Animator) {
                 updateStep(); rebuildDots()
+                // bounce-in dell'icona
+                iconView.scaleX = 0.5f; iconView.scaleY = 0.5f
+                iconView.animate().scaleX(1f).scaleY(1f)
+                    .setDuration(380)
+                    .setInterpolator(OvershootInterpolator(1.4f)).start()
                 ValueAnimator.ofFloat(0f, 1f).apply {
                     duration = 250
                     interpolator = DecelerateInterpolator()
@@ -228,7 +275,10 @@ class TutorialOverlay @JvmOverloads constructor(
         titleView.setText(titleRes)
         descView.setText(descRes)
         iconView.setImageResource(iconRes)
-        nextBtn.text = if (step == steps.size - 1)
+        // ultimo step: mostra bottone "Imposta come predefinito"
+        val isLast = step == steps.size - 1
+        setDefaultBtn.visibility = if (isLast) View.VISIBLE else View.GONE
+        nextBtn.text = if (isLast)
             context.getString(R.string.tutorial_done)
         else
             context.getString(R.string.tutorial_next)

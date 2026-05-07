@@ -15,14 +15,16 @@ import android.view.ViewConfiguration
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
-import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
+import org.cheipstudio.speedlauncher.data.SettingsRepository
 import kotlin.math.abs
 
 /**
- * v15: drag a 600ms, menu a 1200ms, tolleranza al micro-movimento (touchSlop * 2).
+ * v18:
+ * - Long-press menu fix: 500ms drag, 1000ms menu (più tolleranti)
+ * - Icon shape applicato via IconShaper
+ * - Dot color custom da settings
  */
 class IconCellView(context: Context) : LinearLayout(context) {
 
@@ -47,8 +49,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var menuFired = false
     private var moved = false
 
-    private val DRAG_THRESHOLD = 600L
-    private val MENU_THRESHOLD = 1200L
+    private val DRAG_THRESHOLD = 500L
+    private val MENU_THRESHOLD = 1000L
 
     private val dragRunnable = Runnable {
         if (pressing && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
@@ -93,7 +95,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
         addView(labelView)
 
         setWillNotDraw(false)
-        dotPaint.color = ContextCompat.getColor(context, R.color.notification_dot)
+        val settings = SpeedApp.instance.settingsRepository
+        dotPaint.color = settings.dotColor.value ?: SettingsRepository.DOT_DEFAULT
         isClickable = true
         isFocusable = true
     }
@@ -140,9 +143,12 @@ class IconCellView(context: Context) : LinearLayout(context) {
 
     fun bind(app: AppInfo) {
         this.app = app
-        iconView.setImageDrawable(app.icon)
+        val settings = SpeedApp.instance.settingsRepository
+        val shape = settings.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
+        iconView.setImageDrawable(IconShaper.shape(app.icon, shape))
         labelView.text = app.label
         packageName = app.packageName
+        dotPaint.color = settings.dotColor.value ?: SettingsRepository.DOT_DEFAULT
     }
 
     override fun onDraw(canvas: Canvas) {

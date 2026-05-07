@@ -19,12 +19,11 @@ import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 import org.cheipstudio.speedlauncher.data.HomeItem
+import org.cheipstudio.speedlauncher.data.SettingsRepository
 
 /**
- * v16: BottomSheet che mostra le app dentro una folder.
- * - Tap app = lancia
- * - Long-press app = rimuovi dalla folder (riapre come app singola)
- * - Edit del nome in alto
+ * v18: design espressivo. Header con titolo grande, app in griglia 4-col con padding generoso,
+ * footer pulsante elimina arrotondato + outline.
  */
 object FolderSheet {
 
@@ -39,30 +38,29 @@ object FolderSheet {
         val density = context.resources.displayMetrics.density
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding((20 * density).toInt(), (12 * density).toInt(), (20 * density).toInt(), (24 * density).toInt())
+            setPadding((24 * density).toInt(), (12 * density).toInt(), (24 * density).toInt(), (28 * density).toInt())
         }
 
-        // handle
         val handle = View(context).apply {
             background = ContextCompat.getDrawable(context, R.drawable.bg_drag_handle)
-            val lp = LinearLayout.LayoutParams((32 * density).toInt(), (4 * density).toInt())
+            val lp = LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
             lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.bottomMargin = (16 * density).toInt()
+            lp.bottomMargin = (20 * density).toInt()
             layoutParams = lp
         }
         container.addView(handle)
 
-        // titolo editabile
         val nameInput = EditText(context).apply {
             setText(folder.name)
-            textSize = 22f
+            textSize = 28f
             setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
             background = null
             setHintTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant))
             hint = context.getString(R.string.folder_name_hint)
             setSingleLine(true)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
             val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            lp.bottomMargin = (16 * density).toInt()
+            lp.bottomMargin = (24 * density).toInt()
             layoutParams = lp
             addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
@@ -72,7 +70,6 @@ object FolderSheet {
         }
         container.addView(nameInput)
 
-        // griglia di app
         val apps = SpeedApp.instance.appRepository.apps.value ?: emptyList()
         val byKey = apps.associateBy { it.key }
         val folderApps = folder.folderApps.mapNotNull { byKey[it] }
@@ -90,18 +87,19 @@ object FolderSheet {
         }
         container.addView(grid)
 
-        // bottone elimina folder
+        // Bottone delete più moderno: pill con bordo
         val deleteBtn = TextView(context).apply {
             text = context.getString(R.string.folder_delete)
-            setTextColor(Color.parseColor("#FF6464"))
+            setTextColor(Color.parseColor("#E04545"))
             textSize = 14f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
-            setPadding((16 * density).toInt(), (16 * density).toInt(), (16 * density).toInt(), (8 * density).toInt())
-            isClickable = true
-            isFocusable = true
-            background = ContextCompat.getDrawable(context, android.R.drawable.list_selector_background)
-            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            lp.topMargin = (16 * density).toInt()
+            background = ContextCompat.getDrawable(context, R.drawable.bg_folder_delete_btn)
+            setPadding((24 * density).toInt(), (14 * density).toInt(), (24 * density).toInt(), (14 * density).toInt())
+            isClickable = true; isFocusable = true
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            lp.gravity = Gravity.CENTER_HORIZONTAL
+            lp.topMargin = (24 * density).toInt()
             layoutParams = lp
         }
         container.addView(deleteBtn)
@@ -122,17 +120,20 @@ object FolderSheet {
         val cell = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            val pad = (8 * density).toInt()
+            val pad = (10 * density).toInt()
             setPadding(pad, pad, pad, pad)
             isClickable = true; isFocusable = true
             background = ContextCompat.getDrawable(context, android.R.drawable.list_selector_background)
         }
         val lp = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f))
-        lp.width = 0; lp.height = (90 * density).toInt()
+        lp.width = 0; lp.height = (96 * density).toInt()
         cell.layoutParams = lp
 
+        val settings = SpeedApp.instance.settingsRepository
+        val shape = settings.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
+
         val icon = ImageView(context).apply {
-            setImageDrawable(app.icon)
+            setImageDrawable(IconShaper.shape(app.icon, shape))
             val s = (44 * density).toInt()
             layoutParams = LinearLayout.LayoutParams(s, s)
         }

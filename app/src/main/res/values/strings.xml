@@ -41,6 +41,8 @@
     <string name="settings_haptic">Vibrazione tattile</string>
     <string name="settings_swipe_down">Swipe giù apre notifiche</string>
     <string name="settings_swipe_down_sub">Scorri verso il basso dalla home per aprire la tendina notifiche</string>
+    <string name="settings_double_tap_lock">Doppio tap blocca schermo</string>
+    <string name="settings_double_tap_lock_sub">Doppio tap sulla barra di ricerca per spegnere lo schermo</string>
     <string name="settings_search_mode">Tipo di ricerca</string>
     <string name="settings_search_apps">Cerca solo app installate</string>
     <string name="settings_search_google">Cerca su Google</string>
@@ -50,6 +52,21 @@
     <string name="settings_notification_access_sub">Necessario per i pallini di notifica</string>
     <string name="settings_app_info">Informazioni app di sistema</string>
     <string name="settings_show_tutorial">Mostra di nuovo il tutorial</string>
+
+    <string name="settings_icon_shape">Forma icone</string>
+    <string name="shape_original">Originale</string>
+    <string name="shape_squircle">Squircle (Material You)</string>
+    <string name="shape_circle">Cerchio</string>
+    <string name="shape_square">Quadrato arrotondato</string>
+    <string name="shape_teardrop">Goccia</string>
+
+    <string name="settings_dot_color">Colore pallino notifiche</string>
+    <string name="settings_dot_color_sub">Tocca un colore per applicarlo</string>
+
+    <string name="settings_anim_style">Stile animazioni</string>
+    <string name="anim_expressive">Espressivo (consigliato)</string>
+    <string name="anim_standard">Standard</string>
+    <string name="anim_none">Nessuna</string>
 
     <string name="settings_reset_layout">Ripristina layout home</string>
     <string name="settings_reset_layout_sub">Riporta le icone alla disposizione iniziale</string>
@@ -75,14 +92,20 @@
     <string name="build_value">%1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
 
+    <string name="screen_lock_admin_explanation">Speed Launcher userà questo permesso solo per spegnere lo schermo quando fai doppio tap sulla barra di ricerca. Nessun altro utilizzo.</string>
+    <string name="screen_lock_enable_admin_toast">Abilita Speed Launcher come amministratore per usare il blocco schermo</string>
+
     <string name="tutorial_swipe_title">Apri tutte le app</string>
-    <string name="tutorial_swipe_desc">Scorri verso l\'alto da qualsiasi punto della home per aprire l\'elenco delle app.</string>
-    <string name="tutorial_longpress_icon_title">Sposta o personalizza</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuto un\'icona per spostarla. Continua a tenere premuto per aprire il menu Info/Disinstalla.</string>
-    <string name="tutorial_settings_title">Impostazioni</string>
-    <string name="tutorial_settings_desc">Tocca l\'icona ⚙ a destra nella barra di ricerca per aprire le impostazioni del launcher.</string>
-    <string name="tutorial_pages_title">Più pagine e cartelle</string>
-    <string name="tutorial_pages_desc">Quando una pagina è piena, viene creata automaticamente una nuova. Trascina un\'icona su un\'altra per creare una cartella.</string>
+    <string name="tutorial_swipe_desc">Scorri verso l\'alto da qualsiasi punto della home per aprire l\'elenco delle app installate.</string>
+    <string name="tutorial_longpress_icon_title">Sposta, raggruppa, gestisci</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'icona per spostarla. Trascinala su un\'altra per creare una cartella. Tieni premuto più a lungo per il menu Info/Disinstalla.</string>
+    <string name="tutorial_settings_title">Personalizza tutto</string>
+    <string name="tutorial_settings_desc">Tocca l\'icona ⚙ a destra nella barra di ricerca. Cambia griglia, forma icone, animazioni, colori e molto altro.</string>
+    <string name="tutorial_pages_title">Pagine multiple</string>
+    <string name="tutorial_pages_desc">Quando una pagina è piena ne nasce una nuova. Trascina un\'icona oltre il bordo per spostarla. Tocca i puntini in fondo per saltare tra pagine.</string>
+    <string name="tutorial_default_title">Quasi pronto</string>
+    <string name="tutorial_default_desc">Imposta Speed come il tuo launcher principale per usarlo ogni volta che premi il tasto home.</string>
+    <string name="tutorial_set_default_btn">Imposta come predefinito</string>
     <string name="tutorial_next">Avanti</string>
     <string name="tutorial_done">Iniziamo</string>
     <string name="tutorial_skip">Salta</string>

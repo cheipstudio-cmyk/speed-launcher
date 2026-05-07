@@ -4,8 +4,11 @@ import android.content.ClipData
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
+import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
@@ -18,13 +21,16 @@ import android.view.ViewConfiguration
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.cheipstudio.speedlauncher.SpeedApp
-import org.cheipstudio.speedlauncher.data.AppInfo
 import org.cheipstudio.speedlauncher.data.HomeItem
 import kotlin.math.abs
 
 /**
- * v16: cella folder che mostra fino a 4 icone in 2x2 dentro un quadrato arrotondato.
- * Tap = apre folder. Hold 600ms = drag. Hold 1200ms = (futuro: menu rinomina).
+ * v18: design moderno per le cartelle:
+ * - Squircle (superellipse) come maschera, non rettangolo arrotondato
+ * - Gradient soft sopra il blur, non solid color
+ * - 4 icone in 2x2 ma con padding maggiore per dare aria
+ * - Icone cresciute al 28% lato (era ~24%)
+ * - Bordo sottile bianco per lo "stacked" feel
  */
 class FolderCellView(context: Context) : LinearLayout(context) {
 
@@ -41,7 +47,7 @@ class FolderCellView(context: Context) : LinearLayout(context) {
     private var downX = 0f; private var downY = 0f
     private var pressing = false; private var dragFired = false; private var moved = false
 
-    private val DRAG_THRESHOLD = 600L
+    private val DRAG_THRESHOLD = 500L
 
     private val dragRunnable = Runnable {
         if (pressing && !dragFired && dragOriginId.isNotEmpty()) {
@@ -81,7 +87,9 @@ class FolderCellView(context: Context) : LinearLayout(context) {
 
     fun bind(folder: HomeItem) {
         this.folder = folder
-        labelView.text = if (folder.name.isNotEmpty()) folder.name else "Cartella"
+        labelView.text = if (folder.name.isNotEmpty()) folder.name else context.getString(
+            org.cheipstudio.speedlauncher.R.string.folder_default_name
+        )
         val apps = SpeedApp.instance.appRepository.apps.value ?: emptyList()
         val byKey = apps.associateBy { it.key }
         val drawables = folder.folderApps.take(4).mapNotNull { byKey[it]?.icon }
@@ -122,43 +130,87 @@ class FolderCellView(context: Context) : LinearLayout(context) {
         return super.onTouchEvent(event)
     }
 
-    /**
-     * Inner view: disegna fino a 4 icone in 2x2 dentro un quadrato arrotondato semi-trasparente.
-     */
     private class FolderPreview(context: Context) : View(context) {
-        private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#55FFFFFF")
+        private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+            color = Color.parseColor("#33FFFFFF")
         }
-        private val rect = RectF()
+        private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(60, 0, 0, 0)
+            maskFilter = android.graphics.BlurMaskFilter(8f, android.graphics.BlurMaskFilter.Blur.NORMAL)
+        }
         private var icons: List<Drawable> = emptyList()
+        private var maskPath: Path? = null
+        private var size = 0
 
-        fun setIcons(list: List<Drawable>) {
-            icons = list
-            invalidate()
+        fun setIcons(list: List<Drawable>) { icons = list; invalidate() }
+
+        override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+            super.onSizeChanged(w, h, oldw, oldh)
+            size = w
+            maskPath = buildSquirclePath(w.toFloat())
+            // gradiente verticale
+            bgPaint.shader = LinearGradient(
+                0f, 0f, 0f, h.toFloat(),
+                intArrayOf(Color.parseColor("#66FFFFFF"), Color.parseColor("#33FFFFFF")),
+                null, Shader.TileMode.CLAMP
+            )
         }
 
         override fun onDraw(canvas: Canvas) {
-            val w = width.toFloat(); val h = height.toFloat()
-            val r = w * 0.22f
-            rect.set(0f, 0f, w, h)
-            canvas.drawRoundRect(rect, r, r, bgPaint)
+            val s = size.toFloat()
+            if (s == 0f) return
+            val path = maskPath ?: return
 
+            // ombra leggera sotto
+            canvas.save()
+            canvas.translate(0f, 2f)
+            canvas.drawPath(path, shadowPaint)
+            canvas.restore()
+
+            // bg gradient
+            canvas.drawPath(path, bgPaint)
+            // bordo
+            canvas.drawPath(path, borderPaint)
+
+            // icone in 2x2
             if (icons.isEmpty()) return
-            val pad = w * 0.12f
-            val inner = w - 2 * pad
-            val cellSize = (inner - pad * 0.4f) / 2f  // gap piccolo tra le icone
-            val gap = pad * 0.4f
-            val baseX = pad
-            val baseY = pad
+            canvas.save()
+            canvas.clipPath(path)
+            val pad = s * 0.14f
+            val gap = s * 0.06f
+            val cellSize = (s - 2 * pad - gap) / 2f
             for (i in 0 until icons.size.coerceAtMost(4)) {
                 val col = i % 2
                 val row = i / 2
-                val x = baseX + col * (cellSize + gap)
-                val y = baseY + row * (cellSize + gap)
+                val x = pad + col * (cellSize + gap)
+                val y = pad + row * (cellSize + gap)
                 val d = icons[i]
                 d.setBounds(x.toInt(), y.toInt(), (x + cellSize).toInt(), (y + cellSize).toInt())
                 d.draw(canvas)
             }
+            canvas.restore()
+        }
+
+        private fun buildSquirclePath(s: Float): Path {
+            val path = Path()
+            val n = 4f
+            val r = s / 2
+            val cx = r; val cy = r
+            val steps = 64
+            var first = true
+            for (i in 0..steps) {
+                val t = i.toFloat() / steps * (Math.PI * 2)
+                val cosT = Math.cos(t); val sinT = Math.sin(t)
+                val x = cx + Math.signum(cosT) * Math.pow(Math.abs(cosT), 2.0 / n) * r
+                val y = cy + Math.signum(sinT) * Math.pow(Math.abs(sinT), 2.0 / n) * r
+                if (first) { path.moveTo(x.toFloat(), y.toFloat()); first = false }
+                else path.lineTo(x.toFloat(), y.toFloat())
+            }
+            path.close()
+            return path
         }
     }
 }

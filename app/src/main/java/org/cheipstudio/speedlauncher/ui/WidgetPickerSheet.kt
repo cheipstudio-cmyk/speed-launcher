@@ -19,17 +19,19 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.cheipstudio.speedlauncher.R
 
 /**
- * Picker custom: lista pulita, filtro per dimensione slot, search.
+ * v18: niente filtro per altezza widget (tanto lo slot si adatta).
+ * Filtriamo solo per larghezza > slot.
  */
 class WidgetPickerSheet : BottomSheetDialogFragment() {
 
     var onWidgetSelected: ((AppWidgetProviderInfo) -> Unit)? = null
-
     var slotWidthPx: Int = 0
-    var slotHeightPx: Int = 0
+    var slotMaxHeightPx: Int = 0  // ora "max" non vincolante
 
     private lateinit var adapter: WidgetAdapter
     private var allItems: List<AppWidgetProviderInfo> = emptyList()
+
+    override fun getTheme(): Int = R.style.WidgetPickerSheetTheme
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -60,12 +62,10 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
         val ctx = requireContext()
         val manager = AppWidgetManager.getInstance(ctx)
         val all = manager.installedProviders
-        // Filtro: minWidth/minHeight devono entrare nello slot disponibile
+        // v18: solo filtro larghezza, l'altezza lo slot se la gestisce
         val filtered = all.filter { info ->
             val minW = info.minWidth.coerceAtLeast(1)
-            val minH = info.minHeight.coerceAtLeast(1)
-            (slotWidthPx == 0 || minW <= slotWidthPx + 32) &&
-                    (slotHeightPx == 0 || minH <= slotHeightPx + 32)
+            slotWidthPx == 0 || minW <= slotWidthPx + 32
         }.sortedBy { it.loadLabel(ctx.packageManager).lowercase() }
 
         allItems = filtered
@@ -84,28 +84,28 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
-        dialog.setOnShowListener {
-            val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            sheet?.let {
-                val behavior = BottomSheetBehavior.from(it)
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                behavior.skipCollapsed = true
-                it.layoutParams.height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
-            }
+        dialog.setOnShowListener { d ->
+            val sheet = (d as BottomSheetDialog).findViewById<View>(
+                com.google.android.material.R.id.design_bottom_sheet
+            ) ?: return@setOnShowListener
+            val targetHeight = (resources.displayMetrics.heightPixels * 0.85f).toInt()
+            sheet.layoutParams = sheet.layoutParams.apply { height = targetHeight }
+            val behavior = BottomSheetBehavior.from(sheet)
+            behavior.skipCollapsed = true
+            behavior.isFitToContents = false
+            behavior.expandedOffset = 0
+            behavior.peekHeight = targetHeight
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         return dialog
     }
 
     private class WidgetAdapter(val onClick: (AppWidgetProviderInfo) -> Unit)
         : RecyclerView.Adapter<WidgetAdapter.VH>() {
-
         private val items = mutableListOf<AppWidgetProviderInfo>()
-        fun submit(list: List<AppWidgetProviderInfo>) {
-            items.clear(); items.addAll(list); notifyDataSetChanged()
-        }
+        fun submit(list: List<AppWidgetProviderInfo>) { items.clear(); items.addAll(list); notifyDataSetChanged() }
         override fun onCreateViewHolder(parent: ViewGroup, vt: Int): VH {
-            val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_widget_picker, parent, false)
+            val v = LayoutInflater.from(parent.context).inflate(R.layout.item_widget_picker, parent, false)
             return VH(v)
         }
         override fun getItemCount(): Int = items.size
@@ -119,8 +119,7 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
             private val app = v.findViewById<TextView>(R.id.widgetApp)
             private val size = v.findViewById<TextView>(R.id.widgetSize)
             fun bind(info: AppWidgetProviderInfo) {
-                val ctx = itemView.context
-                val pm = ctx.packageManager
+                val ctx = itemView.context; val pm = ctx.packageManager
                 name.text = info.loadLabel(pm)
                 try {
                     val ai = pm.getApplicationInfo(info.provider.packageName, 0)
@@ -139,10 +138,10 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(slotWidthPx: Int, slotHeightPx: Int): WidgetPickerSheet {
+        fun newInstance(slotWidthPx: Int, slotMaxHeightPx: Int): WidgetPickerSheet {
             return WidgetPickerSheet().apply {
                 this.slotWidthPx = slotWidthPx
-                this.slotHeightPx = slotHeightPx
+                this.slotMaxHeightPx = slotMaxHeightPx
             }
         }
     }

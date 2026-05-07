@@ -41,6 +41,8 @@
     <string name="settings_haptic">Haptic feedback</string>
     <string name="settings_swipe_down">Swipe down opens notifications</string>
     <string name="settings_swipe_down_sub">Swipe down from home to open the notification shade</string>
+    <string name="settings_double_tap_lock">Double tap to lock screen</string>
+    <string name="settings_double_tap_lock_sub">Double tap on the search bar to turn the screen off</string>
     <string name="settings_search_mode">Search type</string>
     <string name="settings_search_apps">Apps only</string>
     <string name="settings_search_google">Search Google</string>
@@ -50,6 +52,21 @@
     <string name="settings_notification_access_sub">Required for notification dots</string>
     <string name="settings_app_info">System app info</string>
     <string name="settings_show_tutorial">Show tutorial again</string>
+
+    <string name="settings_icon_shape">Icon shape</string>
+    <string name="shape_original">Original</string>
+    <string name="shape_squircle">Squircle (Material You)</string>
+    <string name="shape_circle">Circle</string>
+    <string name="shape_square">Rounded square</string>
+    <string name="shape_teardrop">Teardrop</string>
+
+    <string name="settings_dot_color">Notification dot color</string>
+    <string name="settings_dot_color_sub">Tap a color to apply it</string>
+
+    <string name="settings_anim_style">Animation style</string>
+    <string name="anim_expressive">Expressive (recommended)</string>
+    <string name="anim_standard">Standard</string>
+    <string name="anim_none">None</string>
 
     <string name="settings_reset_layout">Reset home layout</string>
     <string name="settings_reset_layout_sub">Restore icons to initial layout</string>
@@ -75,14 +92,20 @@
     <string name="build_value">%1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
 
+    <string name="screen_lock_admin_explanation">Speed Launcher will only use this permission to turn off the screen when you double tap the search bar. No other use.</string>
+    <string name="screen_lock_enable_admin_toast">Enable Speed Launcher as administrator to use screen lock</string>
+
     <string name="tutorial_swipe_title">Open all apps</string>
-    <string name="tutorial_swipe_desc">Swipe up from anywhere on the home to open the apps list.</string>
-    <string name="tutorial_longpress_icon_title">Move or customize</string>
-    <string name="tutorial_longpress_icon_desc">Hold an icon to move it. Keep holding to open the Info/Uninstall menu.</string>
-    <string name="tutorial_settings_title">Settings</string>
-    <string name="tutorial_settings_desc">Tap the gear icon on the right of the search bar to open launcher settings.</string>
-    <string name="tutorial_pages_title">Pages and folders</string>
-    <string name="tutorial_pages_desc">When a page is full, a new one is created automatically. Drag an icon onto another to create a folder.</string>
+    <string name="tutorial_swipe_desc">Swipe up from anywhere on the home to open the list of installed apps.</string>
+    <string name="tutorial_longpress_icon_title">Move, group, manage</string>
+    <string name="tutorial_longpress_icon_desc">Hold an icon to move it. Drop it onto another to create a folder. Keep holding for the Info/Uninstall menu.</string>
+    <string name="tutorial_settings_title">Customize everything</string>
+    <string name="tutorial_settings_desc">Tap the gear icon on the right of the search bar. Change grid, icon shape, animations, colors and more.</string>
+    <string name="tutorial_pages_title">Multiple pages</string>
+    <string name="tutorial_pages_desc">When a page is full a new one is created. Drag an icon past the edge to move it across. Tap the dots at the bottom to jump pages.</string>
+    <string name="tutorial_default_title">Almost ready</string>
+    <string name="tutorial_default_desc">Set Speed as your default launcher to use it every time you press the home button.</string>
+    <string name="tutorial_set_default_btn">Set as default</string>
     <string name="tutorial_next">Next</string>
     <string name="tutorial_done">Let\'s go</string>
     <string name="tutorial_skip">Skip</string>

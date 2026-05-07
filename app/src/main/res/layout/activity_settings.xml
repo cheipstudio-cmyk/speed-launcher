@@ -30,28 +30,31 @@
             android:orientation="vertical"
             android:paddingBottom="32dp">
 
+            <!-- Title XL espressivo -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="28dp"
                 android:paddingEnd="28dp"
-                android:paddingTop="48dp"
-                android:paddingBottom="32dp"
+                android:paddingTop="40dp"
+                android:paddingBottom="28dp"
                 android:text="@string/settings_title"
                 android:textColor="?attr/colorOnSurface"
-                android:textSize="44sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="48sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02" />
 
             <!-- ASPETTO -->
-            <TextView style="@style/MotoSection" android:text="@string/settings_section_appearance" />
+            <LinearLayout style="@style/MotoSectionRow">
+                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_palette" />
+                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_appearance" />
+            </LinearLayout>
             <View style="@style/MotoDivider" />
 
             <LinearLayout style="@style/MotoRow">
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
                     <TextView style="@style/MotoTitle" android:text="@string/settings_grid_size" />
                     <TextView android:id="@+id/gridValueLabel" style="@style/MotoSubtitle" />
                 </LinearLayout>
@@ -74,6 +77,59 @@
                     android:text="@string/settings_grid_5x6" />
             </RadioGroup>
 
+            <!-- Forma icone -->
+            <LinearLayout style="@style/MotoRow">
+                <LinearLayout
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_icon_shape" />
+                    <TextView android:id="@+id/iconShapeLabel" style="@style/MotoSubtitle" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/iconShapeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingBottom="8dp">
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/shapeOriginal" style="@style/MotoRadio"
+                    android:text="@string/shape_original" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/shapeSquircle" style="@style/MotoRadio"
+                    android:text="@string/shape_squircle" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/shapeCircle" style="@style/MotoRadio"
+                    android:text="@string/shape_circle" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/shapeSquare" style="@style/MotoRadio"
+                    android:text="@string/shape_square" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/shapeTeardrop" style="@style/MotoRadio"
+                    android:text="@string/shape_teardrop" />
+            </RadioGroup>
+
+            <!-- Colore dot -->
+            <LinearLayout style="@style/MotoRow">
+                <LinearLayout
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_dot_color" />
+                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_dot_color_sub" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dotColorRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="28dp"
+                android:paddingBottom="20dp"
+                android:gravity="start" />
+
             <LinearLayout style="@style/MotoRow">
                 <TextView
                     android:layout_width="0dp" android:layout_height="wrap_content"
@@ -84,8 +140,39 @@
                     android:layout_width="wrap_content" android:layout_height="wrap_content" />
             </LinearLayout>
 
+            <!-- Animazioni -->
+            <LinearLayout style="@style/MotoRow">
+                <LinearLayout
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_anim_style" />
+                    <TextView android:id="@+id/animStyleLabel" style="@style/MotoSubtitle" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/animStyleGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingBottom="8dp">
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/animExpressive" style="@style/MotoRadio"
+                    android:text="@string/anim_expressive" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/animStandard" style="@style/MotoRadio"
+                    android:text="@string/anim_standard" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/animNone" style="@style/MotoRadio"
+                    android:text="@string/anim_none" />
+            </RadioGroup>
+
             <!-- BARRA DI RICERCA -->
-            <TextView style="@style/MotoSection" android:text="@string/settings_section_searchbar" />
+            <LinearLayout style="@style/MotoSectionRow">
+                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_search" />
+                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_searchbar" />
+            </LinearLayout>
             <View style="@style/MotoDivider" />
 
             <LinearLayout style="@style/MotoRow">
@@ -105,25 +192,17 @@
                 android:paddingHorizontal="20dp"
                 android:paddingBottom="8dp">
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleSystem" style="@style/MotoRadio"
-                    android:text="@string/style_system" />
+                    android:id="@+id/styleSystem" style="@style/MotoRadio" android:text="@string/style_system" />
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleTransparent" style="@style/MotoRadio"
-                    android:text="@string/style_transparent" />
+                    android:id="@+id/styleTransparent" style="@style/MotoRadio" android:text="@string/style_transparent" />
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleDark" style="@style/MotoRadio"
-                    android:text="@string/style_dark" />
+                    android:id="@+id/styleDark" style="@style/MotoRadio" android:text="@string/style_dark" />
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/styleLight" style="@style/MotoRadio"
-                    android:text="@string/style_light" />
+                    android:id="@+id/styleLight" style="@style/MotoRadio" android:text="@string/style_light" />
             </RadioGroup>
 
             <LinearLayout style="@style/MotoRow">
-                <LinearLayout
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/MotoTitle" android:text="@string/settings_search_mode" />
-                </LinearLayout>
+                <TextView style="@style/MotoTitle" android:text="@string/settings_search_mode" />
             </LinearLayout>
 
             <RadioGroup
@@ -134,15 +213,16 @@
                 android:paddingHorizontal="20dp"
                 android:paddingBottom="8dp">
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/searchModeApps" style="@style/MotoRadio"
-                    android:text="@string/settings_search_apps" />
+                    android:id="@+id/searchModeApps" style="@style/MotoRadio" android:text="@string/settings_search_apps" />
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/searchModeGoogle" style="@style/MotoRadio"
-                    android:text="@string/settings_search_google" />
+                    android:id="@+id/searchModeGoogle" style="@style/MotoRadio" android:text="@string/settings_search_google" />
             </RadioGroup>
 
             <!-- GESTI -->
-            <TextView style="@style/MotoSection" android:text="@string/settings_section_gestures" />
+            <LinearLayout style="@style/MotoSectionRow">
+                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_swipe_up" />
+                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_gestures" />
+            </LinearLayout>
             <View style="@style/MotoDivider" />
 
             <LinearLayout style="@style/MotoRow">
@@ -158,6 +238,18 @@
             </LinearLayout>
 
             <LinearLayout style="@style/MotoRow">
+                <LinearLayout
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_double_tap_lock" />
+                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_double_tap_lock_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchDoubleTapLock"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/MotoRow">
                 <TextView
                     android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1" style="@style/MotoTitle"
@@ -168,7 +260,10 @@
             </LinearLayout>
 
             <!-- AVANZATE -->
-            <TextView style="@style/MotoSection" android:text="@string/settings_section_advanced" />
+            <LinearLayout style="@style/MotoSectionRow">
+                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_settings" />
+                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_advanced" />
+            </LinearLayout>
             <View style="@style/MotoDivider" />
 
             <LinearLayout android:id="@+id/itemShowTutorial" style="@style/MotoRowClickable">
@@ -207,7 +302,10 @@
             </LinearLayout>
 
             <!-- SISTEMA -->
-            <TextView style="@style/MotoSection" android:text="@string/settings_section_general" />
+            <LinearLayout style="@style/MotoSectionRow">
+                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_widgets" />
+                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_general" />
+            </LinearLayout>
             <View style="@style/MotoDivider" />
 
             <LinearLayout android:id="@+id/itemDefaultLauncher" style="@style/MotoRowClickable">
@@ -236,7 +334,10 @@
             </LinearLayout>
 
             <!-- INFO -->
-            <TextView style="@style/MotoSection" android:text="@string/settings_section_info" />
+            <LinearLayout style="@style/MotoSectionRow">
+                <ImageView style="@style/MotoSectionIcon" android:src="@drawable/ic_pin" />
+                <TextView style="@style/MotoSectionLabel" android:text="@string/settings_section_info" />
+            </LinearLayout>
             <View style="@style/MotoDivider" />
 
             <LinearLayout style="@style/MotoRow">
