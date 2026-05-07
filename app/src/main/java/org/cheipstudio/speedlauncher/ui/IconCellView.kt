@@ -5,8 +5,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.os.Handler
-import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
@@ -18,14 +16,11 @@ import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 
 /**
- * v9:
- * - Sulla home (dragOriginId valorizzato):
- *   - Tap singolo → onLaunch
- *   - Doppio tap → onMenu (menu Info / Disinstalla)
- *   - Long-press → drag immediato
- * - Nel drawer (dragOriginId vuoto):
- *   - Tap → onLaunch
- *   - Long-press → menu (Info / Disinstalla)
+ * v11:
+ * - Tap → onLaunch IMMEDIATO (zero delay)
+ * - Long-press → drag SE dragOriginId valorizzato, altrimenti menu (drawer)
+ * - Niente più doppio tap (causava lag percepito).
+ *   Per il menu app dalla home: l'utente deve passare dal drawer.
  */
 class IconCellView(context: Context) : LinearLayout(context) {
 
@@ -45,11 +40,6 @@ class IconCellView(context: Context) : LinearLayout(context) {
             field = value
             updateLongPressBehavior()
         }
-
-    private val handler = Handler(Looper.getMainLooper())
-    private var lastTapTime: Long = 0L
-    private val doubleTapTimeout = 300L
-    private var pendingTapRunnable: Runnable? = null
 
     init {
         orientation = VERTICAL
@@ -81,41 +71,13 @@ class IconCellView(context: Context) : LinearLayout(context) {
         isFocusable = true
         isLongClickable = true
 
-        updateClickBehavior()
-        updateLongPressBehavior()
-    }
-
-    private fun updateClickBehavior() {
-        if (dragOriginId.isNotEmpty()) {
-            // Sulla home: gestione doppio tap
-            setOnClickListener {
-                val a = app ?: return@setOnClickListener
-                val now = System.currentTimeMillis()
-                if (now - lastTapTime < doubleTapTimeout) {
-                    // Doppio tap → menu
-                    pendingTapRunnable?.let { handler.removeCallbacks(it) }
-                    pendingTapRunnable = null
-                    lastTapTime = 0L
-                    onMenu?.invoke(a, this)
-                } else {
-                    // Primo tap: aspetta per vedere se arriva il secondo
-                    lastTapTime = now
-                    pendingTapRunnable = Runnable {
-                        Anim.pressFeedback(iconView)
-                        postDelayed({ onLaunch?.invoke(a, this) }, 50)
-                        pendingTapRunnable = null
-                    }
-                    handler.postDelayed(pendingTapRunnable!!, doubleTapTimeout)
-                }
-            }
-        } else {
-            // Nel drawer: tap singolo lancia
-            setOnClickListener {
-                val a = app ?: return@setOnClickListener
-                Anim.pressFeedback(iconView)
-                postDelayed({ onLaunch?.invoke(a, this) }, 50)
-            }
+        // Tap: lancia immediatamente
+        setOnClickListener {
+            val a = app ?: return@setOnClickListener
+            onLaunch?.invoke(a, this)
         }
+
+        updateLongPressBehavior()
     }
 
     private fun updateLongPressBehavior() {
@@ -123,23 +85,18 @@ class IconCellView(context: Context) : LinearLayout(context) {
             // Sulla home: long-press = drag immediato
             setOnLongClickListener {
                 val a = app ?: return@setOnLongClickListener false
-                // Cancella eventuale tap pendente per evitare lancio in concomitanza
-                pendingTapRunnable?.let { handler.removeCallbacks(it) }
-                pendingTapRunnable = null
-                lastTapTime = 0L
                 val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
                 startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
                 true
             }
         } else {
-            // Nel drawer: long-press = menu
+            // Nel drawer: long-press = menu Info/Disinstalla
             setOnLongClickListener {
                 val a = app ?: return@setOnLongClickListener false
                 onMenu?.invoke(a, this)
                 true
             }
         }
-        updateClickBehavior()
     }
 
     fun bind(app: AppInfo) {

@@ -20,7 +20,6 @@ class IconGridView @JvmOverloads constructor(
     var onAppLaunch: ((AppInfo, View) -> Unit)? = null
     var onAppLongPress: ((AppInfo, View) -> Unit)? = null
 
-    /** Indice di pagina di questa griglia (0 = prima pagina) */
     var pageIndex: Int = 0
 
     private val store = HomeLayoutStore(context)
@@ -77,7 +76,6 @@ class IconGridView @JvmOverloads constructor(
 
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
-        // Auto-popola la pagina 0 al primo avvio
         if (!initialized && pageIndex == 0 && apps.size > 5) {
             val toAdd = apps.drop(5).take(cols * rows)
             for (i in toAdd.indices) pinnedKeys[i] = toAdd[i].key
@@ -107,16 +105,25 @@ class IconGridView @JvmOverloads constructor(
 
     fun isPinned(app: AppInfo): Boolean = pinnedKeys.contains(app.key)
 
+    /** v11: una pagina è piena se non ha più slot vuoti */
+    fun isFull(): Boolean = pinnedKeys.all { it != null }
+
     fun swapWith(key: String, targetIdx: Int) {
         if (targetIdx !in 0 until cols * rows) return
         val sourceIdx = pinnedKeys.indexOf(key)
         if (sourceIdx == -1) {
-            // Drop da pagina diversa: aggiungi al targetIdx
+            // Drop da pagina diversa: aggiungi al targetIdx (anche se occupato → swap nel posto)
             if (pinnedKeys[targetIdx] == null) {
                 pinnedKeys[targetIdx] = key
-                persist()
-                rebuild()
+            } else {
+                // Trova primo slot vuoto e metti lì
+                val emptyIdx = pinnedKeys.indexOfFirst { it == null }
+                if (emptyIdx != -1) {
+                    pinnedKeys[emptyIdx] = key
+                }
             }
+            persist()
+            rebuild()
             return
         }
         if (sourceIdx == targetIdx) return
@@ -191,7 +198,12 @@ class IconGridView @JvmOverloads constructor(
         val parts = text.split("|")
         if (parts.size != 2) return false
         val draggedKey = parts[1]
-        swapWith(draggedKey, targetCellIdx)
+        // Inoltra al gestore globale per il routing tra pagine
+        SpeedApp.instance.dragHandler?.invoke(
+            text.split("|")[0],
+            draggedKey,
+            "grid${pageIndex}:$targetCellIdx"
+        )
         return true
     }
 

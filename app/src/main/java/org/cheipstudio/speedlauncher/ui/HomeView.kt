@@ -17,6 +17,13 @@ import org.cheipstudio.speedlauncher.databinding.ViewHomeBinding
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 
+/**
+ * v11:
+ * - Pagine dinamiche: pagina 1 si crea quando la 0 è piena
+ * - Swipe-up più conservativo: intercept solo se spostamento verticale è forte
+ *   E parte dalla parte bassa della home (così non blocca i bottom sheet sopra)
+ * - Niente più menu da home (long-press = drag, e basta)
+ */
 class HomeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -30,19 +37,16 @@ class HomeView @JvmOverloads constructor(
     private val settings = SpeedApp.instance.settingsRepository
 
     private val pages = mutableListOf<IconGridView>()
-    private val pageCount = 2
 
     var onSwipeUp: (() -> Unit)? = null
     var onSearchTap: (() -> Unit)? = null
     var onHomeLongPress: (() -> Unit)? = null
-    var onAppLongPressOnHome: ((AppInfo) -> Unit)? = null
 
     private var swipeDownX = 0f
     private var swipeDownY = 0f
     private var swipeTrackingActive = false
+    private val swipeMinDistance = resources.displayMetrics.density * 100f
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-    // Soglia minima del fling verticale per considerarlo swipe-up (px/s di velocità o distanza)
-    private val swipeMinDistance = resources.displayMetrics.density * 80f
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
@@ -60,25 +64,15 @@ class HomeView @JvmOverloads constructor(
 
         binding.searchBar.setOnClickListener { onSearchTap?.invoke() }
 
-        // Costruisci le pagine
-        repeat(pageCount) { idx ->
-            val page = IconGridView(context).apply {
-                pageIndex = idx
-                onAppLaunch = { app, view ->
-                    SpeedApp.instance.appRepository.launch(app, view)
-                }
-                onAppLongPress = { app, _ ->
-                    onAppLongPressOnHome?.invoke(app)
-                }
-                setLayout(layoutStore.loadPage(idx))
-            }
-            pages.add(page)
-            binding.pagedHome.addPage(page)
-        }
+        // Pagine dinamiche: leggi quante pagine ci sono nei dati salvati
+        val maxPageInData = layoutStore.load().maxOfOrNull { it.page } ?: 0
+        val initialPageCount = (maxPageInData + 1).coerceAtLeast(1)
 
-        binding.pageIndicator.setPages(pageCount, 0)
-        binding.pagedHome.onPageChanged = { p ->
-            binding.pageIndicator.setPages(pageCount, p)
+        repeat(initialPageCount) { idx -> addPageAt(idx) }
+        updatePageIndicator()
+
+        binding.pagedHome.onPageChanged = { _ ->
+            updatePageIndicator()
         }
 
         SpeedApp.instance.dragHandler = { origin, key, target ->
@@ -88,27 +82,64 @@ class HomeView @JvmOverloads constructor(
         applySettings()
     }
 
+    private fun addPageAt(idx: Int) {
+        val page = IconGridView(context).apply {
+            pageIndex = idx
+            onAppLaunch = { app, view ->
+                SpeedApp.instance.appRepository.launch(app, view)
+            }
+            // Niente onAppLongPress — il long-press parte direttamente il drag
+            setLayout(layoutStore.loadPage(idx))
+        }
+        pages.add(page)
+        binding.pagedHome.addPage(page)
+    }
+
+    private fun ensurePageExists(idx: Int) {
+        while (pages.size <= idx) {
+            addPageAt(pages.size)
+        }
+        updatePageIndicator()
+    }
+
+    private fun updatePageIndicator() {
+        binding.pageIndicator.setPages(pages.size, binding.pagedHome.currentPage.coerceAtMost(pages.size - 1))
+        binding.pageIndicator.visibility = if (pages.size > 1) View.VISIBLE else View.INVISIBLE
+    }
+
+    /**
+     * Verifica se la pagina è piena (tutti gli slot occupati). Se sì, crea la pagina successiva.
+     */
+    private fun maybeCreateNextPage() {
+        val lastIdx = pages.size - 1
+        if (lastIdx < 0) return
+        if (pages[lastIdx].isFull()) {
+            ensurePageExists(lastIdx + 1)
+        }
+    }
+
     private fun handleDrag(origin: String, key: String, target: String) {
         val app = SpeedApp.instance.appRepository.apps.value?.find { it.key == key } ?: return
-        // Format target: "grid{N}:idx"
         val regex = Regex("""grid(\d+):(\d+)""")
         val match = regex.matchEntire(target) ?: return
         val targetPage = match.groupValues[1].toInt()
         val targetIdx = match.groupValues[2].toInt()
+
+        ensurePageExists(targetPage)
         val targetGrid = pages.getOrNull(targetPage) ?: return
 
-        // Format origin: "grid{N}:idx"
         val originMatch = regex.matchEntire(origin)
         if (originMatch != null) {
             val originPage = originMatch.groupValues[1].toInt()
             if (originPage != targetPage) {
-                // Cross-page: rimuovi dalla pagina d'origine, aggiungi alla destinazione
                 pages.getOrNull(originPage)?.unpinApp(app)
                 targetGrid.swapWith(key, targetIdx)
+                maybeCreateNextPage()
                 return
             }
         }
         targetGrid.swapWith(key, targetIdx)
+        maybeCreateNextPage()
     }
 
     private fun applySettings() {
@@ -124,11 +155,22 @@ class HomeView @JvmOverloads constructor(
     }
 
     /**
-     * v10: rilevamento swipe-up forzato che sovrasta i figli.
-     * Se vediamo un movimento dal basso verso l'alto sufficientemente forte,
-     * lo intercettiamo a livello FrameLayout e apriamo il drawer.
+     * v11: intercept conservativo. Solo swipe-up con movimento ENORME (100dp) e
+     * verticalità chiara (dy > dx*2). E SOLO se non ci sono bottom sheet sopra.
      */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        // Se sopra di noi c'è un dialog/bottomsheet, non intercettiamo nulla
+        val activity = context as? android.app.Activity
+        if (activity != null) {
+            // Check via FragmentManager se c'è un BottomSheet visibile
+            val fm = (activity as? androidx.fragment.app.FragmentActivity)?.supportFragmentManager
+            if (fm != null) {
+                for (frag in fm.fragments) {
+                    if (frag is androidx.fragment.app.DialogFragment && frag.isVisible) return false
+                }
+            }
+        }
+
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 swipeDownX = ev.x
@@ -140,8 +182,7 @@ class HomeView @JvmOverloads constructor(
                 if (!swipeTrackingActive) return false
                 val dx = abs(ev.x - swipeDownX)
                 val dy = swipeDownY - ev.y
-                // Swipe-up: dy positivo grande, dy >> dx
-                if (dy > swipeMinDistance && dy > dx * 1.5f) {
+                if (dy > swipeMinDistance && dy > dx * 2f) {
                     swipeTrackingActive = false
                     performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                     onSwipeUp?.invoke()
@@ -166,15 +207,29 @@ class HomeView @JvmOverloads constructor(
 
     fun refreshApps(apps: List<AppInfo>) {
         for (page in pages) page.refresh(apps)
+        maybeCreateNextPage()
     }
 
     fun refreshDots() {
         for (page in pages) page.invalidate()
     }
 
-    fun pinApp(app: AppInfo) = pages.firstOrNull()?.pinApp(app) ?: false
+    fun pinApp(app: AppInfo): Boolean {
+        // Cerca la prima pagina con uno slot libero
+        for (page in pages) {
+            if (page.pinApp(app)) {
+                maybeCreateNextPage()
+                return true
+            }
+        }
+        // Tutte piene: crea nuova pagina
+        ensurePageExists(pages.size)
+        return pages.last().pinApp(app)
+    }
+
     fun unpinApp(app: AppInfo) {
         for (page in pages) page.unpinApp(app)
     }
+
     fun isPinned(app: AppInfo) = pages.any { it.isPinned(app) }
 }
