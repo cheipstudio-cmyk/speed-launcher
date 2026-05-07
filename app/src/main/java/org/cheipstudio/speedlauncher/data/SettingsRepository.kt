@@ -34,6 +34,8 @@ class SettingsRepository(context: Context) {
     val aiLauncherMode = MutableLiveData(prefs.getBoolean(KEY_AI_LAUNCHER_MODE, true))
     // v30: orientamento landscape supportato (off = solo portrait)
     val landscapeAllowed = MutableLiveData(prefs.getBoolean(KEY_LANDSCAPE_ALLOWED, false))
+    // v32: posizione della sezione Raccomandate (top o bottom)
+    val recommendedPosition = MutableLiveData(prefs.getString(KEY_REC_POSITION, REC_POS_BOTTOM) ?: REC_POS_BOTTOM)
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -100,6 +102,9 @@ class SettingsRepository(context: Context) {
     fun setLandscapeAllowed(on: Boolean) {
         prefs.edit().putBoolean(KEY_LANDSCAPE_ALLOWED, on).apply(); landscapeAllowed.postValue(on)
     }
+    fun setRecommendedPosition(pos: String) {
+        prefs.edit().putString(KEY_REC_POSITION, pos).apply(); recommendedPosition.postValue(pos)
+    }
 
     fun unhideAllApps() {
         val empty = mutableSetOf<String>()
@@ -129,6 +134,7 @@ class SettingsRepository(context: Context) {
         hiddenApps.postValue(mutableSetOf())
         aiLauncherMode.postValue(true)
         landscapeAllowed.postValue(false)
+        recommendedPosition.postValue(REC_POS_BOTTOM)
     }
     fun resetEverything() {
         homeLayoutPrefs.edit().clear().apply()
@@ -191,6 +197,9 @@ class SettingsRepository(context: Context) {
         private const val KEY_FIRST_RUN_DONE = "first_run_done"
         private const val KEY_AI_LAUNCHER_MODE = "ai_launcher_mode"
         private const val KEY_LANDSCAPE_ALLOWED = "landscape_allowed"
+        private const val KEY_REC_POSITION = "recommended_position"
+        const val REC_POS_TOP = "top"
+        const val REC_POS_BOTTOM = "bottom"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange
