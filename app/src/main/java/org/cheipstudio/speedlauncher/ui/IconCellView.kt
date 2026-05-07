@@ -175,20 +175,24 @@ class IconCellView(context: Context) : LinearLayout(context) {
         dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        val count = SpeedApp.instance.notificationCounter.countFor(packageName)
-        if (count != lastNotifCount) {
-            if (count > 0 && lastNotifCount == 0) Anim.bounceIn(iconView)
-            lastNotifCount = count
-        }
-        if (count > 0 && iconView.width > 0) {
+    /**
+     * v33: badge disegnato come overlay drawable sull'iconView.
+     * ViewOverlay è progettato per disegnare sopra il contenuto della view ed è la soluzione
+     * "ufficiale" Android per badges. Affidabile dove dispatchDraw poteva fallire per
+     * via di hardware layers / shadow layers / ottimizzazioni di rendering.
+     */
+    private val badgeDrawable = object : android.graphics.drawable.Drawable() {
+        override fun draw(canvas: Canvas) {
+            val count = SpeedApp.instance.notificationCounter.countFor(packageName)
+            if (count <= 0) return
             val s = SpeedApp.instance.settingsRepository
             val mode = s.notificationBadgeMode.value ?: SettingsRepository.BADGE_DOT
             if (mode == SettingsRepository.BADGE_OFF) return
             val density = resources.displayMetrics.density
+            val b = bounds
+            // colore sempre aggiornato dalle settings
+            dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
             if (mode == SettingsRepository.BADGE_COUNT) {
-                // pallone con numero: alto-destra dell'icona
                 val displayCount = if (count > 99) "99+" else count.toString()
                 val textSize = 10 * density
                 dotTextPaint.textSize = textSize
@@ -197,24 +201,49 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val padV = 2 * density
                 val pillW = (textWidth + padH * 2).coerceAtLeast(16 * density)
                 val pillH = textSize + padV * 2 + (2 * density)
-                val cx = iconView.right - pillW / 2 + (2 * density)
-                val cy = iconView.top + pillH / 2 - (2 * density)
+                // posiziona angolo alto-destra dell'iconView
+                val cx = b.right - pillW / 2 + (2 * density)
+                val cy = b.top + pillH / 2 - (2 * density)
                 val rect = android.graphics.RectF(
                     cx - pillW / 2, cy - pillH / 2,
                     cx + pillW / 2, cy + pillH / 2
                 )
                 canvas.drawRoundRect(rect, pillH / 2, pillH / 2, dotPaint)
-                // testo bianco centrato
                 val fm = dotTextPaint.fontMetrics
                 val textY = cy - (fm.ascent + fm.descent) / 2
                 canvas.drawText(displayCount, cx, textY, dotTextPaint)
             } else {
-                // dot semplice
-                val cx = iconView.right - (4 * density)
-                val cy = iconView.top + (6 * density)
+                val cx = b.right - (4 * density)
+                val cy = b.top + (6 * density)
                 val r = 5 * density
                 canvas.drawCircle(cx, cy, r, dotPaint)
             }
+        }
+        override fun setAlpha(alpha: Int) {}
+        override fun setColorFilter(filter: android.graphics.ColorFilter?) {}
+        @Deprecated("API")
+        override fun getOpacity() = android.graphics.PixelFormat.TRANSLUCENT
+    }
+
+    init {
+        // v33: aggiungo il badge come overlay dell'iconView
+        // ViewOverlay disegna il drawable SOPRA tutto il contenuto della view
+        iconView.viewTreeObserver.addOnGlobalLayoutListener {
+            if (iconView.width > 0 && iconView.height > 0) {
+                badgeDrawable.setBounds(0, 0, iconView.width, iconView.height)
+            }
+        }
+        iconView.overlay.add(badgeDrawable)
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        // v33: trigger refresh badge animation se count è cambiato
+        val count = SpeedApp.instance.notificationCounter.countFor(packageName)
+        if (count != lastNotifCount) {
+            if (count > 0 && lastNotifCount == 0) Anim.bounceIn(iconView)
+            lastNotifCount = count
+            badgeDrawable.invalidateSelf()
         }
     }
 }
