@@ -15,8 +15,9 @@ import org.cheipstudio.speedlauncher.data.HomeItem
 import org.cheipstudio.speedlauncher.data.HomeLayoutStore
 
 /**
- * v16: griglia che supporta app E folder.
- * Drop su una cella vuota = sposta. Drop su un'altra app = crea folder. Drop su folder = aggiungi.
+ * v19: fix drag tra pagine + drag in folder.
+ * - handleIncomingDrop ora rimuove SEMPRE dall'origine, anche se fromGrid != this
+ * - rebuild senza LayoutTransition durante l'operazione (più veloce)
  */
 class IconGridView @JvmOverloads constructor(
     context: Context,
@@ -31,7 +32,6 @@ class IconGridView @JvmOverloads constructor(
 
     private val store = HomeLayoutStore(context)
     private var allApps: List<AppInfo> = emptyList()
-    /** v16: ora memorizziamo HomeItem? invece di String? per tenere folder + apps */
     private var pinnedItems: MutableList<HomeItem?>
     private var initialized = false
     private var cols: Int
@@ -118,24 +118,30 @@ class IconGridView @JvmOverloads constructor(
     fun isFull(): Boolean = pinnedItems.all { it != null }
     fun isEmpty(): Boolean = pinnedItems.all { it == null }
 
-    /** Ritorna tutti gli items (per persistenza globale) */
     fun getItems(): List<HomeItem> = pinnedItems.filterNotNull().mapIndexed { i, item ->
         item.copy(cellX = i % cols, cellY = i / cols, page = pageIndex)
     }
 
     /**
-     * v16: Sposta un item esistente (app o folder) in una cella.
-     * Se la cella ha già un'app → crea folder.
-     * Se la cella ha già una folder → aggiungi app alla folder.
+     * v19: rimozione esplicita di un item per indice (usato dal drag tra pagine).
+     */
+    fun removeAt(index: Int) {
+        if (index in pinnedItems.indices) {
+            pinnedItems[index] = null
+            persist(); rebuild()
+        }
+    }
+
+    /**
+     * v19: handleIncomingDrop ora rimuove correttamente dall'origine anche se fromGrid != this.
      */
     fun handleIncomingDrop(itemKey: String, fromGrid: IconGridView?, fromIdx: Int, targetIdx: Int) {
         if (targetIdx !in 0 until cols * rows) return
 
         // Trova l'item sorgente
-        val sourceItem: HomeItem? = if (fromGrid == this && fromIdx in pinnedItems.indices) {
-            pinnedItems[fromIdx]
+        val sourceItem: HomeItem? = if (fromGrid != null && fromIdx in fromGrid.pinnedItems.indices) {
+            fromGrid.pinnedItems[fromIdx]
         } else {
-            // app dal drawer: cerca per key
             val app = allApps.find { it.key == itemKey }
             if (app != null) HomeItem(
                 key = app.key, page = pageIndex,
@@ -145,28 +151,38 @@ class IconGridView @JvmOverloads constructor(
         if (sourceItem == null) return
 
         val targetItem = pinnedItems[targetIdx]
+        val isCrossGrid = fromGrid != null && fromGrid !== this
+        val sameCell = !isCrossGrid && fromIdx == targetIdx
 
         when {
             // cella vuota: muovi
             targetItem == null -> {
-                pinnedItems[targetIdx] = sourceItem.copy(page = pageIndex,
-                    cellX = targetIdx % cols, cellY = targetIdx / cols)
-                if (fromGrid == this && fromIdx in pinnedItems.indices && fromIdx != targetIdx) {
+                pinnedItems[targetIdx] = sourceItem.copy(
+                    page = pageIndex,
+                    cellX = targetIdx % cols, cellY = targetIdx / cols
+                )
+                if (sameCell) return
+                if (isCrossGrid) {
+                    fromGrid?.removeAt(fromIdx)
+                } else if (fromGrid === this && fromIdx in pinnedItems.indices) {
                     pinnedItems[fromIdx] = null
                 }
             }
             // target è folder: aggiungi sourceItem se è un'app
             targetItem.type == HomeItem.TYPE_FOLDER && sourceItem.type == HomeItem.TYPE_APP -> {
+                if (sameCell) return
                 if (!targetItem.folderApps.contains(sourceItem.key)) {
                     pinnedItems[targetIdx] = targetItem.copy(
                         folderApps = targetItem.folderApps + sourceItem.key
                     )
                 }
-                if (fromGrid == this && fromIdx in pinnedItems.indices) {
+                if (isCrossGrid) {
+                    fromGrid?.removeAt(fromIdx)
+                } else if (fromGrid === this && fromIdx in pinnedItems.indices) {
                     pinnedItems[fromIdx] = null
                 }
             }
-            // target è app, source è app, source != target: crea folder
+            // target è app, source è app: crea folder
             targetItem.type == HomeItem.TYPE_APP && sourceItem.type == HomeItem.TYPE_APP &&
                     targetItem.key != sourceItem.key -> {
                 val folderId = "f_${System.currentTimeMillis()}"
@@ -177,25 +193,48 @@ class IconGridView @JvmOverloads constructor(
                     folderApps = listOf(targetItem.key, sourceItem.key)
                 )
                 pinnedItems[targetIdx] = newFolder
-                if (fromGrid == this && fromIdx in pinnedItems.indices) {
+                if (isCrossGrid) {
+                    fromGrid?.removeAt(fromIdx)
+                } else if (fromGrid === this && fromIdx in pinnedItems.indices) {
                     pinnedItems[fromIdx] = null
                 }
             }
-            // target è folder ma source è folder o stesso elemento: swap normale
+            // swap (stessa pagina)
             else -> {
+                if (sameCell) return
                 if (sourceItem.key == targetItem.key) return
-                if (fromGrid == this && fromIdx in pinnedItems.indices && fromIdx != targetIdx) {
-                    pinnedItems[targetIdx] = sourceItem.copy(page = pageIndex,
-                        cellX = targetIdx % cols, cellY = targetIdx / cols)
+                if (!isCrossGrid && fromGrid === this && fromIdx in pinnedItems.indices) {
+                    pinnedItems[targetIdx] = sourceItem.copy(
+                        page = pageIndex,
+                        cellX = targetIdx % cols, cellY = targetIdx / cols
+                    )
                     pinnedItems[fromIdx] = targetItem.copy(
                         cellX = fromIdx % cols, cellY = fromIdx / cols
                     )
+                } else if (isCrossGrid) {
+                    // cross-page: target ha già qualcosa, fai semplice swap di pagine
+                    // metti source qui, sposta target sulla pagina sorgente
+                    val targetCopy = targetItem.copy()
+                    pinnedItems[targetIdx] = sourceItem.copy(
+                        page = pageIndex,
+                        cellX = targetIdx % cols, cellY = targetIdx / cols
+                    )
+                    fromGrid?.replaceAt(fromIdx, targetCopy.copy(
+                        page = fromGrid.pageIndex,
+                        cellX = fromIdx % fromGrid.cols, cellY = fromIdx / fromGrid.cols
+                    ))
                 }
             }
         }
         persist(); rebuild()
-        // segnale per controllare se la pagina sorgente è vuota
-        fromGrid?.persistAndRebuild()
+    }
+
+    /** v19: helper per cross-page swap */
+    fun replaceAt(index: Int, item: HomeItem) {
+        if (index in pinnedItems.indices) {
+            pinnedItems[index] = item
+            persist(); rebuild()
+        }
     }
 
     fun persistAndRebuild() {
@@ -207,7 +246,7 @@ class IconGridView @JvmOverloads constructor(
         if (idx == -1) return
         val current = pinnedItems[idx] ?: return
         val updated = transform(current)
-        pinnedItems[idx] = updated  // null = elimina
+        pinnedItems[idx] = updated
         persist(); rebuild()
     }
 
@@ -220,13 +259,16 @@ class IconGridView @JvmOverloads constructor(
     }
 
     private fun rebuild() {
+        // v19: disabilita transizioni durante rebuild → meno lag
+        val transition = layoutTransition
+        layoutTransition = null
         removeAllViews()
         if (allApps.isEmpty()) {
             for (i in 0 until cols * rows) addView(emptyCell(i), buildLayoutParams(i))
+            layoutTransition = transition
             return
         }
         val byKey = allApps.associateBy { it.key }
-        val gridSelf = this
         for (i in 0 until cols * rows) {
             val item = pinnedItems[i]
             val cell: View = when {
@@ -249,6 +291,7 @@ class IconGridView @JvmOverloads constructor(
             }
             addView(cell, buildLayoutParams(i))
         }
+        layoutTransition = transition
     }
 
     private fun emptyCell(index: Int): View = View(context).apply {
@@ -275,7 +318,7 @@ class IconGridView @JvmOverloads constructor(
     }
 
     private fun checkEdgeForPageChange(x: Float, y: Float) {
-        val edgeZone = width * 0.18f
+        val edgeZone = width * 0.15f
         val pager = findPager() ?: return
         val newTarget = when {
             x < edgeZone && pager.currentPage > 0 -> pager.currentPage - 1
@@ -289,7 +332,7 @@ class IconGridView @JvmOverloads constructor(
         edgeHandler.postDelayed({
             if (pendingEdgeTarget == newTarget) pager.snapToPage(newTarget, animate = true)
             pendingEdgeTarget = -1
-        }, 350L)
+        }, 400L)
     }
 
     private fun cancelEdgeScroll() {

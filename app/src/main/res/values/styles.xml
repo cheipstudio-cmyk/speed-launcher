@@ -90,8 +90,11 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <!-- v19: dim opaco al 70% e niente wallpaper sotto -->
     <style name="WidgetPickerSheetTheme" parent="Theme.Material3.DayNight.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/WidgetPickerSheetStyle</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:backgroundDimAmount">0.7</item>
     </style>
     <style name="WidgetPickerSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
         <item name="behavior_skipCollapsed">true</item>

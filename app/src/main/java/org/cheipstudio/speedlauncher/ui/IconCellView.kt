@@ -21,10 +21,14 @@ import org.cheipstudio.speedlauncher.data.SettingsRepository
 import kotlin.math.abs
 
 /**
- * v18:
- * - Long-press menu fix: 500ms drag, 1000ms menu (più tolleranti)
- * - Icon shape applicato via IconShaper
- * - Dot color custom da settings
+ * v19 LOGICA CORRETTA:
+ * - 500ms premuto FERMO → entra in modalità "armed": haptic, l'icona può ora essere DRAG
+ *   se ti muovi, oppure puoi continuare a tenere premuto fermo per 500ms ancora per il MENU.
+ * - 1000ms premuto FERMO senza muoverti → MENU Info/Disinstalla
+ * - Se in stato armed ti muovi → parte il drag (cancella il menu pending)
+ *
+ * Differenza fondamentale dalla v18: a 500ms NON facciamo partire il drag, lo "armiamo".
+ * Questo permette al menu di scattare a 1000ms se l'utente non muove il dito.
  */
 class IconCellView(context: Context) : LinearLayout(context) {
 
@@ -45,24 +49,24 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var downX = 0f
     private var downY = 0f
     private var pressing = false
-    private var dragFired = false
+    private var armed = false
     private var menuFired = false
-    private var moved = false
+    private var dragFired = false
 
-    private val DRAG_THRESHOLD = 500L
-    private val MENU_THRESHOLD = 1000L
+    private val ARM_DELAY = 500L
+    private val MENU_DELAY = 1000L
 
-    private val dragRunnable = Runnable {
-        if (pressing && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
-            dragFired = true
+    private val armRunnable = Runnable {
+        if (pressing && !menuFired && !dragFired) {
+            armed = true
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            val a = app ?: return@Runnable
-            val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
-            startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
+            scaleX = 0.92f; scaleY = 0.92f  // feedback visivo: armato
+            animate().scaleX(1f).scaleY(1f).setDuration(150).start()
         }
     }
+
     private val menuRunnable = Runnable {
-        if (pressing && !menuFired) {
+        if (pressing && armed && !menuFired && !dragFired) {
             menuFired = true
             performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val a = app ?: return@Runnable
@@ -87,16 +91,15 @@ class IconCellView(context: Context) : LinearLayout(context) {
             ellipsize = android.text.TextUtils.TruncateAt.END
             includeFontPadding = false
             setShadowLayer(2f, 0f, 1f, Color.argb(160, 0, 0, 0))
-            val labelMargin = (4 * resources.displayMetrics.density).toInt()
-            val params = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            params.topMargin = labelMargin
-            layoutParams = params
+            val lp = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+            lp.topMargin = (4 * resources.displayMetrics.density).toInt()
+            layoutParams = lp
         }
         addView(labelView)
 
         setWillNotDraw(false)
-        val settings = SpeedApp.instance.settingsRepository
-        dotPaint.color = settings.dotColor.value ?: SettingsRepository.DOT_DEFAULT
+        val s = SpeedApp.instance.settingsRepository
+        dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
         isClickable = true
         isFocusable = true
     }
@@ -107,48 +110,62 @@ class IconCellView(context: Context) : LinearLayout(context) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x; downY = event.y
-                pressing = true; moved = false
-                dragFired = false; menuFired = false
-                handler.postDelayed(dragRunnable, DRAG_THRESHOLD)
-                handler.postDelayed(menuRunnable, MENU_THRESHOLD)
+                pressing = true; armed = false
+                menuFired = false; dragFired = false
+                handler.postDelayed(armRunnable, ARM_DELAY)
+                handler.postDelayed(menuRunnable, MENU_DELAY)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(event.x - downX)
                 val dy = abs(event.y - downY)
-                if (!moved && (dx > moveSlop || dy > moveSlop)) {
-                    moved = true
-                    handler.removeCallbacks(dragRunnable)
-                    handler.removeCallbacks(menuRunnable)
+                if (dx > moveSlop || dy > moveSlop) {
+                    if (armed && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
+                        // ARMED + movimento = drag
+                        dragFired = true
+                        handler.removeCallbacks(menuRunnable)
+                        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
+                        startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
+                    } else if (!armed) {
+                        // Movimento prima dell'arm = scroll/tap cancellato
+                        cancelAll()
+                    }
                 }
                 return true
             }
             MotionEvent.ACTION_UP -> {
-                pressing = false
-                handler.removeCallbacks(dragRunnable)
-                handler.removeCallbacks(menuRunnable)
-                if (moved || dragFired || menuFired) return true
-                onLaunch?.invoke(a, this)
+                val wasArmed = armed
+                val wasMenu = menuFired
+                val wasDrag = dragFired
+                cancelAll()
+                if (!wasArmed && !wasMenu && !wasDrag) {
+                    // tap normale
+                    onLaunch?.invoke(a, this)
+                }
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
-                pressing = false
-                handler.removeCallbacks(dragRunnable)
-                handler.removeCallbacks(menuRunnable)
+                cancelAll()
                 return true
             }
         }
         return super.onTouchEvent(event)
     }
 
+    private fun cancelAll() {
+        pressing = false; armed = false
+        handler.removeCallbacks(armRunnable)
+        handler.removeCallbacks(menuRunnable)
+    }
+
     fun bind(app: AppInfo) {
         this.app = app
-        val settings = SpeedApp.instance.settingsRepository
-        val shape = settings.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
+        val s = SpeedApp.instance.settingsRepository
+        val shape = s.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
         iconView.setImageDrawable(IconShaper.shape(app.icon, shape))
         labelView.text = app.label
         packageName = app.packageName
-        dotPaint.color = settings.dotColor.value ?: SettingsRepository.DOT_DEFAULT
+        dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
     }
 
     override fun onDraw(canvas: Canvas) {

@@ -47,19 +47,19 @@ class HomeView @JvmOverloads constructor(
     private var trackStartY = 0f
     private var tracking = false
     // v18: threshold più reattivo (45dp invece di 60dp)
-    private val swipeThreshold = resources.displayMetrics.density * 45f
+    private val swipeThreshold = resources.displayMetrics.density * 35f
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             // v18: threshold velocità abbassato a 700f, ratio 1.2 (era 1100/1.4)
-            if (vy < -700f && abs(vy) > abs(vx) * 1.2f) {
+            if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 onSwipeUp?.invoke()
                 return true
             }
             if (settings.swipeDownNotifications.value == true &&
-                vy > 700f && abs(vy) > abs(vx) * 1.2f) {
+                vy > 500f && abs(vy) > abs(vx) * 1.0f) {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 StatusBarHelper.expandNotifications(context)
                 return true
@@ -119,14 +119,14 @@ class HomeView @JvmOverloads constructor(
             SettingsRepository.ANIM_STANDARD -> {
                 layoutTransition = LayoutTransition().apply {
                     enableTransitionType(LayoutTransition.CHANGING)
-                    setDuration(160)
+                    setDuration(120)
                 }
             }
             else -> {
                 // ANIM_EXPRESSIVE: più overshoot, più lungo
                 layoutTransition = LayoutTransition().apply {
                     enableTransitionType(LayoutTransition.CHANGING)
-                    setDuration(240)
+                    setDuration(180)
                 }
             }
         }
@@ -334,14 +334,14 @@ class HomeView @JvmOverloads constructor(
                 val dy = ev.y - trackStartY
                 gestureDetector.onTouchEvent(ev)
                 // v18: ratio 1.2 invece di 1.3
-                if (dy < -swipeThreshold && abs(dy) > dx * 1.2f) {
+                if (dy < -swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     onSwipeUp?.invoke()
                     return true
                 }
                 if (settings.swipeDownNotifications.value == true &&
-                    dy > swipeThreshold && abs(dy) > dx * 1.2f) {
+                    dy > swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     StatusBarHelper.expandNotifications(context)

@@ -7,8 +7,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings as AndroidSettings
 import android.view.View
+import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.cheipstudio.speedlauncher.data.SettingsRepository
 import org.cheipstudio.speedlauncher.databinding.ActivitySettingsBinding
@@ -19,16 +21,22 @@ class SettingsActivity : AppCompatActivity() {
     private val settings get() = SpeedApp.instance.settingsRepository
 
     private val dotColors = listOf(
-        SettingsRepository.DOT_DEFAULT,                 // arancione
-        Color.parseColor("#FF5252"),                    // rosso
-        Color.parseColor("#FFD740"),                    // giallo
-        Color.parseColor("#69F0AE"),                    // verde
-        Color.parseColor("#40C4FF"),                    // azzurro
-        Color.parseColor("#E040FB")                     // viola
+        SettingsRepository.DOT_DEFAULT,
+        Color.parseColor("#FF5252"),
+        Color.parseColor("#FFD740"),
+        Color.parseColor("#69F0AE"),
+        Color.parseColor("#40C4FF"),
+        Color.parseColor("#E040FB")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // v19: forza full-screen senza wallpaper sotto
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+        window.statusBarColor = resolveAttr(com.google.android.material.R.attr.colorSurface)
+        window.navigationBarColor = resolveAttr(com.google.android.material.R.attr.colorSurface)
+
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -39,7 +47,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.versionValue.text = getString(R.string.version_value, versionName)
         binding.buildValue.text = getString(R.string.build_value, versionCode.toString())
 
-        // Grid
+        // v19: icona dell'app nella sezione info
+        try {
+            binding.appIconInfo.setImageDrawable(packageManager.getApplicationIcon(packageName))
+        } catch (_: Throwable) {}
+
         when {
             settings.gridCols.value == 4 && settings.gridRows.value == 4 -> binding.gridRadio4x4.isChecked = true
             settings.gridCols.value == 5 && settings.gridRows.value == 5 -> binding.gridRadio5x5.isChecked = true
@@ -55,7 +67,6 @@ class SettingsActivity : AppCompatActivity() {
             updateGridLabel()
         }
 
-        // Icon shape
         when (settings.iconShape.value) {
             SettingsRepository.SHAPE_ORIGINAL -> binding.shapeOriginal.isChecked = true
             SettingsRepository.SHAPE_SQUIRCLE -> binding.shapeSquircle.isChecked = true
@@ -77,7 +88,6 @@ class SettingsActivity : AppCompatActivity() {
             updateShapeLabel()
         }
 
-        // Animation style
         when (settings.animationStyle.value) {
             SettingsRepository.ANIM_EXPRESSIVE -> binding.animExpressive.isChecked = true
             SettingsRepository.ANIM_STANDARD -> binding.animStandard.isChecked = true
@@ -95,10 +105,8 @@ class SettingsActivity : AppCompatActivity() {
             updateAnimLabel()
         }
 
-        // Dot color row
         buildDotColorPicker()
 
-        // Search mode
         binding.searchModeApps.isChecked = settings.searchMode.value == SettingsRepository.MODE_APPS
         binding.searchModeGoogle.isChecked = settings.searchMode.value == SettingsRepository.MODE_GOOGLE
         binding.searchModeGroup.setOnCheckedChangeListener { _, id ->
@@ -108,7 +116,6 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        // Search bar style
         when (settings.searchBarStyle.value) {
             SettingsRepository.STYLE_SYSTEM -> binding.styleSystem.isChecked = true
             SettingsRepository.STYLE_TRANSPARENT -> binding.styleTransparent.isChecked = true
@@ -128,7 +135,6 @@ class SettingsActivity : AppCompatActivity() {
             updateStyleLabel()
         }
 
-        // Switches
         binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
         binding.switchShowWidget.setOnCheckedChangeListener { _, c -> settings.setShowWidgetSlot(c) }
         binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
@@ -138,16 +144,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchDoubleTapLock.isChecked = settings.doubleTapLock.value == true
         binding.switchDoubleTapLock.setOnCheckedChangeListener { _, c ->
             settings.setDoubleTapLock(c)
-            if (c) {
-                // Pre-attiva il device admin se non già fatto
-                org.cheipstudio.speedlauncher.ui.ScreenLockHelper.lockScreen(this)
-                // (lockScreen ritorna false se non admin e apre l'attivazione)
-            }
+            if (c) org.cheipstudio.speedlauncher.ui.ScreenLockHelper.lockScreen(this)
         }
 
-        // Reset items
         binding.itemResetLayout.setOnClickListener {
-            MaterialAlertDialogBuilder(this)
+            MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog)
                 .setTitle(R.string.settings_reset_layout)
                 .setMessage(R.string.settings_reset_layout_msg)
                 .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
@@ -156,7 +157,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
         binding.itemResetSettings.setOnClickListener {
-            MaterialAlertDialogBuilder(this)
+            MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog)
                 .setTitle(R.string.settings_reset_settings)
                 .setMessage(R.string.settings_reset_settings_msg)
                 .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
@@ -165,7 +166,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
         binding.itemResetEverything.setOnClickListener {
-            MaterialAlertDialogBuilder(this)
+            MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog)
                 .setTitle(R.string.settings_reset_everything)
                 .setMessage(R.string.settings_reset_everything_msg)
                 .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
@@ -198,22 +199,29 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun resolveAttr(attr: Int): Int {
+        val tv = android.util.TypedValue()
+        theme.resolveAttribute(attr, tv, true)
+        return tv.data
+    }
+
+    /** v19: pallini più piccoli (28dp invece di 40) */
     private fun buildDotColorPicker() {
         binding.dotColorRow.removeAllViews()
         val density = resources.displayMetrics.density
         val current = settings.dotColor.value ?: SettingsRepository.DOT_DEFAULT
         for (color in dotColors) {
             val isSelected = color == current
-            val sizePx = (40 * density).toInt()
+            val sizePx = (28 * density).toInt()
             val btn = View(this).apply {
                 layoutParams = LinearLayout.LayoutParams(sizePx, sizePx).apply {
-                    marginEnd = (12 * density).toInt()
+                    marginEnd = (10 * density).toInt()
                 }
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
                     setColor(color)
-                    if (isSelected) setStroke((3 * density).toInt(), Color.WHITE)
-                    else setStroke((1 * density).toInt(), Color.parseColor("#33000000"))
+                    if (isSelected) setStroke((2 * density).toInt(), Color.WHITE)
+                    else setStroke((1 * density).toInt(), Color.parseColor("#22000000"))
                 }
                 isClickable = true
                 isFocusable = true
