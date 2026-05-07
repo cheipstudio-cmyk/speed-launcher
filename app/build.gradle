@@ -12,7 +12,7 @@ android {
         minSdk 31
         targetSdk 34
         versionCode 16
-        versionName "0.15.1"
+        versionName "0.16.0"
         resourceConfigurations += ['en', 'it']
     }
 

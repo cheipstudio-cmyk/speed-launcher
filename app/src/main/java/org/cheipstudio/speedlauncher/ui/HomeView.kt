@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import com.google.android.material.card.MaterialCardView
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
+import org.cheipstudio.speedlauncher.data.HomeItem
 import org.cheipstudio.speedlauncher.data.HomeLayoutStore
 import org.cheipstudio.speedlauncher.data.SettingsRepository
 import org.cheipstudio.speedlauncher.databinding.ViewHomeBinding
@@ -42,15 +43,22 @@ class HomeView @JvmOverloads constructor(
     private var trackStartX = 0f
     private var trackStartY = 0f
     private var tracking = false
-    private val swipeThreshold = resources.displayMetrics.density * 70f
+    private val swipeThreshold = resources.displayMetrics.density * 60f
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            if (vy < -1200f && abs(vy) > abs(vx) * 1.4f) {
-                // v15: vibrazione più leggera (KEYBOARD_TAP invece di CONTEXT_CLICK)
+            // swipe up — drawer
+            if (vy < -1100f && abs(vy) > abs(vx) * 1.3f) {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 onSwipeUp?.invoke()
+                return true
+            }
+            // v16: swipe down — notifiche (se abilitato)
+            if (settings.swipeDownNotifications.value == true &&
+                vy > 1100f && abs(vy) > abs(vx) * 1.3f) {
+                performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                StatusBarHelper.expandNotifications(context)
                 return true
             }
             return false
@@ -62,15 +70,6 @@ class HomeView @JvmOverloads constructor(
             enableTransitionType(LayoutTransition.CHANGING)
             setDuration(160)
         }
-
-        // v15.1: rispetta status bar in alto + nav bar in basso (3-button non copre più la search bar)
-        clipToPadding = false
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
-            val sys = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-            v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
-            insets
-        }
-
         binding.searchBar.setOnClickListener { handleSearchTap() }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
@@ -83,13 +82,14 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
+        // v16: tap su dot del page indicator
+        binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
         applySettings()
     }
 
-    /** v15: applica lo stile della barra di ricerca scelto nei settings */
     private fun applySearchBarStyle() {
         val card = binding.searchBar as MaterialCardView
         val hint = binding.searchBarHint
@@ -162,6 +162,7 @@ class HomeView @JvmOverloads constructor(
             pageIndex = idx
             onAppLaunch = { app, view -> SpeedApp.instance.appRepository.launch(app, view) }
             onAppLongPress = { app, _ -> onAppMenuRequest?.invoke(app) }
+            onFolderOpen = { folder -> openFolder(folder) }
             setLayout(layoutStore.loadPage(idx))
         }
         pages.add(page)
@@ -170,6 +171,21 @@ class HomeView @JvmOverloads constructor(
 
     private fun ensurePageExists(idx: Int) {
         while (pages.size <= idx) addPageAt(pages.size)
+        updatePageIndicator()
+    }
+
+    /** v16: rimuove pagine vuote in coda (mantiene almeno 1 pagina) */
+    private fun trimEmptyPages() {
+        while (pages.size > 1 && pages.last().isEmpty()) {
+            val last = pages.removeAt(pages.size - 1)
+            binding.pagedHome.removePage(pages.size)  // size dopo removeAt è già il vecchio idx
+            // pulisci storage
+            layoutStore.savePage(pages.size, emptyList())
+            // se ero su questa pagina, vai alla precedente
+            if (binding.pagedHome.currentPage >= pages.size) {
+                binding.pagedHome.snapToPage(pages.size - 1, true)
+            }
+        }
         updatePageIndicator()
     }
 
@@ -185,31 +201,72 @@ class HomeView @JvmOverloads constructor(
     }
 
     private fun handleDrag(origin: String, key: String, target: String) {
-        val app = SpeedApp.instance.appRepository.apps.value?.find { it.key == key } ?: return
         val regex = Regex("""grid(\d+):(\d+)""")
-        val match = regex.matchEntire(target) ?: return
-        val targetPage = match.groupValues[1].toInt()
-        val targetIdx = match.groupValues[2].toInt()
+        val matchT = regex.matchEntire(target) ?: return
+        val targetPage = matchT.groupValues[1].toInt()
+        val targetIdx = matchT.groupValues[2].toInt()
         ensurePageExists(targetPage)
         val targetGrid = pages.getOrNull(targetPage) ?: return
 
-        val originMatch = regex.matchEntire(origin)
-        if (originMatch != null) {
-            val originPage = originMatch.groupValues[1].toInt()
-            if (originPage != targetPage) {
-                pages.getOrNull(originPage)?.unpinApp(app)
-                targetGrid.swapWith(key, targetIdx)
-                maybeCreateNextPage()
-                return
-            }
-        }
-        targetGrid.swapWith(key, targetIdx)
+        val matchO = regex.matchEntire(origin)
+        val fromGrid = if (matchO != null) {
+            pages.getOrNull(matchO.groupValues[1].toInt())
+        } else null
+        val fromIdx = if (matchO != null) matchO.groupValues[2].toInt() else -1
+
+        targetGrid.handleIncomingDrop(key, fromGrid, fromIdx, targetIdx)
         maybeCreateNextPage()
+        // v16: se la pagina sorgente è ora vuota e non è la prima, rimuovila
+        post { trimEmptyPages() }
+    }
+
+    /**
+     * v16: apri folder con possibilità di rinominare/rimuovere/eliminare.
+     */
+    private fun openFolder(folder: HomeItem) {
+        FolderSheet.show(
+            context = context,
+            folder = folder,
+            onLaunch = { app -> SpeedApp.instance.appRepository.launch(app, this) },
+            onRename = { newName ->
+                pages.forEach { grid ->
+                    grid.updateFolder(folder.key) { f -> f.copy(name = newName) }
+                }
+            },
+            onRemoveFromFolder = { app ->
+                pages.forEach { grid ->
+                    grid.updateFolder(folder.key) { f ->
+                        val newApps = f.folderApps - app.key
+                        // se rimane vuota, elimina; se rimane 1 app, dissolvi
+                        when {
+                            newApps.isEmpty() -> null
+                            newApps.size == 1 -> {
+                                // sostituisci con app singola al posto suo
+                                HomeItem(
+                                    key = newApps[0], page = f.page,
+                                    cellX = f.cellX, cellY = f.cellY,
+                                    type = HomeItem.TYPE_APP
+                                )
+                            }
+                            else -> f.copy(folderApps = newApps)
+                        }
+                    }
+                }
+                // ripin l'app rimossa in una cella libera
+                val appInfo = SpeedApp.instance.appRepository.apps.value?.find { it.key == app.key }
+                if (appInfo != null && pages.none { it.isPinned(appInfo) }) {
+                    pinApp(appInfo)
+                }
+            },
+            onDeleteFolder = {
+                pages.forEach { grid -> grid.updateFolder(folder.key) { null } }
+                post { trimEmptyPages() }
+            }
+        )
     }
 
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
-        // v15: search bar SEMPRE visibile
         binding.searchBar.visibility = View.VISIBLE
         updateSearchBarText()
         applySearchBarStyle()
@@ -241,10 +298,18 @@ class HomeView @JvmOverloads constructor(
                 val dx = abs(ev.x - trackStartX)
                 val dy = ev.y - trackStartY
                 gestureDetector.onTouchEvent(ev)
-                if (dy < -swipeThreshold && abs(dy) > dx * 1.4f) {
+                if (dy < -swipeThreshold && abs(dy) > dx * 1.3f) {
                     tracking = false
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     onSwipeUp?.invoke()
+                    return true
+                }
+                // v16: swipe down on the home (slow gesture, not just fling)
+                if (settings.swipeDownNotifications.value == true &&
+                    dy > swipeThreshold && abs(dy) > dx * 1.3f) {
+                    tracking = false
+                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    StatusBarHelper.expandNotifications(context)
                     return true
                 }
             }
@@ -267,6 +332,9 @@ class HomeView @JvmOverloads constructor(
         ensurePageExists(pages.size)
         return pages.last().pinApp(app)
     }
-    fun unpinApp(app: AppInfo) { for (page in pages) page.unpinApp(app) }
+    fun unpinApp(app: AppInfo) {
+        for (page in pages) page.unpinApp(app)
+        post { trimEmptyPages() }
+    }
     fun isPinned(app: AppInfo) = pages.any { it.isPinned(app) }
 }

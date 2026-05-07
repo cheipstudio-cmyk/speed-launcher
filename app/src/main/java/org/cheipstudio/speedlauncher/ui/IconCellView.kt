@@ -22,10 +22,7 @@ import org.cheipstudio.speedlauncher.data.AppInfo
 import kotlin.math.abs
 
 /**
- * v14:
- * - Tap → lancia subito
- * - Press tenuto >400ms (drag threshold) → drag (per spostare)
- * - Press tenuto >1500ms senza spostarsi → menu app
+ * v15: drag a 600ms, menu a 1200ms, tolleranza al micro-movimento (touchSlop * 2).
  */
 class IconCellView(context: Context) : LinearLayout(context) {
 
@@ -42,7 +39,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     var dragOriginId: String = ""
 
     private val handler = Handler(Looper.getMainLooper())
-    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val moveSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
     private var downX = 0f
     private var downY = 0f
     private var pressing = false
@@ -50,11 +47,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var menuFired = false
     private var moved = false
 
-    private val DRAG_THRESHOLD = 400L
-    private val MENU_THRESHOLD = 1500L
+    private val DRAG_THRESHOLD = 600L
+    private val MENU_THRESHOLD = 1200L
 
     private val dragRunnable = Runnable {
-        if (pressing && !moved && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
+        if (pressing && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
             dragFired = true
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             val a = app ?: return@Runnable
@@ -63,7 +60,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
         }
     }
     private val menuRunnable = Runnable {
-        if (pressing && !moved && !menuFired) {
+        if (pressing && !menuFired) {
             menuFired = true
             performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val a = app ?: return@Runnable
@@ -106,12 +103,9 @@ class IconCellView(context: Context) : LinearLayout(context) {
         val a = app ?: return super.onTouchEvent(event)
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                downX = event.x
-                downY = event.y
-                pressing = true
-                moved = false
-                dragFired = false
-                menuFired = false
+                downX = event.x; downY = event.y
+                pressing = true; moved = false
+                dragFired = false; menuFired = false
                 handler.postDelayed(dragRunnable, DRAG_THRESHOLD)
                 handler.postDelayed(menuRunnable, MENU_THRESHOLD)
                 return true
@@ -119,9 +113,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(event.x - downX)
                 val dy = abs(event.y - downY)
-                if (!moved && (dx > touchSlop || dy > touchSlop)) {
+                if (!moved && (dx > moveSlop || dy > moveSlop)) {
                     moved = true
-                    // Movimento prima del drag-threshold: cancella tutto, lascia gestire al parent (paginazione/swipe)
                     handler.removeCallbacks(dragRunnable)
                     handler.removeCallbacks(menuRunnable)
                 }

@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.BIND_APPWIDGET" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
@@ -9,51 +16,34 @@
         </intent>
     </queries>
 
-    <uses-permission android:name="android.permission.BIND_APPWIDGET"
-        tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
-    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-
     <application
         android:name=".SpeedApp"
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
         android:theme="@style/Theme.SpeedLauncher"
-        android:enableOnBackInvokedCallback="true">
+        android:supportsRtl="true">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:stateNotNeeded="true"
-            android:resumeWhilePausing="true"
             android:windowSoftInputMode="adjustNothing"
-            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|mcc|mnc|density|fontScale|fontWeightAdjustment|locale|layoutDirection|uiMode">
-
-            <!-- HOME + LAUNCHER: l'app è un launcher E appare nel drawer di sistema -->
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/appwidget_info" />
         </activity>
 
         <activity
             android:name=".SettingsActivity"
-            android:exported="false"
             android:label="@string/settings_title"
-            android:theme="@style/Theme.SpeedLauncher.Settings" />
+            android:theme="@style/Theme.SpeedLauncher"
+            android:exported="false" />
 
         <service
             android:name=".notifications.SpeedNotificationListener"
@@ -65,5 +55,10 @@
             </intent-filter>
         </service>
 
+        <receiver
+            android:name="androidx.appwidget.AppWidgetHostView"
+            tools:node="remove" />
+
     </application>
+
 </manifest>

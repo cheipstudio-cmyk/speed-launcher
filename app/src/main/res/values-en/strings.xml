@@ -13,23 +13,34 @@
     <string name="action_uninstall">Uninstall</string>
     <string name="widget_placeholder_hint">Long-press to add a widget</string>
     <string name="widget_remove_title">Remove widget?</string>
-    <string name="widget_remove_message">The widget will be removed from home. Its internal data may be lost.</string>
+    <string name="widget_remove_message">Hold a widget to bring up this screen. Confirm removal?</string>
     <string name="widget_remove_confirm">Remove</string>
     <string name="widget_picker_title">Add a widget</string>
     <string name="widget_picker_search">Search widgets…</string>
     <string name="widget_picker_empty">No widget fits the available space</string>
+
+    <string name="folder_name_hint">Folder name</string>
+    <string name="folder_delete">Delete folder</string>
+    <string name="folder_default_name">Folder</string>
+
     <string name="settings_title">Settings</string>
     <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_searchbar">Search bar</string>
     <string name="settings_section_search">Search</string>
-    <string name="settings_section_behavior">Behavior</string>
+    <string name="settings_section_gestures">Gestures</string>
+    <string name="settings_section_advanced">Advanced</string>
     <string name="settings_section_general">System</string>
+    <string name="settings_section_info">Info</string>
+
     <string name="settings_grid_size">Grid size</string>
     <string name="settings_grid_4x4">4 × 4 (large icons)</string>
     <string name="settings_grid_5x5">5 × 5 (medium)</string>
     <string name="settings_grid_5x6">5 × 6 (compact)</string>
     <string name="settings_show_widget">Show widget area</string>
-    <string name="settings_show_search">Show search bar</string>
+    <string name="settings_searchbar_style">Search bar style</string>
     <string name="settings_haptic">Haptic feedback</string>
+    <string name="settings_swipe_down">Swipe down opens notifications</string>
+    <string name="settings_swipe_down_sub">Swipe down from home to open the notification shade</string>
     <string name="settings_search_mode">Search type</string>
     <string name="settings_search_apps">Apps only</string>
     <string name="settings_search_google">Search Google</string>
@@ -38,19 +49,40 @@
     <string name="settings_notification_access">Notification access</string>
     <string name="settings_notification_access_sub">Required for notification dots</string>
     <string name="settings_app_info">System app info</string>
-    <string name="settings_reset">Reset home layout</string>
-    <string name="settings_reset_sub">Restore icons to initial layout</string>
     <string name="settings_show_tutorial">Show tutorial again</string>
-    <string name="version_value">Version %1$s</string>
+
+    <string name="settings_reset_layout">Reset home layout</string>
+    <string name="settings_reset_layout_sub">Restore icons to initial layout</string>
+    <string name="settings_reset_layout_msg">All icons, folders and widgets will be removed from the home. Installed apps are not affected.</string>
+    <string name="settings_reset_settings">Reset settings</string>
+    <string name="settings_reset_settings_sub">Restore all settings to defaults</string>
+    <string name="settings_reset_settings_msg">Launcher settings will be restored to factory defaults. Home layout is not affected.</string>
+    <string name="settings_reset_everything">Reset entire app</string>
+    <string name="settings_reset_everything_sub">Wipe layout, settings and tutorial</string>
+    <string name="settings_reset_everything_msg">The whole launcher will be restored to its initial state: empty layout, factory settings, tutorial visible again. Installed apps are not affected.</string>
+    <string name="settings_reset_confirm">Reset</string>
+
+    <string name="style_system">System (dynamic colors)</string>
+    <string name="style_transparent">Transparent</string>
+    <string name="style_dark">Dark</string>
+    <string name="style_light">Light</string>
+
+    <string name="info_version_label">Version</string>
+    <string name="info_build_label">Build</string>
+    <string name="info_studio_label">Cheip Studio</string>
+    <string name="info_studio_sub">cheipstudio.org — tap to visit</string>
+    <string name="version_value">%1$s</string>
+    <string name="build_value">%1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
-    <string name="tutorial_swipe_title">Open the drawer</string>
-    <string name="tutorial_swipe_desc">Swipe up quickly from anywhere on the home to open the list of all apps.</string>
+
+    <string name="tutorial_swipe_title">Open all apps</string>
+    <string name="tutorial_swipe_desc">Swipe up from anywhere on the home to open the apps list.</string>
     <string name="tutorial_longpress_icon_title">Move or customize</string>
-    <string name="tutorial_longpress_icon_desc">Hold an icon to move it. Long-press (1.5 seconds) for the Info/Uninstall menu.</string>
-    <string name="tutorial_longpress_home_title">Customize</string>
-    <string name="tutorial_longpress_home_desc">Tap the ⚙ icon in the search bar to open settings.</string>
-    <string name="tutorial_pages_title">Multiple pages</string>
-    <string name="tutorial_pages_desc">Swipe horizontally to change page. Drag an icon to the edge to move it to another page.</string>
+    <string name="tutorial_longpress_icon_desc">Hold an icon to move it. Keep holding to open the Info/Uninstall menu.</string>
+    <string name="tutorial_settings_title">Settings</string>
+    <string name="tutorial_settings_desc">Tap the gear icon on the right of the search bar to open launcher settings.</string>
+    <string name="tutorial_pages_title">Pages and folders</string>
+    <string name="tutorial_pages_desc">When a page is full, a new one is created automatically. Drag an icon onto another to create a folder.</string>
     <string name="tutorial_next">Next</string>
     <string name="tutorial_done">Let\'s go</string>
     <string name="tutorial_skip">Skip</string>

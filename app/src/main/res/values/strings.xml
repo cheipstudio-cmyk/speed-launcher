@@ -13,23 +13,34 @@
     <string name="action_uninstall">Disinstalla</string>
     <string name="widget_placeholder_hint">Tieni premuto per aggiungere un widget</string>
     <string name="widget_remove_title">Rimuovere il widget?</string>
-    <string name="widget_remove_message">Il widget verrà rimosso dalla home. I dati interni potrebbero andare persi.</string>
+    <string name="widget_remove_message">Tieni premuto un widget per aprire questa schermata. Confermi la rimozione?</string>
     <string name="widget_remove_confirm">Rimuovi</string>
     <string name="widget_picker_title">Aggiungi un widget</string>
     <string name="widget_picker_search">Cerca widget…</string>
     <string name="widget_picker_empty">Nessun widget compatibile con lo spazio disponibile</string>
+
+    <string name="folder_name_hint">Nome cartella</string>
+    <string name="folder_delete">Elimina cartella</string>
+    <string name="folder_default_name">Cartella</string>
+
     <string name="settings_title">Impostazioni</string>
     <string name="settings_section_appearance">Aspetto</string>
+    <string name="settings_section_searchbar">Barra di ricerca</string>
     <string name="settings_section_search">Ricerca</string>
-    <string name="settings_section_behavior">Comportamento</string>
+    <string name="settings_section_gestures">Gesti</string>
+    <string name="settings_section_advanced">Avanzate</string>
     <string name="settings_section_general">Sistema</string>
+    <string name="settings_section_info">Info</string>
+
     <string name="settings_grid_size">Dimensione griglia</string>
     <string name="settings_grid_4x4">4 × 4 (icone grandi)</string>
     <string name="settings_grid_5x5">5 × 5 (medie)</string>
     <string name="settings_grid_5x6">5 × 6 (compatte)</string>
     <string name="settings_show_widget">Mostra spazio widget</string>
-    <string name="settings_show_search">Mostra barra di ricerca</string>
+    <string name="settings_searchbar_style">Stile barra di ricerca</string>
     <string name="settings_haptic">Vibrazione tattile</string>
+    <string name="settings_swipe_down">Swipe giù apre notifiche</string>
+    <string name="settings_swipe_down_sub">Scorri verso il basso dalla home per aprire la tendina notifiche</string>
     <string name="settings_search_mode">Tipo di ricerca</string>
     <string name="settings_search_apps">Cerca solo app installate</string>
     <string name="settings_search_google">Cerca su Google</string>
@@ -38,19 +49,40 @@
     <string name="settings_notification_access">Accesso alle notifiche</string>
     <string name="settings_notification_access_sub">Necessario per i pallini di notifica</string>
     <string name="settings_app_info">Informazioni app di sistema</string>
-    <string name="settings_reset">Ripristina layout home</string>
-    <string name="settings_reset_sub">Riporta le icone alla disposizione iniziale</string>
     <string name="settings_show_tutorial">Mostra di nuovo il tutorial</string>
-    <string name="version_value">Versione %1$s</string>
+
+    <string name="settings_reset_layout">Ripristina layout home</string>
+    <string name="settings_reset_layout_sub">Riporta le icone alla disposizione iniziale</string>
+    <string name="settings_reset_layout_msg">Tutte le icone, le cartelle e i widget verranno rimossi dalla home. Le app installate non vengono toccate.</string>
+    <string name="settings_reset_settings">Ripristina impostazioni</string>
+    <string name="settings_reset_settings_sub">Riporta tutte le impostazioni ai valori predefiniti</string>
+    <string name="settings_reset_settings_msg">Le impostazioni del launcher torneranno ai valori di fabbrica. Il layout della home non verrà toccato.</string>
+    <string name="settings_reset_everything">Ripristina app completa</string>
+    <string name="settings_reset_everything_sub">Cancella layout, impostazioni e tutorial</string>
+    <string name="settings_reset_everything_msg">Tutto il launcher tornerà allo stato iniziale: layout vuoto, impostazioni di fabbrica, tutorial nuovamente visibile. Le app installate non vengono toccate.</string>
+    <string name="settings_reset_confirm">Ripristina</string>
+
+    <string name="style_system">Sistema (colori dinamici)</string>
+    <string name="style_transparent">Trasparente</string>
+    <string name="style_dark">Scuro</string>
+    <string name="style_light">Chiaro</string>
+
+    <string name="info_version_label">Versione</string>
+    <string name="info_build_label">Build</string>
+    <string name="info_studio_label">Cheip Studio</string>
+    <string name="info_studio_sub">cheipstudio.org — tocca per visitare</string>
+    <string name="version_value">%1$s</string>
+    <string name="build_value">%1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
-    <string name="tutorial_swipe_title">Apri il drawer</string>
-    <string name="tutorial_swipe_desc">Scorri velocemente verso l\'alto da qualsiasi punto della home per aprire l\'elenco di tutte le app.</string>
+
+    <string name="tutorial_swipe_title">Apri tutte le app</string>
+    <string name="tutorial_swipe_desc">Scorri verso l\'alto da qualsiasi punto della home per aprire l\'elenco delle app.</string>
     <string name="tutorial_longpress_icon_title">Sposta o personalizza</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuto un\'icona per spostarla. Premi a lungo (1.5 secondi) per il menu Info/Disinstalla.</string>
-    <string name="tutorial_longpress_home_title">Personalizza</string>
-    <string name="tutorial_longpress_home_desc">Tocca l\'icona ⚙ nella barra di ricerca per aprire le impostazioni.</string>
-    <string name="tutorial_pages_title">Più pagine</string>
-    <string name="tutorial_pages_desc">Scorri orizzontalmente per cambiare pagina. Trascina un\'icona oltre il bordo per spostarla in un\'altra pagina.</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuto un\'icona per spostarla. Continua a tenere premuto per aprire il menu Info/Disinstalla.</string>
+    <string name="tutorial_settings_title">Impostazioni</string>
+    <string name="tutorial_settings_desc">Tocca l\'icona ⚙ a destra nella barra di ricerca per aprire le impostazioni del launcher.</string>
+    <string name="tutorial_pages_title">Più pagine e cartelle</string>
+    <string name="tutorial_pages_desc">Quando una pagina è piena, viene creata automaticamente una nuova. Trascina un\'icona su un\'altra per creare una cartella.</string>
     <string name="tutorial_next">Avanti</string>
     <string name="tutorial_done">Iniziamo</string>
     <string name="tutorial_skip">Salta</string>

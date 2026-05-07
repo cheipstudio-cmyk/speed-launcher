@@ -54,4 +54,19 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="MotoRadio">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="WidgetPickerSheetTheme" parent="Theme.Material3.DayNight.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/WidgetPickerSheetStyle</item>
+    </style>
+    <style name="WidgetPickerSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="behavior_skipCollapsed">true</item>
+        <item name="behavior_fitToContents">false</item>
+    </style>
+
 </resources>
