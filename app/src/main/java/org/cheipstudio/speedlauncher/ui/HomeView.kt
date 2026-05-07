@@ -4,6 +4,7 @@ import android.animation.LayoutTransition
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import com.google.android.material.card.MaterialCardView
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 import org.cheipstudio.speedlauncher.data.HomeLayoutStore
@@ -30,12 +32,11 @@ class HomeView @JvmOverloads constructor(
 
     private val layoutStore = HomeLayoutStore(context)
     private val settings = SpeedApp.instance.settingsRepository
-
     private val pages = mutableListOf<IconGridView>()
 
     var onSwipeUp: (() -> Unit)? = null
     var onSearchTap: (() -> Unit)? = null
-    var onHomeLongPress: (() -> Unit)? = null   // mantenuto per il bottone ⚙
+    var onHomeLongPress: (() -> Unit)? = null
     var onAppMenuRequest: ((AppInfo) -> Unit)? = null
 
     private var trackStartX = 0f
@@ -45,19 +46,11 @@ class HomeView @JvmOverloads constructor(
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
-        override fun onFling(
-            e1: MotionEvent?, e2: MotionEvent,
-            velocityX: Float, velocityY: Float
-        ): Boolean {
-            // Swipe up
-            if (velocityY < -1200f && abs(velocityY) > abs(velocityX) * 1.4f) {
-                performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
+            if (vy < -1200f && abs(vy) > abs(vx) * 1.4f) {
+                // v15: vibrazione più leggera (KEYBOARD_TAP invece di CONTEXT_CLICK)
+                performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 onSwipeUp?.invoke()
-                return true
-            }
-            // Swipe down → notifiche
-            if (velocityY > 1200f && abs(velocityY) > abs(velocityX) * 1.4f) {
-                expandStatusBar()
                 return true
             }
             return false
@@ -70,10 +63,19 @@ class HomeView @JvmOverloads constructor(
             setDuration(160)
         }
 
+        // v15.1: rispetta status bar in alto + nav bar in basso (3-button non copre più la search bar)
+        clipToPadding = false
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+            val sys = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
+            insets
+        }
+
         binding.searchBar.setOnClickListener { handleSearchTap() }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
         updateSearchBarText()
+        applySearchBarStyle()
 
         val maxPageInData = layoutStore.load().maxOfOrNull { it.page } ?: 0
         val initialPageCount = (maxPageInData + 1).coerceAtLeast(1)
@@ -82,23 +84,54 @@ class HomeView @JvmOverloads constructor(
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
 
-        SpeedApp.instance.dragHandler = { origin, key, target ->
-            handleDrag(origin, key, target)
-        }
+        SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
         applySettings()
     }
 
-    /** Apre il pannello notifiche via reflection — non garantito su tutti i device */
-    private fun expandStatusBar() {
-        try {
-            val sbm = context.getSystemService("statusbar")
-            val cls = Class.forName("android.app.StatusBarManager")
-            val method = cls.getMethod("expandNotificationsPanel")
-            method.invoke(sbm)
-        } catch (_: Throwable) {
-            // Silenzioso: alcune ROM bloccano questo trick
+    /** v15: applica lo stile della barra di ricerca scelto nei settings */
+    private fun applySearchBarStyle() {
+        val card = binding.searchBar as MaterialCardView
+        val hint = binding.searchBarHint
+        val searchIcon = binding.searchIcon
+        val menuIcon = binding.btnHomeMenu
+
+        when (settings.searchBarStyle.value) {
+            SettingsRepository.STYLE_TRANSPARENT -> {
+                card.setCardBackgroundColor(Color.parseColor("#33FFFFFF"))
+                card.cardElevation = 0f
+                hint.setTextColor(Color.parseColor("#DDFFFFFF"))
+                searchIcon.setColorFilter(Color.parseColor("#DDFFFFFF"))
+                menuIcon.setColorFilter(Color.parseColor("#DDFFFFFF"))
+            }
+            SettingsRepository.STYLE_DARK -> {
+                card.setCardBackgroundColor(Color.parseColor("#1F1F1F"))
+                card.cardElevation = 2 * resources.displayMetrics.density
+                hint.setTextColor(Color.parseColor("#CCFFFFFF"))
+                searchIcon.setColorFilter(Color.parseColor("#CCFFFFFF"))
+                menuIcon.setColorFilter(Color.parseColor("#CCFFFFFF"))
+            }
+            SettingsRepository.STYLE_LIGHT -> {
+                card.setCardBackgroundColor(Color.parseColor("#F0F0F0"))
+                card.cardElevation = 2 * resources.displayMetrics.density
+                hint.setTextColor(Color.parseColor("#333333"))
+                searchIcon.setColorFilter(Color.parseColor("#666666"))
+                menuIcon.setColorFilter(Color.parseColor("#666666"))
+            }
+            else -> {
+                card.setCardBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerHigh))
+                card.cardElevation = 2 * resources.displayMetrics.density
+                hint.setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+                searchIcon.setColorFilter(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+                menuIcon.setColorFilter(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+            }
         }
+    }
+
+    private fun resolveAttr(attr: Int): Int {
+        val tv = android.util.TypedValue()
+        context.theme.resolveAttribute(attr, tv, true)
+        return tv.data
     }
 
     private fun updateSearchBarText() {
@@ -176,8 +209,10 @@ class HomeView @JvmOverloads constructor(
 
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
-        binding.searchBar.visibility = if (settings.showSearchBar.value == true) View.VISIBLE else View.GONE
+        // v15: search bar SEMPRE visibile
+        binding.searchBar.visibility = View.VISIBLE
         updateSearchBarText()
+        applySearchBarStyle()
     }
 
     fun reapplySettings() {
@@ -196,8 +231,7 @@ class HomeView @JvmOverloads constructor(
         }
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                trackStartX = ev.x
-                trackStartY = ev.y
+                trackStartX = ev.x; trackStartY = ev.y
                 tracking = true
                 gestureDetector.onTouchEvent(ev)
                 return false
@@ -205,19 +239,12 @@ class HomeView @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 if (!tracking) return false
                 val dx = abs(ev.x - trackStartX)
-                val dy = ev.y - trackStartY  // positivo = giù, negativo = su
+                val dy = ev.y - trackStartY
                 gestureDetector.onTouchEvent(ev)
-                // Swipe-up
                 if (dy < -swipeThreshold && abs(dy) > dx * 1.4f) {
                     tracking = false
-                    performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     onSwipeUp?.invoke()
-                    return true
-                }
-                // Swipe-down (parte solo dalla zona alta della home)
-                if (dy > swipeThreshold && abs(dy) > dx * 1.4f && trackStartY < height * 0.4f) {
-                    tracking = false
-                    expandStatusBar()
                     return true
                 }
             }
@@ -232,9 +259,7 @@ class HomeView @JvmOverloads constructor(
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
-    fun attachWidgetHost(host: WidgetHostController) {
-        binding.widgetSlot.setHostController(host)
-    }
+    fun attachWidgetHost(host: WidgetHostController) { binding.widgetSlot.setHostController(host) }
     fun refreshApps(apps: List<AppInfo>) { for (page in pages) page.refresh(apps); maybeCreateNextPage() }
     fun refreshDots() { for (page in pages) page.invalidate() }
     fun pinApp(app: AppInfo): Boolean {
