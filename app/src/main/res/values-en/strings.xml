@@ -11,7 +11,14 @@
     <string name="action_info">App info</string>
     <string name="action_uninstall">Uninstall</string>
     <string name="settings_title">Settings</string>
-    <string name="settings_section_general">General</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_general">System</string>
+    <string name="settings_grid_size">Grid size</string>
+    <string name="settings_grid_4x4">4 × 4 (large icons)</string>
+    <string name="settings_grid_5x5">5 × 5 (medium)</string>
+    <string name="settings_grid_5x6">5 × 6 (compact)</string>
+    <string name="settings_show_dock">Show dock</string>
+    <string name="settings_show_widget">Show widget area</string>
     <string name="settings_default_launcher">Set as default launcher</string>
     <string name="settings_default_launcher_sub">Opens system settings</string>
     <string name="settings_notification_access">Notification access</string>
@@ -19,4 +26,13 @@
     <string name="settings_app_info">System app info</string>
     <string name="version_value">Version %1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
+    <string name="tutorial_swipe_title">Open the drawer</string>
+    <string name="tutorial_swipe_desc">Swipe up quickly anywhere on the home to open the list of all apps.</string>
+    <string name="tutorial_longpress_icon_title">App options</string>
+    <string name="tutorial_longpress_icon_desc">Long-press an icon to pin it, see app info or uninstall.</string>
+    <string name="tutorial_longpress_home_title">Customize</string>
+    <string name="tutorial_longpress_home_desc">Long-press an empty area to change wallpaper, add widgets or open settings.</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_done">Done</string>
+    <string name="tutorial_skip">Skip</string>
 </resources>

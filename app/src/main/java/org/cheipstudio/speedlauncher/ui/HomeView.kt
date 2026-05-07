@@ -15,12 +15,6 @@ import org.cheipstudio.speedlauncher.databinding.ViewHomeBinding
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 
-/**
- * v5: gesture handling tramite GestureDetector standard.
- * - onFling con velocityY < -1500 → swipe-up (apri drawer)
- * - onLongPress su area vuota → menu home
- * - i figli (icone, dock, widget, search) gestiscono i loro tap normalmente
- */
 class HomeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -31,6 +25,7 @@ class HomeView @JvmOverloads constructor(
         ViewHomeBinding.inflate(LayoutInflater.from(context), this)
 
     private val layoutStore = HomeLayoutStore(context)
+    private val settings = SpeedApp.instance.settingsRepository
 
     var onSwipeUp: (() -> Unit)? = null
     var onSearchTap: (() -> Unit)? = null
@@ -44,7 +39,6 @@ class HomeView @JvmOverloads constructor(
             e1: MotionEvent?, e2: MotionEvent,
             velocityX: Float, velocityY: Float
         ): Boolean {
-            // Swipe verso l'alto: velocity Y negativa, e più verticale che orizzontale
             if (velocityY < -1500f && abs(velocityY) > abs(velocityX) * 1.3f) {
                 performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                 onSwipeUp?.invoke()
@@ -54,11 +48,8 @@ class HomeView @JvmOverloads constructor(
         }
 
         override fun onLongPress(e: MotionEvent) {
-            // Long press solo se non sta sopra a un figlio interattivo
-            if (!isOverInteractiveChild(e.x, e.y)) {
-                performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-                onHomeLongPress?.invoke()
-            }
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            onHomeLongPress?.invoke()
         }
     })
 
@@ -78,30 +69,23 @@ class HomeView @JvmOverloads constructor(
         }
         binding.iconGrid.setLayout(layoutStore.load())
         binding.dock.setLayout(layoutStore.loadDock())
+
+        applySettings()
     }
 
-    private fun isOverInteractiveChild(x: Float, y: Float): Boolean {
-        return hitTest(binding.iconGrid, x, y) ||
-                hitTest(binding.dock, x, y) ||
-                hitTest(binding.widgetSlot, x, y) ||
-                hitTest(binding.searchBar, x, y)
+    private fun applySettings() {
+        binding.dock.visibility = if (settings.showDock.value == true) View.VISIBLE else View.GONE
+        binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
     }
 
-    private fun hitTest(view: View, x: Float, y: Float): Boolean {
-        if (view.visibility != View.VISIBLE) return false
-        val loc = IntArray(2)
-        view.getLocationInWindow(loc)
-        val myLoc = IntArray(2)
-        getLocationInWindow(myLoc)
-        val left = loc[0] - myLoc[0]
-        val top = loc[1] - myLoc[1]
-        return x >= left && x <= left + view.width && y >= top && y <= top + view.height
+    fun reapplySettings() {
+        applySettings()
+        // Se la griglia è cambiata, applica
+        val cols = settings.gridCols.value ?: 4
+        val rows = settings.gridRows.value ?: 4
+        binding.iconGrid.applyGridSize(cols, rows)
     }
 
-    /**
-     * Riceviamo i touch SOLO su area non-figlio. Quando l'utente tocca un'icona,
-     * il GridLayout li gestisce e noi non vediamo nulla.
-     */
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return gestureDetector.onTouchEvent(event)

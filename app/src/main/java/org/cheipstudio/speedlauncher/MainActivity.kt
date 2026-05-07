@@ -11,6 +11,7 @@ import org.cheipstudio.speedlauncher.databinding.ActivityMainBinding
 import org.cheipstudio.speedlauncher.ui.AppActionsSheet
 import org.cheipstudio.speedlauncher.ui.AppDrawerSheet
 import org.cheipstudio.speedlauncher.ui.HomeMenuSheet
+import org.cheipstudio.speedlauncher.ui.TutorialOverlay
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private var drawerSheet: AppDrawerSheet? = null
     private var homeMenuSheet: HomeMenuSheet? = null
     private var appActionsSheet: AppActionsSheet? = null
+    private var tutorialOverlay: TutorialOverlay? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,11 +57,30 @@ class MainActivity : AppCompatActivity() {
                 appActionsSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
             }
         })
+
+        // Tutorial al primo avvio
+        if (SpeedApp.instance.settingsRepository.tutorialSeen.value != true) {
+            showTutorial()
+        }
+    }
+
+    private fun showTutorial() {
+        tutorialOverlay = TutorialOverlay(this).also {
+            (binding.root as android.widget.FrameLayout).addView(
+                it,
+                android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            )
+        }
     }
 
     override fun onResume() {
         super.onResume()
         widgetHostController.startListening()
+        // Riapplica settings se l'utente è tornato dalle impostazioni
+        binding.homeView.reapplySettings()
     }
 
     override fun onPause() {

@@ -26,6 +26,8 @@ class DockView @JvmOverloads constructor(
         weightSum = SLOTS.toFloat()
         val pad = (8 * resources.displayMetrics.density).toInt()
         setPadding(pad, 0, pad, 0)
+        isClickable = false
+        isFocusable = false
     }
 
     fun setLayout(items: List<String>) {
@@ -81,6 +83,9 @@ class DockView @JvmOverloads constructor(
             val cell: View = if (key.isNullOrEmpty()) {
                 View(context).apply {
                     minimumHeight = (56 * resources.displayMetrics.density).toInt()
+                    isClickable = false
+                    isFocusable = false
+                    isLongClickable = false
                 }
             } else {
                 byKey[key]?.let { app ->
@@ -91,6 +96,9 @@ class DockView @JvmOverloads constructor(
                     }
                 } ?: View(context).apply {
                     minimumHeight = (56 * resources.displayMetrics.density).toInt()
+                    isClickable = false
+                    isFocusable = false
+                    isLongClickable = false
                 }
             }
             addView(cell, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
