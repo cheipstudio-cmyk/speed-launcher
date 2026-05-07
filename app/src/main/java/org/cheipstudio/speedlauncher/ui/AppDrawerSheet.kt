@@ -99,8 +99,10 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
 
     private fun applyFilter(q: String) {
         val normalized = normalize(q)
-        val filtered = if (normalized.isBlank()) allApps
-        else allApps.filter { normalize(it.label).contains(normalized) }
+        val hidden = SpeedApp.instance.settingsRepository.hiddenApps.value ?: mutableSetOf()
+        val visible = allApps.filter { !hidden.contains(it.key) }
+        val filtered = if (normalized.isBlank()) visible
+        else visible.filter { normalize(it.label).contains(normalized) }
         adapter.submitList(filtered)
     }
 

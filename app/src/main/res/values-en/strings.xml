@@ -131,4 +131,9 @@
 
     <string name="folder_delete_confirm_title">Delete folder?</string>
     <string name="folder_delete_confirm_msg">Apps will return to the home screen. The folder will be removed.</string>
+
+    <string name="action_hide">Hide from drawer</string>
+    <string name="action_unhide">Show in drawer</string>
+    <string name="menu_sort_alpha">Sort home alphabetically</string>
+    <string name="sort_done">Sorted</string>
 </resources>

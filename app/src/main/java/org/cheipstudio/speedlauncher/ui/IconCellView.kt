@@ -61,7 +61,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var dragFired = false
 
     private val ARM_DELAY = 500L
-    private val MENU_DELAY = 1000L
+    private val MENU_DELAY = 2000L
 
     private val armRunnable = Runnable {
         if (pressing && !menuFired && !dragFired) {

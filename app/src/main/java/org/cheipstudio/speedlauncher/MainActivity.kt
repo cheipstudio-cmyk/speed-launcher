@@ -123,6 +123,9 @@ class MainActivity : AppCompatActivity() {
             it.onSettings = {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
+            it.onSorted = {
+                recreate()
+            }
             it.show(supportFragmentManager, "homemenu")
         }
     }

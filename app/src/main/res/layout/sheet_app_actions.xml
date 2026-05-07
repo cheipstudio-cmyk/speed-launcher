@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorSurface"
+    android:background="@drawable/bg_modal_sheet"
     android:orientation="vertical"
     android:paddingVertical="12dp">
 
     <View
-        android:layout_width="32dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/bg_drag_handle" />
 
     <LinearLayout
@@ -20,12 +20,12 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="24dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="20dp">
 
         <ImageView
             android:id="@+id/appIcon"
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
+            android:layout_width="56dp"
+            android:layout_height="56dp" />
 
         <TextView
             android:id="@+id/appLabel"
@@ -36,21 +36,22 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="4dp"
+        android:alpha="0.3"
         android:background="?attr/colorOutlineVariant" />
 
     <LinearLayout
         android:id="@+id/actionPin"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="60dp"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -59,8 +60,8 @@
         android:paddingHorizontal="24dp">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:src="@drawable/ic_pin"
             app:tint="?attr/colorOnSurface" />
 
@@ -76,7 +77,7 @@
     <LinearLayout
         android:id="@+id/actionInfo"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="60dp"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -85,8 +86,8 @@
         android:paddingHorizontal="24dp">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:src="@drawable/ic_info"
             app:tint="?attr/colorOnSurface" />
 
@@ -100,9 +101,9 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/actionUninstall"
+        android:id="@+id/actionHide"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="60dp"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -111,8 +112,34 @@
         android:paddingHorizontal="24dp">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_hide"
+            app:tint="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/hideLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/actionUninstall"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:src="@drawable/ic_uninstall"
             app:tint="?attr/colorError" />
 

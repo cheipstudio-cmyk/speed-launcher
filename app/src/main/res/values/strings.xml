@@ -131,4 +131,9 @@
 
     <string name="folder_delete_confirm_title">Eliminare la cartella?</string>
     <string name="folder_delete_confirm_msg">Le app torneranno alla home. La cartella verrà rimossa.</string>
+
+    <string name="action_hide">Nascondi dal drawer</string>
+    <string name="action_unhide">Mostra nel drawer</string>
+    <string name="menu_sort_alpha">Riordina home in ordine alfabetico</string>
+    <string name="sort_done">Riordinato</string>
 </resources>

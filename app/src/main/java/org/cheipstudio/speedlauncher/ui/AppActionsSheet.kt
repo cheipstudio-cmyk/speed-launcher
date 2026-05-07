@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.cheipstudio.speedlauncher.R
+import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 
 class AppActionsSheet : BottomSheetDialogFragment() {
@@ -49,6 +50,16 @@ class AppActionsSheet : BottomSheetDialogFragment() {
                 }
                 startActivity(intent)
             } catch (_: Throwable) {}
+            dismissAllowingStateLoss()
+        }
+
+        // v24: Hide / Show toggle
+        val settings = SpeedApp.instance.settingsRepository
+        val hideLabel = view.findViewById<TextView>(R.id.hideLabel)
+        val isHidden = settings.isAppHidden(a.key)
+        hideLabel.text = getString(if (isHidden) R.string.action_unhide else R.string.action_hide)
+        view.findViewById<View>(R.id.actionHide).setOnClickListener {
+            if (isHidden) settings.unhideApp(a.key) else settings.hideApp(a.key)
             dismissAllowingStateLoss()
         }
 
