@@ -44,6 +44,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // v30: orientation in base al setting (default = portrait only)
+        applyOrientationLock()
+
         widgetHostController = WidgetHostController(this).also { it.start() }
         binding.homeView.attachWidgetHost(widgetHostController)
 
@@ -68,6 +71,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun applyOrientationLock() {
+        val allowLandscape = SpeedApp.instance.settingsRepository.landscapeAllowed.value == true
+        requestedOrientation = if (allowLandscape) {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        } else {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
+
     private fun showTutorial() {
         tutorialOverlay = TutorialOverlay(this).also {
             (binding.root as android.widget.FrameLayout).addView(
@@ -84,6 +96,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         widgetHostController.startListening()
         binding.homeView.reapplySettings()
+        // v30: ri-applica orientation se è cambiata
+        applyOrientationLock()
     }
 
     override fun onPause() {
@@ -98,6 +112,8 @@ class MainActivity : AppCompatActivity() {
             drawerSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
             homeMenuSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
             appActionsSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
+            // v27: pressione tasto home da home → torna a pagina 1 con animazione
+            binding.homeView.snapToFirstPage()
         }
     }
 

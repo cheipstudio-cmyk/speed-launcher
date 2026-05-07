@@ -139,4 +139,30 @@
 
     <string name="info_experimental_warn">Experimental</string>
     <string name="settings_show_widget_sub">Experimental: some widgets may not work</string>
+
+    <string name="settings_section_backup">Data and backup</string>
+    <string name="settings_hidden_apps">Hidden apps</string>
+    <string name="settings_hidden_apps_sub">Show apps hidden from drawer</string>
+    <string name="hidden_apps_title">Hidden apps</string>
+    <string name="hidden_apps_empty">No hidden apps</string>
+    <string name="action_unhide_short">Show</string>
+    <string name="settings_backup_export">Export backup</string>
+    <string name="settings_backup_export_sub">Save settings and layout to a file</string>
+    <string name="settings_backup_import">Import backup</string>
+    <string name="settings_backup_import_sub">Restore from a backup file</string>
+    <string name="backup_exported_ok">Backup exported</string>
+    <string name="backup_export_fail">Export failed</string>
+    <string name="backup_imported_ok">Backup imported. Restarting…</string>
+    <string name="backup_import_fail">Invalid or corrupted file</string>
+
+    <string name="settings_contact_label">Report a bug</string>
+    <string name="settings_contact_sub">Contact cheipstudio@gmail.com to report an issue</string>
+    <string name="contact_email_subject">Speed Launcher — Bug Report</string>
+
+    <string name="settings_section_ai">AI Launcher Mode</string>
+    <string name="settings_ai_launcher_mode">Recommended</string>
+    <string name="settings_ai_launcher_mode_sub">Show most recently used apps at the top of home and drawer</string>
+    <string name="settings_landscape">Landscape mode</string>
+    <string name="settings_landscape_sub">Allow launcher rotation (recommended on tablets)</string>
+    <string name="recommended_header">Recommended</string>
 </resources>

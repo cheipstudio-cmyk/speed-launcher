@@ -45,6 +45,12 @@
             android:theme="@style/Theme.SpeedLauncher"
             android:exported="false" />
 
+        <activity
+            android:name=".HiddenAppsActivity"
+            android:label="@string/hidden_apps_title"
+            android:theme="@style/Theme.SpeedLauncher"
+            android:exported="false" />
+
         <service
             android:name=".notifications.SpeedNotificationListener"
             android:exported="false"

@@ -18,6 +18,13 @@
             android:layout_height="@dimen/widget_slot_height"
             android:layout_marginBottom="16dp" />
 
+        <!-- v30: AI Launcher Mode - Raccomandate -->
+        <org.cheipstudio.speedlauncher.ui.RecommendedView
+            android:id="@+id/recommendedRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp" />
+
         <org.cheipstudio.speedlauncher.ui.PagedHomeContainer
             android:id="@+id/pagedHome"
             android:layout_width="match_parent"

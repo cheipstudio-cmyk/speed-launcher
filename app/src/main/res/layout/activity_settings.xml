@@ -172,6 +172,37 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ============ AI LAUNCHER MODE (v30) ============ -->
+            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_ai" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_circle" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_ai_launcher_mode" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_ai_launcher_mode_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchAiMode"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_pages" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_landscape" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_landscape_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchLandscape"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ============ BARRA DI RICERCA ============ -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_searchbar" />
 
@@ -370,6 +401,42 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ============ DATI E BACKUP (v27) ============ -->
+            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_backup" />
+
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemHiddenApps" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_hide" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_hidden_apps" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_hidden_apps_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemBackupExport" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_backup_export" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_backup_export" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_backup_export_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemBackupImport" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_backup_import" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_backup_import" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_backup_import_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ============ SISTEMA ============ -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_general" />
 
@@ -465,6 +532,17 @@
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/info_studio_label" />
                         <TextView style="@style/PixelItemSubtitle" android:text="@string/info_studio_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemContact" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_info" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_contact_label" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_contact_sub" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

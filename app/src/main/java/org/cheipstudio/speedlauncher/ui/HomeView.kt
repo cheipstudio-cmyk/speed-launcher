@@ -46,21 +46,31 @@ class HomeView @JvmOverloads constructor(
     private var trackStartX = 0f
     private var trackStartY = 0f
     private var tracking = false
+
+    /** v26: overlay per fade durante swipe up del drawer */
+    private val fadeOverlay = android.view.View(context).apply {
+        setBackgroundColor(Color.BLACK)
+        alpha = 0f
+        isClickable = false
+        isFocusable = false
+        // v26: non intercetta tap finché alpha > 0 (e anche allora è solo decorativo)
+        layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
+        )
+    }
     // v18: threshold più reattivo (45dp invece di 60dp)
     private val swipeThreshold = resources.displayMetrics.density * 35f
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            // v18: threshold velocità abbassato a 700f, ratio 1.2 (era 1100/1.4)
+            // v26: niente haptic qui - lo facciamo SOLO in onInterceptTouchEvent quando il threshold è confermato
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
-                performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 onSwipeUp?.invoke()
                 return true
             }
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
-                performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
@@ -86,6 +96,26 @@ class HomeView @JvmOverloads constructor(
     })
 
     init {
+        // v26: aggiungo overlay per fade al drawer
+        addView(fadeOverlay)
+
+        // v30: setup callback Raccomandate
+        binding.recommendedRow.onAppClick = { app ->
+            SpeedApp.instance.usageTracker.recordLaunch(app.key)
+            try {
+                val launchIntent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+                if (launchIntent != null) {
+                    launchIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(launchIntent)
+                }
+            } catch (_: Throwable) {}
+            // refresh dopo qualche istante
+            postDelayed({ refreshRecommended() }, 500)
+        }
+        binding.recommendedRow.onAppLongPress = { app ->
+            onAppMenuRequest?.invoke(app)
+        }
+
         // v18: animazione layout dipende dallo stile selezionato
         applyAnimationStyle()
         // v20: gestione 3 bottoni nav bar - aggiungo solo il bottom inset al container interno
@@ -327,6 +357,7 @@ class HomeView @JvmOverloads constructor(
     }
 
     fun reapplySettings() {
+        refreshRecommended()
         applySettings()
         val cols = settings.gridCols.value ?: 4
         val rows = settings.gridRows.value ?: 4
@@ -356,17 +387,27 @@ class HomeView @JvmOverloads constructor(
                 val dx = abs(ev.x - trackStartX)
                 val dy = ev.y - trackStartY
                 gestureDetector.onTouchEvent(ev)
-                // v18: ratio 1.2 invece di 1.3
+
+                // v26: durante lo swipe up, aggiorna alpha overlay proporzionale
+                if (dy < 0 && abs(dy) > dx * 1.0f) {
+                    val maxFadeDistance = height * 0.45f
+                    val progress = (abs(dy) / maxFadeDistance).coerceIn(0f, 1f)
+                    fadeOverlay.alpha = progress * 0.55f
+                }
+
                 if (dy < -swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    performHapticFeedbackLight()
+                    // mantieni overlay visibile finché il drawer non è aperto
                     onSwipeUp?.invoke()
+                    // dissolvi overlay leggermente in ritardo
+                    fadeOverlay.animate().alpha(0f).setDuration(220).start()
                     return true
                 }
                 if (settings.swipeDownNotifications.value == true &&
                     dy > swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    performHapticFeedbackLight()
                     StatusBarHelper.expandNotifications(context)
                     return true
                 }
@@ -374,6 +415,10 @@ class HomeView @JvmOverloads constructor(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 tracking = false
                 gestureDetector.onTouchEvent(ev)
+                // v26: se overlay parzialmente visibile, dissolvilo
+                if (fadeOverlay.alpha > 0f) {
+                    fadeOverlay.animate().alpha(0f).setDuration(180).start()
+                }
             }
         }
         return false
@@ -383,7 +428,22 @@ class HomeView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
     fun attachWidgetHost(host: WidgetHostController) { binding.widgetSlot.setHostController(host) }
-    fun refreshApps(apps: List<AppInfo>) { for (page in pages) page.refresh(apps); maybeCreateNextPage() }
+    fun refreshApps(apps: List<AppInfo>) {
+        for (page in pages) page.refresh(apps)
+        maybeCreateNextPage()
+        refreshRecommended()
+    }
+
+    /** v30: aggiorna la sezione Raccomandate se AI mode è attivo */
+    fun refreshRecommended() {
+        val aiOn = settings.aiLauncherMode.value == true
+        if (aiOn) {
+            binding.recommendedRow.visibility = android.view.View.VISIBLE
+            binding.recommendedRow.refresh("home")
+        } else {
+            binding.recommendedRow.visibility = android.view.View.GONE
+        }
+    }
     fun refreshDots() { for (page in pages) page.invalidate() }
     fun pinApp(app: AppInfo): Boolean {
         for (page in pages) if (page.pinApp(app)) { maybeCreateNextPage(); return true }
@@ -395,4 +455,24 @@ class HomeView @JvmOverloads constructor(
         post { trimEmptyPages() }
     }
     fun isPinned(app: AppInfo) = pages.any { it.isPinned(app) }
+
+    /** v27: chiamato da MainActivity quando si preme home dalla home */
+    fun snapToFirstPage() {
+        if (binding.pagedHome.currentPage > 0) {
+            binding.pagedHome.snapToPage(0, animate = true)
+        }
+    }
+
+    /**
+     * v26: haptic leggero, single-tap. Su API 30+ usa GESTURE_START (più sottile),
+     * altrimenti CLOCK_TICK (era KEYBOARD_TAP — troppo forte).
+     */
+    private fun performHapticFeedbackLight() {
+        if (settings.hapticEnabled.value != true) return
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+        } else {
+            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+        }
+    }
 }

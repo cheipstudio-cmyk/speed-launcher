@@ -139,4 +139,30 @@
 
     <string name="info_experimental_warn">Sperimentale</string>
     <string name="settings_show_widget_sub">Sperimentale: alcuni widget potrebbero non funzionare</string>
+
+    <string name="settings_section_backup">Dati e backup</string>
+    <string name="settings_hidden_apps">App nascoste</string>
+    <string name="settings_hidden_apps_sub">Mostra le app nascoste dal drawer</string>
+    <string name="hidden_apps_title">App nascoste</string>
+    <string name="hidden_apps_empty">Nessuna app nascosta</string>
+    <string name="action_unhide_short">Mostra</string>
+    <string name="settings_backup_export">Esporta backup</string>
+    <string name="settings_backup_export_sub">Salva impostazioni e layout in un file</string>
+    <string name="settings_backup_import">Importa backup</string>
+    <string name="settings_backup_import_sub">Ripristina da un file di backup</string>
+    <string name="backup_exported_ok">Backup esportato</string>
+    <string name="backup_export_fail">Errore durante l\'esportazione</string>
+    <string name="backup_imported_ok">Backup importato. Riavvio…</string>
+    <string name="backup_import_fail">File non valido o corrotto</string>
+
+    <string name="settings_contact_label">Segnala un bug</string>
+    <string name="settings_contact_sub">Contatta cheipstudio@gmail.com per segnalare un problema</string>
+    <string name="contact_email_subject">Speed Launcher — Bug Report</string>
+
+    <string name="settings_section_ai">AI Launcher Mode</string>
+    <string name="settings_ai_launcher_mode">Raccomandate</string>
+    <string name="settings_ai_launcher_mode_sub">Mostra le app più usate di recente in cima alla home e al drawer</string>
+    <string name="settings_landscape">Modalità orizzontale</string>
+    <string name="settings_landscape_sub">Consenti la rotazione del launcher (consigliata su tablet)</string>
+    <string name="recommended_header">Raccomandate</string>
 </resources>

@@ -50,6 +50,21 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             }
         )
         applyDrawerLayout()
+        // v30: setup Raccomandate
+        val aiOn = SpeedApp.instance.settingsRepository.aiLauncherMode.value == true
+        if (aiOn) {
+            _binding?.recommendedRow?.visibility = View.VISIBLE
+            _binding?.recommendedRow?.refresh("drawer")
+            _binding?.recommendedRow?.onAppClick = { app ->
+                SpeedApp.instance.appRepository.launch(app)
+                dismissAllowingStateLoss()
+            }
+            _binding?.recommendedRow?.onAppLongPress = { app ->
+                onAppLongPress?.invoke(app)
+            }
+        } else {
+            _binding?.recommendedRow?.visibility = View.GONE
+        }
         binding.recycler.adapter = adapter
 
         SpeedApp.instance.appRepository.apps.observe(viewLifecycleOwner) { apps ->
@@ -81,20 +96,55 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID3 -> {
                 adapter.listMode = false
                 binding.recycler.layoutManager = GridLayoutManager(requireContext(), 3)
+                _binding?.alphaScrollBar?.visibility = View.GONE
             }
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID5 -> {
                 adapter.listMode = false
                 binding.recycler.layoutManager = GridLayoutManager(requireContext(), 5)
+                _binding?.alphaScrollBar?.visibility = View.GONE
             }
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_LIST -> {
                 adapter.listMode = true
                 binding.recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+                // v29: scrollbar A-Z visibile solo in lista
+                _binding?.alphaScrollBar?.visibility = View.VISIBLE
+                setupAlphaScrollbar()
             }
             else -> {
                 adapter.listMode = false
                 binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4)
+                _binding?.alphaScrollBar?.visibility = View.GONE
             }
         }
+    }
+
+    /**
+     * v29: collega la scrollbar A-Z al recycler.
+     * - Calcola le iniziali presenti nella lista corrente (allApps filtrate)
+     * - Quando l'utente seleziona una lettera, scrolla alla prima app con quella iniziale
+     */
+    private fun setupAlphaScrollbar() {
+        val sb = _binding?.alphaScrollBar ?: return
+        // calcola lettere presenti
+        val current = adapter.currentList
+        val letters = current
+            .map { firstLetter(it.label) }
+            .distinct()
+            .sortedWith(compareBy { if (it == "#") "ZZ" else it })  // # in fondo
+        sb.setLetters(letters)
+        sb.onLetterSelected = { letter ->
+            val idx = current.indexOfFirst { firstLetter(it.label) == letter }
+            if (idx >= 0) {
+                (binding.recycler.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)
+                    ?.scrollToPositionWithOffset(idx, 0)
+            }
+        }
+    }
+
+    private fun firstLetter(label: String): String {
+        if (label.isEmpty()) return "#"
+        val ch = label.trim().firstOrNull()?.uppercaseChar() ?: return "#"
+        return if (ch.isLetter()) ch.toString() else "#"
     }
 
     private fun applyFilter(q: String) {
@@ -103,7 +153,12 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         val visible = allApps.filter { !hidden.contains(it.key) }
         val filtered = if (normalized.isBlank()) visible
         else visible.filter { normalize(it.label).contains(normalized) }
-        adapter.submitList(filtered)
+        adapter.submitList(filtered) {
+            // v29: dopo che la lista è aggiornata, refresh della scrollbar
+            if (_binding?.alphaScrollBar?.visibility == View.VISIBLE) {
+                setupAlphaScrollbar()
+            }
+        }
     }
 
     private fun normalize(s: String): String {

@@ -5,6 +5,9 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import android.provider.Settings as AndroidSettings
 import android.view.View
 import android.view.WindowManager
@@ -19,6 +22,40 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
     private val settings get() = SpeedApp.instance.settingsRepository
+
+    private val exportLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val uri = result.data?.data ?: return@registerForActivityResult
+        val content = BackupManager.exportToJson(this)
+        val ok = BackupManager.writeToUri(this, uri, content)
+        Toast.makeText(this,
+            if (ok) R.string.backup_exported_ok else R.string.backup_export_fail,
+            Toast.LENGTH_SHORT).show()
+    }
+
+    private val importLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val uri = result.data?.data ?: return@registerForActivityResult
+        val content = BackupManager.readFromUri(this, uri) ?: run {
+            Toast.makeText(this, R.string.backup_import_fail, Toast.LENGTH_SHORT).show()
+            return@registerForActivityResult
+        }
+        val res = BackupManager.importFromJson(this, content)
+        if (res.isSuccess) {
+            Toast.makeText(this, R.string.backup_imported_ok, Toast.LENGTH_LONG).show()
+            // restart per applicare
+            val i = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(i)
+            finish()
+        } else {
+            val msg = res.exceptionOrNull()?.message ?: getString(R.string.backup_import_fail)
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
+    }
 
     private val dotColors = listOf(
         SettingsRepository.DOT_DEFAULT,
@@ -243,12 +280,72 @@ class SettingsActivity : AppCompatActivity() {
                 startActivity(intent)
             } catch (_: Throwable) {}
         }
+        // v27: hidden apps screen
+        binding.itemHiddenApps.setOnClickListener {
+            startActivity(Intent(this, HiddenAppsActivity::class.java))
+        }
+        // v27: backup export
+        binding.itemBackupExport.setOnClickListener {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/json"
+                putExtra(Intent.EXTRA_TITLE, BackupManager.suggestedFilename())
+            }
+            try { exportLauncher.launch(intent) } catch (_: Throwable) {
+                Toast.makeText(this, R.string.backup_export_fail, Toast.LENGTH_SHORT).show()
+            }
+        }
+        // v27: backup import
+        binding.itemBackupImport.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+            }
+            try { importLauncher.launch(intent) } catch (_: Throwable) {
+                Toast.makeText(this, R.string.backup_import_fail, Toast.LENGTH_SHORT).show()
+            }
+        }
+
         binding.itemCheipStudio.setOnClickListener {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://cheipstudio.org"))
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             } catch (_: Throwable) {}
+        }
+        // v28: contact email
+        // v30: AI launcher mode toggle
+        binding.switchAiMode.isChecked = settings.aiLauncherMode.value == true
+        binding.switchAiMode.setOnCheckedChangeListener { _, on ->
+            settings.setAiLauncherMode(on)
+        }
+        // v30: landscape allowed toggle
+        binding.switchLandscape.isChecked = settings.landscapeAllowed.value == true
+        binding.switchLandscape.setOnCheckedChangeListener { _, on ->
+            settings.setLandscapeAllowed(on)
+        }
+
+        binding.itemContact.setOnClickListener {
+            try {
+                val versionName = try {
+                    packageManager.getPackageInfo(packageName, 0).versionName ?: ""
+                } catch (_: Throwable) { "" }
+                val device = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} (Android ${android.os.Build.VERSION.RELEASE})"
+                val body = "
+
+---
+Speed Launcher v$versionName
+$device"
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:cheipstudio@gmail.com")
+                    putExtra(Intent.EXTRA_SUBJECT, getString(R.string.contact_email_subject))
+                    putExtra(Intent.EXTRA_TEXT, body)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            } catch (_: Throwable) {
+                Toast.makeText(this, "cheipstudio@gmail.com", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

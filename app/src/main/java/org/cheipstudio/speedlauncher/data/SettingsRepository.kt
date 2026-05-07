@@ -9,8 +9,12 @@ class SettingsRepository(context: Context) {
     private val prefs = ctx.getSharedPreferences("speed_settings", Context.MODE_PRIVATE)
     private val homeLayoutPrefs = ctx.getSharedPreferences("speed_home_layout", Context.MODE_PRIVATE)
 
-    val gridCols = MutableLiveData(prefs.getInt(KEY_COLS, 5))
-    val gridRows = MutableLiveData(prefs.getInt(KEY_ROWS, 5))
+    // v30: tablet detection — sw >= 600dp considerato tablet
+    private val isTablet = context.resources.configuration.smallestScreenWidthDp >= 600
+    private val defaultCols = if (isTablet) 6 else 5
+    private val defaultRows = if (isTablet) 6 else 5
+    val gridCols = MutableLiveData(prefs.getInt(KEY_COLS, defaultCols))
+    val gridRows = MutableLiveData(prefs.getInt(KEY_ROWS, defaultRows))
     val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, false))
     val hapticEnabled = MutableLiveData(prefs.getBoolean(KEY_HAPTIC, true))
     val tutorialSeen = MutableLiveData(prefs.getBoolean(KEY_TUTORIAL_SEEN, false))
@@ -25,6 +29,11 @@ class SettingsRepository(context: Context) {
     val folderBgStyle = MutableLiveData(prefs.getString(KEY_FOLDER_BG, FOLDER_BG_SYSTEM) ?: FOLDER_BG_SYSTEM)
     val notificationBadgeMode = MutableLiveData(prefs.getString(KEY_BADGE_MODE, BADGE_DOT) ?: BADGE_DOT)
     val hiddenApps = MutableLiveData(prefs.getStringSet(KEY_HIDDEN_APPS, emptySet())?.toMutableSet() ?: mutableSetOf())
+    val firstRunDone = MutableLiveData(prefs.getBoolean(KEY_FIRST_RUN_DONE, false))
+    // v30: AI Launcher Mode — sezione "Raccomandate" in home e drawer
+    val aiLauncherMode = MutableLiveData(prefs.getBoolean(KEY_AI_LAUNCHER_MODE, true))
+    // v30: orientamento landscape supportato (off = solo portrait)
+    val landscapeAllowed = MutableLiveData(prefs.getBoolean(KEY_LANDSCAPE_ALLOWED, false))
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -81,6 +90,22 @@ class SettingsRepository(context: Context) {
         hiddenApps.postValue(current)
     }
     fun isAppHidden(appKey: String): Boolean = hiddenApps.value?.contains(appKey) == true
+    fun markFirstRunDone() {
+        prefs.edit().putBoolean(KEY_FIRST_RUN_DONE, true).apply()
+        firstRunDone.postValue(true)
+    }
+    fun setAiLauncherMode(on: Boolean) {
+        prefs.edit().putBoolean(KEY_AI_LAUNCHER_MODE, on).apply(); aiLauncherMode.postValue(on)
+    }
+    fun setLandscapeAllowed(on: Boolean) {
+        prefs.edit().putBoolean(KEY_LANDSCAPE_ALLOWED, on).apply(); landscapeAllowed.postValue(on)
+    }
+
+    fun unhideAllApps() {
+        val empty = mutableSetOf<String>()
+        prefs.edit().putStringSet(KEY_HIDDEN_APPS, empty).apply()
+        hiddenApps.postValue(empty)
+    }
     fun markTutorialSeen() {
         prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, true).apply(); tutorialSeen.postValue(true)
     }
@@ -92,7 +117,7 @@ class SettingsRepository(context: Context) {
     }
     fun resetSettings() {
         prefs.edit().clear().apply()
-        gridCols.postValue(5); gridRows.postValue(5)
+        gridCols.postValue(defaultCols); gridRows.postValue(defaultRows)
         showWidgetSlot.postValue(false); hapticEnabled.postValue(true)
         tutorialSeen.postValue(false); searchMode.postValue(MODE_APPS)
         searchBarStyle.postValue(STYLE_SYSTEM); swipeDownNotifications.postValue(true)
@@ -102,10 +127,15 @@ class SettingsRepository(context: Context) {
         folderBgStyle.postValue(FOLDER_BG_SYSTEM)
         notificationBadgeMode.postValue(BADGE_DOT)
         hiddenApps.postValue(mutableSetOf())
+        aiLauncherMode.postValue(true)
+        landscapeAllowed.postValue(false)
     }
     fun resetEverything() {
         homeLayoutPrefs.edit().clear().apply()
         resetSettings()
+        // v27: reset anche del firstRunDone così la home si ripopola alla prossima apertura
+        prefs.edit().putBoolean(KEY_FIRST_RUN_DONE, false).apply()
+        firstRunDone.postValue(false)
     }
 
     companion object {
@@ -158,6 +188,9 @@ class SettingsRepository(context: Context) {
         const val BADGE_OFF = "off"
 
         private const val KEY_HIDDEN_APPS = "hidden_apps"
+        private const val KEY_FIRST_RUN_DONE = "first_run_done"
+        private const val KEY_AI_LAUNCHER_MODE = "ai_launcher_mode"
+        private const val KEY_LANDSCAPE_ALLOWED = "landscape_allowed"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange
