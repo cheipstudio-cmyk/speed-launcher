@@ -1,7 +1,6 @@
 package org.cheipstudio.speedlauncher.ui
 
 import android.content.Context
-import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -19,16 +18,11 @@ import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 
 /**
- * HomeView v4: gestione touch corretta.
- *
- * Logica:
- * - DOWN: registra coordinate. Se il punto è su area vuota, programma long-press home.
- *   Se è su un figlio (icona/dock/widget/searchbar), il figlio gestirà via il suo onTouchEvent.
- * - MOVE: rileva swipe-up se Y diminuisce di tanto e siamo partiti da area vuota.
- * - UP: se swipe rilevato, spara onSwipeUp UNA volta.
- *
- * IMPORTANTE: onInterceptTouchEvent ritorna true SOLO al momento del rilevamento swipe,
- * così il DOWN/UP normale arriva ai figli.
+ * v4.1:
+ * - Swipe-up area estesa: parte dal fondo schermo (240dp dal basso)
+ * - Vibrazione leggera (CONTEXT_CLICK) invece di LONG_PRESS forte
+ * - Quando rileviamo lo swipe, mandiamo ACTION_CANCEL ai figli (annulla animazione icone)
+ * - Menu impostazioni cancellato in modo più aggressivo se c'è movimento
  */
 class HomeView @JvmOverloads constructor(
     context: Context,
@@ -48,20 +42,22 @@ class HomeView @JvmOverloads constructor(
 
     private var downX = 0f
     private var downY = 0f
-    private var swipeArmed = false      // siamo nel range potenziale per uno swipe
-    private var swipeDetected = false   // soglia raggiunta, intercettiamo
+    private var swipeArmed = false
+    private var swipeDetected = false
     private var longPressFired = false
     private var downOverChild = false
 
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
-    private val swipeUpThreshold = resources.displayMetrics.density * 60f
+    private val swipeUpThreshold = resources.displayMetrics.density * 50f
+    // Zona estesa di trigger swipe: ultimi 280dp dal fondo dello schermo
+    private val swipeBottomZoneDp = resources.displayMetrics.density * 280f
 
     private val handler = Handler(Looper.getMainLooper())
     private val longPressRunnable = Runnable {
         if (!swipeDetected && !longPressFired && !downOverChild) {
             longPressFired = true
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             onHomeLongPress?.invoke()
         }
     }
@@ -88,6 +84,7 @@ class HomeView @JvmOverloads constructor(
 
     fun cancelHomeLongPress() {
         handler.removeCallbacks(longPressRunnable)
+        longPressFired = true // blocca anche se runnable già accodato
     }
 
     private fun isOverInteractiveChild(x: Float, y: Float): Boolean {
@@ -106,6 +103,11 @@ class HomeView @JvmOverloads constructor(
         val left = loc[0] - myLoc[0]
         val top = loc[1] - myLoc[1]
         return x >= left && x <= left + view.width && y >= top && y <= top + view.height
+    }
+
+    /** Lo swipe-up parte dalla zona bassa dello schermo (anche sopra dock e icone) */
+    private fun isInSwipeZone(y: Float): Boolean {
+        return y > height - swipeBottomZoneDp
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -130,9 +132,11 @@ class HomeView @JvmOverloads constructor(
                 if (dx > touchSlop || abs(dy) > touchSlop) {
                     handler.removeCallbacks(longPressRunnable)
                 }
-                if (dy > swipeUpThreshold && dy > dx * 1.2f) {
+                // Swipe rilevato se: parte dalla zona bassa + movimento verticale forte
+                if (isInSwipeZone(downY) && dy > swipeUpThreshold && dy > dx * 1.2f) {
                     swipeDetected = true
-                    return true // da qui in poi i tocchi vengono a noi via onTouchEvent
+                    longPressFired = true // blocca eventuale long-press in pending
+                    return true
                 }
                 return false
             }
@@ -148,15 +152,12 @@ class HomeView @JvmOverloads constructor(
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_MOVE -> {
-                // Stiamo seguendo lo swipe; ritorniamo true per consumare il MOVE
-                return swipeDetected
-            }
+            MotionEvent.ACTION_MOVE -> return swipeDetected
             MotionEvent.ACTION_UP -> {
                 if (swipeDetected) {
                     swipeDetected = false
                     swipeArmed = false
-                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                     onSwipeUp?.invoke()
                     return true
                 }

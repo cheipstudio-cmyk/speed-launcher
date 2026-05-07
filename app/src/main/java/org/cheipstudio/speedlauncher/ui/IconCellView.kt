@@ -42,12 +42,13 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var longPressFired = false
     private var dragStarted = false
     private var menuOpened = false
+    private var pressAnimated = false
 
     private val handler = Handler(Looper.getMainLooper())
     private val longPressRunnable = Runnable {
         if (!dragStarted && !menuOpened) {
             longPressFired = true
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
         }
     }
 
@@ -88,6 +89,14 @@ class IconCellView(context: Context) : LinearLayout(context) {
         packageName = app.packageName
     }
 
+    private fun cancelPressAnimation() {
+        // Reset scale immediato
+        iconView.animate().cancel()
+        iconView.scaleX = 1f
+        iconView.scaleY = 1f
+        pressAnimated = false
+    }
+
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val a = app ?: return super.onTouchEvent(event)
@@ -98,9 +107,16 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 longPressFired = false
                 dragStarted = false
                 menuOpened = false
+                pressAnimated = false
                 handler.removeCallbacks(longPressRunnable)
                 handler.postDelayed(longPressRunnable, longPressTimeout)
-                Anim.pressFeedback(iconView)
+                // Press feedback ritardato — solo dopo touchSlop confermato
+                postDelayed({
+                    if (!dragStarted && !menuOpened) {
+                        Anim.pressFeedback(iconView)
+                        pressAnimated = true
+                    }
+                }, 80)
                 parent?.requestDisallowInterceptTouchEvent(true)
                 return true
             }
@@ -109,9 +125,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val dy = abs(event.y - downY)
                 if (longPressFired && !dragStarted && (dx > touchSlop || dy > touchSlop)) {
                     dragStarted = true
+                    cancelPressAnimation()
                     onDragStart?.invoke(a, this)
                 } else if (!longPressFired && (dx > touchSlop * 2 || dy > touchSlop * 2)) {
                     handler.removeCallbacks(longPressRunnable)
+                    cancelPressAnimation()
                     longPressFired = false
                     parent?.requestDisallowInterceptTouchEvent(false)
                 }
@@ -120,7 +138,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
             MotionEvent.ACTION_UP -> {
                 handler.removeCallbacks(longPressRunnable)
                 if (dragStarted) {
-                    // drag già partito
+                    // niente
                 } else if (longPressFired && !menuOpened) {
                     menuOpened = true
                     onMenu?.invoke(a, this)
@@ -130,7 +148,12 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
+                // Importante: il parent ci ha cancellato il touch (es. swipe rilevato)
                 handler.removeCallbacks(longPressRunnable)
+                cancelPressAnimation()
+                longPressFired = false
+                dragStarted = false
+                menuOpened = false
                 return true
             }
         }
