@@ -15,8 +15,11 @@ import org.cheipstudio.speedlauncher.data.AppInfo
 
 class AppActionsSheet : BottomSheetDialogFragment() {
 
-    var onPinToggle: ((AppInfo) -> Unit)? = null
-    var isPinned: ((AppInfo) -> Boolean)? = null
+    var onPinHomeToggle: ((AppInfo) -> Unit)? = null
+    var onPinDockToggle: ((AppInfo) -> Unit)? = null
+    var onMoveStart: ((AppInfo) -> Unit)? = null
+    var isInGrid: ((AppInfo) -> Boolean)? = null
+    var isInDock: ((AppInfo) -> Boolean)? = null
 
     private var app: AppInfo? = null
 
@@ -33,14 +36,36 @@ class AppActionsSheet : BottomSheetDialogFragment() {
         view.findViewById<ImageView>(R.id.appIcon).setImageDrawable(a.icon)
         view.findViewById<TextView>(R.id.appLabel).text = a.label
 
-        val pinLabel = view.findViewById<TextView>(R.id.pinLabel)
-        val pinned = isPinned?.invoke(a) ?: false
-        pinLabel.text = getString(if (pinned) R.string.action_unpin else R.string.action_pin)
-
-        view.findViewById<View>(R.id.actionPin).setOnClickListener {
-            onPinToggle?.invoke(a)
-            dismissAllowingStateLoss()
+        // Pin home
+        val pinHomeLabel = view.findViewById<TextView>(R.id.pinHomeLabel)
+        val inGrid = isInGrid?.invoke(a) ?: false
+        pinHomeLabel.text = getString(if (inGrid) R.string.action_unpin_home else R.string.action_pin_home)
+        view.findViewById<View>(R.id.actionPinHome).setOnClickListener {
+            onPinHomeToggle?.invoke(a); dismissAllowingStateLoss()
         }
+
+        // Pin dock
+        val pinDockLabel = view.findViewById<TextView>(R.id.pinDockLabel)
+        val inDock = isInDock?.invoke(a) ?: false
+        pinDockLabel.text = getString(if (inDock) R.string.action_unpin_dock else R.string.action_pin_dock)
+        view.findViewById<View>(R.id.actionPinDock).setOnClickListener {
+            onPinDockToggle?.invoke(a); dismissAllowingStateLoss()
+        }
+
+        // Move (drag)
+        val actionMove = view.findViewById<View>(R.id.actionMove)
+        if (inGrid || inDock) {
+            actionMove.visibility = View.VISIBLE
+            actionMove.setOnClickListener {
+                dismissAllowingStateLoss()
+                // ritardo per dare tempo al sheet di chiudersi
+                actionMove.postDelayed({ onMoveStart?.invoke(a) }, 250)
+            }
+        } else {
+            actionMove.visibility = View.GONE
+        }
+
+        // Info
         view.findViewById<View>(R.id.actionInfo).setOnClickListener {
             try {
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -51,6 +76,8 @@ class AppActionsSheet : BottomSheetDialogFragment() {
             } catch (_: Throwable) {}
             dismissAllowingStateLoss()
         }
+
+        // Uninstall
         view.findViewById<View>(R.id.actionUninstall).setOnClickListener {
             try {
                 val intent = Intent(Intent.ACTION_DELETE).apply {

@@ -12,6 +12,9 @@ class SpeedApp : Application() {
     val notificationCounter: NotificationCounter by lazy { NotificationCounter() }
     val settingsRepository: SettingsRepository by lazy { SettingsRepository(this) }
 
+    /** Callback per il drag&drop globale. (origin, draggedKey, target) -> Unit. */
+    var dragHandler: ((String, String, String) -> Unit)? = null
+
     override fun onCreate() {
         super.onCreate()
         instance = this

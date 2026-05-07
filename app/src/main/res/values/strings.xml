@@ -8,6 +8,11 @@
     <string name="menu_settings">Impostazioni Speed</string>
     <string name="action_pin">Aggiungi a home</string>
     <string name="action_unpin">Rimuovi da home</string>
+    <string name="action_pin_home">Aggiungi alla griglia</string>
+    <string name="action_unpin_home">Rimuovi dalla griglia</string>
+    <string name="action_pin_dock">Aggiungi alla dock</string>
+    <string name="action_unpin_dock">Rimuovi dalla dock</string>
+    <string name="action_move">Sposta</string>
     <string name="action_info">Informazioni app</string>
     <string name="action_uninstall">Disinstalla</string>
     <string name="settings_title">Impostazioni</string>
@@ -29,7 +34,7 @@
     <string name="tutorial_swipe_title">Apri il drawer</string>
     <string name="tutorial_swipe_desc">Scorri velocemente verso l\'alto in qualsiasi punto della home per aprire l\'elenco di tutte le app.</string>
     <string name="tutorial_longpress_icon_title">Opzioni app</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'icona per aggiungerla alla home, vedere le info dell\'app o disinstallarla.</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'icona per aggiungerla alla home o alla dock, spostarla, vedere le info o disinstallare.</string>
     <string name="tutorial_longpress_home_title">Personalizza</string>
     <string name="tutorial_longpress_home_desc">Tieni premuto un punto vuoto della home per cambiare sfondo, aggiungere widget o aprire le impostazioni.</string>
     <string name="tutorial_next">Avanti</string>

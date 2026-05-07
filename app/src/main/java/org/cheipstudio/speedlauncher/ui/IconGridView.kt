@@ -2,6 +2,7 @@ package org.cheipstudio.speedlauncher.ui
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.DragEvent
 import android.view.View
 import android.widget.GridLayout
 import org.cheipstudio.speedlauncher.SpeedApp
@@ -27,7 +28,6 @@ class IconGridView @JvmOverloads constructor(
     private var rows: Int
 
     init {
-        // Leggo dimensione griglia dalle settings
         val settings = SpeedApp.instance.settingsRepository
         cols = settings.gridCols.value ?: 4
         rows = settings.gridRows.value ?: 4
@@ -35,14 +35,14 @@ class IconGridView @JvmOverloads constructor(
         columnCount = cols
         rowCount = rows
         useDefaultMargins = false
-        // Importante: il GridLayout NON deve consumare touch da solo
         isClickable = false
         isFocusable = false
+
+        setOnDragListener { _, event -> handleDrag(event) }
     }
 
     fun applyGridSize(newCols: Int, newRows: Int) {
         if (newCols == cols && newRows == rows) return
-        // Mantieni le app pinnate quando puoi
         val oldKeys = pinnedKeys.filterNotNull()
         cols = newCols
         rows = newRows
@@ -97,6 +97,28 @@ class IconGridView @JvmOverloads constructor(
 
     fun isPinned(app: AppInfo): Boolean = pinnedKeys.contains(app.key)
 
+    /**
+     * Handler chiamato dall'esterno per richiedere drag su una cella specifica.
+     */
+    fun beginDragForCell(cellIndex: Int) {
+        if (cellIndex !in 0 until childCount) return
+        val cell = getChildAt(cellIndex) as? IconCellView ?: return
+        cell.beginDrag()
+    }
+
+    /**
+     * Cerca la cella corrispondente all'app passata e avvia il drag.
+     */
+    fun beginDragFor(app: AppInfo) {
+        for (i in 0 until childCount) {
+            val cell = getChildAt(i) as? IconCellView ?: continue
+            if (cell.packageName == app.packageName) {
+                cell.beginDrag()
+                return
+            }
+        }
+    }
+
     private fun persist() {
         val items = mutableListOf<HomeItem>()
         for (i in pinnedKeys.indices) {
@@ -108,29 +130,31 @@ class IconGridView @JvmOverloads constructor(
 
     private fun rebuild() {
         removeAllViews()
-        if (allApps.isEmpty()) return
+        if (allApps.isEmpty()) {
+            // riempi con celle vuote per non collassare
+            for (i in 0 until cols * rows) addView(emptyCell(i), buildLayoutParams(i))
+            return
+        }
         val byKey = allApps.associateBy { it.key }
         for (i in 0 until cols * rows) {
             val cell: View = pinnedKeys[i]?.let { byKey[it] }?.let { app ->
                 IconCellView(context).apply {
                     bind(app)
+                    dragOriginId = "grid:$i"
                     onLaunch = { a, v -> onAppLaunch?.invoke(a, v) }
                     onMenu = { a, v -> onAppLongPress?.invoke(a, v) }
                 }
-            } ?: emptyCell()
+            } ?: emptyCell(i)
             addView(cell, buildLayoutParams(i))
         }
     }
 
-    /**
-     * Cella vuota: NON cliccabile e NON focusabile, così il touch passa
-     * attraverso al parent (HomeView) per il long-press.
-     */
-    private fun emptyCell(): View {
+    private fun emptyCell(index: Int): View {
         return View(context).apply {
             isClickable = false
             isFocusable = false
             isLongClickable = false
+            tag = "grid:$index"
         }
     }
 
@@ -141,5 +165,39 @@ class IconGridView @JvmOverloads constructor(
             width = 0
             height = 0
         }
+    }
+
+    private fun handleDrag(event: DragEvent): Boolean {
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> true
+            DragEvent.ACTION_DRAG_ENTERED -> true
+            DragEvent.ACTION_DRAG_LOCATION -> true
+            DragEvent.ACTION_DRAG_EXITED -> true
+            DragEvent.ACTION_DROP -> handleDrop(event)
+            DragEvent.ACTION_DRAG_ENDED -> true
+            else -> false
+        }
+    }
+
+    private fun handleDrop(event: DragEvent): Boolean {
+        val targetCellIdx = findCellAt(event.x, event.y) ?: return false
+        val text = (event.clipData?.getItemAt(0)?.text ?: return false).toString()
+        // Format: "grid:N|key" oppure "dock:N|key"
+        val parts = text.split("|")
+        if (parts.size != 2) return false
+        val (origin, draggedKey) = parts
+        // Comunica al gestore esterno (HomeView) di processare il drop
+        SpeedApp.instance.dragHandler?.invoke(origin, draggedKey, "grid:$targetCellIdx")
+        return true
+    }
+
+    private fun findCellAt(x: Float, y: Float): Int? {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) {
+                return i
+            }
+        }
+        return null
     }
 }

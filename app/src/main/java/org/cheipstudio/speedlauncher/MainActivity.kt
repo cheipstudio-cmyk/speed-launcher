@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // Tutorial al primo avvio
         if (SpeedApp.instance.settingsRepository.tutorialSeen.value != true) {
             showTutorial()
         }
@@ -79,7 +78,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         widgetHostController.startListening()
-        // Riapplica settings se l'utente è tornato dalle impostazioni
         binding.homeView.reapplySettings()
     }
 
@@ -130,10 +128,18 @@ class MainActivity : AppCompatActivity() {
     private fun openAppActions(app: AppInfo) {
         if (appActionsSheet?.isAdded == true) return
         appActionsSheet = AppActionsSheet.newInstance(app).also {
-            it.isPinned = { a -> binding.homeView.isPinned(a) }
-            it.onPinToggle = { a ->
-                if (binding.homeView.isPinned(a)) binding.homeView.unpinApp(a)
+            it.isInGrid = { a -> binding.homeView.isInGrid(a) }
+            it.isInDock = { a -> binding.homeView.isInDock(a) }
+            it.onPinHomeToggle = { a ->
+                if (binding.homeView.isInGrid(a)) binding.homeView.unpinApp(a)
                 else binding.homeView.pinApp(a)
+            }
+            it.onPinDockToggle = { a ->
+                if (binding.homeView.isInDock(a)) binding.homeView.unpinApp(a)
+                else binding.homeView.pinAppToDock(a)
+            }
+            it.onMoveStart = { a ->
+                binding.homeView.beginDragFor(a)
             }
             it.show(supportFragmentManager, "appactions")
         }

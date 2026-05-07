@@ -8,6 +8,11 @@
     <string name="menu_settings">Speed settings</string>
     <string name="action_pin">Add to home</string>
     <string name="action_unpin">Remove from home</string>
+    <string name="action_pin_home">Pin to grid</string>
+    <string name="action_unpin_home">Unpin from grid</string>
+    <string name="action_pin_dock">Pin to dock</string>
+    <string name="action_unpin_dock">Unpin from dock</string>
+    <string name="action_move">Move</string>
     <string name="action_info">App info</string>
     <string name="action_uninstall">Uninstall</string>
     <string name="settings_title">Settings</string>
@@ -29,7 +34,7 @@
     <string name="tutorial_swipe_title">Open the drawer</string>
     <string name="tutorial_swipe_desc">Swipe up quickly anywhere on the home to open the list of all apps.</string>
     <string name="tutorial_longpress_icon_title">App options</string>
-    <string name="tutorial_longpress_icon_desc">Long-press an icon to pin it, see app info or uninstall.</string>
+    <string name="tutorial_longpress_icon_desc">Long-press an icon to pin it to home or dock, move it, see info or uninstall.</string>
     <string name="tutorial_longpress_home_title">Customize</string>
     <string name="tutorial_longpress_home_desc">Long-press an empty area to change wallpaper, add widgets or open settings.</string>
     <string name="tutorial_next">Next</string>

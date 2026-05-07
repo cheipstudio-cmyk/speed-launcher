@@ -1,5 +1,6 @@
 package org.cheipstudio.speedlauncher.ui
 
+import android.content.ClipData
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -14,17 +15,6 @@ import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 
-/**
- * v5: usa SOLO setOnClickListener / setOnLongClickListener standard.
- * Il drag&drop NON parte da long-press qui — viene gestito separatamente
- * da chi crea la cell (via tag e dragdrop sulla parent grid).
- *
- * Comportamento:
- * - Tap → onLaunch
- * - Long-press → onMenu (apre il bottom sheet Pin/Info/Uninstall)
- * - Per riordinare: per ora niente drag&drop nella v5; lo aggiungeremo dopo
- *   che gli altri gesti sono confermati funzionanti.
- */
 class IconCellView(context: Context) : LinearLayout(context) {
 
     private val iconView = ImageView(context)
@@ -37,6 +27,9 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var app: AppInfo? = null
     var onLaunch: ((AppInfo, View) -> Unit)? = null
     var onMenu: ((AppInfo, View) -> Unit)? = null
+
+    /** ID di origine per il drag, settato dal parent (es. "grid:5" o "dock:2") */
+    var dragOriginId: String = ""
 
     init {
         orientation = VERTICAL
@@ -68,17 +61,24 @@ class IconCellView(context: Context) : LinearLayout(context) {
         isFocusable = true
         isLongClickable = true
 
-        // Listener Android standard
         setOnClickListener {
             val a = app ?: return@setOnClickListener
             Anim.pressFeedback(iconView)
             postDelayed({ onLaunch?.invoke(a, this) }, 50)
         }
+
         setOnLongClickListener {
             val a = app ?: return@setOnLongClickListener false
             onMenu?.invoke(a, this)
             true
         }
+    }
+
+    fun beginDrag() {
+        val a = app ?: return
+        if (dragOriginId.isEmpty()) return
+        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
+        startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
     }
 
     fun bind(app: AppInfo) {

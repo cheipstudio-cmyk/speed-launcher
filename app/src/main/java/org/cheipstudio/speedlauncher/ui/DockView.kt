@@ -2,8 +2,10 @@ package org.cheipstudio.speedlauncher.ui
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.DragEvent
 import android.view.View
 import android.widget.LinearLayout
+import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 import org.cheipstudio.speedlauncher.data.HomeLayoutStore
 
@@ -28,6 +30,8 @@ class DockView @JvmOverloads constructor(
         setPadding(pad, 0, pad, 0)
         isClickable = false
         isFocusable = false
+
+        setOnDragListener { _, event -> handleDrag(event) }
     }
 
     fun setLayout(items: List<String>) {
@@ -71,6 +75,28 @@ class DockView @JvmOverloads constructor(
         rebuild()
     }
 
+    /** Sostituisce app a slot specifico (per drop dock-to-dock o esterno) */
+    fun placeAt(slotIndex: Int, key: String) {
+        if (slotIndex !in 0 until SLOTS) return
+        // Rimuovi key altrove se già presente
+        val existingIdx = dockKeys.indexOf(key)
+        if (existingIdx != -1) dockKeys[existingIdx] = null
+        dockKeys[slotIndex] = key
+        persist()
+        rebuild()
+    }
+
+    /** Rimuove la app a uno slot specifico */
+    fun removeAt(slotIndex: Int) {
+        if (slotIndex !in 0 until SLOTS) return
+        dockKeys[slotIndex] = null
+        persist()
+        rebuild()
+    }
+
+    /** Trova lo slot di una key */
+    fun slotOf(key: String): Int = dockKeys.indexOf(key)
+
     private fun persist() {
         store.saveDock(dockKeys.map { it ?: "" })
     }
@@ -81,28 +107,68 @@ class DockView @JvmOverloads constructor(
         for (i in 0 until SLOTS) {
             val key = dockKeys[i]
             val cell: View = if (key.isNullOrEmpty()) {
-                View(context).apply {
-                    minimumHeight = (56 * resources.displayMetrics.density).toInt()
-                    isClickable = false
-                    isFocusable = false
-                    isLongClickable = false
-                }
+                emptyCell(i)
             } else {
                 byKey[key]?.let { app ->
                     IconCellView(context).apply {
                         bind(app)
+                        dragOriginId = "dock:$i"
                         onLaunch = { a, v -> onAppLaunch?.invoke(a, v) }
                         onMenu = { a, v -> onAppLongPress?.invoke(a, v) }
                     }
-                } ?: View(context).apply {
-                    minimumHeight = (56 * resources.displayMetrics.density).toInt()
-                    isClickable = false
-                    isFocusable = false
-                    isLongClickable = false
-                }
+                } ?: emptyCell(i)
             }
             addView(cell, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         }
+    }
+
+    private fun emptyCell(index: Int): View {
+        return View(context).apply {
+            minimumHeight = (56 * resources.displayMetrics.density).toInt()
+            isClickable = false
+            isFocusable = false
+            isLongClickable = false
+            tag = "dock:$index"
+        }
+    }
+
+    fun beginDragFor(app: AppInfo) {
+        for (i in 0 until childCount) {
+            val cell = getChildAt(i) as? IconCellView ?: continue
+            if (cell.packageName == app.packageName) {
+                cell.beginDrag()
+                return
+            }
+        }
+    }
+
+    private fun handleDrag(event: DragEvent): Boolean {
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> true
+            DragEvent.ACTION_DRAG_ENTERED, DragEvent.ACTION_DRAG_EXITED -> true
+            DragEvent.ACTION_DRAG_LOCATION -> true
+            DragEvent.ACTION_DROP -> handleDrop(event)
+            DragEvent.ACTION_DRAG_ENDED -> true
+            else -> false
+        }
+    }
+
+    private fun handleDrop(event: DragEvent): Boolean {
+        val targetSlot = findCellAt(event.x) ?: return false
+        val text = (event.clipData?.getItemAt(0)?.text ?: return false).toString()
+        val parts = text.split("|")
+        if (parts.size != 2) return false
+        val (origin, draggedKey) = parts
+        SpeedApp.instance.dragHandler?.invoke(origin, draggedKey, "dock:$targetSlot")
+        return true
+    }
+
+    private fun findCellAt(x: Float): Int? {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (x >= child.left && x <= child.right) return i
+        }
+        return null
     }
 
     companion object {
