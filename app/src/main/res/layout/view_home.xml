@@ -47,7 +47,6 @@
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="28dp"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
             app:cardElevation="2dp">
 
             <LinearLayout
@@ -59,10 +58,10 @@
                 android:paddingEnd="6dp">
 
                 <ImageView
+                    android:id="@+id/searchIcon"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_search"
-                    app:tint="?attr/colorOnSurfaceVariant" />
+                    android:src="@drawable/ic_search" />
 
                 <TextView
                     android:id="@+id/searchBarHint"
@@ -71,7 +70,6 @@
                     android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:text="@string/search_apps"
-                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="15sp"
                     android:ellipsize="end"
                     android:maxLines="1" />
@@ -85,8 +83,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:src="@drawable/ic_settings"
-                    android:contentDescription="@string/menu_settings"
-                    app:tint="?attr/colorOnSurfaceVariant" />
+                    android:contentDescription="@string/menu_settings" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

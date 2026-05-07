@@ -15,15 +15,6 @@ import androidx.core.content.ContextCompat
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 
-/**
- * v10: tutorial con design migliorato:
- * - Background con gradient blur
- * - Card più grande, padding generoso
- * - Icona animata in entrata
- * - Indicatore step a pallini
- * - Titolo + descrizione + CTA
- * - Animazioni di transizione tra step
- */
 class TutorialOverlay @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -39,19 +30,17 @@ class TutorialOverlay @JvmOverloads constructor(
     private val dotsContainer: LinearLayout
 
     private var step = 0
+    // v16: 4 step (settings al posto di longpress_home, pages aggiornato per cartelle)
     private val steps = listOf(
         Triple(R.string.tutorial_swipe_title, R.string.tutorial_swipe_desc, R.drawable.ic_swipe_up),
         Triple(R.string.tutorial_longpress_icon_title, R.string.tutorial_longpress_icon_desc, R.drawable.ic_pin),
-        Triple(R.string.tutorial_longpress_home_title, R.string.tutorial_longpress_home_desc, R.drawable.ic_settings),
+        Triple(R.string.tutorial_settings_title, R.string.tutorial_settings_desc, R.drawable.ic_settings),
         Triple(R.string.tutorial_pages_title, R.string.tutorial_pages_desc, R.drawable.ic_pages)
     )
 
     init {
-        // Background gradient + blur opacity
         background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_overlay)
-        isClickable = true
-        isFocusable = true
-
+        isClickable = true; isFocusable = true
         val density = resources.displayMetrics.density
 
         card = LinearLayout(context).apply {
@@ -64,13 +53,11 @@ class TutorialOverlay @JvmOverloads constructor(
             val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
                 gravity = Gravity.CENTER
                 val margin = (28 * density).toInt()
-                leftMargin = margin
-                rightMargin = margin
+                leftMargin = margin; rightMargin = margin
             }
             layoutParams = lp
         }
 
-        // Icona dentro un cerchio gradient
         val iconWrapper = FrameLayout(context).apply {
             background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_icon)
             val size = (88 * density).toInt()
@@ -116,7 +103,6 @@ class TutorialOverlay @JvmOverloads constructor(
         }
         card.addView(descView)
 
-        // Dots
         dotsContainer = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -129,15 +115,13 @@ class TutorialOverlay @JvmOverloads constructor(
         }
         card.addView(dotsContainer)
 
-        // Bottoni
         val btnRow = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            val lp = LinearLayout.LayoutParams(
+            layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            layoutParams = lp
         }
 
         skipBtn = TextView(context).apply {
@@ -146,8 +130,7 @@ class TutorialOverlay @JvmOverloads constructor(
             textSize = 15f
             gravity = Gravity.CENTER
             setPadding((20 * density).toInt(), (12 * density).toInt(), (20 * density).toInt(), (12 * density).toInt())
-            isClickable = true
-            isFocusable = true
+            isClickable = true; isFocusable = true
         }
 
         nextBtn = TextView(context).apply {
@@ -158,8 +141,7 @@ class TutorialOverlay @JvmOverloads constructor(
             gravity = Gravity.CENTER
             background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_btn)
             setPadding((28 * density).toInt(), (12 * density).toInt(), (28 * density).toInt(), (12 * density).toInt())
-            isClickable = true
-            isFocusable = true
+            isClickable = true; isFocusable = true
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -168,7 +150,6 @@ class TutorialOverlay @JvmOverloads constructor(
             layoutParams = lp
         }
 
-        // Spacer
         val spacer = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
         }
@@ -188,15 +169,11 @@ class TutorialOverlay @JvmOverloads constructor(
         rebuildDots()
         updateStep()
 
-        // Animazione iniziale
         card.alpha = 0f
         card.translationY = 60f
         card.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(350)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
+            .alpha(1f).translationY(0f).setDuration(350)
+            .setInterpolator(DecelerateInterpolator()).start()
     }
 
     private fun rebuildDots() {
@@ -227,22 +204,17 @@ class TutorialOverlay @JvmOverloads constructor(
         anim.duration = 150
         anim.addUpdateListener {
             val v = it.animatedValue as Float
-            iconView.alpha = v
-            titleView.alpha = v
-            descView.alpha = v
+            iconView.alpha = v; titleView.alpha = v; descView.alpha = v
         }
         anim.addListener(object : android.animation.AnimatorListenerAdapter() {
             override fun onAnimationEnd(a: android.animation.Animator) {
-                updateStep()
-                rebuildDots()
+                updateStep(); rebuildDots()
                 ValueAnimator.ofFloat(0f, 1f).apply {
                     duration = 250
                     interpolator = DecelerateInterpolator()
                     addUpdateListener {
                         val v = it.animatedValue as Float
-                        iconView.alpha = v
-                        titleView.alpha = v
-                        descView.alpha = v
+                        iconView.alpha = v; titleView.alpha = v; descView.alpha = v
                     }
                     start()
                 }
