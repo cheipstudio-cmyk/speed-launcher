@@ -12,7 +12,7 @@
     <string name="action_uninstall">Uninstall</string>
     <string name="widget_placeholder_hint">Long-press to add a widget</string>
     <string name="widget_remove_title">Remove widget?</string>
-    <string name="widget_remove_message">The widget will be removed from the home. Its internal data may be lost.</string>
+    <string name="widget_remove_message">The widget will be removed from home. Its internal data may be lost.</string>
     <string name="widget_remove_confirm">Remove</string>
     <string name="settings_title">Settings</string>
     <string name="settings_section_appearance">Appearance</string>
@@ -36,12 +36,14 @@
     <string name="version_value">Version %1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
     <string name="tutorial_swipe_title">Open the drawer</string>
-    <string name="tutorial_swipe_desc">Swipe up quickly anywhere on the home to open the list of all apps.</string>
+    <string name="tutorial_swipe_desc">Swipe up quickly from anywhere on the home to open the list of all apps.</string>
     <string name="tutorial_longpress_icon_title">Move or customize</string>
-    <string name="tutorial_longpress_icon_desc">Long-press an icon on the home and drag to move it. Double-tap to open Info/Uninstall menu.</string>
+    <string name="tutorial_longpress_icon_desc">Long-press an icon on the home to move it. Double-tap to open the app options.</string>
     <string name="tutorial_longpress_home_title">Customize</string>
-    <string name="tutorial_longpress_home_desc">Long-press an empty area to change wallpaper or open settings. For widgets, long-press the area at the top. To remove a widget, long-press it.</string>
+    <string name="tutorial_longpress_home_desc">Long-press an empty area to change wallpaper or open settings. Long-press at the top for widgets.</string>
+    <string name="tutorial_pages_title">Multiple pages</string>
+    <string name="tutorial_pages_desc">Swipe horizontally on home to move between pages. Drag an icon to the edge to send it to another page.</string>
     <string name="tutorial_next">Next</string>
-    <string name="tutorial_done">Done</string>
+    <string name="tutorial_done">Let\'s go</string>
     <string name="tutorial_skip">Skip</string>
 </resources>

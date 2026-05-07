@@ -8,6 +8,7 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
@@ -28,24 +29,23 @@ class HomeView @JvmOverloads constructor(
     private val layoutStore = HomeLayoutStore(context)
     private val settings = SpeedApp.instance.settingsRepository
 
+    private val pages = mutableListOf<IconGridView>()
+    private val pageCount = 2
+
     var onSwipeUp: (() -> Unit)? = null
     var onSearchTap: (() -> Unit)? = null
     var onHomeLongPress: (() -> Unit)? = null
     var onAppLongPressOnHome: ((AppInfo) -> Unit)? = null
 
+    private var swipeDownX = 0f
+    private var swipeDownY = 0f
+    private var swipeTrackingActive = false
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    // Soglia minima del fling verticale per considerarlo swipe-up (px/s di velocità o distanza)
+    private val swipeMinDistance = resources.displayMetrics.density * 80f
+
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
-        override fun onFling(
-            e1: MotionEvent?, e2: MotionEvent,
-            velocityX: Float, velocityY: Float
-        ): Boolean {
-            if (velocityY < -1500f && abs(velocityY) > abs(velocityX) * 1.3f) {
-                performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-                onSwipeUp?.invoke()
-                return true
-            }
-            return false
-        }
         override fun onLongPress(e: MotionEvent) {
             performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             onHomeLongPress?.invoke()
@@ -53,20 +53,33 @@ class HomeView @JvmOverloads constructor(
     })
 
     init {
-        // Animazioni fluide su tutti i layout change
         layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
             setDuration(180)
         }
 
         binding.searchBar.setOnClickListener { onSearchTap?.invoke() }
-        binding.iconGrid.onAppLaunch = { app, view ->
-            SpeedApp.instance.appRepository.launch(app, view)
+
+        // Costruisci le pagine
+        repeat(pageCount) { idx ->
+            val page = IconGridView(context).apply {
+                pageIndex = idx
+                onAppLaunch = { app, view ->
+                    SpeedApp.instance.appRepository.launch(app, view)
+                }
+                onAppLongPress = { app, _ ->
+                    onAppLongPressOnHome?.invoke(app)
+                }
+                setLayout(layoutStore.loadPage(idx))
+            }
+            pages.add(page)
+            binding.pagedHome.addPage(page)
         }
-        binding.iconGrid.onAppLongPress = { app, _ ->
-            onAppLongPressOnHome?.invoke(app)
+
+        binding.pageIndicator.setPages(pageCount, 0)
+        binding.pagedHome.onPageChanged = { p ->
+            binding.pageIndicator.setPages(pageCount, p)
         }
-        binding.iconGrid.setLayout(layoutStore.load())
 
         SpeedApp.instance.dragHandler = { origin, key, target ->
             handleDrag(origin, key, target)
@@ -77,10 +90,25 @@ class HomeView @JvmOverloads constructor(
 
     private fun handleDrag(origin: String, key: String, target: String) {
         val app = SpeedApp.instance.appRepository.apps.value?.find { it.key == key } ?: return
-        if (target.startsWith("grid:")) {
-            val targetIdx = target.removePrefix("grid:").toIntOrNull() ?: return
-            binding.iconGrid.swapWith(key, targetIdx)
+        // Format target: "grid{N}:idx"
+        val regex = Regex("""grid(\d+):(\d+)""")
+        val match = regex.matchEntire(target) ?: return
+        val targetPage = match.groupValues[1].toInt()
+        val targetIdx = match.groupValues[2].toInt()
+        val targetGrid = pages.getOrNull(targetPage) ?: return
+
+        // Format origin: "grid{N}:idx"
+        val originMatch = regex.matchEntire(origin)
+        if (originMatch != null) {
+            val originPage = originMatch.groupValues[1].toInt()
+            if (originPage != targetPage) {
+                // Cross-page: rimuovi dalla pagina d'origine, aggiungi alla destinazione
+                pages.getOrNull(originPage)?.unpinApp(app)
+                targetGrid.swapWith(key, targetIdx)
+                return
+            }
         }
+        targetGrid.swapWith(key, targetIdx)
     }
 
     private fun applySettings() {
@@ -92,7 +120,39 @@ class HomeView @JvmOverloads constructor(
         applySettings()
         val cols = settings.gridCols.value ?: 4
         val rows = settings.gridRows.value ?: 4
-        binding.iconGrid.applyGridSize(cols, rows)
+        for (page in pages) page.applyGridSize(cols, rows)
+    }
+
+    /**
+     * v10: rilevamento swipe-up forzato che sovrasta i figli.
+     * Se vediamo un movimento dal basso verso l'alto sufficientemente forte,
+     * lo intercettiamo a livello FrameLayout e apriamo il drawer.
+     */
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.action) {
+            MotionEvent.ACTION_DOWN -> {
+                swipeDownX = ev.x
+                swipeDownY = ev.y
+                swipeTrackingActive = true
+                return false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!swipeTrackingActive) return false
+                val dx = abs(ev.x - swipeDownX)
+                val dy = swipeDownY - ev.y
+                // Swipe-up: dy positivo grande, dy >> dx
+                if (dy > swipeMinDistance && dy > dx * 1.5f) {
+                    swipeTrackingActive = false
+                    performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                    onSwipeUp?.invoke()
+                    return true
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                swipeTrackingActive = false
+            }
+        }
+        return false
     }
 
     @Suppress("ClickableViewAccessibility")
@@ -105,14 +165,16 @@ class HomeView @JvmOverloads constructor(
     }
 
     fun refreshApps(apps: List<AppInfo>) {
-        binding.iconGrid.refresh(apps)
+        for (page in pages) page.refresh(apps)
     }
 
     fun refreshDots() {
-        binding.iconGrid.invalidate()
+        for (page in pages) page.invalidate()
     }
 
-    fun pinApp(app: AppInfo) = binding.iconGrid.pinApp(app)
-    fun unpinApp(app: AppInfo) = binding.iconGrid.unpinApp(app)
-    fun isPinned(app: AppInfo) = binding.iconGrid.isPinned(app)
+    fun pinApp(app: AppInfo) = pages.firstOrNull()?.pinApp(app) ?: false
+    fun unpinApp(app: AppInfo) {
+        for (page in pages) page.unpinApp(app)
+    }
+    fun isPinned(app: AppInfo) = pages.any { it.isPinned(app) }
 }

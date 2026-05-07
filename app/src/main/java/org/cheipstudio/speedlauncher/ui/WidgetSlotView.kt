@@ -1,6 +1,5 @@
 package org.cheipstudio.speedlauncher.ui
 
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
@@ -14,10 +13,6 @@ import android.widget.TextView
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 
-/**
- * v9: long-press su widget piazzato → conferma rimozione.
- * long-press su slot vuoto → picker widget.
- */
 class WidgetSlotView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -77,7 +72,6 @@ class WidgetSlotView @JvmOverloads constructor(
 
     private fun handleLongPress() {
         if (currentWidgetView == null) {
-            // Slot vuoto: picker
             val controller = hostController ?: return
             controller.pickAndAddWidget { view ->
                 view ?: return@pickAndAddWidget
@@ -87,15 +81,10 @@ class WidgetSlotView @JvmOverloads constructor(
                 addView(view)
             }
         } else {
-            // Widget presente: chiedi rimozione
-            AlertDialog.Builder(context)
-                .setTitle(R.string.widget_remove_title)
-                .setMessage(R.string.widget_remove_message)
-                .setPositiveButton(R.string.widget_remove_confirm) { _, _ ->
-                    removeWidget()
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
+            // BottomSheet stile coerente
+            WidgetRemoveSheet.show(context) {
+                removeWidget()
+            }
         }
     }
 

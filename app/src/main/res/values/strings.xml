@@ -12,7 +12,7 @@
     <string name="action_uninstall">Disinstalla</string>
     <string name="widget_placeholder_hint">Tieni premuto per aggiungere un widget</string>
     <string name="widget_remove_title">Rimuovere il widget?</string>
-    <string name="widget_remove_message">Il widget verrà rimosso dalla home. I dati interni del widget potrebbero andare persi.</string>
+    <string name="widget_remove_message">Il widget verrà rimosso dalla home. I dati interni potrebbero andare persi.</string>
     <string name="widget_remove_confirm">Rimuovi</string>
     <string name="settings_title">Impostazioni</string>
     <string name="settings_section_appearance">Aspetto</string>
@@ -36,12 +36,14 @@
     <string name="version_value">Versione %1$s</string>
     <string name="cheip_studio_credit">A Cheip Studio project</string>
     <string name="tutorial_swipe_title">Apri il drawer</string>
-    <string name="tutorial_swipe_desc">Scorri velocemente verso l\'alto in qualsiasi punto della home per aprire l\'elenco di tutte le app.</string>
+    <string name="tutorial_swipe_desc">Scorri velocemente verso l\'alto da qualsiasi punto della home per aprire l\'elenco di tutte le app.</string>
     <string name="tutorial_longpress_icon_title">Sposta o personalizza</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'icona sulla home e trascinala per spostarla. Doppio tap per aprire menu Info/Disinstalla.</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'icona sulla home per spostarla. Doppio tap per aprire le opzioni dell\'app.</string>
     <string name="tutorial_longpress_home_title">Personalizza</string>
-    <string name="tutorial_longpress_home_desc">Tieni premuto un punto vuoto della home per cambiare sfondo o aprire le impostazioni. Per i widget, tieni premuto lo spazio in alto. Per rimuoverlo, tieni premuto sul widget stesso.</string>
+    <string name="tutorial_longpress_home_desc">Tieni premuto un\'area vuota per cambiare sfondo o aprire le impostazioni. Tieni premuto in alto per i widget.</string>
+    <string name="tutorial_pages_title">Più pagine</string>
+    <string name="tutorial_pages_desc">Scorri orizzontalmente sulla home per spostarti tra le pagine. Trascina un\'icona oltre il bordo per portarla in un\'altra pagina.</string>
     <string name="tutorial_next">Avanti</string>
-    <string name="tutorial_done">Fatto</string>
+    <string name="tutorial_done">Iniziamo</string>
     <string name="tutorial_skip">Salta</string>
 </resources>

@@ -18,13 +18,18 @@ class HomeLayoutStore(context: Context) {
             out.add(
                 HomeItem(
                     key = o.getString("key"),
-                    page = o.getInt("page"),
+                    page = o.optInt("page", 0),
                     cellX = o.getInt("cellX"),
                     cellY = o.getInt("cellY")
                 )
             )
         }
         return out
+    }
+
+    /** Carica solo gli item della pagina specificata */
+    fun loadPage(page: Int): List<HomeItem> {
+        return load().filter { it.page == page }
     }
 
     fun save(items: List<HomeItem>) {
@@ -40,9 +45,12 @@ class HomeLayoutStore(context: Context) {
         prefs.edit().putString(KEY_GRID, arr.toString()).apply()
     }
 
-    /**
-     * Carica la dock; le stringhe vuote rappresentano slot null mantenuti per posizione.
-     */
+    /** Salva sostituendo solo gli item di una specifica pagina */
+    fun savePage(page: Int, items: List<HomeItem>) {
+        val others = load().filter { it.page != page }
+        save(others + items)
+    }
+
     fun loadDock(): List<String> {
         val raw = prefs.getString(KEY_DOCK, "[]") ?: "[]"
         val arr = JSONArray(raw)

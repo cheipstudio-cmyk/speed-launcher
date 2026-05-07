@@ -20,6 +20,9 @@ class IconGridView @JvmOverloads constructor(
     var onAppLaunch: ((AppInfo, View) -> Unit)? = null
     var onAppLongPress: ((AppInfo, View) -> Unit)? = null
 
+    /** Indice di pagina di questa griglia (0 = prima pagina) */
+    var pageIndex: Int = 0
+
     private val store = HomeLayoutStore(context)
     private var allApps: List<AppInfo> = emptyList()
     private var pinnedKeys: MutableList<String?>
@@ -39,7 +42,6 @@ class IconGridView @JvmOverloads constructor(
         isClickable = false
         isFocusable = false
 
-        // Animazioni transizione fluide
         layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
             setDuration(180)
@@ -75,7 +77,8 @@ class IconGridView @JvmOverloads constructor(
 
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
-        if (!initialized && apps.size > 5) {
+        // Auto-popola la pagina 0 al primo avvio
+        if (!initialized && pageIndex == 0 && apps.size > 5) {
             val toAdd = apps.drop(5).take(cols * rows)
             for (i in toAdd.indices) pinnedKeys[i] = toAdd[i].key
             initialized = true
@@ -104,11 +107,18 @@ class IconGridView @JvmOverloads constructor(
 
     fun isPinned(app: AppInfo): Boolean = pinnedKeys.contains(app.key)
 
-    /** Sposta key allo slot targetIdx, scambia con quello che c'era prima */
     fun swapWith(key: String, targetIdx: Int) {
         if (targetIdx !in 0 until cols * rows) return
         val sourceIdx = pinnedKeys.indexOf(key)
-        if (sourceIdx == -1) return
+        if (sourceIdx == -1) {
+            // Drop da pagina diversa: aggiungi al targetIdx
+            if (pinnedKeys[targetIdx] == null) {
+                pinnedKeys[targetIdx] = key
+                persist()
+                rebuild()
+            }
+            return
+        }
         if (sourceIdx == targetIdx) return
         val tmp = pinnedKeys[targetIdx]
         pinnedKeys[targetIdx] = key
@@ -121,9 +131,9 @@ class IconGridView @JvmOverloads constructor(
         val items = mutableListOf<HomeItem>()
         for (i in pinnedKeys.indices) {
             val key = pinnedKeys[i] ?: continue
-            items.add(HomeItem(key = key, page = 0, cellX = i % cols, cellY = i / cols))
+            items.add(HomeItem(key = key, page = pageIndex, cellX = i % cols, cellY = i / cols))
         }
-        store.save(items)
+        store.savePage(pageIndex, items)
     }
 
     private fun rebuild() {
@@ -137,7 +147,7 @@ class IconGridView @JvmOverloads constructor(
             val cell: View = pinnedKeys[i]?.let { byKey[it] }?.let { app ->
                 IconCellView(context).apply {
                     bind(app)
-                    dragOriginId = "grid:$i"
+                    dragOriginId = "grid${pageIndex}:$i"
                     onLaunch = { a, v -> onAppLaunch?.invoke(a, v) }
                     onMenu = { a, v -> onAppLongPress?.invoke(a, v) }
                 }
@@ -151,7 +161,7 @@ class IconGridView @JvmOverloads constructor(
             isClickable = false
             isFocusable = false
             isLongClickable = false
-            tag = "grid:$index"
+            tag = "grid${pageIndex}:$index"
         }
     }
 

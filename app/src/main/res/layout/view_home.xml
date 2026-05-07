@@ -18,18 +18,25 @@
             android:layout_height="@dimen/widget_slot_height"
             android:layout_marginBottom="16dp" />
 
-        <org.cheipstudio.speedlauncher.ui.IconGridView
-            android:id="@+id/iconGrid"
+        <org.cheipstudio.speedlauncher.ui.PagedHomeContainer
+            android:id="@+id/pagedHome"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
+        <org.cheipstudio.speedlauncher.ui.PageIndicator
+            android:id="@+id/pageIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="10dp" />
 
         <View
             android:layout_width="40dp"
             android:layout_height="4dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="6dp"
             android:background="@drawable/bg_swipe_handle" />
 
         <com.google.android.material.card.MaterialCardView
