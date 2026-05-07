@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.onSwipeUp = { openDrawer() }
         binding.homeView.onSearchTap = { openDrawerWithSearch() }
         binding.homeView.onHomeLongPress = { openHomeMenu() }
-        binding.homeView.onAppLongPressOnHome = { app -> openAppActions(app) }
+        // v11: niente più onAppLongPressOnHome — long-press su icona = drag
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openHomeMenu() {
+    fun openHomeMenu() {
         if (homeMenuSheet?.isAdded == true) return
         homeMenuSheet = HomeMenuSheet().also {
             it.onSettings = {

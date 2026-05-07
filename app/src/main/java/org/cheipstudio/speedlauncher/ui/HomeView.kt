@@ -17,13 +17,6 @@ import org.cheipstudio.speedlauncher.databinding.ViewHomeBinding
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 
-/**
- * v11:
- * - Pagine dinamiche: pagina 1 si crea quando la 0 è piena
- * - Swipe-up più conservativo: intercept solo se spostamento verticale è forte
- *   E parte dalla parte bassa della home (così non blocca i bottom sheet sopra)
- * - Niente più menu da home (long-press = drag, e basta)
- */
 class HomeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -46,7 +39,6 @@ class HomeView @JvmOverloads constructor(
     private var swipeDownY = 0f
     private var swipeTrackingActive = false
     private val swipeMinDistance = resources.displayMetrics.density * 100f
-    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
@@ -64,10 +56,14 @@ class HomeView @JvmOverloads constructor(
 
         binding.searchBar.setOnClickListener { onSearchTap?.invoke() }
 
-        // Pagine dinamiche: leggi quante pagine ci sono nei dati salvati
+        // Bottone settings nella search bar - punto di accesso AFFIDABILE al menu home
+        binding.btnHomeMenu.setOnClickListener {
+            onHomeLongPress?.invoke()
+        }
+
+        // Pagine dinamiche
         val maxPageInData = layoutStore.load().maxOfOrNull { it.page } ?: 0
         val initialPageCount = (maxPageInData + 1).coerceAtLeast(1)
-
         repeat(initialPageCount) { idx -> addPageAt(idx) }
         updatePageIndicator()
 
@@ -88,7 +84,6 @@ class HomeView @JvmOverloads constructor(
             onAppLaunch = { app, view ->
                 SpeedApp.instance.appRepository.launch(app, view)
             }
-            // Niente onAppLongPress — il long-press parte direttamente il drag
             setLayout(layoutStore.loadPage(idx))
         }
         pages.add(page)
@@ -107,9 +102,6 @@ class HomeView @JvmOverloads constructor(
         binding.pageIndicator.visibility = if (pages.size > 1) View.VISIBLE else View.INVISIBLE
     }
 
-    /**
-     * Verifica se la pagina è piena (tutti gli slot occupati). Se sì, crea la pagina successiva.
-     */
     private fun maybeCreateNextPage() {
         val lastIdx = pages.size - 1
         if (lastIdx < 0) return
@@ -154,20 +146,12 @@ class HomeView @JvmOverloads constructor(
         for (page in pages) page.applyGridSize(cols, rows)
     }
 
-    /**
-     * v11: intercept conservativo. Solo swipe-up con movimento ENORME (100dp) e
-     * verticalità chiara (dy > dx*2). E SOLO se non ci sono bottom sheet sopra.
-     */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         // Se sopra di noi c'è un dialog/bottomsheet, non intercettiamo nulla
-        val activity = context as? android.app.Activity
+        val activity = context as? androidx.fragment.app.FragmentActivity
         if (activity != null) {
-            // Check via FragmentManager se c'è un BottomSheet visibile
-            val fm = (activity as? androidx.fragment.app.FragmentActivity)?.supportFragmentManager
-            if (fm != null) {
-                for (frag in fm.fragments) {
-                    if (frag is androidx.fragment.app.DialogFragment && frag.isVisible) return false
-                }
+            for (frag in activity.supportFragmentManager.fragments) {
+                if (frag is androidx.fragment.app.DialogFragment && frag.isVisible) return false
             }
         }
 
@@ -215,14 +199,12 @@ class HomeView @JvmOverloads constructor(
     }
 
     fun pinApp(app: AppInfo): Boolean {
-        // Cerca la prima pagina con uno slot libero
         for (page in pages) {
             if (page.pinApp(app)) {
                 maybeCreateNextPage()
                 return true
             }
         }
-        // Tutte piene: crea nuova pagina
         ensurePageExists(pages.size)
         return pages.last().pinApp(app)
     }
