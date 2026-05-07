@@ -123,4 +123,12 @@
     <string name="folder_bg_transparent">Trasparente sfocato</string>
     <string name="folder_bg_dark">Scuro</string>
     <string name="folder_bg_light">Chiaro</string>
+
+    <string name="settings_badge_mode">Pallini di notifica</string>
+    <string name="badge_dot">Pallino semplice</string>
+    <string name="badge_count">Pallone con numero</string>
+    <string name="badge_off">Disattivato</string>
+
+    <string name="folder_delete_confirm_title">Eliminare la cartella?</string>
+    <string name="folder_delete_confirm_msg">Le app torneranno alla home. La cartella verrà rimossa.</string>
 </resources>

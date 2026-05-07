@@ -87,8 +87,8 @@ object FolderSheet {
             background = ContextCompat.getDrawable(context, cardBgRes)
             elevation = 24 * density
             setPadding(
-                (24 * density).toInt(), (16 * density).toInt(),
-                (24 * density).toInt(), (24 * density).toInt()
+                (28 * density).toInt(), (28 * density).toInt(),
+                (28 * density).toInt(), (28 * density).toInt()
             )
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -97,31 +97,28 @@ object FolderSheet {
             layoutParams = lp
         }
 
-        // handle
-        val handle = View(context).apply {
-            background = ContextCompat.getDrawable(context, R.drawable.bg_drag_handle)
-            val lp = LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
-            lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.bottomMargin = (16 * density).toInt()
+        // v23: header con title input grande + cestino in alto-destra
+        val headerRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = (24 * density).toInt()
             layoutParams = lp
         }
-        card.addView(handle)
-
         val nameInput = EditText(context).apply {
             setText(folder.name)
-            textSize = 24f
+            textSize = 26f
             setTextColor(textColor)
             background = null
             setHintTextColor(hintColor)
             hint = context.getString(R.string.folder_name_hint)
             setSingleLine(true)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.CENTER
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.bottomMargin = (16 * density).toInt()
+            gravity = Gravity.START or Gravity.CENTER_VERTICAL
+            val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             layoutParams = lp
             addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
@@ -129,7 +126,19 @@ object FolderSheet {
                 override fun afterTextChanged(s: Editable?) { onRename(s?.toString() ?: "") }
             })
         }
-        card.addView(nameInput)
+        val deleteIcon = ImageView(context).apply {
+            setImageResource(R.drawable.ic_trash)
+            setColorFilter(if (textColor == Color.WHITE) Color.parseColor("#CCFFFFFF") else Color.parseColor("#CC000000"))
+            background = ContextCompat.getDrawable(context, R.drawable.bg_app_icon_ripple_themed)
+            val s = (40 * density).toInt()
+            val padInner = (8 * density).toInt()
+            setPadding(padInner, padInner, padInner, padInner)
+            layoutParams = LinearLayout.LayoutParams(s, s)
+            isClickable = true; isFocusable = true
+        }
+        headerRow.addView(nameInput)
+        headerRow.addView(deleteIcon)
+        card.addView(headerRow)
 
         val apps = SpeedApp.instance.appRepository.apps.value ?: emptyList()
         val byKey = apps.associateBy { it.key }
@@ -146,22 +155,6 @@ object FolderSheet {
         }
         card.addView(grid)
         // popolato sotto dopo aver creato il dialog
-
-        val deleteBtn = TextView(context).apply {
-            text = context.getString(R.string.folder_delete)
-            setTextColor(Color.parseColor("#FF8A8A"))
-            textSize = 14f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.CENTER
-            background = ContextCompat.getDrawable(context, R.drawable.bg_folder_delete_btn)
-            setPadding((24 * density).toInt(), (12 * density).toInt(), (24 * density).toInt(), (12 * density).toInt())
-            isClickable = true; isFocusable = true
-            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.topMargin = (20 * density).toInt()
-            layoutParams = lp
-        }
-        card.addView(deleteBtn)
 
         rootContainer.addView(card)
 
@@ -205,7 +198,19 @@ object FolderSheet {
         rootContainer.setOnClickListener { dialog.dismiss() }
         card.setOnClickListener { /* swallow */ }
 
-        deleteBtn.setOnClickListener { onDeleteFolder(); dialog.dismiss() }
+        deleteIcon.setOnClickListener {
+            // dialog di conferma
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                context, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+            )
+                .setTitle(R.string.folder_delete_confirm_title)
+                .setMessage(R.string.folder_delete_confirm_msg)
+                .setPositiveButton(R.string.folder_delete) { _, _ ->
+                    onDeleteFolder(); dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
         dialog.show()
     }
 
@@ -232,7 +237,7 @@ object FolderSheet {
             background = null  // v21: nessun bg sulla cella, il ripple sta sull'icona
         }
         val lp = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f))
-        lp.width = 0; lp.height = (96 * density).toInt()
+        lp.width = 0; lp.height = (104 * density).toInt()
         cell.layoutParams = lp
 
         val settings = SpeedApp.instance.settingsRepository
@@ -257,7 +262,7 @@ object FolderSheet {
         val label = TextView(context).apply {
             text = app.label
             setTextColor(labelTextColor)
-            textSize = 11f
+            textSize = 12f
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
             gravity = Gravity.CENTER

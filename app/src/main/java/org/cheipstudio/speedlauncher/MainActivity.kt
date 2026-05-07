@@ -1,7 +1,9 @@
 package org.cheipstudio.speedlauncher
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.Surface
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +32,15 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER,
             WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
         )
+        // v23: richiedi refresh rate massimo (120Hz se disponibile)
+        try {
+            val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) display else windowManager.defaultDisplay
+            val maxRate = display?.supportedModes?.maxByOrNull { it.refreshRate }?.refreshRate ?: 60f
+            window.attributes = window.attributes.apply {
+                preferredRefreshRate = maxRate
+            }
+        } catch (_: Throwable) {}
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

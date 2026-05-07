@@ -35,6 +35,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private val iconView = ImageView(context)
     private val labelView = TextView(context)
     private val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val dotTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textAlign = Paint.Align.CENTER
+        typeface = android.graphics.Typeface.DEFAULT_BOLD
+    }
     private var lastNotifCount: Int = 0
     var packageName: String = ""
         private set
@@ -47,7 +52,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private val handler = Handler(Looper.getMainLooper())
     private val moveSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
     /** v20: dopo armed serve un movimento più ampio per draggare, evita conflitto col menu */
-    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
+    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var downX = 0f
     private var downY = 0f
     private var pressing = false
@@ -178,10 +183,38 @@ class IconCellView(context: Context) : LinearLayout(context) {
             lastNotifCount = count
         }
         if (count > 0 && iconView.width > 0) {
-            val cx = iconView.right - (4 * resources.displayMetrics.density)
-            val cy = iconView.top + (6 * resources.displayMetrics.density)
-            val r = 5 * resources.displayMetrics.density
-            canvas.drawCircle(cx, cy, r, dotPaint)
+            val s = SpeedApp.instance.settingsRepository
+            val mode = s.notificationBadgeMode.value ?: SettingsRepository.BADGE_DOT
+            if (mode == SettingsRepository.BADGE_OFF) return
+            val density = resources.displayMetrics.density
+            if (mode == SettingsRepository.BADGE_COUNT) {
+                // pallone con numero: alto-destra dell'icona
+                val displayCount = if (count > 99) "99+" else count.toString()
+                val textSize = 10 * density
+                dotTextPaint.textSize = textSize
+                val textWidth = dotTextPaint.measureText(displayCount)
+                val padH = 5 * density
+                val padV = 2 * density
+                val pillW = (textWidth + padH * 2).coerceAtLeast(16 * density)
+                val pillH = textSize + padV * 2 + (2 * density)
+                val cx = iconView.right - pillW / 2 + (2 * density)
+                val cy = iconView.top + pillH / 2 - (2 * density)
+                val rect = android.graphics.RectF(
+                    cx - pillW / 2, cy - pillH / 2,
+                    cx + pillW / 2, cy + pillH / 2
+                )
+                canvas.drawRoundRect(rect, pillH / 2, pillH / 2, dotPaint)
+                // testo bianco centrato
+                val fm = dotTextPaint.fontMetrics
+                val textY = cy - (fm.ascent + fm.descent) / 2
+                canvas.drawText(displayCount, cx, textY, dotTextPaint)
+            } else {
+                // dot semplice
+                val cx = iconView.right - (4 * density)
+                val cy = iconView.top + (6 * density)
+                val r = 5 * density
+                canvas.drawCircle(cx, cy, r, dotPaint)
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ class SettingsRepository(context: Context) {
     val animationStyle = MutableLiveData(prefs.getString(KEY_ANIM_STYLE, ANIM_EXPRESSIVE) ?: ANIM_EXPRESSIVE)
     val drawerLayout = MutableLiveData(prefs.getString(KEY_DRAWER_LAYOUT, DRAWER_LIST) ?: DRAWER_LIST)
     val folderBgStyle = MutableLiveData(prefs.getString(KEY_FOLDER_BG, FOLDER_BG_SYSTEM) ?: FOLDER_BG_SYSTEM)
+    val notificationBadgeMode = MutableLiveData(prefs.getString(KEY_BADGE_MODE, BADGE_DOT) ?: BADGE_DOT)
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -63,6 +64,9 @@ class SettingsRepository(context: Context) {
     fun setFolderBgStyle(style: String) {
         prefs.edit().putString(KEY_FOLDER_BG, style).apply(); folderBgStyle.postValue(style)
     }
+    fun setNotificationBadgeMode(mode: String) {
+        prefs.edit().putString(KEY_BADGE_MODE, mode).apply(); notificationBadgeMode.postValue(mode)
+    }
     fun markTutorialSeen() {
         prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, true).apply(); tutorialSeen.postValue(true)
     }
@@ -82,6 +86,7 @@ class SettingsRepository(context: Context) {
         dotColor.postValue(DOT_DEFAULT); animationStyle.postValue(ANIM_EXPRESSIVE)
         drawerLayout.postValue(DRAWER_LIST)
         folderBgStyle.postValue(FOLDER_BG_SYSTEM)
+        notificationBadgeMode.postValue(BADGE_DOT)
     }
     fun resetEverything() {
         homeLayoutPrefs.edit().clear().apply()
@@ -131,6 +136,11 @@ class SettingsRepository(context: Context) {
         const val FOLDER_BG_TRANSPARENT = "transparent"
         const val FOLDER_BG_DARK = "dark"
         const val FOLDER_BG_LIGHT = "light"
+
+        private const val KEY_BADGE_MODE = "badge_mode"
+        const val BADGE_DOT = "dot"
+        const val BADGE_COUNT = "count"
+        const val BADGE_OFF = "off"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange

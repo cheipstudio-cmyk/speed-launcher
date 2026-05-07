@@ -152,6 +152,23 @@ class SettingsActivity : AppCompatActivity() {
             updateFolderBgLabel()
         }
 
+        // v23: badge mode
+        when (settings.notificationBadgeMode.value) {
+            SettingsRepository.BADGE_COUNT -> binding.badgeCount.isChecked = true
+            SettingsRepository.BADGE_OFF -> binding.badgeOff.isChecked = true
+            else -> binding.badgeDot.isChecked = true
+        }
+        updateBadgeLabel()
+        binding.badgeModeGroup.setOnCheckedChangeListener { _, id ->
+            val mode = when (id) {
+                R.id.badgeCount -> SettingsRepository.BADGE_COUNT
+                R.id.badgeOff -> SettingsRepository.BADGE_OFF
+                else -> SettingsRepository.BADGE_DOT
+            }
+            settings.setNotificationBadgeMode(mode)
+            updateBadgeLabel()
+        }
+
         when (settings.searchBarStyle.value) {
             SettingsRepository.STYLE_SYSTEM -> binding.styleSystem.isChecked = true
             SettingsRepository.STYLE_TRANSPARENT -> binding.styleTransparent.isChecked = true
@@ -297,6 +314,15 @@ class SettingsActivity : AppCompatActivity() {
             else -> getString(R.string.anim_expressive)
         }
         binding.animStyleLabel.text = text
+    }
+
+    private fun updateBadgeLabel() {
+        val text = when (settings.notificationBadgeMode.value) {
+            SettingsRepository.BADGE_COUNT -> getString(R.string.badge_count)
+            SettingsRepository.BADGE_OFF -> getString(R.string.badge_off)
+            else -> getString(R.string.badge_dot)
+        }
+        binding.badgeModeLabel.text = text
     }
 
     private fun updateFolderBgLabel() {

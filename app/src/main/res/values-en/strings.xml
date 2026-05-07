@@ -123,4 +123,12 @@
     <string name="folder_bg_transparent">Transparent blur</string>
     <string name="folder_bg_dark">Dark</string>
     <string name="folder_bg_light">Light</string>
+
+    <string name="settings_badge_mode">Notification badges</string>
+    <string name="badge_dot">Simple dot</string>
+    <string name="badge_count">Pill with count</string>
+    <string name="badge_off">Off</string>
+
+    <string name="folder_delete_confirm_title">Delete folder?</string>
+    <string name="folder_delete_confirm_msg">Apps will return to the home screen. The folder will be removed.</string>
 </resources>

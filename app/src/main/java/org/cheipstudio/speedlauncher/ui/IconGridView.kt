@@ -50,7 +50,7 @@ class IconGridView @JvmOverloads constructor(
         isClickable = false; isFocusable = false
         layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
-            setDuration(100)
+            setDuration(70)
         }
         setOnDragListener { _, event -> handleDrag(event) }
     }
@@ -318,7 +318,7 @@ class IconGridView @JvmOverloads constructor(
     }
 
     private fun checkEdgeForPageChange(x: Float, y: Float) {
-        val edgeZone = width * 0.15f
+        val edgeZone = width * 0.20f
         val pager = findPager() ?: return
         val newTarget = when {
             x < edgeZone && pager.currentPage > 0 -> pager.currentPage - 1
@@ -332,7 +332,7 @@ class IconGridView @JvmOverloads constructor(
         edgeHandler.postDelayed({
             if (pendingEdgeTarget == newTarget) pager.snapToPage(newTarget, animate = true)
             pendingEdgeTarget = -1
-        }, 400L)
+        }, 250L)
     }
 
     private fun cancelEdgeScroll() {
