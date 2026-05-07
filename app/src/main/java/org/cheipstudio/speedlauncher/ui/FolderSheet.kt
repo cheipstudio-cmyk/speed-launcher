@@ -7,12 +7,12 @@ import android.graphics.Color
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -28,11 +28,11 @@ import org.cheipstudio.speedlauncher.data.HomeItem
 import org.cheipstudio.speedlauncher.data.SettingsRepository
 
 /**
- * v24: ridisegno cartelle stile iOS/Pixel pulito.
- * - Header compatto: nome cartella in alto centrato (label, non editabile fino a tap)
- * - Icone grandi 56dp con padding generoso
- * - Bottone elimina (cestino) sotto, sempre visibile, con bg ben contrastato
- * - Niente glitch tastiera: input mode ADJUST_NOTHING + focus solo a tap
+ * v25: cartelle stile Pixel/Android puro.
+ * - Card grande con corner radius 32dp
+ * - Titolo cartella in alto, sotto griglia icone con padding generoso
+ * - Bottone "Elimina" stile chip Pixel sotto la griglia
+ * - Niente glitch tastiera (focus solo a tap)
  */
 object FolderSheet {
 
@@ -47,20 +47,16 @@ object FolderSheet {
         val activity = context as? Activity ?: return
         val density = context.resources.displayMetrics.density
 
-        // root: dim + tap fuori per chiudere
         val rootContainer = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setBackgroundColor(Color.parseColor("#33000000"))
             setPadding(
-                (24 * density).toInt(),
-                (24 * density).toInt(),
-                (24 * density).toInt(),
-                (24 * density).toInt()
+                (20 * density).toInt(), (20 * density).toInt(),
+                (20 * density).toInt(), (20 * density).toInt()
             )
         }
 
-        // bg/textColor in base al setting
         val bgStyle = SpeedApp.instance.settingsRepository.folderBgStyle.value
             ?: SettingsRepository.FOLDER_BG_SYSTEM
         val cardBgRes = when (bgStyle) {
@@ -82,15 +78,19 @@ object FolderSheet {
             isLightBg -> Color.parseColor("#88000000")
             else -> resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant)
         }
-        val deleteBgColor = if (isDarkBg) Color.parseColor("#22FFFFFF") else Color.parseColor("#11000000")
+        val deleteChipBg = when {
+            isDarkBg -> Color.parseColor("#22FFFFFF")
+            isLightBg -> Color.parseColor("#11000000")
+            else -> resolveAttr(context, com.google.android.material.R.attr.colorSurfaceContainerHigh)
+        }
 
         val card = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             background = ContextCompat.getDrawable(context, cardBgRes)
             elevation = 24 * density
             setPadding(
-                (24 * density).toInt(), (28 * density).toInt(),
-                (24 * density).toInt(), (24 * density).toInt()
+                (28 * density).toInt(), (32 * density).toInt(),
+                (28 * density).toInt(), (28 * density).toInt()
             )
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -99,10 +99,10 @@ object FolderSheet {
             layoutParams = lp
         }
 
-        // v24: header con titolo grande centrato. Tastiera appare solo dopo tap.
+        // Title input - tap per editare
         val nameInput = EditText(context).apply {
             setText(folder.name)
-            textSize = 22f
+            textSize = 20f
             setTextColor(textColor)
             background = null
             setHintTextColor(hintColor)
@@ -110,11 +110,9 @@ object FolderSheet {
             setSingleLine(true)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
-            // key: niente focus automatico
             isFocusable = false
             isFocusableInTouchMode = false
             isCursorVisible = false
-            // tap per editare
             setOnClickListener {
                 isFocusable = true
                 isFocusableInTouchMode = true
@@ -138,7 +136,6 @@ object FolderSheet {
         }
         card.addView(nameInput)
 
-        // griglia app
         val apps = SpeedApp.instance.appRepository.apps.value ?: emptyList()
         val byKey = apps.associateBy { it.key }
         val folderApps = folder.folderApps.mapNotNull { byKey[it] }
@@ -154,17 +151,17 @@ object FolderSheet {
         }
         card.addView(grid)
 
-        // bottone elimina cartella (sempre visibile, ben contrastato)
-        val deleteBtn = LinearLayout(context).apply {
+        // Chip "Elimina cartella" stile Pixel
+        val deleteChip = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
                 cornerRadius = 100 * density
-                setColor(deleteBgColor)
+                setColor(deleteChipBg)
             }
             setPadding((20 * density).toInt(), (12 * density).toInt(),
-                (20 * density).toInt(), (12 * density).toInt())
+                (24 * density).toInt(), (12 * density).toInt())
             isClickable = true; isFocusable = true
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -179,18 +176,18 @@ object FolderSheet {
             setColorFilter(textColor)
             val s = (18 * density).toInt()
             layoutParams = LinearLayout.LayoutParams(s, s).apply {
-                marginEnd = (8 * density).toInt()
+                marginEnd = (10 * density).toInt()
             }
         }
         val trashLabel = TextView(context).apply {
             text = context.getString(R.string.folder_delete)
             setTextColor(textColor)
             textSize = 14f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTypeface(typeface, android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
         }
-        deleteBtn.addView(trashIcon)
-        deleteBtn.addView(trashLabel)
-        card.addView(deleteBtn)
+        deleteChip.addView(trashIcon)
+        deleteChip.addView(trashLabel)
+        card.addView(deleteChip)
 
         rootContainer.addView(card)
 
@@ -202,7 +199,6 @@ object FolderSheet {
                     WindowManager.LayoutParams.MATCH_PARENT
                 )
                 w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-                // v24: tastiera non spinge il layout
                 w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
             }
             setContentView(rootContainer)
@@ -216,7 +212,6 @@ object FolderSheet {
             } catch (_: Throwable) {}
         }
 
-        // popola griglia con onLaunch che dismiss anche il dialog
         val onLaunchAndDismiss: (AppInfo) -> Unit = { app ->
             onLaunch(app)
             try { dialog.dismiss() } catch (_: Throwable) {}
@@ -224,7 +219,6 @@ object FolderSheet {
         for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunchAndDismiss, onRemoveFromFolder, textColor))
 
         dialog.setOnDismissListener {
-            // chiudi tastiera + rimuovi blur
             val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             try { imm?.hideSoftInputFromWindow(nameInput.windowToken, 0) } catch (_: Throwable) {}
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
@@ -235,7 +229,7 @@ object FolderSheet {
         rootContainer.setOnClickListener { dialog.dismiss() }
         card.setOnClickListener { /* swallow */ }
 
-        deleteBtn.setOnClickListener {
+        deleteChip.setOnClickListener {
             com.google.android.material.dialog.MaterialAlertDialogBuilder(
                 context, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
             )
@@ -273,23 +267,20 @@ object FolderSheet {
             background = null
         }
         val lp = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f))
-        lp.width = 0; lp.height = (110 * density).toInt()
+        lp.width = 0; lp.height = (108 * density).toInt()
         cell.layoutParams = lp
 
         val settings = SpeedApp.instance.settingsRepository
         val shape = settings.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
 
-        // icona grande con ripple rotondo
         val iconWrap = android.widget.FrameLayout(context).apply {
             background = ContextCompat.getDrawable(context, R.drawable.bg_app_icon_ripple)
-            val s = (62 * density).toInt()
+            val s = (60 * density).toInt()
             layoutParams = LinearLayout.LayoutParams(s, s)
-            isClickable = false
-            isFocusable = false
         }
         val icon = ImageView(context).apply {
             setImageDrawable(IconShaper.shape(app.icon, shape))
-            val s = (52 * density).toInt()
+            val s = (50 * density).toInt()
             layoutParams = android.widget.FrameLayout.LayoutParams(s, s, Gravity.CENTER)
         }
         iconWrap.addView(icon)

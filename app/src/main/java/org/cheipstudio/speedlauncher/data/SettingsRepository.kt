@@ -11,7 +11,7 @@ class SettingsRepository(context: Context) {
 
     val gridCols = MutableLiveData(prefs.getInt(KEY_COLS, 5))
     val gridRows = MutableLiveData(prefs.getInt(KEY_ROWS, 5))
-    val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, true))
+    val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, false))
     val hapticEnabled = MutableLiveData(prefs.getBoolean(KEY_HAPTIC, true))
     val tutorialSeen = MutableLiveData(prefs.getBoolean(KEY_TUTORIAL_SEEN, false))
     val searchMode = MutableLiveData(prefs.getString(KEY_SEARCH_MODE, MODE_APPS) ?: MODE_APPS)
@@ -93,7 +93,7 @@ class SettingsRepository(context: Context) {
     fun resetSettings() {
         prefs.edit().clear().apply()
         gridCols.postValue(5); gridRows.postValue(5)
-        showWidgetSlot.postValue(true); hapticEnabled.postValue(true)
+        showWidgetSlot.postValue(false); hapticEnabled.postValue(true)
         tutorialSeen.postValue(false); searchMode.postValue(MODE_APPS)
         searchBarStyle.postValue(STYLE_SYSTEM); swipeDownNotifications.postValue(true)
         doubleTapLock.postValue(false); iconShape.postValue(SHAPE_ORIGINAL)

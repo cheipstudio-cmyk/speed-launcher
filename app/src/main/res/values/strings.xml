@@ -136,4 +136,7 @@
     <string name="action_unhide">Mostra nel drawer</string>
     <string name="menu_sort_alpha">Riordina home in ordine alfabetico</string>
     <string name="sort_done">Riordinato</string>
+
+    <string name="info_experimental_warn">Sperimentale</string>
+    <string name="settings_show_widget_sub">Sperimentale: alcuni widget potrebbero non funzionare</string>
 </resources>

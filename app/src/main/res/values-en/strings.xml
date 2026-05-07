@@ -136,4 +136,7 @@
     <string name="action_unhide">Show in drawer</string>
     <string name="menu_sort_alpha">Sort home alphabetically</string>
     <string name="sort_done">Sorted</string>
+
+    <string name="info_experimental_warn">Experimental</string>
+    <string name="settings_show_widget_sub">Experimental: some widgets may not work</string>
 </resources>
