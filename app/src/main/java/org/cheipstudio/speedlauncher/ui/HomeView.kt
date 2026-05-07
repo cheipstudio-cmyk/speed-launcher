@@ -1,14 +1,12 @@
 package org.cheipstudio.speedlauncher.ui
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
@@ -18,10 +16,10 @@ import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 
 /**
- * v4.2:
- * - Swipe-up funziona da qualsiasi punto della home (no zone)
- * - Long-press home a 800ms (più affidabile, meno falsi positivi)
- * - Soglia swipe più stringente per non confondersi con tap
+ * v5: gesture handling tramite GestureDetector standard.
+ * - onFling con velocityY < -1500 → swipe-up (apri drawer)
+ * - onLongPress su area vuota → menu home
+ * - i figli (icone, dock, widget, search) gestiscono i loro tap normalmente
  */
 class HomeView @JvmOverloads constructor(
     context: Context,
@@ -39,26 +37,30 @@ class HomeView @JvmOverloads constructor(
     var onHomeLongPress: (() -> Unit)? = null
     var onAppLongPressOnHome: ((AppInfo) -> Unit)? = null
 
-    private var downX = 0f
-    private var downY = 0f
-    private var swipeArmed = false
-    private var swipeDetected = false
-    private var longPressFired = false
-    private var downOverChild = false
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean = true
 
-    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-    // Long press a 800ms invece dei 500 di sistema
-    private val longPressTimeout = 800L
-    private val swipeUpThreshold = resources.displayMetrics.density * 70f
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val longPressRunnable = Runnable {
-        if (!swipeDetected && !longPressFired && !downOverChild) {
-            longPressFired = true
-            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            onHomeLongPress?.invoke()
+        override fun onFling(
+            e1: MotionEvent?, e2: MotionEvent,
+            velocityX: Float, velocityY: Float
+        ): Boolean {
+            // Swipe verso l'alto: velocity Y negativa, e più verticale che orizzontale
+            if (velocityY < -1500f && abs(velocityY) > abs(velocityX) * 1.3f) {
+                performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                onSwipeUp?.invoke()
+                return true
+            }
+            return false
         }
-    }
+
+        override fun onLongPress(e: MotionEvent) {
+            // Long press solo se non sta sopra a un figlio interattivo
+            if (!isOverInteractiveChild(e.x, e.y)) {
+                performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                onHomeLongPress?.invoke()
+            }
+        }
+    })
 
     init {
         binding.searchBar.setOnClickListener { onSearchTap?.invoke() }
@@ -66,23 +68,16 @@ class HomeView @JvmOverloads constructor(
             SpeedApp.instance.appRepository.launch(app, view)
         }
         binding.iconGrid.onAppLongPress = { app, _ ->
-            cancelHomeLongPress()
             onAppLongPressOnHome?.invoke(app)
         }
         binding.dock.onAppLaunch = { app, view ->
             SpeedApp.instance.appRepository.launch(app, view)
         }
         binding.dock.onAppLongPress = { app, _ ->
-            cancelHomeLongPress()
             onAppLongPressOnHome?.invoke(app)
         }
         binding.iconGrid.setLayout(layoutStore.load())
         binding.dock.setLayout(layoutStore.loadDock())
-    }
-
-    fun cancelHomeLongPress() {
-        handler.removeCallbacks(longPressRunnable)
-        longPressFired = true
     }
 
     private fun isOverInteractiveChild(x: Float, y: Float): Boolean {
@@ -103,64 +98,13 @@ class HomeView @JvmOverloads constructor(
         return x >= left && x <= left + view.width && y >= top && y <= top + view.height
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        when (ev.action) {
-            MotionEvent.ACTION_DOWN -> {
-                downX = ev.x
-                downY = ev.y
-                longPressFired = false
-                swipeDetected = false
-                swipeArmed = true
-                downOverChild = isOverInteractiveChild(downX, downY)
-                handler.removeCallbacks(longPressRunnable)
-                if (!downOverChild) {
-                    handler.postDelayed(longPressRunnable, longPressTimeout)
-                }
-                return false
-            }
-            MotionEvent.ACTION_MOVE -> {
-                if (!swipeArmed || swipeDetected) return false
-                val dx = abs(ev.x - downX)
-                val dy = downY - ev.y
-                if (dx > touchSlop || abs(dy) > touchSlop) {
-                    handler.removeCallbacks(longPressRunnable)
-                }
-                // Swipe-up rilevato da QUALSIASI parte della home, basta movimento verticale forte
-                if (dy > swipeUpThreshold && dy > dx * 1.3f) {
-                    swipeDetected = true
-                    longPressFired = true
-                    return true
-                }
-                return false
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                handler.removeCallbacks(longPressRunnable)
-                swipeArmed = false
-                return false
-            }
-        }
-        return false
-    }
-
+    /**
+     * Riceviamo i touch SOLO su area non-figlio. Quando l'utente tocca un'icona,
+     * il GridLayout li gestisce e noi non vediamo nulla.
+     */
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_MOVE -> return swipeDetected
-            MotionEvent.ACTION_UP -> {
-                if (swipeDetected) {
-                    swipeDetected = false
-                    swipeArmed = false
-                    performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-                    onSwipeUp?.invoke()
-                    return true
-                }
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                swipeDetected = false
-                swipeArmed = false
-            }
-        }
-        return false
+        return gestureDetector.onTouchEvent(event)
     }
 
     fun attachWidgetHost(host: WidgetHostController) {

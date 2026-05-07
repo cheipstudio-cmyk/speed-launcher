@@ -4,13 +4,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.os.Handler
-import android.os.Looper
 import android.view.Gravity
-import android.view.HapticFeedbackConstants
-import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -18,8 +13,18 @@ import androidx.core.content.ContextCompat
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
-import kotlin.math.abs
 
+/**
+ * v5: usa SOLO setOnClickListener / setOnLongClickListener standard.
+ * Il drag&drop NON parte da long-press qui — viene gestito separatamente
+ * da chi crea la cell (via tag e dragdrop sulla parent grid).
+ *
+ * Comportamento:
+ * - Tap → onLaunch
+ * - Long-press → onMenu (apre il bottom sheet Pin/Info/Uninstall)
+ * - Per riordinare: per ora niente drag&drop nella v5; lo aggiungeremo dopo
+ *   che gli altri gesti sono confermati funzionanti.
+ */
 class IconCellView(context: Context) : LinearLayout(context) {
 
     private val iconView = ImageView(context)
@@ -32,25 +37,6 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var app: AppInfo? = null
     var onLaunch: ((AppInfo, View) -> Unit)? = null
     var onMenu: ((AppInfo, View) -> Unit)? = null
-    var onDragStart: ((AppInfo, View) -> Unit)? = null
-
-    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
-
-    private var downX = 0f
-    private var downY = 0f
-    private var longPressFired = false
-    private var dragStarted = false
-    private var menuOpened = false
-    private var pressAnimated = false
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val longPressRunnable = Runnable {
-        if (!dragStarted && !menuOpened) {
-            longPressFired = true
-            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-        }
-    }
 
     init {
         orientation = VERTICAL
@@ -80,6 +66,19 @@ class IconCellView(context: Context) : LinearLayout(context) {
         dotPaint.color = ContextCompat.getColor(context, R.color.notification_dot)
         isClickable = true
         isFocusable = true
+        isLongClickable = true
+
+        // Listener Android standard
+        setOnClickListener {
+            val a = app ?: return@setOnClickListener
+            Anim.pressFeedback(iconView)
+            postDelayed({ onLaunch?.invoke(a, this) }, 50)
+        }
+        setOnLongClickListener {
+            val a = app ?: return@setOnLongClickListener false
+            onMenu?.invoke(a, this)
+            true
+        }
     }
 
     fun bind(app: AppInfo) {
@@ -87,77 +86,6 @@ class IconCellView(context: Context) : LinearLayout(context) {
         iconView.setImageDrawable(app.icon)
         labelView.text = app.label
         packageName = app.packageName
-    }
-
-    private fun cancelPressAnimation() {
-        // Reset scale immediato
-        iconView.animate().cancel()
-        iconView.scaleX = 1f
-        iconView.scaleY = 1f
-        pressAnimated = false
-    }
-
-    @Suppress("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val a = app ?: return super.onTouchEvent(event)
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                downX = event.x
-                downY = event.y
-                longPressFired = false
-                dragStarted = false
-                menuOpened = false
-                pressAnimated = false
-                handler.removeCallbacks(longPressRunnable)
-                handler.postDelayed(longPressRunnable, longPressTimeout)
-                // Press feedback ritardato — solo dopo touchSlop confermato
-                postDelayed({
-                    if (!dragStarted && !menuOpened) {
-                        Anim.pressFeedback(iconView)
-                        pressAnimated = true
-                    }
-                }, 80)
-                parent?.requestDisallowInterceptTouchEvent(true)
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val dx = abs(event.x - downX)
-                val dy = abs(event.y - downY)
-                if (longPressFired && !dragStarted && (dx > touchSlop || dy > touchSlop)) {
-                    dragStarted = true
-                    cancelPressAnimation()
-                    onDragStart?.invoke(a, this)
-                } else if (!longPressFired && (dx > touchSlop * 2 || dy > touchSlop * 2)) {
-                    handler.removeCallbacks(longPressRunnable)
-                    cancelPressAnimation()
-                    longPressFired = false
-                    parent?.requestDisallowInterceptTouchEvent(false)
-                }
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                handler.removeCallbacks(longPressRunnable)
-                if (dragStarted) {
-                    // niente
-                } else if (longPressFired && !menuOpened) {
-                    menuOpened = true
-                    onMenu?.invoke(a, this)
-                } else if (!longPressFired) {
-                    postDelayed({ onLaunch?.invoke(a, this) }, 50)
-                }
-                return true
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                // Importante: il parent ci ha cancellato il touch (es. swipe rilevato)
-                handler.removeCallbacks(longPressRunnable)
-                cancelPressAnimation()
-                longPressFired = false
-                dragStarted = false
-                menuOpened = false
-                return true
-            }
-        }
-        return super.onTouchEvent(event)
     }
 
     override fun onDraw(canvas: Canvas) {

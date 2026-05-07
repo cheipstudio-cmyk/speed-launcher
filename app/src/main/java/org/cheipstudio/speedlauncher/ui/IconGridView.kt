@@ -1,9 +1,7 @@
 package org.cheipstudio.speedlauncher.ui
 
-import android.content.ClipData
 import android.content.Context
 import android.util.AttributeSet
-import android.view.DragEvent
 import android.view.View
 import android.widget.GridLayout
 import org.cheipstudio.speedlauncher.data.AppInfo
@@ -28,7 +26,6 @@ class IconGridView @JvmOverloads constructor(
         columnCount = COLS
         rowCount = ROWS
         useDefaultMargins = false
-        setupDragListener()
     }
 
     fun setLayout(items: List<HomeItem>) {
@@ -89,57 +86,12 @@ class IconGridView @JvmOverloads constructor(
             val cell: View = pinnedKeys[i]?.let { byKey[it] }?.let { app ->
                 IconCellView(context).apply {
                     bind(app)
-                    tag = i
                     onLaunch = { a, v -> onAppLaunch?.invoke(a, v) }
                     onMenu = { a, v -> onAppLongPress?.invoke(a, v) }
-                    onDragStart = { a, v -> startDragForCell(v, i, a) }
                 }
-            } ?: View(context).apply { tag = i }
+            } ?: View(context)
             addView(cell, buildLayoutParams(i))
         }
-    }
-
-    private fun startDragForCell(cell: View, index: Int, app: AppInfo) {
-        val data = ClipData.newPlainText("homeIdx", "grid:$index")
-        cell.startDragAndDrop(data, View.DragShadowBuilder(cell), app.key, 0)
-    }
-
-    private fun setupDragListener() {
-        setOnDragListener { _, event ->
-            when (event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> true
-                DragEvent.ACTION_DRAG_ENTERED, DragEvent.ACTION_DRAG_EXITED -> true
-                DragEvent.ACTION_DRAG_LOCATION -> true
-                DragEvent.ACTION_DROP -> handleDrop(event)
-                DragEvent.ACTION_DRAG_ENDED -> true
-                else -> false
-            }
-        }
-    }
-
-    private fun handleDrop(event: DragEvent): Boolean {
-        val target = findCellAt(event.x, event.y) ?: return false
-        val targetIdx = target.tag as? Int ?: return false
-        val text = (event.clipData?.getItemAt(0)?.text ?: return false).toString()
-        if (!text.startsWith("grid:")) return false
-        val sourceIdx = text.removePrefix("grid:").toIntOrNull() ?: return false
-        if (sourceIdx == targetIdx) return true
-        val tmp = pinnedKeys[sourceIdx]
-        pinnedKeys[sourceIdx] = pinnedKeys[targetIdx]
-        pinnedKeys[targetIdx] = tmp
-        persist()
-        rebuild()
-        return true
-    }
-
-    private fun findCellAt(x: Float, y: Float): View? {
-        for (i in 0 until childCount) {
-            val child = getChildAt(i)
-            if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) {
-                return child
-            }
-        }
-        return null
     }
 
     private fun buildLayoutParams(index: Int): LayoutParams {
