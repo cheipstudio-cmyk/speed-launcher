@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Speed Launcher</string>
     <string name="search_apps">Cerca app</string>
+    <string name="search_web">Cerca sul web</string>
     <string name="notification_listener_label">Speed Launcher — pallini di notifica</string>
     <string name="menu_wallpaper">Cambia sfondo</string>
     <string name="menu_widgets">Aggiungi widget</string>

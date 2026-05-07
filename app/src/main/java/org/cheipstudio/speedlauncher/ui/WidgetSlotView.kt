@@ -28,6 +28,7 @@ class WidgetSlotView @JvmOverloads constructor(
     private var currentWidgetView: View? = null
     private var currentWidgetId: Int = -1
     private val placeholder: LinearLayout
+    private val removeButton: ImageView
 
     init {
         placeholder = LinearLayout(context).apply {
@@ -61,6 +62,24 @@ class WidgetSlotView @JvmOverloads constructor(
         placeholder.addView(text)
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
+        // v13: bottone X visibile sopra il widget
+        removeButton = ImageView(context).apply {
+            setImageResource(R.drawable.ic_close_circle)
+            val size = (28 * resources.displayMetrics.density).toInt()
+            val margin = (4 * resources.displayMetrics.density).toInt()
+            layoutParams = LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
+                topMargin = margin
+                rightMargin = margin
+            }
+            visibility = GONE
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                WidgetRemoveSheet.show(context) { removeWidget() }
+            }
+        }
+        addView(removeButton)
+
         setOnLongClickListener {
             handleLongPress()
             true
@@ -93,48 +112,39 @@ class WidgetSlotView @JvmOverloads constructor(
         val appWidgetId = controller.host.allocateAppWidgetId()
         val canBind = controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
         if (!canBind) {
-            // Richiedi all'utente il permesso di bind
             val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
-            controller.pendingPlaceCallback = { v ->
-                v?.let {
-                    currentWidgetView = it
-                    currentWidgetId = controller.lastWidgetId
-                    removeAllViews()
-                    addView(it)
-                }
-            }
+            controller.pendingPlaceCallback = { v -> placeWidgetView(v) }
             activity.startActivityForResult(bindIntent, WidgetHostController.REQ_BIND)
             return
         }
-        // Già autorizzato, configura se serve
         if (info.configure != null) {
             val configIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
                 component = info.configure
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             }
-            controller.pendingPlaceCallback = { v ->
-                v?.let {
-                    currentWidgetView = it
-                    currentWidgetId = controller.lastWidgetId
-                    removeAllViews()
-                    addView(it)
-                }
-            }
+            controller.pendingPlaceCallback = { v -> placeWidgetView(v) }
             activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
         } else {
             val view = controller.createView(appWidgetId, info)
             view.setAppWidget(appWidgetId, info)
             controller.markLastWidget(appWidgetId)
-            currentWidgetView = view
-            currentWidgetId = appWidgetId
-            removeAllViews()
-            addView(view)
+            placeWidgetView(view)
         }
+    }
+
+    private fun placeWidgetView(view: View?) {
+        view ?: return
+        currentWidgetView = view
+        currentWidgetId = hostController?.lastWidgetId ?: -1
+        removeAllViews()
+        addView(view)
+        addView(removeButton)
+        removeButton.visibility = VISIBLE
     }
 
     private fun removeWidget() {
@@ -146,6 +156,8 @@ class WidgetSlotView @JvmOverloads constructor(
         currentWidgetView = null
         removeAllViews()
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        addView(removeButton)
+        removeButton.visibility = GONE
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean = false

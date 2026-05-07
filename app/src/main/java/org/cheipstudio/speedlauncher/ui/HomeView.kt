@@ -36,8 +36,8 @@ class HomeView @JvmOverloads constructor(
     var onSwipeUp: (() -> Unit)? = null
     var onSearchTap: (() -> Unit)? = null
     var onHomeLongPress: (() -> Unit)? = null
+    var onAppMenuRequest: ((AppInfo) -> Unit)? = null
 
-    // Tracking swipe-up con criteri di soglia generosi
     private var trackStartX = 0f
     private var trackStartY = 0f
     private var trackingSwipe = false
@@ -46,6 +46,8 @@ class HomeView @JvmOverloads constructor(
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onLongPress(e: MotionEvent) {
+            // v13: se stiamo sopra un'icona o widget, NON aprire il menu home
+            if (isOverIconOrWidget(e.x, e.y)) return
             performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             onHomeLongPress?.invoke()
         }
@@ -71,6 +73,9 @@ class HomeView @JvmOverloads constructor(
         binding.searchBar.setOnClickListener { handleSearchTap() }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
+        // v13: aggiorna testo search bar in base al mode
+        updateSearchBarText()
+
         val maxPageInData = layoutStore.load().maxOfOrNull { it.page } ?: 0
         val initialPageCount = (maxPageInData + 1).coerceAtLeast(1)
         repeat(initialPageCount) { idx -> addPageAt(idx) }
@@ -83,6 +88,38 @@ class HomeView @JvmOverloads constructor(
         }
 
         applySettings()
+    }
+
+    private fun updateSearchBarText() {
+        val text = if (settings.searchMode.value == SettingsRepository.MODE_GOOGLE)
+            context.getString(org.cheipstudio.speedlauncher.R.string.search_web)
+        else
+            context.getString(org.cheipstudio.speedlauncher.R.string.search_apps)
+        binding.searchBarHint.text = text
+    }
+
+    /**
+     * v13: hit-test contro griglia + widget slot, per impedire long-press home
+     * sopra a un elemento che ha già la sua gestione del long-press.
+     */
+    private fun isOverIconOrWidget(x: Float, y: Float): Boolean {
+        // Widget slot
+        if (binding.widgetSlot.visibility == View.VISIBLE) {
+            if (hitTest(binding.widgetSlot, x, y)) return true
+        }
+        // Pager (qualsiasi pagina ha icone, blocchiamo tutta l'area)
+        if (hitTest(binding.pagedHome, x, y)) return true
+        return false
+    }
+
+    private fun hitTest(view: View, x: Float, y: Float): Boolean {
+        val loc = IntArray(2)
+        view.getLocationInWindow(loc)
+        val myLoc = IntArray(2)
+        getLocationInWindow(myLoc)
+        val left = loc[0] - myLoc[0]
+        val top = loc[1] - myLoc[1]
+        return x >= left && x <= left + view.width && y >= top && y <= top + view.height
     }
 
     private fun handleSearchTap() {
@@ -109,7 +146,6 @@ class HomeView @JvmOverloads constructor(
                 SpeedApp.instance.appRepository.launch(app, view)
             }
             onAppLongPress = { app, _ ->
-                // Menu su medium-press; gestito da MainActivity tramite callback
                 onAppMenuRequest?.invoke(app)
             }
             setLayout(layoutStore.loadPage(idx))
@@ -117,8 +153,6 @@ class HomeView @JvmOverloads constructor(
         pages.add(page)
         binding.pagedHome.addPage(page)
     }
-
-    var onAppMenuRequest: ((AppInfo) -> Unit)? = null
 
     private fun ensurePageExists(idx: Int) {
         while (pages.size <= idx) addPageAt(pages.size)
@@ -162,6 +196,7 @@ class HomeView @JvmOverloads constructor(
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
         binding.searchBar.visibility = if (settings.showSearchBar.value == true) View.VISIBLE else View.GONE
+        updateSearchBarText()
     }
 
     fun reapplySettings() {
@@ -171,12 +206,7 @@ class HomeView @JvmOverloads constructor(
         for (page in pages) page.applyGridSize(cols, rows)
     }
 
-    /**
-     * v12: GestureDetector usato come fonte primaria. In aggiunta, intercept
-     * "soft" su MOVE per casi in cui le icone non rilasciano il touch.
-     */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        // Non intercettiamo se c'è un dialog visibile
         val activity = context as? androidx.fragment.app.FragmentActivity
         if (activity != null) {
             for (frag in activity.supportFragmentManager.fragments) {
@@ -197,7 +227,6 @@ class HomeView @JvmOverloads constructor(
                 val dx = abs(ev.x - trackStartX)
                 val dy = trackStartY - ev.y
                 gestureDetector.onTouchEvent(ev)
-                // Soglia distanza generosa per intercept manuale
                 if (dy > swipeThreshold && dy > dx * 1.5f) {
                     trackingSwipe = false
                     performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)

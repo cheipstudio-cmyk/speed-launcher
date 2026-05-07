@@ -31,6 +31,7 @@ class PagedHomeContainer @JvmOverloads constructor(
 
     private val handler = Handler(Looper.getMainLooper())
     private var edgeScrollPending = false
+    private var edgeScrollTarget = -1
 
     init {
         isHorizontalScrollBarEnabled = false
@@ -42,16 +43,6 @@ class PagedHomeContainer @JvmOverloads constructor(
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
         }
         addView(pagesContainer)
-
-        setOnDragListener { _, event ->
-            when (event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> true
-                DragEvent.ACTION_DRAG_LOCATION -> { handleDragEdgeScroll(event.x); true }
-                DragEvent.ACTION_DRAG_EXITED -> { cancelEdgeScroll(); true }
-                DragEvent.ACTION_DRAG_ENDED -> { cancelEdgeScroll(); true }
-                else -> true
-            }
-        }
     }
 
     fun addPage(view: View) {
@@ -93,34 +84,63 @@ class PagedHomeContainer @JvmOverloads constructor(
         }
     }
 
-    private fun handleDragEdgeScroll(x: Float) {
-        val w = width.toFloat()
-        if (w <= 0) return
-        val edgeZone = w * 0.15f
-        when {
-            x < edgeZone && currentPage > 0 -> scheduleEdgeScroll(currentPage - 1)
-            x > w - edgeZone && currentPage < pageCount - 1 -> scheduleEdgeScroll(currentPage + 1)
-            else -> cancelEdgeScroll()
+    /**
+     * v13: gestiamo direttamente i DragEvent qui (override) — funziona meglio
+     * di setOnDragListener perché viene chiamato anche quando i figli non
+     * consumano l'evento.
+     */
+    override fun onDragEvent(event: DragEvent): Boolean {
+        when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> return true
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                handleDragEdgeScroll(event.x)
+                return true
+            }
+            DragEvent.ACTION_DRAG_EXITED -> {
+                cancelEdgeScroll()
+                return true
+            }
+            DragEvent.ACTION_DRAG_ENDED -> {
+                cancelEdgeScroll()
+                return true
+            }
         }
+        return super.onDragEvent(event)
     }
 
-    private fun scheduleEdgeScroll(targetPage: Int) {
-        if (edgeScrollPending) return
+    private fun handleDragEdgeScroll(rawX: Float) {
+        // rawX è in coordinate del PagedHomeContainer (NON dello scrollX)
+        val w = width.toFloat()
+        if (w <= 0) return
+        val edgeZone = w * 0.18f
+        val newTarget = when {
+            rawX < edgeZone && currentPage > 0 -> currentPage - 1
+            rawX > w - edgeZone && currentPage < pageCount - 1 -> currentPage + 1
+            else -> -1
+        }
+        if (newTarget == -1) {
+            cancelEdgeScroll()
+            return
+        }
+        if (edgeScrollPending && edgeScrollTarget == newTarget) return
+        cancelEdgeScroll()
         edgeScrollPending = true
+        edgeScrollTarget = newTarget
         handler.postDelayed({
-            if (edgeScrollPending) snapToPage(targetPage, animate = true)
+            if (edgeScrollPending && edgeScrollTarget == newTarget) {
+                snapToPage(newTarget, animate = true)
+            }
             edgeScrollPending = false
-        }, 500L)
+            edgeScrollTarget = -1
+        }, 450L)
     }
 
     private fun cancelEdgeScroll() {
         edgeScrollPending = false
+        edgeScrollTarget = -1
         handler.removeCallbacksAndMessages(null)
     }
 
-    /**
-     * Intercept più reattivo: se è chiaramente orizzontale (slop superato + dx > dy), prendi.
-     */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
