@@ -331,11 +331,7 @@ class SettingsActivity : AppCompatActivity() {
                     packageManager.getPackageInfo(packageName, 0).versionName ?: ""
                 } catch (_: Throwable) { "" }
                 val device = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} (Android ${android.os.Build.VERSION.RELEASE})"
-                val body = "
-
----
-Speed Launcher v$versionName
-$device"
+                val body = "\n\n---\nSpeed Launcher v$versionName\n$device"
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                     data = Uri.parse("mailto:cheipstudio@gmail.com")
                     putExtra(Intent.EXTRA_SUBJECT, getString(R.string.contact_email_subject))

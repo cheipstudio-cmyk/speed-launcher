@@ -113,10 +113,13 @@ object FolderSheet {
             isFocusable = false
             isFocusableInTouchMode = false
             isCursorVisible = false
+            // v31.2: la tastiera NON deve apparire automaticamente quando il dialog si apre
+            showSoftInputOnFocus = false
             setOnClickListener {
                 isFocusable = true
                 isFocusableInTouchMode = true
                 isCursorVisible = true
+                showSoftInputOnFocus = true
                 requestFocus()
                 setSelection(text?.length ?: 0)
                 val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -183,7 +186,7 @@ object FolderSheet {
             text = context.getString(R.string.folder_delete)
             setTextColor(textColor)
             textSize = 14f
-            setTypeface(typeface, android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         }
         deleteChip.addView(trashIcon)
         deleteChip.addView(trashLabel)
@@ -199,7 +202,10 @@ object FolderSheet {
                     WindowManager.LayoutParams.MATCH_PARENT
                 )
                 w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-                w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+                w.setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING or
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+                )
             }
             setContentView(rootContainer)
         }

@@ -14,6 +14,15 @@ class SpeedApp : Application() {
     val settingsRepository: SettingsRepository by lazy { SettingsRepository(this) }
     val usageTracker: AppUsageTracker by lazy { AppUsageTracker(this) }
 
+    /**
+     * Handler globale per drag & drop di icone tra grid e altre destinazioni.
+     * Signature: (originId, appKey, targetId) -> Unit
+     * - originId: "grid{N}:{idx}" della cella di origine
+     * - appKey: chiave dell'app trascinata
+     * - targetId: "grid{N}:{idx}" della cella destinazione
+     */
+    var dragHandler: ((String, String, String) -> Unit)? = null
+
     override fun onCreate() {
         super.onCreate()
         instance = this
