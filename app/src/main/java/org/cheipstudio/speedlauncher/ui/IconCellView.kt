@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -21,12 +22,10 @@ import org.cheipstudio.speedlauncher.data.AppInfo
 import kotlin.math.abs
 
 /**
- * v12 home icons: pattern Pixel-style.
- * - Tap (rilascio entro 250ms) → onLaunch IMMEDIATO
- * - Press tenuta 250-600ms → menu (onMenu)
- * - Press tenuta >600ms → drag (startDragAndDrop)
- *
- * Niente più doppio tap. Tutto basato sul tempo di pressione.
+ * v14:
+ * - Tap → lancia subito
+ * - Press tenuto >400ms (drag threshold) → drag (per spostare)
+ * - Press tenuto >1500ms senza spostarsi → menu app
  */
 class IconCellView(context: Context) : LinearLayout(context) {
 
@@ -40,40 +39,35 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var app: AppInfo? = null
     var onLaunch: ((AppInfo, View) -> Unit)? = null
     var onMenu: ((AppInfo, View) -> Unit)? = null
-
     var dragOriginId: String = ""
 
     private val handler = Handler(Looper.getMainLooper())
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-
     private var downX = 0f
     private var downY = 0f
     private var pressing = false
-    private var menuFired = false
     private var dragFired = false
+    private var menuFired = false
     private var moved = false
 
-    private val MENU_THRESHOLD = 250L
-    private val DRAG_THRESHOLD = 600L
+    private val DRAG_THRESHOLD = 400L
+    private val MENU_THRESHOLD = 1500L
 
-    private val menuRunnable = Runnable {
-        if (pressing && !moved && !menuFired && !dragFired) {
-            menuFired = true
-            // Feedback aptico leggero
-            performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-            // Animazione "selected" leggera
-            iconView.animate().scaleX(0.92f).scaleY(0.92f).setDuration(80).start()
-        }
-    }
     private val dragRunnable = Runnable {
-        if (pressing && !moved && !dragFired && dragOriginId.isNotEmpty()) {
+        if (pressing && !moved && !dragFired && !menuFired && dragOriginId.isNotEmpty()) {
             dragFired = true
-            menuFired = false  // se parte drag, niente menu
-            iconView.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
-            performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             val a = app ?: return@Runnable
             val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
             startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
+        }
+    }
+    private val menuRunnable = Runnable {
+        if (pressing && !moved && !menuFired) {
+            menuFired = true
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val a = app ?: return@Runnable
+            onMenu?.invoke(a, this)
         }
     }
 
@@ -116,12 +110,10 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 downY = event.y
                 pressing = true
                 moved = false
-                menuFired = false
                 dragFired = false
-                handler.postDelayed(menuRunnable, MENU_THRESHOLD)
+                menuFired = false
                 handler.postDelayed(dragRunnable, DRAG_THRESHOLD)
-                // Lascia che il parent scroll orizzontale possa intercettare
-                parent?.requestDisallowInterceptTouchEvent(false)
+                handler.postDelayed(menuRunnable, MENU_THRESHOLD)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -129,37 +121,24 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val dy = abs(event.y - downY)
                 if (!moved && (dx > touchSlop || dy > touchSlop)) {
                     moved = true
-                    // Movimento → cancella tutto, lascia gestire al parent (paginazione orizzontale o swipe-up)
-                    handler.removeCallbacks(menuRunnable)
+                    // Movimento prima del drag-threshold: cancella tutto, lascia gestire al parent (paginazione/swipe)
                     handler.removeCallbacks(dragRunnable)
-                    iconView.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+                    handler.removeCallbacks(menuRunnable)
                 }
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 pressing = false
-                handler.removeCallbacks(menuRunnable)
                 handler.removeCallbacks(dragRunnable)
-                iconView.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
-                if (moved) return true
-                if (dragFired) return true  // drag già partito
-                if (menuFired) {
-                    // Menu mode: rilasciato dopo 250ms ma prima di 600ms → apri menu
-                    if (dragOriginId.isEmpty()) {
-                        // Drawer: il menu lo apre il long-click standard, non noi
-                    }
-                    onMenu?.invoke(a, this)
-                } else {
-                    // Tap rapido: lancia immediato
-                    onLaunch?.invoke(a, this)
-                }
+                handler.removeCallbacks(menuRunnable)
+                if (moved || dragFired || menuFired) return true
+                onLaunch?.invoke(a, this)
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
                 pressing = false
-                handler.removeCallbacks(menuRunnable)
                 handler.removeCallbacks(dragRunnable)
-                iconView.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+                handler.removeCallbacks(menuRunnable)
                 return true
             }
         }

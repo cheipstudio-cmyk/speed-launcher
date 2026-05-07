@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.DragEvent
 import android.view.MotionEvent
+import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.HorizontalScrollView
@@ -21,13 +22,13 @@ class PagedHomeContainer @JvmOverloads constructor(
     private val pagesContainer: LinearLayout
     var currentPage: Int = 0
         private set
-
     var onPageChanged: ((Int) -> Unit)? = null
 
     private var startX = 0f
     private var startY = 0f
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var horizontalDragLikely = false
+    private var velocityTracker: VelocityTracker? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private var edgeScrollPending = false
@@ -37,7 +38,6 @@ class PagedHomeContainer @JvmOverloads constructor(
         isHorizontalScrollBarEnabled = false
         overScrollMode = OVER_SCROLL_NEVER
         isFillViewport = true
-
         pagesContainer = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
@@ -84,32 +84,17 @@ class PagedHomeContainer @JvmOverloads constructor(
         }
     }
 
-    /**
-     * v13: gestiamo direttamente i DragEvent qui (override) — funziona meglio
-     * di setOnDragListener perché viene chiamato anche quando i figli non
-     * consumano l'evento.
-     */
     override fun onDragEvent(event: DragEvent): Boolean {
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> return true
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                handleDragEdgeScroll(event.x)
-                return true
-            }
-            DragEvent.ACTION_DRAG_EXITED -> {
-                cancelEdgeScroll()
-                return true
-            }
-            DragEvent.ACTION_DRAG_ENDED -> {
-                cancelEdgeScroll()
-                return true
-            }
+            DragEvent.ACTION_DRAG_LOCATION -> { handleDragEdgeScroll(event.x); return true }
+            DragEvent.ACTION_DRAG_EXITED -> { cancelEdgeScroll(); return true }
+            DragEvent.ACTION_DRAG_ENDED -> { cancelEdgeScroll(); return true }
         }
         return super.onDragEvent(event)
     }
 
     private fun handleDragEdgeScroll(rawX: Float) {
-        // rawX è in coordinate del PagedHomeContainer (NON dello scrollX)
         val w = width.toFloat()
         if (w <= 0) return
         val edgeZone = w * 0.18f
@@ -118,21 +103,16 @@ class PagedHomeContainer @JvmOverloads constructor(
             rawX > w - edgeZone && currentPage < pageCount - 1 -> currentPage + 1
             else -> -1
         }
-        if (newTarget == -1) {
-            cancelEdgeScroll()
-            return
-        }
+        if (newTarget == -1) { cancelEdgeScroll(); return }
         if (edgeScrollPending && edgeScrollTarget == newTarget) return
         cancelEdgeScroll()
         edgeScrollPending = true
         edgeScrollTarget = newTarget
         handler.postDelayed({
-            if (edgeScrollPending && edgeScrollTarget == newTarget) {
-                snapToPage(newTarget, animate = true)
-            }
+            if (edgeScrollPending && edgeScrollTarget == newTarget) snapToPage(newTarget, animate = true)
             edgeScrollPending = false
             edgeScrollTarget = -1
-        }, 450L)
+        }, 400L)
     }
 
     private fun cancelEdgeScroll() {
@@ -141,17 +121,23 @@ class PagedHomeContainer @JvmOverloads constructor(
         handler.removeCallbacksAndMessages(null)
     }
 
+    /**
+     * v14: intercept più reattivo (slop standard, dx > dy soltanto).
+     */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                startX = ev.x
-                startY = ev.y
+                startX = ev.x; startY = ev.y
                 horizontalDragLikely = false
+                velocityTracker?.recycle()
+                velocityTracker = VelocityTracker.obtain()
+                velocityTracker?.addMovement(ev)
             }
             MotionEvent.ACTION_MOVE -> {
+                velocityTracker?.addMovement(ev)
                 val dx = abs(ev.x - startX)
                 val dy = abs(ev.y - startY)
-                if (!horizontalDragLikely && dx > touchSlop && dx > dy * 1.3f) {
+                if (!horizontalDragLikely && dx > touchSlop && dx > dy) {
                     horizontalDragLikely = true
                     return true
                 }
@@ -162,14 +148,28 @@ class PagedHomeContainer @JvmOverloads constructor(
 
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent): Boolean {
+        velocityTracker?.addMovement(ev)
         val handled = super.onTouchEvent(ev)
         when (ev.action) {
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 val w = width
                 if (w > 0) {
-                    val nearest = ((scrollX + w / 2f) / w).toInt().coerceIn(0, (pageCount - 1).coerceAtLeast(0))
-                    snapToPage(nearest, animate = true)
+                    velocityTracker?.computeCurrentVelocity(1000)
+                    val vx = velocityTracker?.xVelocity ?: 0f
+
+                    val centerOffset = scrollX + w / 2f
+                    val baseNearest = (centerOffset / w).toInt()
+
+                    // Velocity-based: se swipi rapido, vai nella direzione del fling
+                    val target = when {
+                        vx < -800f -> (currentPage + 1).coerceAtMost(pageCount - 1)
+                        vx > 800f -> (currentPage - 1).coerceAtLeast(0)
+                        else -> baseNearest.coerceIn(0, (pageCount - 1).coerceAtLeast(0))
+                    }
+                    snapToPage(target, animate = true)
                 }
+                velocityTracker?.recycle()
+                velocityTracker = null
             }
         }
         return handled

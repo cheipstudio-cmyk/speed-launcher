@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="SettingsSectionHeader">
+    <style name="MotoSection">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingStart">28dp</item>
         <item name="android:paddingEnd">28dp</item>
-        <item name="android:paddingTop">20dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:textColor">?attr/colorPrimary</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:letterSpacing">0.04</item>
+        <item name="android:paddingTop">28dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="SettingsCard" parent="Widget.Material3.CardView.Filled">
+    <style name="MotoDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">28dp</item>
+        <item name="android:layout_marginEnd">28dp</item>
+        <item name="android:background">?attr/colorOutlineVariant</item>
+        <item name="android:alpha">0.4</item>
+    </style>
+
+    <style name="MotoRow">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginHorizontal">16dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
-        <item name="cardCornerRadius">22dp</item>
-        <item name="cardElevation">0dp</item>
-        <item name="cardBackgroundColor">?attr/colorSurfaceContainerLow</item>
-    </style>
-
-    <style name="SettingsRowToggle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">56dp</item>
+        <item name="android:minHeight">68dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingStart">28dp</item>
+        <item name="android:paddingEnd">28dp</item>
+        <item name="android:paddingVertical">12dp</item>
     </style>
 
-    <style name="SettingsRowClickable">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">60dp</item>
+    <style name="MotoRowClickable" parent="MotoRow">
         <item name="android:background">?attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
     </style>
 
-    <style name="SettingsDivider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_marginStart">20dp</item>
-        <item name="android:layout_marginEnd">20dp</item>
-        <item name="android:background">?attr/colorOutlineVariant</item>
-        <item name="android:alpha">0.4</item>
+    <style name="MotoTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="MotoSubtitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
 </resources>

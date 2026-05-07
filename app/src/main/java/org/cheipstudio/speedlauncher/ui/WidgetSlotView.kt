@@ -14,6 +14,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
@@ -28,15 +29,13 @@ class WidgetSlotView @JvmOverloads constructor(
     private var currentWidgetView: View? = null
     private var currentWidgetId: Int = -1
     private val placeholder: LinearLayout
-    private val removeButton: ImageView
+    private val removeButton: FrameLayout
 
     init {
         placeholder = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            background = androidx.core.content.ContextCompat.getDrawable(
-                context, R.drawable.bg_widget_placeholder
-            )
+            background = ContextCompat.getDrawable(context, R.drawable.bg_widget_placeholder)
         }
         val icon = ImageView(context).apply {
             setImageResource(R.drawable.ic_widgets)
@@ -62,11 +61,12 @@ class WidgetSlotView @JvmOverloads constructor(
         placeholder.addView(text)
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
-        // v13: bottone X visibile sopra il widget
-        removeButton = ImageView(context).apply {
-            setImageResource(R.drawable.ic_close_circle)
-            val size = (28 * resources.displayMetrics.density).toInt()
-            val margin = (4 * resources.displayMetrics.density).toInt()
+        // v14: bottone X dentro un cerchio elevato, stile FAB miniaturizzato
+        removeButton = FrameLayout(context).apply {
+            background = ContextCompat.getDrawable(context, R.drawable.bg_remove_button)
+            elevation = 8 * resources.displayMetrics.density
+            val size = (32 * resources.displayMetrics.density).toInt()
+            val margin = (6 * resources.displayMetrics.density).toInt()
             layoutParams = LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
                 topMargin = margin
                 rightMargin = margin
@@ -78,26 +78,23 @@ class WidgetSlotView @JvmOverloads constructor(
                 WidgetRemoveSheet.show(context) { removeWidget() }
             }
         }
+        val xIcon = ImageView(context).apply {
+            setImageResource(R.drawable.ic_close_x)
+            val s = (16 * resources.displayMetrics.density).toInt()
+            layoutParams = LayoutParams(s, s, Gravity.CENTER)
+            setColorFilter(Color.WHITE)
+        }
+        removeButton.addView(xIcon)
         addView(removeButton)
 
         setOnLongClickListener {
-            handleLongPress()
+            if (currentWidgetView == null) showCustomPicker()
             true
         }
         isLongClickable = true
     }
 
-    fun setHostController(controller: WidgetHostController) {
-        hostController = controller
-    }
-
-    private fun handleLongPress() {
-        if (currentWidgetView == null) {
-            showCustomPicker()
-        } else {
-            WidgetRemoveSheet.show(context) { removeWidget() }
-        }
-    }
+    fun setHostController(controller: WidgetHostController) { hostController = controller }
 
     private fun showCustomPicker() {
         val activity = context as? FragmentActivity ?: return

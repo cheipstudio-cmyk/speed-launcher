@@ -35,29 +35,29 @@ class HomeView @JvmOverloads constructor(
 
     var onSwipeUp: (() -> Unit)? = null
     var onSearchTap: (() -> Unit)? = null
-    var onHomeLongPress: (() -> Unit)? = null
+    var onHomeLongPress: (() -> Unit)? = null   // mantenuto per il bottone ⚙
     var onAppMenuRequest: ((AppInfo) -> Unit)? = null
 
     private var trackStartX = 0f
     private var trackStartY = 0f
-    private var trackingSwipe = false
-    private val swipeThreshold = resources.displayMetrics.density * 80f
+    private var tracking = false
+    private val swipeThreshold = resources.displayMetrics.density * 70f
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
-        override fun onLongPress(e: MotionEvent) {
-            // v13: se stiamo sopra un'icona o widget, NON aprire il menu home
-            if (isOverIconOrWidget(e.x, e.y)) return
-            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            onHomeLongPress?.invoke()
-        }
         override fun onFling(
             e1: MotionEvent?, e2: MotionEvent,
             velocityX: Float, velocityY: Float
         ): Boolean {
-            if (velocityY < -1200f && abs(velocityY) > abs(velocityX) * 1.5f) {
+            // Swipe up
+            if (velocityY < -1200f && abs(velocityY) > abs(velocityX) * 1.4f) {
                 performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                 onSwipeUp?.invoke()
+                return true
+            }
+            // Swipe down → notifiche
+            if (velocityY > 1200f && abs(velocityY) > abs(velocityX) * 1.4f) {
+                expandStatusBar()
                 return true
             }
             return false
@@ -67,13 +67,12 @@ class HomeView @JvmOverloads constructor(
     init {
         layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
-            setDuration(180)
+            setDuration(160)
         }
 
         binding.searchBar.setOnClickListener { handleSearchTap() }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
-        // v13: aggiorna testo search bar in base al mode
         updateSearchBarText()
 
         val maxPageInData = layoutStore.load().maxOfOrNull { it.page } ?: 0
@@ -90,36 +89,24 @@ class HomeView @JvmOverloads constructor(
         applySettings()
     }
 
+    /** Apre il pannello notifiche via reflection — non garantito su tutti i device */
+    private fun expandStatusBar() {
+        try {
+            val sbm = context.getSystemService("statusbar")
+            val cls = Class.forName("android.app.StatusBarManager")
+            val method = cls.getMethod("expandNotificationsPanel")
+            method.invoke(sbm)
+        } catch (_: Throwable) {
+            // Silenzioso: alcune ROM bloccano questo trick
+        }
+    }
+
     private fun updateSearchBarText() {
         val text = if (settings.searchMode.value == SettingsRepository.MODE_GOOGLE)
             context.getString(org.cheipstudio.speedlauncher.R.string.search_web)
         else
             context.getString(org.cheipstudio.speedlauncher.R.string.search_apps)
         binding.searchBarHint.text = text
-    }
-
-    /**
-     * v13: hit-test contro griglia + widget slot, per impedire long-press home
-     * sopra a un elemento che ha già la sua gestione del long-press.
-     */
-    private fun isOverIconOrWidget(x: Float, y: Float): Boolean {
-        // Widget slot
-        if (binding.widgetSlot.visibility == View.VISIBLE) {
-            if (hitTest(binding.widgetSlot, x, y)) return true
-        }
-        // Pager (qualsiasi pagina ha icone, blocchiamo tutta l'area)
-        if (hitTest(binding.pagedHome, x, y)) return true
-        return false
-    }
-
-    private fun hitTest(view: View, x: Float, y: Float): Boolean {
-        val loc = IntArray(2)
-        view.getLocationInWindow(loc)
-        val myLoc = IntArray(2)
-        getLocationInWindow(myLoc)
-        val left = loc[0] - myLoc[0]
-        val top = loc[1] - myLoc[1]
-        return x >= left && x <= left + view.width && y >= top && y <= top + view.height
     }
 
     private fun handleSearchTap() {
@@ -131,9 +118,7 @@ class HomeView @JvmOverloads constructor(
                         putExtra(SearchManager.QUERY, "")
                     }
                     context.startActivity(intent)
-                } catch (_: Throwable) {
-                    onSearchTap?.invoke()
-                }
+                } catch (_: Throwable) { onSearchTap?.invoke() }
             }
             else -> onSearchTap?.invoke()
         }
@@ -142,12 +127,8 @@ class HomeView @JvmOverloads constructor(
     private fun addPageAt(idx: Int) {
         val page = IconGridView(context).apply {
             pageIndex = idx
-            onAppLaunch = { app, view ->
-                SpeedApp.instance.appRepository.launch(app, view)
-            }
-            onAppLongPress = { app, _ ->
-                onAppMenuRequest?.invoke(app)
-            }
+            onAppLaunch = { app, view -> SpeedApp.instance.appRepository.launch(app, view) }
+            onAppLongPress = { app, _ -> onAppMenuRequest?.invoke(app) }
             setLayout(layoutStore.loadPage(idx))
         }
         pages.add(page)
@@ -213,29 +194,35 @@ class HomeView @JvmOverloads constructor(
                 if (frag is androidx.fragment.app.DialogFragment && frag.isVisible) return false
             }
         }
-
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 trackStartX = ev.x
                 trackStartY = ev.y
-                trackingSwipe = true
+                tracking = true
                 gestureDetector.onTouchEvent(ev)
                 return false
             }
             MotionEvent.ACTION_MOVE -> {
-                if (!trackingSwipe) return false
+                if (!tracking) return false
                 val dx = abs(ev.x - trackStartX)
-                val dy = trackStartY - ev.y
+                val dy = ev.y - trackStartY  // positivo = giù, negativo = su
                 gestureDetector.onTouchEvent(ev)
-                if (dy > swipeThreshold && dy > dx * 1.5f) {
-                    trackingSwipe = false
+                // Swipe-up
+                if (dy < -swipeThreshold && abs(dy) > dx * 1.4f) {
+                    tracking = false
                     performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                     onSwipeUp?.invoke()
                     return true
                 }
+                // Swipe-down (parte solo dalla zona alta della home)
+                if (dy > swipeThreshold && abs(dy) > dx * 1.4f && trackStartY < height * 0.4f) {
+                    tracking = false
+                    expandStatusBar()
+                    return true
+                }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                trackingSwipe = false
+                tracking = false
                 gestureDetector.onTouchEvent(ev)
             }
         }
@@ -243,29 +230,18 @@ class HomeView @JvmOverloads constructor(
     }
 
     @Suppress("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return gestureDetector.onTouchEvent(event)
-    }
+    override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
     fun attachWidgetHost(host: WidgetHostController) {
         binding.widgetSlot.setHostController(host)
     }
-
-    fun refreshApps(apps: List<AppInfo>) {
-        for (page in pages) page.refresh(apps)
-        maybeCreateNextPage()
-    }
-
+    fun refreshApps(apps: List<AppInfo>) { for (page in pages) page.refresh(apps); maybeCreateNextPage() }
     fun refreshDots() { for (page in pages) page.invalidate() }
-
     fun pinApp(app: AppInfo): Boolean {
-        for (page in pages) {
-            if (page.pinApp(app)) { maybeCreateNextPage(); return true }
-        }
+        for (page in pages) if (page.pinApp(app)) { maybeCreateNextPage(); return true }
         ensurePageExists(pages.size)
         return pages.last().pinApp(app)
     }
-
     fun unpinApp(app: AppInfo) { for (page in pages) page.unpinApp(app) }
     fun isPinned(app: AppInfo) = pages.any { it.isPinned(app) }
 }

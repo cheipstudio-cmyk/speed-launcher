@@ -45,10 +45,10 @@
     <string name="cheip_studio_credit">A Cheip Studio project</string>
     <string name="tutorial_swipe_title">Open the drawer</string>
     <string name="tutorial_swipe_desc">Swipe up quickly from anywhere on the home to open the list of all apps.</string>
-    <string name="tutorial_longpress_icon_title">Hold for the menu</string>
-    <string name="tutorial_longpress_icon_desc">Long-press an icon to move it. Medium-press (half a second) opens the Info/Uninstall menu.</string>
+    <string name="tutorial_longpress_icon_title">Move or customize</string>
+    <string name="tutorial_longpress_icon_desc">Hold an icon to move it. Long-press (1.5 seconds) for the Info/Uninstall menu.</string>
     <string name="tutorial_longpress_home_title">Customize</string>
-    <string name="tutorial_longpress_home_desc">Tap the ⚙ icon in the search bar or long-press an empty area to open settings.</string>
+    <string name="tutorial_longpress_home_desc">Tap the ⚙ icon in the search bar to open settings.</string>
     <string name="tutorial_pages_title">Multiple pages</string>
     <string name="tutorial_pages_desc">Swipe horizontally to change page. Drag an icon to the edge to move it to another page.</string>
     <string name="tutorial_next">Next</string>

@@ -45,10 +45,10 @@
     <string name="cheip_studio_credit">A Cheip Studio project</string>
     <string name="tutorial_swipe_title">Apri il drawer</string>
     <string name="tutorial_swipe_desc">Scorri velocemente verso l\'alto da qualsiasi punto della home per aprire l\'elenco di tutte le app.</string>
-    <string name="tutorial_longpress_icon_title">Tieni premuto per il menu</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuto a lungo un\'icona per spostarla. Pressione media (mezzo secondo) per il menu Info/Disinstalla.</string>
+    <string name="tutorial_longpress_icon_title">Sposta o personalizza</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuto un\'icona per spostarla. Premi a lungo (1.5 secondi) per il menu Info/Disinstalla.</string>
     <string name="tutorial_longpress_home_title">Personalizza</string>
-    <string name="tutorial_longpress_home_desc">Tocca l\'icona ⚙ nella barra di ricerca o tieni premuto un punto vuoto per aprire le impostazioni.</string>
+    <string name="tutorial_longpress_home_desc">Tocca l\'icona ⚙ nella barra di ricerca per aprire le impostazioni.</string>
     <string name="tutorial_pages_title">Più pagine</string>
     <string name="tutorial_pages_desc">Scorri orizzontalmente per cambiare pagina. Trascina un\'icona oltre il bordo per spostarla in un\'altra pagina.</string>
     <string name="tutorial_next">Avanti</string>

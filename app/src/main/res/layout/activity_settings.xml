@@ -9,13 +9,13 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface">
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="@string/settings_title"
             app:titleTextColor="?attr/colorOnSurface" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -30,378 +30,233 @@
             android:orientation="vertical"
             android:paddingBottom="32dp">
 
-            <!-- Header -->
+            <!-- Titolone stile Motorola -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="28dp"
+                android:paddingEnd="28dp"
+                android:paddingTop="48dp"
+                android:paddingBottom="32dp"
+                android:text="@string/settings_title"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="44sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- ASPETTO -->
+            <TextView style="@style/MotoSection" android:text="@string/settings_section_appearance" />
+            <View style="@style/MotoDivider" />
+
+            <LinearLayout style="@style/MotoRow">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_grid_size" />
+                    <TextView
+                        android:id="@+id/gridValueLabel"
+                        style="@style/MotoSubtitle" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/gridRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp">
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/gridRadio4x4"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/settings_grid_4x4"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/gridRadio5x5"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/settings_grid_5x5"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/gridRadio5x6"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/settings_grid_5x6"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+            </RadioGroup>
+
+            <LinearLayout style="@style/MotoRow">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MotoTitle"
+                    android:text="@string/settings_show_widget" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchShowWidget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/MotoRow">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MotoTitle"
+                    android:text="@string/settings_show_search" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchShowSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <!-- RICERCA -->
+            <TextView style="@style/MotoSection" android:text="@string/settings_section_search" />
+            <View style="@style/MotoDivider" />
+
+            <LinearLayout style="@style/MotoRow">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_search_mode" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/searchModeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingBottom="8dp">
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/searchModeApps"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/settings_search_apps"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/searchModeGoogle"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/settings_search_google"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+            </RadioGroup>
+
+            <!-- COMPORTAMENTO -->
+            <TextView style="@style/MotoSection" android:text="@string/settings_section_behavior" />
+            <View style="@style/MotoDivider" />
+
+            <LinearLayout style="@style/MotoRow">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MotoTitle"
+                    android:text="@string/settings_haptic" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchHaptic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemResetLayout"
+                style="@style/MotoRowClickable">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_reset" />
+                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_reset_sub" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemShowTutorial"
+                style="@style/MotoRowClickable">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MotoTitle"
+                    android:text="@string/settings_show_tutorial" />
+            </LinearLayout>
+
+            <!-- SISTEMA -->
+            <TextView style="@style/MotoSection" android:text="@string/settings_section_general" />
+            <View style="@style/MotoDivider" />
+
+            <LinearLayout
+                android:id="@+id/itemDefaultLauncher"
+                style="@style/MotoRowClickable">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_default_launcher" />
+                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_default_launcher_sub" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemNotificationAccess"
+                style="@style/MotoRowClickable">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/MotoTitle" android:text="@string/settings_notification_access" />
+                    <TextView style="@style/MotoSubtitle" android:text="@string/settings_notification_access_sub" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemAppInfo"
+                style="@style/MotoRowClickable">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MotoTitle"
+                    android:text="@string/settings_app_info" />
+            </LinearLayout>
+
+            <!-- Footer -->
+            <View style="@style/MotoDivider" android:layout_marginTop="24dp" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="32dp">
-                <FrameLayout
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:background="@drawable/bg_settings_logo">
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center"
-                        android:src="@mipmap/ic_launcher" />
-                </FrameLayout>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/app_name"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
                 <TextView
                     android:id="@+id/versionValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="13sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="6dp"
                     android:text="@string/cheip_studio_credit"
                     android:textColor="?attr/colorPrimary"
                     android:textSize="13sp"
                     android:textStyle="italic" />
             </LinearLayout>
-
-            <!-- Sezione: Aspetto -->
-            <TextView
-                style="@style/SettingsSectionHeader"
-                android:text="@string/settings_section_appearance" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/SettingsCard">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingVertical="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="20dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="4dp"
-                        android:text="@string/settings_grid_size"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <RadioGroup
-                        android:id="@+id/gridRadioGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="12dp">
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/gridRadio4x4"
-                            android:layout_width="match_parent"
-                            android:layout_height="44dp"
-                            android:text="@string/settings_grid_4x4"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="14sp" />
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/gridRadio5x5"
-                            android:layout_width="match_parent"
-                            android:layout_height="44dp"
-                            android:text="@string/settings_grid_5x5"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="14sp" />
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/gridRadio5x6"
-                            android:layout_width="match_parent"
-                            android:layout_height="44dp"
-                            android:text="@string/settings_grid_5x6"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="14sp" />
-                    </RadioGroup>
-
-                    <View style="@style/SettingsDivider" />
-
-                    <LinearLayout style="@style/SettingsRowToggle">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_widgets"
-                            app:tint="?attr/colorPrimary" />
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:text="@string/settings_show_widget"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="15sp" />
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchShowWidget"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <LinearLayout style="@style/SettingsRowToggle">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_search"
-                            app:tint="?attr/colorPrimary" />
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:text="@string/settings_show_search"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="15sp" />
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchShowSearch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Sezione: Ricerca -->
-            <TextView
-                style="@style/SettingsSectionHeader"
-                android:text="@string/settings_section_search" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/SettingsCard">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingVertical="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="20dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="4dp"
-                        android:text="@string/settings_search_mode"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <RadioGroup
-                        android:id="@+id/searchModeGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="12dp"
-                        android:paddingBottom="8dp">
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/searchModeApps"
-                            android:layout_width="match_parent"
-                            android:layout_height="44dp"
-                            android:text="@string/settings_search_apps"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="14sp" />
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/searchModeGoogle"
-                            android:layout_width="match_parent"
-                            android:layout_height="44dp"
-                            android:text="@string/settings_search_google"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="14sp" />
-                    </RadioGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Sezione: Comportamento -->
-            <TextView
-                style="@style/SettingsSectionHeader"
-                android:text="@string/settings_section_behavior" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/SettingsCard">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingVertical="4dp">
-
-                    <LinearLayout style="@style/SettingsRowToggle">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_haptic"
-                            app:tint="?attr/colorPrimary" />
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:text="@string/settings_haptic"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="15sp" />
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchHaptic"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <View style="@style/SettingsDivider" />
-
-                    <LinearLayout
-                        android:id="@+id/itemResetLayout"
-                        style="@style/SettingsRowClickable">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_uninstall"
-                            app:tint="?attr/colorError" />
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/settings_reset"
-                                android:textColor="?attr/colorOnSurface"
-                                android:textSize="15sp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/settings_reset_sub"
-                                android:textColor="?attr/colorOnSurfaceVariant"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <View style="@style/SettingsDivider" />
-
-                    <LinearLayout
-                        android:id="@+id/itemShowTutorial"
-                        style="@style/SettingsRowClickable">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_info"
-                            app:tint="?attr/colorPrimary" />
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:text="@string/settings_show_tutorial"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="15sp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Sezione: Sistema -->
-            <TextView
-                style="@style/SettingsSectionHeader"
-                android:text="@string/settings_section_general" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/SettingsCard">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingVertical="4dp">
-
-                    <LinearLayout
-                        android:id="@+id/itemDefaultLauncher"
-                        style="@style/SettingsRowClickable">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_settings"
-                            app:tint="?attr/colorPrimary" />
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/settings_default_launcher"
-                                android:textColor="?attr/colorOnSurface"
-                                android:textSize="15sp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/settings_default_launcher_sub"
-                                android:textColor="?attr/colorOnSurfaceVariant"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <View style="@style/SettingsDivider" />
-
-                    <LinearLayout
-                        android:id="@+id/itemNotificationAccess"
-                        style="@style/SettingsRowClickable">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_info"
-                            app:tint="?attr/colorPrimary" />
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/settings_notification_access"
-                                android:textColor="?attr/colorOnSurface"
-                                android:textSize="15sp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/settings_notification_access_sub"
-                                android:textColor="?attr/colorOnSurfaceVariant"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <View style="@style/SettingsDivider" />
-
-                    <LinearLayout
-                        android:id="@+id/itemAppInfo"
-                        style="@style/SettingsRowClickable">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_info"
-                            app:tint="?attr/colorPrimary" />
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:text="@string/settings_app_info"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="15sp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
