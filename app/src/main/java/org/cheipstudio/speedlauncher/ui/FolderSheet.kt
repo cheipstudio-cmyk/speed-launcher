@@ -99,45 +99,33 @@ object FolderSheet {
             layoutParams = lp
         }
 
-        // Title input - tap per editare
-        val nameInput = EditText(context).apply {
-            setText(folder.name)
+        // v32: TextView + dialog di rename separato. Zero glitch tastiera.
+        val nameLabel = TextView(context).apply {
+            text = folder.name
             textSize = 20f
             setTextColor(textColor)
-            background = null
-            setHintTextColor(hintColor)
-            hint = context.getString(R.string.folder_name_hint)
             setSingleLine(true)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
-            isFocusable = false
-            isFocusableInTouchMode = false
-            isCursorVisible = false
-            // v31.2: la tastiera NON deve apparire automaticamente quando il dialog si apre
-            showSoftInputOnFocus = false
-            setOnClickListener {
-                isFocusable = true
-                isFocusableInTouchMode = true
-                isCursorVisible = true
-                showSoftInputOnFocus = true
-                requestFocus()
-                setSelection(text?.length ?: 0)
-                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                imm?.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-            }
+            background = null
+            isClickable = true
+            isFocusable = true
+            val pad = (8 * density).toInt()
+            setPadding(pad, pad, pad, pad)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.bottomMargin = (24 * density).toInt()
+            lp.bottomMargin = (16 * density).toInt()
             layoutParams = lp
-            addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
-                override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
-                override fun afterTextChanged(s: Editable?) { onRename(s?.toString() ?: "") }
-            })
+            setOnClickListener {
+                showRenameDialog(context, this, folder.name) { newName ->
+                    text = newName
+                    onRename(newName)
+                }
+            }
         }
-        card.addView(nameInput)
+        card.addView(nameLabel)
 
         val apps = SpeedApp.instance.appRepository.apps.value ?: emptyList()
         val byKey = apps.associateBy { it.key }
@@ -218,21 +206,28 @@ object FolderSheet {
             } catch (_: Throwable) {}
         }
 
+        // v36: helper per chiudere fluido — rimuovo blur PRIMA del dismiss visivo
+        fun closeFolder() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
+                try { decor.setRenderEffect(null) } catch (_: Throwable) {}
+            }
+            try { dialog.dismiss() } catch (_: Throwable) {}
+        }
+
         val onLaunchAndDismiss: (AppInfo) -> Unit = { app ->
             onLaunch(app)
-            try { dialog.dismiss() } catch (_: Throwable) {}
+            closeFolder()
         }
         for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunchAndDismiss, onRemoveFromFolder, textColor))
 
         dialog.setOnDismissListener {
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-            try { imm?.hideSoftInputFromWindow(nameInput.windowToken, 0) } catch (_: Throwable) {}
+            // safety net: rimuovi blur al dismiss
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
                 try { decor.setRenderEffect(null) } catch (_: Throwable) {}
             }
         }
 
-        rootContainer.setOnClickListener { dialog.dismiss() }
+        rootContainer.setOnClickListener { closeFolder() }
         card.setOnClickListener { /* swallow */ }
 
         deleteChip.setOnClickListener {
@@ -242,7 +237,7 @@ object FolderSheet {
                 .setTitle(R.string.folder_delete_confirm_title)
                 .setMessage(R.string.folder_delete_confirm_msg)
                 .setPositiveButton(R.string.folder_delete) { _, _ ->
-                    onDeleteFolder(); dialog.dismiss()
+                    onDeleteFolder(); closeFolder()
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
@@ -254,6 +249,51 @@ object FolderSheet {
         val tv = android.util.TypedValue()
         context.theme.resolveAttribute(attr, tv, true)
         return tv.data
+    }
+
+    /**
+     * v32: dialog separato per rinominare la cartella.
+     * Apre solo questo quando l'utente tappa il nome — nessuna tastiera nel dialog principale.
+     */
+    private fun showRenameDialog(
+        context: Context,
+        labelView: TextView,
+        currentName: String,
+        onConfirm: (String) -> Unit
+    ) {
+        val density = context.resources.displayMetrics.density
+        val container = android.widget.FrameLayout(context).apply {
+            val pad = (24 * density).toInt()
+            setPadding(pad, (8 * density).toInt(), pad, 0)
+        }
+        val input = com.google.android.material.textfield.TextInputEditText(context).apply {
+            setText(currentName)
+            setSelection(currentName.length)
+            setSingleLine(true)
+            textSize = 18f
+            hint = context.getString(R.string.folder_name_hint)
+        }
+        val til = com.google.android.material.textfield.TextInputLayout(
+            context, null,
+            com.google.android.material.R.attr.textInputOutlinedStyle
+        ).apply {
+            setBoxCornerRadii(20f * density, 20f * density, 20f * density, 20f * density)
+            addView(input)
+        }
+        container.addView(til)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            context, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.folder_rename_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                onConfirm(input.text?.toString() ?: "")
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+        // Apri tastiera dopo che il dialog è visibile (no glitch perché il dialog di rename È quello dell'input)
+        input.requestFocus()
     }
 
     private fun buildAppCell(

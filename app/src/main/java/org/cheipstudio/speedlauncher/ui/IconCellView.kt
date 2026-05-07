@@ -87,7 +87,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
         val pad = (4 * resources.displayMetrics.density).toInt()
         setPadding(pad, pad, pad, pad)
 
-        val iconSize = (48 * resources.displayMetrics.density).toInt()
+        // v34: icone più piccole in landscape per più colonne sullo schermo
+        val isLandscape = resources.configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val iconSizeDp = if (isLandscape) 42 else 48
+        val iconSize = (iconSizeDp * resources.displayMetrics.density).toInt()
         iconView.layoutParams = LayoutParams(iconSize, iconSize)
         addView(iconView)
 
@@ -201,9 +205,9 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val padV = 2 * density
                 val pillW = (textWidth + padH * 2).coerceAtLeast(16 * density)
                 val pillH = textSize + padV * 2 + (2 * density)
-                // posiziona angolo alto-destra dell'iconView
-                val cx = b.right - pillW / 2 + (2 * density)
-                val cy = b.top + pillH / 2 - (2 * density)
+                // v36: posiziona dentro i bounds (padding 2dp dal bordo)
+                val cx = b.right - pillW / 2 - (2 * density)
+                val cy = b.top + pillH / 2 + (2 * density)
                 val rect = android.graphics.RectF(
                     cx - pillW / 2, cy - pillH / 2,
                     cx + pillW / 2, cy + pillH / 2
@@ -213,9 +217,10 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val textY = cy - (fm.ascent + fm.descent) / 2
                 canvas.drawText(displayCount, cx, textY, dotTextPaint)
             } else {
-                val cx = b.right - (4 * density)
-                val cy = b.top + (6 * density)
+                // v36: dot dentro i bounds (radius=5dp, padding 2dp dal bordo)
                 val r = 5 * density
+                val cx = b.right - r - (2 * density)
+                val cy = b.top + r + (2 * density)
                 canvas.drawCircle(cx, cy, r, dotPaint)
             }
         }
