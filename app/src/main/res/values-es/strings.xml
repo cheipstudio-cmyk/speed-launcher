@@ -143,4 +143,22 @@
     <string name="settings_landscape">Modo horizontal</string>
     <string name="settings_landscape_sub">Permite la rotación del launcher (recomendado en tabletas)</string>
     <string name="recommended_header">Recomendadas</string>
+
+    <string name="accessibility_dialog_title">Activa para apagar la pantalla</string>
+    <string name="accessibility_dialog_message">Para apagar la pantalla sin forzar el PIN al despertar, Speed Launcher necesita el servicio de Accesibilidad. Se comportará como el botón de encendido: la huella desbloqueará normalmente.
+
+Se usará solo para esta función.</string>
+    <string name="accessibility_dialog_open">Abrir ajustes</string>
+    <string name="accessibility_toast_find_speed">Encuentra Speed Launcher y actívalo</string>
+    <string name="accessibility_service_description">Permite a Speed Launcher apagar la pantalla como el botón de encendido. No se leen otros eventos.</string>
+    <string name="accessibility_service_summary">Apaga la pantalla al doble toque en la barra de búsqueda</string>
+    <string name="folder_rename_title">Renombrar carpeta</string>
+    <string name="settings_section_home_layout">Disposición del inicio</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">Posición de recomendadas</string>
+    <string name="recommended_pos_top">Arriba, sobre los iconos</string>
+    <string name="recommended_pos_bottom">Abajo, cerca de la barra de búsqueda</string>
 </resources>

@@ -143,4 +143,22 @@
     <string name="settings_landscape">Mode paysage</string>
     <string name="settings_landscape_sub">Autoriser la rotation du launcher (recommandé sur tablette)</string>
     <string name="recommended_header">Recommandées</string>
+
+    <string name="accessibility_dialog_title">Activer pour éteindre l\'écran</string>
+    <string name="accessibility_dialog_message">Pour éteindre l\'écran sans forcer le PIN au réveil, Speed Launcher a besoin du service d\'Accessibilité. Il agira comme le bouton power : l\'empreinte déverrouillera normalement.
+
+Il sera utilisé uniquement pour cette fonction.</string>
+    <string name="accessibility_dialog_open">Ouvrir les paramètres</string>
+    <string name="accessibility_toast_find_speed">Trouvez Speed Launcher et activez-le</string>
+    <string name="accessibility_service_description">Permet à Speed Launcher d\'éteindre l\'écran comme le bouton power. Aucun autre événement n\'est lu.</string>
+    <string name="accessibility_service_summary">Éteint l\'écran au double tap sur la barre de recherche</string>
+    <string name="folder_rename_title">Renommer le dossier</string>
+    <string name="settings_section_home_layout">Disposition de l\'accueil</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">Position des recommandées</string>
+    <string name="recommended_pos_top">Haut, au-dessus des icônes</string>
+    <string name="recommended_pos_bottom">Bas, près de la barre de recherche</string>
 </resources>

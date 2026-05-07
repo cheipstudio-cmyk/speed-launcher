@@ -143,4 +143,22 @@
     <string name="settings_landscape">横向きモード</string>
     <string name="settings_landscape_sub">ランチャーの回転を許可 (タブレット推奨)</string>
     <string name="recommended_header">おすすめ</string>
+
+    <string name="accessibility_dialog_title">画面オフのために有効化</string>
+    <string name="accessibility_dialog_message">起動時に PIN を強制せずに画面をオフにするため、Speed Launcher にはアクセシビリティサービスが必要です。電源ボタンと同じように動作します: 指紋で通常通りロック解除できます。
+
+この機能のみに使用されます。</string>
+    <string name="accessibility_dialog_open">設定を開く</string>
+    <string name="accessibility_toast_find_speed">Speed Launcher を見つけて有効化してください</string>
+    <string name="accessibility_service_description">Speed Launcher が電源ボタンのように画面をオフにできるようにします。他のイベントは読み取りません。</string>
+    <string name="accessibility_service_summary">検索バーをダブルタップで画面オフ</string>
+    <string name="folder_rename_title">フォルダ名を変更</string>
+    <string name="settings_section_home_layout">ホームレイアウト</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">おすすめの位置</string>
+    <string name="recommended_pos_top">上、アイコンの上</string>
+    <string name="recommended_pos_bottom">下、検索バー近く</string>
 </resources>

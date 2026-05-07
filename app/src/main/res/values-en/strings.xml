@@ -165,4 +165,22 @@
     <string name="settings_landscape">Landscape mode</string>
     <string name="settings_landscape_sub">Allow launcher rotation (recommended on tablets)</string>
     <string name="recommended_header">Recommended</string>
+
+    <string name="accessibility_dialog_title">Enable to turn off screen</string>
+    <string name="accessibility_dialog_message">To turn off the screen without forcing PIN on wake, Speed Launcher needs the Accessibility service. It will behave like the power button: fingerprint will unlock normally.
+
+It will only be used for this feature.</string>
+    <string name="accessibility_dialog_open">Open settings</string>
+    <string name="accessibility_toast_find_speed">Find Speed Launcher and enable it</string>
+    <string name="accessibility_service_description">Allows Speed Launcher to turn off the screen like the power button. No other events are read.</string>
+    <string name="accessibility_service_summary">Turns off screen on double-tap of search bar</string>
+    <string name="folder_rename_title">Rename folder</string>
+    <string name="settings_section_home_layout">Home layout</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">Recommended position</string>
+    <string name="recommended_pos_top">Top, above icons</string>
+    <string name="recommended_pos_bottom">Bottom, near search bar</string>
 </resources>

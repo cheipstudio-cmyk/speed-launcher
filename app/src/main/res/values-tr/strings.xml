@@ -143,4 +143,22 @@
     <string name="settings_landscape">Yatay mod</string>
     <string name="settings_landscape_sub">Başlatıcının döndürülmesine izin ver (tabletlerde önerilir)</string>
     <string name="recommended_header">Önerilenler</string>
+
+    <string name="accessibility_dialog_title">Ekranı kapatmak için etkinleştir</string>
+    <string name="accessibility_dialog_message">Uyandırmada PIN zorlamadan ekranı kapatmak için Speed Launcher\'ın Erişilebilirlik servisi gerekir. Power tuşu gibi davranır: parmak izi normal şekilde kilit açar.
+
+Yalnızca bu özellik için kullanılır.</string>
+    <string name="accessibility_dialog_open">Ayarları aç</string>
+    <string name="accessibility_toast_find_speed">Speed Launcher\'ı bul ve etkinleştir</string>
+    <string name="accessibility_service_description">Speed Launcher\'ın power tuşu gibi ekranı kapatmasına izin verir. Başka olay okunmaz.</string>
+    <string name="accessibility_service_summary">Arama çubuğuna çift dokunarak ekranı kapatır</string>
+    <string name="folder_rename_title">Klasörü yeniden adlandır</string>
+    <string name="settings_section_home_layout">Ana ekran düzeni</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">Önerilenler konumu</string>
+    <string name="recommended_pos_top">Üst, simgelerin üzerinde</string>
+    <string name="recommended_pos_bottom">Alt, arama çubuğu yakınında</string>
 </resources>

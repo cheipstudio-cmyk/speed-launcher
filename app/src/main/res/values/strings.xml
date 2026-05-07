@@ -165,4 +165,22 @@
     <string name="settings_landscape">Modalità orizzontale</string>
     <string name="settings_landscape_sub">Consenti la rotazione del launcher (consigliata su tablet)</string>
     <string name="recommended_header">Raccomandate</string>
+
+    <string name="accessibility_dialog_title">Abilita per spegnere lo schermo</string>
+    <string name="accessibility_dialog_message">Per spegnere lo schermo senza forzare il PIN al risveglio, Speed Launcher ha bisogno del servizio di Accessibilità. Funzionerà come il pulsante power: l\'impronta sbloccherà normalmente.
+
+Si userà solo per questa funzione.</string>
+    <string name="accessibility_dialog_open">Apri impostazioni</string>
+    <string name="accessibility_toast_find_speed">Trova Speed Launcher e attivalo</string>
+    <string name="accessibility_service_description">Permette a Speed Launcher di spegnere lo schermo come fa il pulsante power. Nessun altro evento viene letto.</string>
+    <string name="accessibility_service_summary">Spegne lo schermo al doppio tap sulla barra di ricerca</string>
+    <string name="folder_rename_title">Rinomina cartella</string>
+    <string name="settings_section_home_layout">Layout home</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">Posizione raccomandate</string>
+    <string name="recommended_pos_top">In alto, sopra le icone</string>
+    <string name="recommended_pos_bottom">In basso, vicino alla barra ricerca</string>
 </resources>

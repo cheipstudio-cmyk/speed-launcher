@@ -143,4 +143,22 @@
     <string name="settings_landscape">الوضع الأفقي</string>
     <string name="settings_landscape_sub">السماح بدوران المشغل (موصى به على الأجهزة اللوحية)</string>
     <string name="recommended_header">موصى به</string>
+
+    <string name="accessibility_dialog_title">فعّل لإطفاء الشاشة</string>
+    <string name="accessibility_dialog_message">لإطفاء الشاشة دون فرض PIN عند الاستيقاظ، يحتاج Speed Launcher إلى خدمة إمكانية الوصول. سيعمل مثل زر الطاقة: ستفتح البصمة القفل بشكل طبيعي.
+
+سيتم استخدامها فقط لهذه الميزة.</string>
+    <string name="accessibility_dialog_open">افتح الإعدادات</string>
+    <string name="accessibility_toast_find_speed">ابحث عن Speed Launcher وفعّله</string>
+    <string name="accessibility_service_description">يسمح لـ Speed Launcher بإطفاء الشاشة مثل زر الطاقة. لا يتم قراءة أحداث أخرى.</string>
+    <string name="accessibility_service_summary">يطفئ الشاشة عند الضغط مرتين على شريط البحث</string>
+    <string name="folder_rename_title">إعادة تسمية المجلد</string>
+    <string name="settings_section_home_layout">تخطيط الشاشة الرئيسية</string>
+    <string name="settings_grid_4x5">4 × 5</string>
+    <string name="settings_grid_4x6">4 × 6</string>
+    <string name="settings_grid_6x5">6 × 5</string>
+    <string name="settings_grid_6x6">6 × 6</string>
+    <string name="settings_recommended_position">موضع الموصى به</string>
+    <string name="recommended_pos_top">أعلى، فوق الأيقونات</string>
+    <string name="recommended_pos_bottom">أسفل، بالقرب من شريط البحث</string>
 </resources>
