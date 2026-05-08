@@ -40,12 +40,10 @@ class SettingsRepository(context: Context) {
     val recommendedCount = MutableLiveData(prefs.getInt(KEY_REC_COUNT, 5))
     // v38: lingua manuale ("auto" segue il sistema, oppure codice ISO it/en/fr/...)
     val language = MutableLiveData(prefs.getString(KEY_LANGUAGE, "auto") ?: "auto")
-    // v38: sfondo colorato sotto le icone (Material Expressive)
-    val iconBgEnabled = MutableLiveData(prefs.getBoolean(KEY_ICON_BG, false))
     // v38: dim wallpaper (0..100), 0 = nessuno
     val wallpaperDim = MutableLiveData(prefs.getInt(KEY_WALLPAPER_DIM, 0))
-    // v38: parallax wallpaper (segue lo scroll delle pagine)
-    val wallpaperParallax = MutableLiveData(prefs.getBoolean(KEY_WALLPAPER_PARALLAX, true))
+    // v41: sfocatura wallpaper (radius 0..50, 0 = nessuna)
+    val wallpaperBlur = MutableLiveData(prefs.getInt(KEY_WALLPAPER_BLUR, 0))
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -121,14 +119,11 @@ class SettingsRepository(context: Context) {
     fun setLanguage(code: String) {
         prefs.edit().putString(KEY_LANGUAGE, code).apply(); language.postValue(code)
     }
-    fun setIconBgEnabled(on: Boolean) {
-        prefs.edit().putBoolean(KEY_ICON_BG, on).apply(); iconBgEnabled.postValue(on)
-    }
     fun setWallpaperDim(v: Int) {
         prefs.edit().putInt(KEY_WALLPAPER_DIM, v).apply(); wallpaperDim.postValue(v)
     }
-    fun setWallpaperParallax(on: Boolean) {
-        prefs.edit().putBoolean(KEY_WALLPAPER_PARALLAX, on).apply(); wallpaperParallax.postValue(on)
+    fun setWallpaperBlur(v: Int) {
+        prefs.edit().putInt(KEY_WALLPAPER_BLUR, v).apply(); wallpaperBlur.postValue(v)
     }
 
     fun unhideAllApps() {
@@ -162,9 +157,8 @@ class SettingsRepository(context: Context) {
         recommendedPosition.postValue(REC_POS_BOTTOM)
         recommendedCount.postValue(5)
         language.postValue("auto")
-        iconBgEnabled.postValue(false)
         wallpaperDim.postValue(0)
-        wallpaperParallax.postValue(true)
+        wallpaperBlur.postValue(0)
     }
     fun resetEverything() {
         homeLayoutPrefs.edit().clear().apply()
@@ -232,9 +226,8 @@ class SettingsRepository(context: Context) {
         const val REC_POS_BOTTOM = "bottom"
         private const val KEY_REC_COUNT = "recommended_count"
         private const val KEY_LANGUAGE = "language"
-        private const val KEY_ICON_BG = "icon_bg_enabled"
         private const val KEY_WALLPAPER_DIM = "wallpaper_dim"
-        private const val KEY_WALLPAPER_PARALLAX = "wallpaper_parallax"
+        private const val KEY_WALLPAPER_BLUR = "wallpaper_blur"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange

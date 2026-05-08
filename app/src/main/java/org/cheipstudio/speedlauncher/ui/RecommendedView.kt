@@ -36,8 +36,9 @@ class RecommendedView @JvmOverloads constructor(
         // Card wrapper
         card = MaterialCardView(context).apply {
             radius = 28 * density
-            cardElevation = 2 * density
-            setCardBackgroundColor(resolveAttrColor(com.google.android.material.R.attr.colorSurfaceContainerHigh))
+            cardElevation = 0f
+            // v41: sfondo appena percepibile, no stacco grigio
+            setCardBackgroundColor(softBgColor())
             val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             layoutParams = lp
         }
@@ -63,6 +64,19 @@ class RecommendedView @JvmOverloads constructor(
         val tv = android.util.TypedValue()
         context.theme.resolveAttribute(attr, tv, true)
         return tv.data
+    }
+
+    /**
+     * v41: colore sfondo dock card "appena percepibile":
+     * - alpha 32/255 (~12%) di colorOnSurface
+     * - si adatta a chiaro/scuro automaticamente perché colorOnSurface si inverte
+     */
+    private fun softBgColor(): Int {
+        val onSurface = resolveAttrColor(com.google.android.material.R.attr.colorOnSurface)
+        val r = (onSurface shr 16) and 0xFF
+        val g = (onSurface shr 8) and 0xFF
+        val b = onSurface and 0xFF
+        return Color.argb(32, r, g, b)
     }
 
     /**
@@ -125,8 +139,8 @@ class RecommendedView @JvmOverloads constructor(
             card.setCardBackgroundColor(Color.TRANSPARENT)
             card.cardElevation = 0f
         } else {
-            card.setCardBackgroundColor(resolveAttrColor(com.google.android.material.R.attr.colorSurfaceContainerHigh))
-            card.cardElevation = 2 * density
+            card.setCardBackgroundColor(softBgColor())
+            card.cardElevation = 0f
         }
 
         row.removeAllViews()

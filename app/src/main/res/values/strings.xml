@@ -189,9 +189,6 @@ Si userà solo per questa funzione.</string>
     <string name="settings_section_language">Lingua</string>
     <string name="settings_language">Lingua dell\'app</string>
     <string name="settings_section_expressive">Material Expressive</string>
-    <string name="settings_icon_bg">Sfondo colorato icone</string>
-    <string name="settings_icon_bg_sub">Card morbida sotto ogni icona, in home e drawer</string>
     <string name="settings_wallpaper_dim">Oscurazione sfondo</string>
-    <string name="settings_wallpaper_parallax">Parallax wallpaper</string>
-    <string name="settings_wallpaper_parallax_sub">Lo sfondo si muove al cambio di pagina</string>
+    <string name="settings_wallpaper_blur">Sfocatura sfondo</string>
 </resources>

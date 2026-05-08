@@ -473,28 +473,6 @@ class HomeView @JvmOverloads constructor(
         binding.dimOverlay.alpha = alpha.coerceIn(0f, 1f)
     }
 
-    /**
-     * v38: collega il scroll delle pagine al wallpaper offsets di Android.
-     * Effetto: il wallpaper si muove leggermente quando cambi pagina, parallax classico.
-     */
-    fun attachWallpaperParallax(window: android.view.Window) {
-        val wm = android.app.WallpaperManager.getInstance(context)
-        val previous = binding.pagedHome.onPageChanged
-        binding.pagedHome.onPageChanged = { page ->
-            previous?.invoke(page)
-            val parallaxOn = settings.wallpaperParallax.value == true
-            if (parallaxOn) {
-                val pageCount = binding.pagedHome.pageCount
-                if (pageCount > 1) {
-                    val xOffset = page.toFloat() / (pageCount - 1).toFloat()
-                    try {
-                        wm.setWallpaperOffsets(window.decorView.windowToken, xOffset.coerceIn(0f, 1f), 0f)
-                    } catch (_: Throwable) {}
-                }
-            }
-        }
-    }
-
     /** v27: chiamato da MainActivity quando si preme home dalla home */
     fun snapToFirstPage() {
         if (binding.pagedHome.currentPage > 0) {

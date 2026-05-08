@@ -38,9 +38,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_coral">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_star_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_star_outline" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_ai_launcher_mode" />
@@ -56,9 +54,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_tune" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_tune" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_recommended_position" />
@@ -81,9 +77,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_counter" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_counter" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_recommended_count" />
@@ -104,9 +98,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_yellow">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_screen_rotation" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_screen_rotation" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_landscape" />
@@ -123,9 +115,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemLanguage" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_translate">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_translate" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_translate" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_language" />
@@ -138,28 +128,10 @@
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_expressive" />
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_expressive">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_icon_bg" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_icon_bg_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchIconBg"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_expressive">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_color" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_wallpaper_dim" />
@@ -179,18 +151,25 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_parallax">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_motion" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_wallpaper_parallax" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_wallpaper_parallax_sub" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:paddingVertical="6dp">
+                    <LinearLayout style="@style/PixelItem">
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_motion" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView style="@style/PixelItemTitle" android:text="@string/settings_wallpaper_blur" />
+                            <TextView android:id="@+id/wallpaperBlurLabel" style="@style/PixelItemSubtitle" />
+                        </LinearLayout>
                     </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchWallpaperParallax"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/wallpaperBlurSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="8dp"
+                        android:valueFrom="0"
+                        android:valueTo="50"
+                        android:stepSize="2" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -201,9 +180,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_green">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_apps_outline" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_grid_size" />
@@ -234,9 +211,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_widget" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_widget" />
@@ -255,9 +230,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_cyan">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_shapes" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_shapes" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_icon_shape" />
@@ -286,9 +259,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pink">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_dot" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_dot" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_badge_mode" />
@@ -311,9 +282,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_magenta">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_color" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_dot_color" />
@@ -333,9 +302,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_violet">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_motion" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_motion" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_anim_style" />
@@ -363,9 +330,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_green">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_apps_outline" />
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_drawer_layout" />
                     </LinearLayout>
                     <RadioGroup
@@ -391,9 +356,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_folder_outline" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_folder_outline" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_folder_bg" />
@@ -423,9 +386,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_search_outline" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView style="@style/PixelItemTitle" android:text="@string/settings_searchbar_style" />
@@ -452,9 +413,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:paddingVertical="6dp">
                     <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
-                    </FrameLayout>
+                        <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_search_outline" />
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_search_mode" />
                     </LinearLayout>
                     <RadioGroup
@@ -474,9 +433,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_brown">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_gesture" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_gesture" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_swipe_down" />
@@ -490,9 +447,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_brown">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_lock_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_lock_outline" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_double_tap_lock" />
@@ -506,9 +461,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_brown">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_vibrate" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_vibrate" />
                     <TextView
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" style="@style/PixelItemTitle"
@@ -524,9 +477,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDefaultLauncher" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pixelblue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_home_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_home_outline" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_default_launcher" />
@@ -537,9 +488,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemNotificationAccess" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_bell">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_bell" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_bell" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_notification_access" />
@@ -550,9 +499,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemAppInfo" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_info">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_info_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_info_outline" />
                     <TextView
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" style="@style/PixelItemTitle"
@@ -562,9 +509,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemShowTutorial" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_info">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_info_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_info_outline" />
                     <TextView
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" style="@style/PixelItemTitle"
@@ -577,9 +522,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemHiddenApps" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_hide">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_visibility_off" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_visibility_off" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_hidden_apps" />
@@ -590,9 +533,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemBackupExport" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightgreen">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_upload" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_upload" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_backup_export" />
@@ -603,9 +544,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemBackupImport" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_download" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_download" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_backup_import" />
@@ -619,9 +558,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemResetLayout" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_green">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_apps_outline" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_reset_layout" />
@@ -632,9 +569,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemResetSettings" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_refresh">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_refresh" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_refresh" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_reset_settings" />
@@ -645,9 +580,8 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemResetEverything" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_red">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_delete_forever" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_delete_forever"
+                        android:tint="?attr/colorError" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle"
@@ -703,9 +637,7 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_info">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_info_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_info_outline" />
                     <TextView
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" style="@style/PixelItemTitle"
@@ -716,9 +648,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemCheipStudio" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_link">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_link_external" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_link_external" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/info_studio_label" />
@@ -729,9 +659,7 @@
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemContact" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_email">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_email_outline" />
-                    </FrameLayout>
+                    <ImageView style="@style/PixelItemIcon" android:src="@drawable/ic_email_outline" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_contact_label" />

@@ -182,36 +182,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
         // v40: sincronizza lastNotifCount al count attuale così la cella riciclata non triggera bounce random
         lastNotifCount = SpeedApp.instance.notificationCounter.countFor(packageName)
 
-        // v38: Material Expressive — sfondo colorato sotto l'icona
-        applyIconBackground(s.iconBgEnabled.value == true)
     }
 
-    /**
-     * v38: applica/rimuove uno sfondo "card" sotto l'icona, stile Material Expressive.
-     * Quando attivo: rounded square con colorSurfaceContainer + padding interno per non
-     * mangiare l'icona. Disabilitato di default.
-     */
-    private fun applyIconBackground(enabled: Boolean) {
-        if (!enabled) {
-            iconView.background = null
-            iconView.setPadding(0, 0, 0, 0)
-            return
-        }
-        val density = resources.displayMetrics.density
-        val tv = android.util.TypedValue()
-        context.theme.resolveAttribute(
-            com.google.android.material.R.attr.colorSurfaceContainer, tv, true
-        )
-        val bgColor = tv.data
-        val bgDrawable = android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            cornerRadius = 16 * density
-            setColor(bgColor)
-        }
-        iconView.background = bgDrawable
-        val pad = (6 * density).toInt()
-        iconView.setPadding(pad, pad, pad, pad)
-    }
 
     /**
      * v33: badge disegnato come overlay drawable sull'iconView.

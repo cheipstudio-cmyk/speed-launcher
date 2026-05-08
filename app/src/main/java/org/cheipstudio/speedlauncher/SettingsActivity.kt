@@ -369,12 +369,6 @@ class SettingsActivity : AppCompatActivity() {
             showLanguageDialog()
         }
 
-        // v38: icon bg toggle (Material Expressive)
-        binding.switchIconBg.isChecked = settings.iconBgEnabled.value == true
-        binding.switchIconBg.setOnCheckedChangeListener { _, on ->
-            settings.setIconBgEnabled(on)
-        }
-
         // v38: wallpaper dim slider
         val currentDim = settings.wallpaperDim.value ?: 0
         binding.wallpaperDimSlider.value = currentDim.toFloat()
@@ -384,10 +378,13 @@ class SettingsActivity : AppCompatActivity() {
             updateDimLabel()
         }
 
-        // v38: wallpaper parallax toggle
-        binding.switchWallpaperParallax.isChecked = settings.wallpaperParallax.value == true
-        binding.switchWallpaperParallax.setOnCheckedChangeListener { _, on ->
-            settings.setWallpaperParallax(on)
+        // v41: wallpaper blur slider (radius 0..50)
+        val currentBlur = settings.wallpaperBlur.value ?: 0
+        binding.wallpaperBlurSlider.value = currentBlur.toFloat()
+        updateBlurLabel()
+        binding.wallpaperBlurSlider.addOnChangeListener { _, value, _ ->
+            settings.setWallpaperBlur(value.toInt())
+            updateBlurLabel()
         }
 
         binding.itemContact.setOnClickListener {
@@ -496,6 +493,11 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateDimLabel() {
         val v = settings.wallpaperDim.value ?: 0
         binding.wallpaperDimLabel.text = "$v%"
+    }
+
+    private fun updateBlurLabel() {
+        val v = settings.wallpaperBlur.value ?: 0
+        binding.wallpaperBlurLabel.text = if (v == 0) getString(android.R.string.no) else "${v}px"
     }
 
     private fun showLanguageDialog() {

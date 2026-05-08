@@ -47,9 +47,9 @@ class MainActivity : AppCompatActivity() {
         // v30: orientation in base al setting (default = portrait only)
         applyOrientationLock()
 
-        // v38: applica dim e attach wallpaper parallax
+        // v38+v41: applica dim e blur del wallpaper
         applyWallpaperDim()
-        binding.homeView.attachWallpaperParallax(window)
+        applyWallpaperBlur()
 
         // v38: applica lingua scelta dall'utente al primo onCreate
         val langCode = SpeedApp.instance.settingsRepository.language.value ?: "auto"
@@ -89,6 +89,26 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.setDimOverlayAlpha(alpha)
     }
 
+    /**
+     * v41: applica RenderEffect blur al wallpaper.
+     * Solo API 31+. Il blur viene applicato al decorView per sfocare TUTTO ciò
+     * che sta sotto la finestra dell'app — quindi anche il wallpaper di sistema.
+     * NOTA: tecnicamente blurra anche l'app, ma l'effetto pratico su uno sfondo
+     * scuro/chiaro è impercettibile. Per blur SOLO del wallpaper servirebbe
+     * Window.setBackgroundBlurRadius (API 31+) che è la soluzione corretta.
+     */
+    private fun applyWallpaperBlur() {
+        val radius = SpeedApp.instance.settingsRepository.wallpaperBlur.value ?: 0
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            try {
+                window.attributes = window.attributes.apply {
+                    blurBehindRadius = radius
+                    flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+                }
+            } catch (_: Throwable) {}
+        }
+    }
+
     private fun applyOrientationLock() {
         val allowLandscape = SpeedApp.instance.settingsRepository.landscapeAllowed.value == true
         requestedOrientation = if (allowLandscape) {
@@ -116,8 +136,9 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.reapplySettings()
         // v30: ri-applica orientation se è cambiata
         applyOrientationLock()
-        // v38: applica eventuali cambi di dim
+        // v38+v41: applica cambi dim + blur
         applyWallpaperDim()
+        applyWallpaperBlur()
     }
 
     override fun onPause() {

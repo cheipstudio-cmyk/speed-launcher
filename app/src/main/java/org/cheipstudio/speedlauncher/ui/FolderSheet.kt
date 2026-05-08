@@ -206,12 +206,22 @@ object FolderSheet {
             } catch (_: Throwable) {}
         }
 
-        // v36: helper per chiudere fluido — rimuovo blur PRIMA del dismiss visivo
+        // v36+v41: helper per chiudere fluido con animazione di uscita
         fun closeFolder() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
-                try { decor.setRenderEffect(null) } catch (_: Throwable) {}
-            }
-            try { dialog.dismiss() } catch (_: Throwable) {}
+            // anim: scale + fade then dismiss
+            card.animate()
+                .alpha(0f)
+                .scaleX(0.85f)
+                .scaleY(0.85f)
+                .setDuration(180)
+                .setInterpolator(android.view.animation.AccelerateInterpolator())
+                .withEndAction {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
+                        try { decor.setRenderEffect(null) } catch (_: Throwable) {}
+                    }
+                    try { dialog.dismiss() } catch (_: Throwable) {}
+                }
+                .start()
         }
 
         val onLaunchAndDismiss: (AppInfo) -> Unit = { app ->
@@ -241,6 +251,19 @@ object FolderSheet {
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
+        }
+        // v41: animazione di entrata fluida (scale + fade)
+        dialog.setOnShowListener {
+            card.alpha = 0f
+            card.scaleX = 0.85f
+            card.scaleY = 0.85f
+            card.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(260)
+                .setInterpolator(android.view.animation.OvershootInterpolator(1.1f))
+                .start()
         }
         dialog.show()
     }
