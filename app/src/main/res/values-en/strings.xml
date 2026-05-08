@@ -258,4 +258,24 @@ Download now?</string>
     <string name="update_no_update_msg">You are using the latest version (%1$s).</string>
     <string name="update_download">Download</string>
     <string name="update_later">Later</string>
+    <string name="update_no_release_yet">No release published yet. Try again later.</string>
+    <string name="update_no_internet">No internet connection.</string>
+    <string name="update_downloading_title">Downloading update</string>
+    <string name="update_downloading_progress">Downloading... %1$d%%</string>
+    <string name="update_downloading_size">Downloaded %1$d MB...</string>
+    <string name="update_download_failed">Download failed. Try again.</string>
+    <string name="settings_recommended_mode">Recommended mode</string>
+    <string name="rec_mode_ai">Automatic (AI)</string>
+    <string name="rec_mode_manual">Manual (chosen by you)</string>
+    <string name="rec_mode_pick_apps_title">Pick %1$d apps</string>
+    <string name="rec_mode_pick_apps_msg">Tap the apps to show in the recommended row.</string>
+    <string name="rec_mode_pick_apps_too_few">You must select exactly %1$d apps.</string>
+    <string name="rec_mode_no_apps_selected">No apps selected. Using AI until you choose.</string>
+    <string name="settings_drawer_enabled">Show app drawer</string>
+    <string name="settings_drawer_enabled_sub">Disable to have all apps on home (iOS-style)</string>
+    <string name="settings_auto_grid_reset">Reset auto grid</string>
+    <string name="settings_auto_grid_reset_sub">Clear customizations and re-populate with all apps</string>
+    <string name="auto_grid_reset_confirm_title">Reset grid?</string>
+    <string name="auto_grid_reset_confirm_msg">Will clear the current home layout and recreate it with all apps alphabetically.</string>
+    <string name="auto_grid_reset_done">Grid regenerated</string>
 </resources>

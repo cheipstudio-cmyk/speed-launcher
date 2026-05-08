@@ -236,4 +236,24 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="update_no_update_msg">En son sürümü kullanıyorsunuz (%1$s).</string>
     <string name="update_download">İndir</string>
     <string name="update_later">Daha sonra</string>
+    <string name="update_no_release_yet">Henüz sürüm yayınlanmadı. Daha sonra deneyin.</string>
+    <string name="update_no_internet">İnternet bağlantısı yok.</string>
+    <string name="update_downloading_title">Güncelleme indiriliyor</string>
+    <string name="update_downloading_progress">İndiriliyor... %%%1$d</string>
+    <string name="update_downloading_size">%1$d MB indirildi...</string>
+    <string name="update_download_failed">İndirme başarısız.</string>
+    <string name="settings_recommended_mode">Önerilen modu</string>
+    <string name="rec_mode_ai">Otomatik (AI)</string>
+    <string name="rec_mode_manual">Manuel (sizin seçtiğiniz)</string>
+    <string name="rec_mode_pick_apps_title">%1$d uygulama seçin</string>
+    <string name="rec_mode_pick_apps_msg">Önerilen satırında gösterilecek uygulamalara dokunun.</string>
+    <string name="rec_mode_pick_apps_too_few">Tam olarak %1$d uygulama seçmelisiniz.</string>
+    <string name="rec_mode_no_apps_selected">Uygulama seçilmedi. AI modu aktif.</string>
+    <string name="settings_drawer_enabled">Uygulama çekmecesini göster</string>
+    <string name="settings_drawer_enabled_sub">Tüm uygulamaları ana ekranda göstermek için devre dışı bırak (iOS tarzı)</string>
+    <string name="settings_auto_grid_reset">Otomatik ızgarayı sıfırla</string>
+    <string name="settings_auto_grid_reset_sub">Özelleştirmeleri temizle ve tüm uygulamalarla yeniden doldur</string>
+    <string name="auto_grid_reset_confirm_title">Izgarayı sıfırla?</string>
+    <string name="auto_grid_reset_confirm_msg">Mevcut ana ekran düzenini temizleyecek ve tüm uygulamalarla alfabetik olarak yeniden oluşturacak.</string>
+    <string name="auto_grid_reset_done">Izgara yeniden oluşturuldu</string>
 </resources>

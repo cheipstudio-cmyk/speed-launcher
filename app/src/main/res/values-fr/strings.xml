@@ -236,4 +236,24 @@ Télécharger maintenant ?</string>
     <string name="update_no_update_msg">Vous utilisez la dernière version (%1$s).</string>
     <string name="update_download">Télécharger</string>
     <string name="update_later">Plus tard</string>
+    <string name="update_no_release_yet">Aucune version publiée. Réessayez plus tard.</string>
+    <string name="update_no_internet">Pas de connexion internet.</string>
+    <string name="update_downloading_title">Téléchargement</string>
+    <string name="update_downloading_progress">Téléchargement... %1$d%%</string>
+    <string name="update_downloading_size">Téléchargé %1$d MB...</string>
+    <string name="update_download_failed">Échec du téléchargement.</string>
+    <string name="settings_recommended_mode">Mode recommandées</string>
+    <string name="rec_mode_ai">Automatique (IA)</string>
+    <string name="rec_mode_manual">Manuel (choisies par vous)</string>
+    <string name="rec_mode_pick_apps_title">Choisir %1$d applications</string>
+    <string name="rec_mode_pick_apps_msg">Touchez les apps à afficher dans la rangée recommandées.</string>
+    <string name="rec_mode_pick_apps_too_few">Vous devez sélectionner exactement %1$d apps.</string>
+    <string name="rec_mode_no_apps_selected">Aucune app sélectionnée. Mode IA actif.</string>
+    <string name="settings_drawer_enabled">Afficher le tiroir d\'apps</string>
+    <string name="settings_drawer_enabled_sub">Désactivez pour avoir toutes les apps sur l\'accueil (style iOS)</string>
+    <string name="settings_auto_grid_reset">Réinitialiser la grille auto</string>
+    <string name="settings_auto_grid_reset_sub">Effacer les personnalisations et repopulier avec toutes les apps</string>
+    <string name="auto_grid_reset_confirm_title">Réinitialiser la grille ?</string>
+    <string name="auto_grid_reset_confirm_msg">Effacera la disposition actuelle et la recréera avec toutes les apps alphabétiquement.</string>
+    <string name="auto_grid_reset_done">Grille régénérée</string>
 </resources>

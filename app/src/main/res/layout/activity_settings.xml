@@ -145,6 +145,20 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v84: Modalità raccomandate (AI vs Manuale) -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemRecommendedMode" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_tune" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_recommended_mode" />
+                        <TextView android:id="@+id/recommendedModeLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
 
             <!-- Tema dock raccomandate -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDockTheme" style="@style/PixelCard">
@@ -308,6 +322,23 @@
             <!-- ===== LAYOUT HOME ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_drawer" />
 
+            <!-- v85: Toggle drawer abilitato/disabilitato -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerEnabled" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightgreen">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_drawer_enabled" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_drawer_enabled_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchDrawerEnabled"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerLayout" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
@@ -330,6 +361,20 @@
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_drawer_theme" />
                         <TextView android:id="@+id/drawerThemeValue" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v85: Reset griglia automatica (visibile solo se drawer disabilitato) -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemAutoGridReset" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_refresh" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_auto_grid_reset" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_auto_grid_reset_sub" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

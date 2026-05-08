@@ -73,9 +73,12 @@ class HomeView @JvmOverloads constructor(
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             // v77: dedup vibrazione — usa flag swipeFireVibrated, una sola vibrazione per gesto.
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
-                if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
-                onSwipeUp?.invoke()
-                return true
+                // v85: rispetta drawerEnabled
+                if (settings.drawerEnabled.value != false) {
+                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
+                    onSwipeUp?.invoke()
+                    return true
+                }
             }
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
@@ -138,13 +141,15 @@ class HomeView @JvmOverloads constructor(
                 getChildAt(it) as? android.widget.LinearLayout
             }
             child?.let { ll ->
-                val basePadTop = ll.paddingTop
                 val basePadBottom = ll.paddingBottom
-                // applica una sola volta usando tag
+                // v83: top padding = SOLO status bar inset + 4dp di respiro.
+                // Prima sommavamo home_top_padding del XML al bars.top → troppo spazio.
+                // Ora il widget parte subito sotto la status bar.
                 if (ll.tag != "insets-applied") {
+                    val extraTopDp = (4 * resources.displayMetrics.density).toInt()
                     ll.setPadding(
                         ll.paddingLeft,
-                        basePadTop + bars.top,
+                        bars.top + extraTopDp,
                         ll.paddingRight,
                         basePadBottom + bars.bottom
                     )
@@ -278,9 +283,15 @@ class HomeView @JvmOverloads constructor(
                         putExtra(SearchManager.QUERY, "")
                     }
                     context.startActivity(intent)
-                } catch (_: Throwable) { onSearchTap?.invoke() }
+                } catch (_: Throwable) {
+                    // v85: solo se drawer abilitato apre fallback
+                    if (settings.drawerEnabled.value != false) onSearchTap?.invoke()
+                }
             }
-            else -> onSearchTap?.invoke()
+            else -> {
+                // v85: solo se drawer abilitato apre il drawer
+                if (settings.drawerEnabled.value != false) onSearchTap?.invoke()
+            }
         }
     }
 
@@ -512,11 +523,13 @@ class HomeView @JvmOverloads constructor(
 
                 if (isFastSwipeUp || isSlowSwipeUp) {
                     tracking = false
-                    // v77: una sola vibrazione per gesto (flag swipeFireVibrated)
-                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
-                    onSwipeUp?.invoke()
-                    fadeOverlay.animate().alpha(0f).setDuration(180).start()
-                    return true
+                    // v85: rispetta drawerEnabled
+                    if (settings.drawerEnabled.value != false) {
+                        if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
+                        onSwipeUp?.invoke()
+                        fadeOverlay.animate().alpha(0f).setDuration(180).start()
+                        return true
+                    }
                 }
                 if (settings.swipeDownNotifications.value == true &&
                     dy > swipeThreshold && abs(dy) > dx * 1.0f) {

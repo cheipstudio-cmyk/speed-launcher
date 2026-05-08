@@ -111,6 +111,17 @@ class SettingsActivity : AppCompatActivity() {
         }
         applyWidgetDependentEnabled(settings.showWidgetSlot.value == true)
 
+        // v85: drawer enabled toggle + reset auto grid
+        binding.switchDrawerEnabled.isChecked = settings.drawerEnabled.value != false
+        binding.switchDrawerEnabled.setOnCheckedChangeListener { _, on ->
+            settings.setDrawerEnabled(on)
+            handleDrawerToggle(on)
+        }
+        settings.drawerEnabled.observe(this) { applyDrawerDependentVisibility(it != false) }
+        applyDrawerDependentVisibility(settings.drawerEnabled.value != false)
+
+        binding.itemAutoGridReset.setOnClickListener { showAutoGridResetDialog() }
+
         // v63: toggle "mostra barra ricerca"
         binding.switchShowSearchbar.isChecked = settings.showSearchBar.value != false
         binding.switchShowSearchbar.setOnCheckedChangeListener { _, isChecked ->
@@ -246,6 +257,10 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.itemRecommendedPosition.setOnClickListener { showRecommendedPositionDialog() }
         binding.itemRecommendedCount.setOnClickListener { showRecommendedCountDialog() }
+        // v84: modalità raccomandate
+        binding.itemRecommendedMode.setOnClickListener { showRecommendedModeDialog() }
+        settings.recommendedMode.observe(this) { updateRecommendedModeLabel() }
+        updateRecommendedModeLabel()
 
         // v38: language picker
         updateLanguageLabel()
@@ -510,33 +525,33 @@ class SettingsActivity : AppCompatActivity() {
      */
 
 
-    /** v80: check for update via GitHub Releases API */
+    /** v83: check + download + install update (via GitHub Releases) */
     private fun handleCheckUpdate() {
         binding.checkUpdateLabel.text = getString(R.string.update_checking)
         org.cheipstudio.speedlauncher.tools.UpdateChecker.checkForUpdate(this) { info ->
+            binding.checkUpdateLabel.text = getString(R.string.settings_check_update_sub)
             if (info == null) {
-                binding.checkUpdateLabel.text = getString(R.string.settings_check_update_sub)
                 Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
                 return@checkForUpdate
             }
-            binding.checkUpdateLabel.text = getString(R.string.settings_check_update_sub)
+            // v83: gestione errori specifici
+            when (info.errorReason) {
+                "no_release" -> {
+                    Toast.makeText(this, R.string.update_no_release_yet, Toast.LENGTH_LONG).show()
+                    return@checkForUpdate
+                }
+                "no_internet" -> {
+                    Toast.makeText(this, R.string.update_no_internet, Toast.LENGTH_LONG).show()
+                    return@checkForUpdate
+                }
+                null -> {} // tutto ok
+                else -> {
+                    Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
+                    return@checkForUpdate
+                }
+            }
             if (info.isUpdateAvailable && info.downloadUrl != null) {
-                com.google.android.material.dialog.MaterialAlertDialogBuilder(
-                    this,
-                    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-                )
-                    .setTitle(R.string.update_available_title)
-                    .setMessage(getString(
-                        R.string.update_available_msg,
-                        info.latestVersion,
-                        info.currentVersion,
-                        info.releaseNotes.take(300)
-                    ))
-                    .setPositiveButton(R.string.update_download) { _, _ ->
-                        org.cheipstudio.speedlauncher.tools.UpdateChecker.openDownload(this, info.downloadUrl)
-                    }
-                    .setNegativeButton(R.string.update_later, null)
-                    .show()
+                showUpdateAvailableDialog(info)
             } else {
                 com.google.android.material.dialog.MaterialAlertDialogBuilder(
                     this,
@@ -548,6 +563,107 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
             }
         }
+    }
+
+    private fun showUpdateAvailableDialog(info: org.cheipstudio.speedlauncher.tools.UpdateChecker.UpdateInfo) {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.update_available_title)
+            .setMessage(getString(
+                R.string.update_available_msg,
+                info.latestVersion,
+                info.currentVersion,
+                info.releaseNotes.take(300)
+            ))
+            .setPositiveButton(R.string.update_download) { _, _ ->
+                if (info.downloadUrl != null) startUpdateDownload(info.downloadUrl)
+            }
+            .setNegativeButton(R.string.update_later, null)
+            .show()
+    }
+
+    private fun startUpdateDownload(url: String) {
+        // v83: dialog con progress bar durante download, poi apre installer di sistema
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.update_downloading_title)
+            .setMessage(getString(R.string.update_downloading_progress, 0))
+            .setCancelable(false)
+            .create()
+        dialog.show()
+
+        org.cheipstudio.speedlauncher.tools.UpdateChecker.downloadAndInstall(
+            this,
+            url,
+            onProgress = { downloaded, total ->
+                if (total > 0) {
+                    val pct = (downloaded * 100 / total).toInt()
+                    dialog.setMessage(getString(R.string.update_downloading_progress, pct))
+                } else {
+                    val mb = downloaded / (1024 * 1024)
+                    dialog.setMessage(getString(R.string.update_downloading_size, mb))
+                }
+            },
+            onComplete = { file ->
+                dialog.dismiss()
+                if (file == null) {
+                    Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_LONG).show()
+                }
+                // Se OK, l'installer parte automaticamente
+            }
+        )
+    }
+
+
+
+
+    /**
+     * v85: visibilità del bottone "Reset griglia" — solo se drawer disabilitato.
+     */
+    private fun applyDrawerDependentVisibility(drawerEnabled: Boolean) {
+        binding.itemAutoGridReset.visibility = if (drawerEnabled) android.view.View.GONE else android.view.View.VISIBLE
+    }
+
+    /**
+     * v85: gestisce il toggle drawer.
+     * - ON → drawer = true: rimuovo le app autoAdded dalla home (mantenendo personalizzazioni)
+     * - OFF → drawer = false: popolo la home con tutte le app non già presenti
+     */
+    private fun handleDrawerToggle(drawerEnabled: Boolean) {
+        val store = org.cheipstudio.speedlauncher.data.HomeLayoutStore(this)
+        if (drawerEnabled) {
+            org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.removeAutoAdded(store)
+        } else {
+            val cols = settings.gridCols.value ?: 4
+            val rows = settings.gridRows.value ?: 5
+            org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
+        }
+        // Restart per riapplicare il layout
+        forceRestartApp()
+    }
+
+    /** v85: dialog di conferma + reset griglia automatica */
+    private fun showAutoGridResetDialog() {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.auto_grid_reset_confirm_title)
+            .setMessage(R.string.auto_grid_reset_confirm_msg)
+            .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
+                val store = org.cheipstudio.speedlauncher.data.HomeLayoutStore(this)
+                val cols = settings.gridCols.value ?: 4
+                val rows = settings.gridRows.value ?: 5
+                org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.fullReset(store, cols, rows)
+                Toast.makeText(this, R.string.auto_grid_reset_done, Toast.LENGTH_SHORT).show()
+                forceRestartApp()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun forceRestartApp() {
@@ -672,6 +788,90 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
+
+
+
+    private fun updateRecommendedModeLabel() {
+        val mode = settings.recommendedMode.value ?: SettingsRepository.REC_MODE_AI
+        binding.recommendedModeLabel.text = when (mode) {
+            SettingsRepository.REC_MODE_MANUAL -> getString(R.string.rec_mode_manual)
+            else -> getString(R.string.rec_mode_ai)
+        }
+    }
+
+    /** v84: dialog scelta AI vs Manuale per le raccomandate */
+    private fun showRecommendedModeDialog() {
+        val current = settings.recommendedMode.value ?: SettingsRepository.REC_MODE_AI
+        val labels = arrayOf(
+            getString(R.string.rec_mode_ai),
+            getString(R.string.rec_mode_manual)
+        )
+        val values = arrayOf(SettingsRepository.REC_MODE_AI, SettingsRepository.REC_MODE_MANUAL)
+        val sel = values.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.settings_recommended_mode)
+            .setSingleChoiceItems(labels, sel) { dialog, which ->
+                val picked = values[which]
+                settings.setRecommendedMode(picked)
+                dialog.dismiss()
+                if (picked == SettingsRepository.REC_MODE_MANUAL) {
+                    // Apro selettore app per scegliere quali mostrare
+                    showRecommendedManualPicker()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** v84: dialog multi-select per scegliere le app raccomandate manuali */
+    private fun showRecommendedManualPicker() {
+        val apps = org.cheipstudio.speedlauncher.SpeedApp.instance.appRepository.apps.value
+            ?: emptyList()
+        val hidden = settings.hiddenApps.value ?: emptySet<String>()
+        val available = apps.filter { !hidden.contains(it.key) }
+            .sortedBy { it.label.lowercase() }
+        val countNeeded = settings.recommendedCount.value ?: 5
+        val current = settings.recommendedManualApps.value ?: mutableSetOf()
+
+        val labels = available.map { it.label }.toTypedArray()
+        val checked = BooleanArray(available.size) { i -> current.contains(available[i].key) }
+        val selected = current.toMutableSet()
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(getString(R.string.rec_mode_pick_apps_title, countNeeded))
+            .setMessage(getString(R.string.rec_mode_pick_apps_msg))
+            .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
+                val key = available[which].key
+                if (isChecked) selected.add(key) else selected.remove(key)
+                // Validazione al click del positive button, non qui
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                if (selected.size == countNeeded) {
+                    settings.setRecommendedManualApps(selected)
+                    Toast.makeText(this, getString(R.string.rec_mode_pick_apps_title, countNeeded), Toast.LENGTH_SHORT).show()
+                } else {
+                    // Salvo comunque ma avviso
+                    settings.setRecommendedManualApps(selected)
+                    if (selected.isEmpty()) {
+                        Toast.makeText(this, R.string.rec_mode_no_apps_selected, Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.rec_mode_pick_apps_too_few, countNeeded),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
 
     /** v71: abilita/disabilita visivamente le card che dipendono dalla searchbar */
     private fun applySearchBarDependentEnabled(enabled: Boolean) {

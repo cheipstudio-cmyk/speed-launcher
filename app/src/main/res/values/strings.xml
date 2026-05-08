@@ -258,4 +258,24 @@ Vuoi scaricarla?</string>
     <string name="update_no_update_msg">Stai usando l\'ultima versione disponibile (%1$s).</string>
     <string name="update_download">Scarica</string>
     <string name="update_later">Più tardi</string>
+    <string name="update_no_release_yet">Nessuna release ancora pubblicata. Riprova più tardi.</string>
+    <string name="update_no_internet">Connessione internet assente.</string>
+    <string name="update_downloading_title">Download aggiornamento</string>
+    <string name="update_downloading_progress">Scaricamento in corso... %1$d%%</string>
+    <string name="update_downloading_size">Scaricato %1$d MB...</string>
+    <string name="update_download_failed">Download fallito. Riprova.</string>
+    <string name="settings_recommended_mode">Modalità raccomandate</string>
+    <string name="rec_mode_ai">Automatica (AI)</string>
+    <string name="rec_mode_manual">Manuale (scelte da te)</string>
+    <string name="rec_mode_pick_apps_title">Scegli %1$d app</string>
+    <string name="rec_mode_pick_apps_msg">Tocca le app da mostrare nella card raccomandate.</string>
+    <string name="rec_mode_pick_apps_too_few">Devi selezionare esattamente %1$d app.</string>
+    <string name="rec_mode_no_apps_selected">Nessuna app selezionata. Usando AI fino a quando non scegli.</string>
+    <string name="settings_drawer_enabled">Mostra drawer app</string>
+    <string name="settings_drawer_enabled_sub">Disabilita per avere tutte le app in home (stile iOS)</string>
+    <string name="settings_auto_grid_reset">Reset griglia automatica</string>
+    <string name="settings_auto_grid_reset_sub">Cancella personalizzazioni e ripopola con tutte le app</string>
+    <string name="auto_grid_reset_confirm_title">Reset griglia?</string>
+    <string name="auto_grid_reset_confirm_msg">Cancellerà la disposizione attuale della home e la ricreerà con tutte le app in ordine alfabetico.</string>
+    <string name="auto_grid_reset_done">Griglia rigenerata</string>
 </resources>

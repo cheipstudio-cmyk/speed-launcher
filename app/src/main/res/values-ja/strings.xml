@@ -236,4 +236,24 @@
     <string name="update_no_update_msg">最新バージョンを使用しています (%1$s)。</string>
     <string name="update_download">ダウンロード</string>
     <string name="update_later">後で</string>
+    <string name="update_no_release_yet">リリースがまだ公開されていません。後でもう一度お試しください。</string>
+    <string name="update_no_internet">インターネット接続がありません。</string>
+    <string name="update_downloading_title">アップデートをダウンロード中</string>
+    <string name="update_downloading_progress">ダウンロード中... %1$d%%</string>
+    <string name="update_downloading_size">%1$d MB ダウンロード済み...</string>
+    <string name="update_download_failed">ダウンロードに失敗しました。</string>
+    <string name="settings_recommended_mode">おすすめモード</string>
+    <string name="rec_mode_ai">自動 (AI)</string>
+    <string name="rec_mode_manual">手動 (自分で選択)</string>
+    <string name="rec_mode_pick_apps_title">%1$d 個のアプリを選択</string>
+    <string name="rec_mode_pick_apps_msg">おすすめに表示するアプリをタップしてください。</string>
+    <string name="rec_mode_pick_apps_too_few">%1$d 個のアプリを選択する必要があります。</string>
+    <string name="rec_mode_no_apps_selected">アプリが選択されていません。AIモードを使用中。</string>
+    <string name="settings_drawer_enabled">アプリドロワーを表示</string>
+    <string name="settings_drawer_enabled_sub">無効にするとすべてのアプリをホームに表示（iOSスタイル）</string>
+    <string name="settings_auto_grid_reset">自動グリッドをリセット</string>
+    <string name="settings_auto_grid_reset_sub">カスタマイズを消去してすべてのアプリで再作成</string>
+    <string name="auto_grid_reset_confirm_title">グリッドをリセット？</string>
+    <string name="auto_grid_reset_confirm_msg">現在のホームレイアウトを消去し、すべてのアプリでアルファベット順に再作成します。</string>
+    <string name="auto_grid_reset_done">グリッドを再生成しました</string>
 </resources>

@@ -236,4 +236,24 @@ Se usará solo para esta función.</string>
     <string name="update_no_update_msg">Estás usando la última versión (%1$s).</string>
     <string name="update_download">Descargar</string>
     <string name="update_later">Más tarde</string>
+    <string name="update_no_release_yet">Aún no hay versión publicada. Inténtalo más tarde.</string>
+    <string name="update_no_internet">Sin conexión a internet.</string>
+    <string name="update_downloading_title">Descargando actualización</string>
+    <string name="update_downloading_progress">Descargando... %1$d%%</string>
+    <string name="update_downloading_size">Descargado %1$d MB...</string>
+    <string name="update_download_failed">Descarga fallida. Inténtalo de nuevo.</string>
+    <string name="settings_recommended_mode">Modo recomendadas</string>
+    <string name="rec_mode_ai">Automático (IA)</string>
+    <string name="rec_mode_manual">Manual (elegidas por ti)</string>
+    <string name="rec_mode_pick_apps_title">Elige %1$d apps</string>
+    <string name="rec_mode_pick_apps_msg">Toca las apps para mostrar en recomendadas.</string>
+    <string name="rec_mode_pick_apps_too_few">Debes seleccionar exactamente %1$d apps.</string>
+    <string name="rec_mode_no_apps_selected">Ninguna app seleccionada. Modo IA activo.</string>
+    <string name="settings_drawer_enabled">Mostrar cajón de apps</string>
+    <string name="settings_drawer_enabled_sub">Desactiva para tener todas las apps en home (estilo iOS)</string>
+    <string name="settings_auto_grid_reset">Restablecer cuadrícula auto</string>
+    <string name="settings_auto_grid_reset_sub">Borrar personalizaciones y repoblar con todas las apps</string>
+    <string name="auto_grid_reset_confirm_title">¿Restablecer cuadrícula?</string>
+    <string name="auto_grid_reset_confirm_msg">Borrará la disposición actual y la recreará con todas las apps alfabéticamente.</string>
+    <string name="auto_grid_reset_done">Cuadrícula regenerada</string>
 </resources>

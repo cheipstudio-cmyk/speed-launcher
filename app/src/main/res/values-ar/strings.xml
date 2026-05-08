@@ -236,4 +236,24 @@
     <string name="update_no_update_msg">أنت تستخدم أحدث إصدار (%1$s).</string>
     <string name="update_download">تنزيل</string>
     <string name="update_later">لاحقًا</string>
+    <string name="update_no_release_yet">لا يوجد إصدار منشور بعد. حاول لاحقًا.</string>
+    <string name="update_no_internet">لا يوجد اتصال بالإنترنت.</string>
+    <string name="update_downloading_title">تنزيل التحديث</string>
+    <string name="update_downloading_progress">جارٍ التنزيل... %1$d%%</string>
+    <string name="update_downloading_size">تم تنزيل %1$d ميجابايت...</string>
+    <string name="update_download_failed">فشل التنزيل.</string>
+    <string name="settings_recommended_mode">وضع التوصيات</string>
+    <string name="rec_mode_ai">تلقائي (AI)</string>
+    <string name="rec_mode_manual">يدوي (تختاره بنفسك)</string>
+    <string name="rec_mode_pick_apps_title">اختر %1$d تطبيقات</string>
+    <string name="rec_mode_pick_apps_msg">اضغط على التطبيقات لعرضها في صف التوصيات.</string>
+    <string name="rec_mode_pick_apps_too_few">يجب اختيار %1$d تطبيقات بالضبط.</string>
+    <string name="rec_mode_no_apps_selected">لم يتم اختيار تطبيقات. وضع AI نشط.</string>
+    <string name="settings_drawer_enabled">عرض درج التطبيقات</string>
+    <string name="settings_drawer_enabled_sub">قم بتعطيله لعرض جميع التطبيقات على الشاشة الرئيسية (نمط iOS)</string>
+    <string name="settings_auto_grid_reset">إعادة تعيين الشبكة التلقائية</string>
+    <string name="settings_auto_grid_reset_sub">امسح التخصيصات وأعد التعبئة بجميع التطبيقات</string>
+    <string name="auto_grid_reset_confirm_title">إعادة تعيين الشبكة؟</string>
+    <string name="auto_grid_reset_confirm_msg">سيتم مسح التخطيط الحالي وإعادة إنشائه بجميع التطبيقات أبجديًا.</string>
+    <string name="auto_grid_reset_done">تم إعادة إنشاء الشبكة</string>
 </resources>

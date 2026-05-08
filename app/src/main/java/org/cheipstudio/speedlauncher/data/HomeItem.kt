@@ -6,6 +6,8 @@ package org.cheipstudio.speedlauncher.data
  * - type = "folder" → key è l'ID folder (es. "f_1234"), name è il nome visualizzato,
  *   folderApps contiene le keys delle app dentro
  * v59: aggiunto type "tool" per pulsanti come memory cleaner.
+ * v85: flag autoAdded per le app aggiunte automaticamente quando il drawer è disabilitato.
+ *      Permette di rimuoverle facilmente quando si riattiva il drawer.
  */
 data class HomeItem(
     val key: String,
@@ -14,7 +16,8 @@ data class HomeItem(
     val cellY: Int,
     val type: String = TYPE_APP,
     val name: String = "",
-    val folderApps: List<String> = emptyList()
+    val folderApps: List<String> = emptyList(),
+    val autoAdded: Boolean = false
 ) {
     companion object {
         const val TYPE_APP = "app"

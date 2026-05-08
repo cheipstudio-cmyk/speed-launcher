@@ -11,8 +11,8 @@ android {
         applicationId "org.cheipstudio.speedlauncher"
         minSdk 31
         targetSdk 34
-        versionCode 83
-        versionName "0.82.0"
+        versionCode 86
+        versionName "0.85.0"
         resourceConfigurations += ['en', 'it', 'fr', 'es', 'tr', 'ar', 'ja']
     }
 

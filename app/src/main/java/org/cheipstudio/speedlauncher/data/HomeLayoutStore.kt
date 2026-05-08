@@ -6,7 +6,8 @@ import org.json.JSONObject
 
 /**
  * v16: persistenza con supporto folder.
- * Schema JSON: { type, key, page, cellX, cellY, name?, folderApps? }
+ * Schema JSON: { type, key, page, cellX, cellY, name?, folderApps?, autoAdded? }
+ * v85: campo autoAdded per identificare app aggiunte automaticamente (drawer disabilitato).
  */
 class HomeLayoutStore(context: Context) {
 
@@ -31,7 +32,8 @@ class HomeLayoutStore(context: Context) {
                     cellY = o.getInt("cellY"),
                     type = o.optString("type", HomeItem.TYPE_APP),
                     name = o.optString("name", ""),
-                    folderApps = folderApps
+                    folderApps = folderApps,
+                    autoAdded = o.optBoolean("autoAdded", false)
                 ))
             }
             out
@@ -60,6 +62,7 @@ class HomeLayoutStore(context: Context) {
                 for (k in it.folderApps) fa.put(k)
                 o.put("folderApps", fa)
             }
+            if (it.autoAdded) o.put("autoAdded", true)
             arr.put(o)
         }
         prefs.edit().putString(KEY_ITEMS, arr.toString()).apply()

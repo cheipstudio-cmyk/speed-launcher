@@ -131,17 +131,28 @@ class RecommendedView @JvmOverloads constructor(
     }
 
     fun refresh(scope: String = "home") {
-        val tracker = SpeedApp.instance.usageTracker
+        val settings = SpeedApp.instance.settingsRepository
         val all = SpeedApp.instance.appRepository.apps.value ?: emptyList()
-        val hidden = SpeedApp.instance.settingsRepository.hiddenApps.value ?: emptySet<String>()
+        val hidden = settings.hiddenApps.value ?: emptySet<String>()
         val available = all.filter { !hidden.contains(it.key) }
         val byKey = available.associateBy { it.key }
-        val countToShow = SpeedApp.instance.settingsRepository.recommendedCount.value ?: 5
-        val topKeys = tracker.getTopApps(byKey.keys, topN = countToShow)
-        var topApps = topKeys.mapNotNull { byKey[it] }
+        val countToShow = settings.recommendedCount.value ?: 5
 
-        // v75: se l'usage tracker non ha ancora dati (nuovo install), uso fallback:
-        // primi N apps in ordine alfabetico così le raccomandate sono comunque visibili
+        // v84: supporta modalità "ai" (default, da usage) o "manual" (scelta utente)
+        val mode = settings.recommendedMode.value ?: SettingsRepository.REC_MODE_AI
+        var topApps: List<AppInfo> = if (mode == SettingsRepository.REC_MODE_MANUAL) {
+            // Modalità manuale: prendo le app scelte dall\'utente, in ordine
+            val manualKeys = settings.recommendedManualApps.value ?: mutableSetOf()
+            val list = manualKeys.mapNotNull { byKey[it] }.take(countToShow)
+            list
+        } else {
+            // Modalità AI: usage tracker
+            val tracker = SpeedApp.instance.usageTracker
+            val topKeys = tracker.getTopApps(byKey.keys, topN = countToShow)
+            topKeys.mapNotNull { byKey[it] }
+        }
+
+        // v75: se vuoto (nuovo install / manuale non configurato), fallback alfabetico
         if (topApps.isEmpty() && available.isNotEmpty()) {
             topApps = available.sortedBy { it.label.lowercase() }.take(countToShow)
         }

@@ -63,6 +63,17 @@ class SettingsRepository(context: Context) {
     /** v75: icon pack esterno (package name, "" = nessuno). Sperimentale. */
     val iconPackPackage = MutableLiveData(prefs.getString(KEY_ICON_PACK, "") ?: "")
 
+    /** v84: modalità raccomandate — "ai" (auto da usage tracker) o "manual" (scelte dall\'utente) */
+    val recommendedMode = MutableLiveData(prefs.getString(KEY_REC_MODE, REC_MODE_AI) ?: REC_MODE_AI)
+
+    /** v84: lista app manuali per raccomandate (set di chiavi "packageName/componentName") */
+    val recommendedManualApps = MutableLiveData(
+        prefs.getStringSet(KEY_REC_MANUAL_APPS, emptySet())?.toMutableSet() ?: mutableSetOf()
+    )
+
+    /** v85: drawer abilitato. Se false, tutte le app vengono auto-popolate in home (stile iOS). */
+    val drawerEnabled = MutableLiveData(prefs.getBoolean(KEY_DRAWER_ENABLED, true))
+
     init {
         // v48: al primo run di v48 (dopo aggiornamento), imposta TUTTI i temi a "transparent" come default
         if (!prefs.getBoolean(KEY_FIRST_THEMES_SET, false)) {
@@ -191,6 +202,21 @@ class SettingsRepository(context: Context) {
     fun setIconPackPackage(pkg: String) {
         prefs.edit().putString(KEY_ICON_PACK, pkg).apply()
         iconPackPackage.postValue(pkg)
+    }
+
+    fun setRecommendedMode(mode: String) {
+        prefs.edit().putString(KEY_REC_MODE, mode).apply()
+        recommendedMode.postValue(mode)
+    }
+
+    fun setRecommendedManualApps(keys: Set<String>) {
+        prefs.edit().putStringSet(KEY_REC_MANUAL_APPS, keys).apply()
+        recommendedManualApps.postValue(keys.toMutableSet())
+    }
+
+    fun setDrawerEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_DRAWER_ENABLED, enabled).apply()
+        drawerEnabled.postValue(enabled)
     }
 
     fun unhideAllApps() {
@@ -341,6 +367,12 @@ class SettingsRepository(context: Context) {
         private const val KEY_DRAWER_THEME = "drawer_theme"
         private const val KEY_MEMORY_CLEANER = "memory_cleaner_enabled"
         private const val KEY_ICON_PACK = "icon_pack_package"
+        private const val KEY_REC_MODE = "recommended_mode"
+        private const val KEY_REC_MANUAL_APPS = "recommended_manual_apps"
+
+        const val REC_MODE_AI = "ai"
+        const val REC_MODE_MANUAL = "manual"
+        private const val KEY_DRAWER_ENABLED = "drawer_enabled"
         private const val KEY_FIRST_THEMES_SET = "first_themes_set"
 
         // Default = arancione/rosso vivace (Material 3)
