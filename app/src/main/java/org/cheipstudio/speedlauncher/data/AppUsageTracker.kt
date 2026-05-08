@@ -44,6 +44,19 @@ class AppUsageTracker(context: Context) {
             .map { it.first }
     }
 
+
+    /**
+     * v112: ritorna i topN apps tra le keys disponibili, ordinate per uso più recente.
+     * Usato da RecommendedView in modalità AI.
+     */
+    fun getTopApps(availableKeys: Set<String>, topN: Int): List<String> {
+        // Prima prova: most recently used (cronologico)
+        val recent = getMostRecentlyUsed().filter { it in availableKeys }
+        if (recent.isNotEmpty()) return recent.take(topN)
+        // Fallback: most used (frequenza)
+        return getMostUsed().filter { it in availableKeys }.take(topN)
+    }
+
     fun clear() {
         prefs.edit().clear().apply()
     }
