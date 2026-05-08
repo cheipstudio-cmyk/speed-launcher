@@ -244,4 +244,18 @@ Si userà solo per questa funzione.</string>
     <string name="icon_pack_no_pack_installed">Nessun icon pack installato</string>
     <string name="icon_pack_no_pack_installed_msg">Per usare un icon pack scaricane uno dal Play Store (es. Whicons, Pixel Icon Pack, ecc).</string>
     <string name="icon_pack_applied">Icon pack applicato. Riavvio in corso...</string>
+    <string name="settings_check_update">Controlla aggiornamenti</string>
+    <string name="settings_check_update_sub">Verifica se è disponibile una nuova versione</string>
+    <string name="update_checking">Controllo in corso...</string>
+    <string name="update_check_failed">Impossibile contattare il server. Riprova più tardi.</string>
+    <string name="update_available_title">Aggiornamento disponibile</string>
+    <string name="update_available_msg">Versione %1$s disponibile (attuale: %2$s).
+
+%3$s
+
+Vuoi scaricarla?</string>
+    <string name="update_no_update_title">Sei aggiornato</string>
+    <string name="update_no_update_msg">Stai usando l\'ultima versione disponibile (%1$s).</string>
+    <string name="update_download">Scarica</string>
+    <string name="update_later">Più tardi</string>
 </resources>

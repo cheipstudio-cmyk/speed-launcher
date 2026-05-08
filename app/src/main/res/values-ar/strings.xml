@@ -222,4 +222,18 @@
     <string name="icon_pack_no_pack_installed">لا توجد حزمة أيقونات مثبتة</string>
     <string name="icon_pack_no_pack_installed_msg">لاستخدام حزمة أيقونات، قم بتنزيل واحدة من Play Store.</string>
     <string name="icon_pack_applied">تم تطبيق حزمة الأيقونات. جارٍ إعادة التشغيل...</string>
+    <string name="settings_check_update">التحقق من التحديثات</string>
+    <string name="settings_check_update_sub">تحقق من توفر إصدار جديد</string>
+    <string name="update_checking">جارٍ التحقق...</string>
+    <string name="update_check_failed">تعذر الوصول إلى الخادم. حاول لاحقًا.</string>
+    <string name="update_available_title">تحديث متاح</string>
+    <string name="update_available_msg">الإصدار %1$s متاح (الحالي: %2$s).
+
+%3$s
+
+هل تريد التنزيل الآن؟</string>
+    <string name="update_no_update_title">أنت محدّث</string>
+    <string name="update_no_update_msg">أنت تستخدم أحدث إصدار (%1$s).</string>
+    <string name="update_download">تنزيل</string>
+    <string name="update_later">لاحقًا</string>
 </resources>

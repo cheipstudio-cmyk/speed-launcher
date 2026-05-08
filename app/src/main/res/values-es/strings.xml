@@ -222,4 +222,18 @@ Se usará solo para esta función.</string>
     <string name="icon_pack_no_pack_installed">Ningún pack de iconos instalado</string>
     <string name="icon_pack_no_pack_installed_msg">Para usar un pack de iconos, descarga uno desde Play Store.</string>
     <string name="icon_pack_applied">Pack de iconos aplicado. Reiniciando...</string>
+    <string name="settings_check_update">Buscar actualizaciones</string>
+    <string name="settings_check_update_sub">Verificar si hay una nueva versión disponible</string>
+    <string name="update_checking">Comprobando...</string>
+    <string name="update_check_failed">No se pudo contactar el servidor. Inténtalo más tarde.</string>
+    <string name="update_available_title">Actualización disponible</string>
+    <string name="update_available_msg">Versión %1$s disponible (actual: %2$s).
+
+%3$s
+
+¿Descargar ahora?</string>
+    <string name="update_no_update_title">Estás actualizado</string>
+    <string name="update_no_update_msg">Estás usando la última versión (%1$s).</string>
+    <string name="update_download">Descargar</string>
+    <string name="update_later">Más tarde</string>
 </resources>

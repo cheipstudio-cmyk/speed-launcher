@@ -326,6 +326,9 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "cheipstudio@gmail.com", Toast.LENGTH_LONG).show()
             }
         }
+
+        // v80: check for update
+        binding.itemCheckUpdate.setOnClickListener { handleCheckUpdate() }
     }
 
     private fun resolveAttr(attr: Int): Int {
@@ -505,6 +508,48 @@ class SettingsActivity : AppCompatActivity() {
      * v60: termina il processo e riavvia l\'app dalla MainActivity.
      * Necessario dopo reset totale per ricaricare tutte le impostazioni in stato fresh.
      */
+
+
+    /** v80: check for update via GitHub Releases API */
+    private fun handleCheckUpdate() {
+        binding.checkUpdateLabel.text = getString(R.string.update_checking)
+        org.cheipstudio.speedlauncher.tools.UpdateChecker.checkForUpdate(this) { info ->
+            if (info == null) {
+                binding.checkUpdateLabel.text = getString(R.string.settings_check_update_sub)
+                Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
+                return@checkForUpdate
+            }
+            binding.checkUpdateLabel.text = getString(R.string.settings_check_update_sub)
+            if (info.isUpdateAvailable && info.downloadUrl != null) {
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                    this,
+                    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+                )
+                    .setTitle(R.string.update_available_title)
+                    .setMessage(getString(
+                        R.string.update_available_msg,
+                        info.latestVersion,
+                        info.currentVersion,
+                        info.releaseNotes.take(300)
+                    ))
+                    .setPositiveButton(R.string.update_download) { _, _ ->
+                        org.cheipstudio.speedlauncher.tools.UpdateChecker.openDownload(this, info.downloadUrl)
+                    }
+                    .setNegativeButton(R.string.update_later, null)
+                    .show()
+            } else {
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                    this,
+                    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+                )
+                    .setTitle(R.string.update_no_update_title)
+                    .setMessage(getString(R.string.update_no_update_msg, info.currentVersion))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+        }
+    }
+
     private fun forceRestartApp() {
         try {
             val intent = packageManager.getLaunchIntentForPackage(packageName)

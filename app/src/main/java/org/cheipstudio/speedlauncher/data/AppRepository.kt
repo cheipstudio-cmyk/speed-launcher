@@ -32,7 +32,6 @@ class AppRepository(private val context: Context) {
 
     private fun loadApps(): List<AppInfo> {
         val result = mutableListOf<AppInfo>()
-        // Per ora carichiamo solo lo user principale; multi-user/work profile arrivano dopo
         val users: List<UserHandle> = listOf(Process.myUserHandle())
         for (user in users) {
             val activities = try {
@@ -56,9 +55,6 @@ class AppRepository(private val context: Context) {
         return result.sortedWith(compareBy(collator) { it.label.lowercase() })
     }
 
-    /**
-     * Si registra ai cambi di package per ricaricare automaticamente.
-     */
     fun observePackageChanges() {
         launcherApps.registerCallback(object : LauncherApps.Callback() {
             override fun onPackageRemoved(packageName: String, user: UserHandle) = reload()
@@ -74,20 +70,25 @@ class AppRepository(private val context: Context) {
         val (sourceBounds, options) = buildLaunchAnimation(sourceView)
         try {
             launcherApps.startMainActivity(component, app.userHandle, sourceBounds, options?.toBundle())
-            // v30: registra il lancio per le Raccomandate (AI Launcher Mode)
             try {
                 org.cheipstudio.speedlauncher.SpeedApp.instance.usageTracker.recordLaunch(app.key)
             } catch (_: Throwable) {}
         } catch (t: Throwable) {
-            // App rimossa o non più avviabile: ricarica
             reload()
         }
     }
 
     /**
-     * Costruisce l'animazione di apertura "scale-up dall'icona" stile Pixel.
-     * Restituisce sia i bounds (per sourceBounds di startMainActivity) che le ActivityOptions.
-     * Se la view è null o non visibile, animazione di default.
+     * v82: animazione di apertura "Pixel-style".
+     *
+     * Strategia in cascata (la prima che funziona vince):
+     * 1. Android 12+ con view nota: makeScaleUpAnimation + splashScreenStyle ICON_PREFERRED
+     *    → zoom dall'icona + splash dell'app sincronizzata
+     * 2. Android 5.1+: makeClipRevealAnimation
+     *    → reveal circolare dal punto dell'icona, più fluido del classico scale up
+     * 3. Fallback: makeScaleUpAnimation
+     *    → zoom dall'icona compatibile con tutto
+     * 4. Senza view: nessuna animazione custom (sistema default)
      */
     private fun buildLaunchAnimation(
         view: android.view.View?
@@ -95,12 +96,41 @@ class AppRepository(private val context: Context) {
         if (view == null || view.width == 0 || view.height == 0) {
             return null to null
         }
+
+        // Bounds della view sorgente (per il sistema)
         val loc = IntArray(2)
         view.getLocationOnScreen(loc)
         val bounds = android.graphics.Rect(
             loc[0], loc[1],
             loc[0] + view.width, loc[1] + view.height
         )
+
+        // Tier 1: Android 12+ — clipReveal + splashScreen ICON_PREFERRED (Pixel-like)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            try {
+                val options = android.app.ActivityOptions.makeClipRevealAnimation(
+                    view, 0, 0, view.width, view.height
+                )
+                // splashScreenStyle ICON_PREFERRED → app target mostra la sua icona splash
+                // sincronizzata col reveal del launcher
+                options.setSplashScreenStyle(
+                    android.window.SplashScreen.SPLASH_SCREEN_STYLE_ICON
+                )
+                return bounds to options
+            } catch (_: Throwable) {}
+        }
+
+        // Tier 2: Android 5.1+ — clipReveal (cerchio che si espande dall'icona)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+            try {
+                val options = android.app.ActivityOptions.makeClipRevealAnimation(
+                    view, view.width / 2, view.height / 2, 0, 0
+                )
+                return bounds to options
+            } catch (_: Throwable) {}
+        }
+
+        // Tier 3: fallback scaleUp (zoom dall'icona)
         val options = android.app.ActivityOptions.makeScaleUpAnimation(
             view, 0, 0, view.width, view.height
         )

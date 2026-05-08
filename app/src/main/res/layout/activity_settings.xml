@@ -687,6 +687,20 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v80: Check for update -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemCheckUpdate" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_download" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_check_update" />
+                        <TextView android:id="@+id/checkUpdateLabel" style="@style/PixelItemSubtitle" android:text="@string/settings_check_update_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Cheip Studio + Contattaci come voci card normali (uniformi al resto) -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemCheipStudio" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">

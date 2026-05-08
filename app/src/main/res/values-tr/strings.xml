@@ -222,4 +222,18 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="icon_pack_no_pack_installed">Hiç simge paketi yüklü değil</string>
     <string name="icon_pack_no_pack_installed_msg">Bir simge paketi kullanmak için Play Store\'dan indirin.</string>
     <string name="icon_pack_applied">Simge paketi uygulandı. Yeniden başlatılıyor...</string>
+    <string name="settings_check_update">Güncellemeleri kontrol et</string>
+    <string name="settings_check_update_sub">Yeni sürümün olup olmadığını kontrol et</string>
+    <string name="update_checking">Kontrol ediliyor...</string>
+    <string name="update_check_failed">Sunucuya ulaşılamadı. Daha sonra tekrar deneyin.</string>
+    <string name="update_available_title">Güncelleme mevcut</string>
+    <string name="update_available_msg">Sürüm %1$s mevcut (geçerli: %2$s).
+
+%3$s
+
+Şimdi indir?</string>
+    <string name="update_no_update_title">Güncelsiniz</string>
+    <string name="update_no_update_msg">En son sürümü kullanıyorsunuz (%1$s).</string>
+    <string name="update_download">İndir</string>
+    <string name="update_later">Daha sonra</string>
 </resources>
