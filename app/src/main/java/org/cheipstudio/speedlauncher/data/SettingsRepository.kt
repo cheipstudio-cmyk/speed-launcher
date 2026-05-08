@@ -44,6 +44,30 @@ class SettingsRepository(context: Context) {
     val wallpaperDim = MutableLiveData(prefs.getInt(KEY_WALLPAPER_DIM, 0))
     // v41: sfocatura wallpaper (radius 0..50, 0 = nessuna)
     val wallpaperBlur = MutableLiveData(prefs.getInt(KEY_WALLPAPER_BLUR, 0))
+
+    // v47: widget Speed Stats — tema (system/transparent/light/dark) + auto-refresh
+    private val widgetPrefs = context.getSharedPreferences("speed_widget_prefs", Context.MODE_PRIVATE)
+    val widgetTheme = MutableLiveData(widgetPrefs.getString(KEY_WIDGET_THEME, "system") ?: "system")
+    val widgetAutoRefresh = MutableLiveData(widgetPrefs.getBoolean(KEY_WIDGET_AUTO_REFRESH, true))
+
+    // v48: tema search bar + tema dock raccomandate (system/transparent/light/dark)
+    val searchTheme = MutableLiveData(prefs.getString(KEY_SEARCH_THEME, "system") ?: "system")
+    val dockTheme = MutableLiveData(prefs.getString(KEY_DOCK_THEME, "system") ?: "system")
+
+    init {
+        // v48: al primo run di v48 (dopo aggiornamento), imposta TUTTI i temi a "transparent" come default
+        if (!prefs.getBoolean(KEY_FIRST_THEMES_SET, false)) {
+            prefs.edit()
+                .putString(KEY_SEARCH_THEME, "transparent")
+                .putString(KEY_DOCK_THEME, "transparent")
+                .putBoolean(KEY_FIRST_THEMES_SET, true)
+                .apply()
+            widgetPrefs.edit().putString(KEY_WIDGET_THEME, "transparent").apply()
+            searchTheme.postValue("transparent")
+            dockTheme.postValue("transparent")
+            widgetTheme.postValue("transparent")
+        }
+    }
     val showDock = MutableLiveData(false)
     val showSearchBar = MutableLiveData(true)
 
@@ -124,6 +148,25 @@ class SettingsRepository(context: Context) {
     }
     fun setWallpaperBlur(v: Int) {
         prefs.edit().putInt(KEY_WALLPAPER_BLUR, v).apply(); wallpaperBlur.postValue(v)
+    }
+
+    /** v47: widget settings */
+    fun setWidgetTheme(v: String) {
+        widgetPrefs.edit().putString(KEY_WIDGET_THEME, v).apply()
+        widgetTheme.postValue(v)
+    }
+    fun setWidgetAutoRefresh(on: Boolean) {
+        widgetPrefs.edit().putBoolean(KEY_WIDGET_AUTO_REFRESH, on).apply()
+        widgetAutoRefresh.postValue(on)
+    }
+
+    fun setSearchTheme(v: String) {
+        prefs.edit().putString(KEY_SEARCH_THEME, v).apply()
+        searchTheme.postValue(v)
+    }
+    fun setDockTheme(v: String) {
+        prefs.edit().putString(KEY_DOCK_THEME, v).apply()
+        dockTheme.postValue(v)
     }
 
     fun unhideAllApps() {
@@ -228,6 +271,12 @@ class SettingsRepository(context: Context) {
         private const val KEY_LANGUAGE = "language"
         private const val KEY_WALLPAPER_DIM = "wallpaper_dim"
         private const val KEY_WALLPAPER_BLUR = "wallpaper_blur"
+        // v47: widget keys (in widgetPrefs separato — letto anche da WidgetProvider)
+        private const val KEY_WIDGET_THEME = "widget_theme"
+        private const val KEY_WIDGET_AUTO_REFRESH = "widget_auto_refresh"
+        private const val KEY_SEARCH_THEME = "search_theme"
+        private const val KEY_DOCK_THEME = "dock_theme"
+        private const val KEY_FIRST_THEMES_SET = "first_themes_set"
 
         // Default = arancione/rosso vivace (Material 3)
         const val DOT_DEFAULT = -0x4ab9d  // ~#FFB546... red-orange

@@ -386,6 +386,23 @@ class SettingsActivity : AppCompatActivity() {
             updateBlurLabel()
         }
 
+        // === v48: TEMA SEARCH + TEMA DOCK ===
+        updateSearchThemeLabel()
+        binding.itemSearchTheme.setOnClickListener { showSearchThemeDialog() }
+
+        updateDockThemeLabel()
+        binding.itemDockTheme.setOnClickListener { showDockThemeDialog() }
+
+        // === v47: WIDGET SPEED STATS ===
+        updateWidgetThemeLabel()
+        binding.itemWidgetTheme.setOnClickListener { showWidgetThemeDialog() }
+
+        binding.switchWidgetAutoRefresh.isChecked = settings.widgetAutoRefresh.value == true
+        binding.switchWidgetAutoRefresh.setOnCheckedChangeListener { _, on ->
+            settings.setWidgetAutoRefresh(on)
+            org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider.refreshAll(this)
+        }
+
         binding.itemContact.setOnClickListener {
             try {
                 val versionName = try {
@@ -497,6 +514,94 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateBlurLabel() {
         val v = settings.wallpaperBlur.value ?: 0
         binding.wallpaperBlurLabel.text = if (v == 0) getString(android.R.string.no) else "${v}px"
+    }
+
+    /** v47: widget theme label + dialog */
+    private fun updateWidgetThemeLabel() {
+        val current = settings.widgetTheme.value ?: "system"
+        val labelRes = when (current) {
+            "transparent" -> R.string.widget_theme_transparent
+            "light" -> R.string.widget_theme_light
+            "dark" -> R.string.widget_theme_dark
+            else -> R.string.widget_theme_system
+        }
+        binding.widgetThemeValue.text = getString(labelRes)
+    }
+
+    private fun updateSearchThemeLabel() {
+        val current = settings.searchTheme.value ?: "system"
+        binding.searchThemeValue.text = themeLabel(current)
+    }
+
+    private fun showSearchThemeDialog() {
+        showGenericThemeDialog(R.string.settings_search_theme,
+            settings.searchTheme.value ?: "system") { picked ->
+            settings.setSearchTheme(picked)
+            updateSearchThemeLabel()
+        }
+    }
+
+    private fun updateDockThemeLabel() {
+        val current = settings.dockTheme.value ?: "system"
+        binding.dockThemeValue.text = themeLabel(current)
+    }
+
+    private fun showDockThemeDialog() {
+        showGenericThemeDialog(R.string.settings_dock_theme,
+            settings.dockTheme.value ?: "system") { picked ->
+            settings.setDockTheme(picked)
+            updateDockThemeLabel()
+        }
+    }
+
+    private fun themeLabel(key: String): String {
+        return getString(when (key) {
+            "transparent" -> R.string.widget_theme_transparent
+            "light" -> R.string.widget_theme_light
+            "dark" -> R.string.widget_theme_dark
+            else -> R.string.widget_theme_system
+        })
+    }
+
+    private fun showGenericThemeDialog(titleRes: Int, current: String, onPicked: (String) -> Unit) {
+        val labels = arrayOf(
+            getString(R.string.widget_theme_system),
+            getString(R.string.widget_theme_transparent),
+            getString(R.string.widget_theme_light),
+            getString(R.string.widget_theme_dark)
+        )
+        val keys = arrayOf("system", "transparent", "light", "dark")
+        val sel = keys.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(titleRes)
+            .setSingleChoiceItems(labels, sel) { dialog, which ->
+                onPicked(keys[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showWidgetThemeDialog() {
+        val labels = arrayOf(
+            getString(R.string.widget_theme_system),
+            getString(R.string.widget_theme_transparent),
+            getString(R.string.widget_theme_light),
+            getString(R.string.widget_theme_dark)
+        )
+        val keys = arrayOf("system", "transparent", "light", "dark")
+        val current = settings.widgetTheme.value ?: "system"
+        val sel = keys.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.settings_widget_theme)
+            .setSingleChoiceItems(labels, sel) { dialog, which ->
+                settings.setWidgetTheme(keys[which])
+                updateWidgetThemeLabel()
+                org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider.refreshAll(this)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun showLanguageDialog() {

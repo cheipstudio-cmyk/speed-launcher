@@ -51,6 +51,10 @@ class MainActivity : AppCompatActivity() {
         applyWallpaperDim()
         applyWallpaperBlur()
 
+        // v48: applica tema search bar + dock raccomandate
+        binding.homeView.applySearchTheme()
+        binding.homeView.applyDockTheme()
+
         // v38: applica lingua scelta dall'utente al primo onCreate
         val langCode = SpeedApp.instance.settingsRepository.language.value ?: "auto"
         if (langCode != "auto") {
@@ -139,6 +143,9 @@ class MainActivity : AppCompatActivity() {
         // v38+v41: applica cambi dim + blur
         applyWallpaperDim()
         applyWallpaperBlur()
+        // v48: re-apply temi (in caso cambiati da settings)
+        binding.homeView.applySearchTheme()
+        binding.homeView.applyDockTheme()
     }
 
     override fun onPause() {

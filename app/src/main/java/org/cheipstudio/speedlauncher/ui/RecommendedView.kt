@@ -38,7 +38,7 @@ class RecommendedView @JvmOverloads constructor(
             radius = 28 * density
             cardElevation = 0f
             // v41: sfondo appena percepibile, no stacco grigio
-            setCardBackgroundColor(softBgColor())
+            setCardBackgroundColor(themedBgColor())
             val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             layoutParams = lp
         }
@@ -77,6 +77,31 @@ class RecommendedView @JvmOverloads constructor(
         val g = (onSurface shr 8) and 0xFF
         val b = onSurface and 0xFF
         return Color.argb(32, r, g, b)
+    }
+
+    /**
+     * v48: colore sfondo dock secondo il dockTheme nelle settings.
+     * - "transparent" → totalmente trasparente
+     * - "light" → bg chiaro semi-opaco (#F5F5F5 a 90%)
+     * - "dark" → bg scuro semi-opaco (#1B1B1F a 90%)
+     * - "system" o default → softBgColor (~12% colorOnSurface, segue chiaro/scuro)
+     */
+    private fun themedBgColor(): Int {
+        val theme = SpeedApp.instance.settingsRepository.dockTheme.value ?: "system"
+        return when (theme) {
+            "transparent" -> Color.TRANSPARENT
+            "light" -> Color.argb(230, 245, 245, 245)
+            "dark" -> Color.argb(230, 27, 27, 31)
+            else -> softBgColor()
+        }
+    }
+
+    /** v48: forza refresh del bg quando il tema cambia */
+    fun refreshTheme() {
+        val card = (getChildAt(0) as? com.google.android.material.card.MaterialCardView)
+        card?.setCardBackgroundColor(themedBgColor())
+        card?.cardElevation = 0f
+        // Aggiorna anche il color del testo "label" sotto le icone se serve
     }
 
     /**
@@ -139,7 +164,7 @@ class RecommendedView @JvmOverloads constructor(
             card.setCardBackgroundColor(Color.TRANSPARENT)
             card.cardElevation = 0f
         } else {
-            card.setCardBackgroundColor(softBgColor())
+            card.setCardBackgroundColor(themedBgColor())
             card.cardElevation = 0f
         }
 

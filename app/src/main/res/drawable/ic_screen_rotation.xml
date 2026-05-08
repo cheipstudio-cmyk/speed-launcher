@@ -2,6 +2,7 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp"
     android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Tablet in landscape (più chiaro: device orizzontale) -->
     <path android:fillColor="#FFFFFFFF"
-        android:pathData="M16.5,2.94L19.07,5.5L17,7.57V12H15V8.07L13.43,9.64L11.5,8L16.5,3M7.07,11L8.5,12.43L7,13.93V16C7,17.1 7.9,18 9,18H15V20H9A4,4 0 0,1 5,16V13.93L3.5,15.43L2.07,14L7.07,11Z"/>
+        android:pathData="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3,18H21C22.1,18 23,17.1 23,16V8C23,6.9 22.1,6 21,6M21,16H3V8H21V16Z"/>
 </vector>

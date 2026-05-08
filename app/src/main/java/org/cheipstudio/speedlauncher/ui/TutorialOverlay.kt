@@ -1,13 +1,14 @@
 package org.cheipstudio.speedlauncher.ui
 
-import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.provider.Settings
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
@@ -15,15 +16,17 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 
 /**
- * v18: tutorial più espressivo:
- * - Card con icona dentro un cerchio gradient
- * - Animazione overshoot per l'icona (bounce-in)
- * - 5 step (l'ultimo con bottone "Imposta come predefinito")
- * - Pulsante "Avanti" con effetto press
+ * v46: tutorial ridisegnato.
+ * - Container con dimensioni FISSE: niente più jump al next
+ * - Cross-fade tra step (smooth)
+ * - 6 step con copy esaustivo
+ * - Progress bar in cima
+ * - Icona in cerchio gradient con pulse
  */
 class TutorialOverlay @JvmOverloads constructor(
     context: Context,
@@ -31,263 +34,340 @@ class TutorialOverlay @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private val backdrop: View
     private val card: LinearLayout
     private val titleView: TextView
     private val descView: TextView
+    private val iconCircle: FrameLayout
     private val iconView: ImageView
-    private val nextBtn: TextView
+    private val progressBar: View
+    private val progressFill: View
+    private val nextBtn: MaterialButton
     private val skipBtn: TextView
-    private val setDefaultBtn: TextView
-    private val dotsContainer: LinearLayout
+    private val setDefaultBtn: MaterialButton
+    private val contentInner: LinearLayout
 
     private var step = 0
+    private data class Step(val titleRes: Int, val descRes: Int, val iconRes: Int, val accent: Int)
     private val steps = listOf(
-        Triple(R.string.tutorial_swipe_title, R.string.tutorial_swipe_desc, R.drawable.ic_swipe_up),
-        Triple(R.string.tutorial_longpress_icon_title, R.string.tutorial_longpress_icon_desc, R.drawable.ic_pin),
-        Triple(R.string.tutorial_settings_title, R.string.tutorial_settings_desc, R.drawable.ic_settings),
-        Triple(R.string.tutorial_pages_title, R.string.tutorial_pages_desc, R.drawable.ic_pages),
-        Triple(R.string.tutorial_default_title, R.string.tutorial_default_desc, R.drawable.ic_widgets)
+        Step(R.string.tutorial_welcome_title, R.string.tutorial_welcome_desc,
+             R.drawable.ic_star_outline, 0xFFFFB4A8.toInt()),
+        Step(R.string.tutorial_swipe_title, R.string.tutorial_swipe_desc,
+             R.drawable.ic_gesture, 0xFF89B4FA.toInt()),
+        Step(R.string.tutorial_longpress_icon_title, R.string.tutorial_longpress_icon_desc,
+             R.drawable.ic_apps_outline, 0xFFA6E3A1.toInt()),
+        Step(R.string.tutorial_home_long_press_title, R.string.tutorial_home_long_press_desc,
+             R.drawable.ic_home_outline, 0xFFCBA6F7.toInt()),
+        Step(R.string.tutorial_settings_title, R.string.tutorial_settings_desc,
+             R.drawable.ic_tune, 0xFFFFD68C.toInt()),
+        Step(R.string.tutorial_widget_title, R.string.tutorial_widget_desc,
+             R.drawable.ic_widget, 0xFF89B4FA.toInt()),
+        Step(R.string.tutorial_default_title, R.string.tutorial_default_desc,
+             R.drawable.ic_home_outline, 0xFFA6E3A1.toInt())
     )
 
     init {
-        background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_overlay)
-        isClickable = true; isFocusable = true
         val density = resources.displayMetrics.density
 
+        // Backdrop
+        backdrop = View(context).apply {
+            setBackgroundColor(Color.parseColor("#CC000000"))
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
+            )
+        }
+        addView(backdrop)
+
+        // Card outer (fissa altezza grande così non salta tra step)
         card = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_card)
-            val pad = (28 * density).toInt()
-            setPadding(pad, (32 * density).toInt(), pad, (24 * density).toInt())
-            elevation = 16 * density
-            val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER
-                val margin = (28 * density).toInt()
-                leftMargin = margin; rightMargin = margin
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 32 * density
+                setColor(resolveAttrColor(com.google.android.material.R.attr.colorSurfaceContainerHigh))
             }
+            setPadding(
+                (28 * density).toInt(), (28 * density).toInt(),
+                (28 * density).toInt(), (24 * density).toInt()
+            )
+            val lp = LayoutParams(
+                (resources.displayMetrics.widthPixels * 0.86f).toInt(),
+                LayoutParams.WRAP_CONTENT
+            )
+            lp.gravity = Gravity.CENTER
             layoutParams = lp
         }
 
-        val iconWrapper = FrameLayout(context).apply {
-            background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_icon)
-            val size = (96 * density).toInt()
-            layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                bottomMargin = (24 * density).toInt()
+        // Progress bar in alto
+        val progressContainer = FrameLayout(context).apply {
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (4 * density).toInt())
+            lp.bottomMargin = (24 * density).toInt()
+            layoutParams = lp
+        }
+        progressBar = View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 2 * density
+                setColor(resolveAttrColor(com.google.android.material.R.attr.colorSurfaceContainerHighest))
             }
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        progressContainer.addView(progressBar)
+        progressFill = View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 2 * density
+                setColor(resolveAttrColor(com.google.android.material.R.attr.colorPrimary))
+            }
+            layoutParams = FrameLayout.LayoutParams(0, FrameLayout.LayoutParams.MATCH_PARENT)
+        }
+        progressContainer.addView(progressFill)
+        card.addView(progressContainer)
+
+        // Inner content (icona + titolo + desc) — quello che cross-fade-ia
+        contentInner = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            // ALTEZZA FISSA per evitare salti tra step di lunghezze diverse
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                (340 * density).toInt()
+            )
+            layoutParams = lp
+        }
+
+        // Cerchio icona
+        iconCircle = FrameLayout(context).apply {
+            val lp = LinearLayout.LayoutParams((84 * density).toInt(), (84 * density).toInt())
+            lp.gravity = Gravity.CENTER_HORIZONTAL
+            lp.bottomMargin = (24 * density).toInt()
+            layoutParams = lp
         }
         iconView = ImageView(context).apply {
-            val size = (44 * density).toInt()
-            layoutParams = LayoutParams(size, size, Gravity.CENTER)
-            setColorFilter(Color.WHITE)
+            val lp = FrameLayout.LayoutParams((40 * density).toInt(), (40 * density).toInt())
+            lp.gravity = Gravity.CENTER
+            layoutParams = lp
+            setColorFilter(0xFF1B1B1F.toInt())
         }
-        iconWrapper.addView(iconView)
-        card.addView(iconWrapper)
+        iconCircle.addView(iconView)
+        contentInner.addView(iconCircle)
 
+        // Titolo
         titleView = TextView(context).apply {
-            textSize = 24f
-            setTextColor(Color.WHITE)
-            gravity = Gravity.CENTER
+            textSize = 22f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(resolveAttrColor(com.google.android.material.R.attr.colorOnSurface))
+            gravity = Gravity.CENTER
             val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
             lp.bottomMargin = (12 * density).toInt()
             layoutParams = lp
         }
-        card.addView(titleView)
+        contentInner.addView(titleView)
 
+        // Descrizione
         descView = TextView(context).apply {
             textSize = 15f
-            setTextColor(Color.parseColor("#CCFFFFFF"))
+            setTextColor(resolveAttrColor(com.google.android.material.R.attr.colorOnSurfaceVariant))
             gravity = Gravity.CENTER
-            lineHeight = (22 * density).toInt()
+            setLineSpacing(0f, 1.3f)
             val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.bottomMargin = (24 * density).toInt()
-            val hpad = (8 * density).toInt()
-            setPadding(hpad, 0, hpad, 0)
             layoutParams = lp
         }
-        card.addView(descView)
+        contentInner.addView(descView)
 
-        // bottone "Imposta come predefinito" (visibile solo all'ultimo step)
-        setDefaultBtn = TextView(context).apply {
-            text = context.getString(R.string.tutorial_set_default_btn)
-            setTextColor(Color.parseColor("#1A1A1A"))
-            textSize = 15f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.CENTER
-            background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_set_default_btn)
-            setPadding((24 * density).toInt(), (14 * density).toInt(), (24 * density).toInt(), (14 * density).toInt())
-            isClickable = true; isFocusable = true
-            visibility = View.GONE
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.bottomMargin = (16 * density).toInt()
-            layoutParams = lp
-            setOnClickListener {
-                try {
-                    val intent = Intent(Settings.ACTION_HOME_SETTINGS).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(intent)
-                } catch (_: Throwable) {}
-            }
-        }
-        card.addView(setDefaultBtn)
+        card.addView(contentInner)
 
-        dotsContainer = LinearLayout(context).apply {
+        // Bottoni footer
+        val buttonsRow = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
+            gravity = Gravity.CENTER_VERTICAL
             val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.bottomMargin = (24 * density).toInt()
+            lp.topMargin = (8 * density).toInt()
             layoutParams = lp
-        }
-        card.addView(dotsContainer)
-
-        val btnRow = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
         }
 
         skipBtn = TextView(context).apply {
             text = context.getString(R.string.tutorial_skip)
-            setTextColor(Color.parseColor("#99FFFFFF"))
-            textSize = 15f
-            gravity = Gravity.CENTER
-            setPadding((20 * density).toInt(), (12 * density).toInt(), (20 * density).toInt(), (12 * density).toInt())
+            setTextColor(resolveAttrColor(com.google.android.material.R.attr.colorOnSurfaceVariant))
+            textSize = 14f
+            setPadding(
+                (8 * density).toInt(), (12 * density).toInt(),
+                (8 * density).toInt(), (12 * density).toInt()
+            )
             isClickable = true; isFocusable = true
-        }
-
-        nextBtn = TextView(context).apply {
-            text = context.getString(R.string.tutorial_next)
-            setTextColor(Color.WHITE)
-            textSize = 15f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.CENTER
-            background = ContextCompat.getDrawable(context, R.drawable.bg_tutorial_btn)
-            setPadding((28 * density).toInt(), (12 * density).toInt(), (28 * density).toInt(), (12 * density).toInt())
-            isClickable = true; isFocusable = true
+            // Selector ripple via theme attr
+            val tv2 = android.util.TypedValue()
+            context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, tv2, true)
+            setBackgroundResource(tv2.resourceId)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.leftMargin = (12 * density).toInt()
             layoutParams = lp
+            setOnClickListener { dismissTutorial() }
         }
+        buttonsRow.addView(skipBtn)
 
-        val spacer = View(context).apply {
+        // Spacer
+        buttonsRow.addView(View(context).apply {
             layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
-        }
+        })
 
-        btnRow.addView(skipBtn)
-        btnRow.addView(spacer)
-        btnRow.addView(nextBtn)
-        card.addView(btnRow)
+        setDefaultBtn = MaterialButton(context).apply {
+            text = context.getString(R.string.tutorial_set_default)
+            visibility = GONE
+            cornerRadius = (24 * density).toInt()
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.marginEnd = (8 * density).toInt()
+            layoutParams = lp
+            setOnClickListener {
+                try {
+                    val intent = Intent(Settings.ACTION_HOME_SETTINGS)
+                    context.startActivity(intent)
+                } catch (_: Throwable) {}
+            }
+        }
+        buttonsRow.addView(setDefaultBtn)
+
+        nextBtn = MaterialButton(context).apply {
+            text = context.getString(R.string.tutorial_next)
+            cornerRadius = (24 * density).toInt()
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams = lp
+            setOnClickListener { nextStep() }
+        }
+        buttonsRow.addView(nextBtn)
+
+        card.addView(buttonsRow)
 
         addView(card)
 
-        skipBtn.setOnClickListener { dismiss() }
-        nextBtn.setOnClickListener {
-            step++
-            if (step >= steps.size) dismiss() else animateStepChange()
-        }
-        rebuildDots()
-        updateStep()
-
-        // entrata espressiva con overshoot
+        // Animazione di entrata
         card.alpha = 0f
-        card.scaleX = 0.85f
-        card.scaleY = 0.85f
-        card.translationY = 60f
+        card.scaleX = 0.92f; card.scaleY = 0.92f
+        card.translationY = 32 * density
         card.animate()
-            .alpha(1f).scaleX(1f).scaleY(1f).translationY(0f).setDuration(420)
-            .setInterpolator(OvershootInterpolator(0.6f)).start()
+            .alpha(1f).scaleX(1f).scaleY(1f).translationY(0f)
+            .setDuration(380)
+            .setInterpolator(OvershootInterpolator(0.9f))
+            .start()
+
+        showStep(0, animate = false)
     }
 
-    private fun rebuildDots() {
-        dotsContainer.removeAllViews()
+    private fun resolveAttrColor(attr: Int): Int {
+        val tv = android.util.TypedValue()
+        context.theme.resolveAttribute(attr, tv, true)
+        return tv.data
+    }
+
+    private fun nextStep() {
+        if (step < steps.size - 1) {
+            step++
+            showStep(step, animate = true)
+        } else {
+            dismissTutorial()
+        }
+    }
+
+    private fun showStep(idx: Int, animate: Boolean) {
+        val s = steps[idx]
         val density = resources.displayMetrics.density
-        for (i in steps.indices) {
-            val dot = View(context).apply {
-                background = ContextCompat.getDrawable(
-                    context,
-                    if (i == step) R.drawable.bg_tutorial_dot_active
-                    else R.drawable.bg_tutorial_dot_inactive
-                )
-                val size = (8 * density).toInt()
-                val active = (24 * density).toInt()
-                layoutParams = LinearLayout.LayoutParams(
-                    if (i == step) active else size, size
-                ).apply {
-                    leftMargin = (4 * density).toInt()
-                    rightMargin = (4 * density).toInt()
-                }
-            }
-            dotsContainer.addView(dot)
-        }
-    }
 
-    private fun animateStepChange() {
-        val anim = ValueAnimator.ofFloat(1f, 0f)
-        anim.duration = 150
-        anim.addUpdateListener {
-            val v = it.animatedValue as Float
-            iconView.alpha = v; titleView.alpha = v; descView.alpha = v
+        val applyContent = {
+            titleView.setText(s.titleRes)
+            descView.setText(s.descRes)
+            iconView.setImageResource(s.iconRes)
+            // Cerchio gradient con accent del step
+            iconCircle.background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(s.accent)
+            }
+            // Bottone next: se ultimo step → "Inizia"
+            nextBtn.text = context.getString(
+                if (idx == steps.size - 1) R.string.tutorial_done else R.string.tutorial_next
+            )
+            // Set default button: solo all'ultimo step
+            setDefaultBtn.visibility = if (idx == steps.size - 1) View.VISIBLE else View.GONE
+
+            // Progress bar animation
+            val cardWidth = (resources.displayMetrics.widthPixels * 0.86f).toInt() -
+                            (28 * density).toInt() * 2
+            val targetWidth = (cardWidth * (idx + 1).toFloat() / steps.size).toInt()
+            val animator = android.animation.ValueAnimator.ofInt(progressFill.width, targetWidth)
+            animator.duration = 450
+            animator.interpolator = DecelerateInterpolator()
+            animator.addUpdateListener {
+                progressFill.layoutParams = (progressFill.layoutParams as FrameLayout.LayoutParams).apply {
+                    width = it.animatedValue as Int
+                }
+                progressFill.requestLayout()
+            }
+            animator.start()
         }
-        anim.addListener(object : android.animation.AnimatorListenerAdapter() {
-            override fun onAnimationEnd(a: android.animation.Animator) {
-                updateStep(); rebuildDots()
-                // bounce-in dell'icona
-                iconView.scaleX = 0.5f; iconView.scaleY = 0.5f
-                iconView.animate().scaleX(1f).scaleY(1f)
-                    .setDuration(380)
+
+        if (!animate) {
+            applyContent()
+            // Pulse iniziale icona
+            iconCircle.scaleX = 0f; iconCircle.scaleY = 0f
+            iconCircle.animate().scaleX(1f).scaleY(1f).setDuration(420)
+                .setInterpolator(OvershootInterpolator(1.4f)).setStartDelay(150).start()
+            return
+        }
+
+        // Cross-fade: fade out content, swap, fade in
+        contentInner.animate()
+            .alpha(0f).translationY(-12 * density)
+            .setDuration(170)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                applyContent()
+                contentInner.translationY = 12 * density
+                contentInner.animate()
+                    .alpha(1f).translationY(0f)
+                    .setDuration(220)
+                    .setInterpolator(DecelerateInterpolator())
+                    .start()
+                // Pulse icona ad ogni step
+                iconCircle.scaleX = 0.7f; iconCircle.scaleY = 0.7f
+                iconCircle.animate().scaleX(1f).scaleY(1f).setDuration(380)
                     .setInterpolator(OvershootInterpolator(1.4f)).start()
-                ValueAnimator.ofFloat(0f, 1f).apply {
-                    duration = 250
-                    interpolator = DecelerateInterpolator()
-                    addUpdateListener {
-                        val v = it.animatedValue as Float
-                        iconView.alpha = v; titleView.alpha = v; descView.alpha = v
-                    }
-                    start()
-                }
             }
-        })
-        anim.start()
+            .start()
     }
 
-    private fun updateStep() {
-        val (titleRes, descRes, iconRes) = steps[step]
-        titleView.setText(titleRes)
-        descView.setText(descRes)
-        iconView.setImageResource(iconRes)
-        // ultimo step: mostra bottone "Imposta come predefinito"
-        val isLast = step == steps.size - 1
-        setDefaultBtn.visibility = if (isLast) View.VISIBLE else View.GONE
-        nextBtn.text = if (isLast)
-            context.getString(R.string.tutorial_done)
-        else
-            context.getString(R.string.tutorial_next)
-    }
-
-    private fun dismiss() {
+    private fun dismissTutorial() {
         SpeedApp.instance.settingsRepository.markTutorialSeen()
         animate().alpha(0f).setDuration(220).withEndAction {
-            (parent as? FrameLayout)?.removeView(this)
+            (parent as? android.view.ViewGroup)?.removeView(this)
         }.start()
+    }
+
+    companion object {
+        fun showIfNeeded(rootView: android.view.ViewGroup) {
+            val seen = SpeedApp.instance.settingsRepository.tutorialSeen.value == true
+            if (seen) return
+            val overlay = TutorialOverlay(rootView.context)
+            rootView.addView(overlay,
+                FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        }
+
+        fun showAlways(rootView: android.view.ViewGroup) {
+            val overlay = TutorialOverlay(rootView.context)
+            rootView.addView(overlay,
+                FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        }
     }
 }

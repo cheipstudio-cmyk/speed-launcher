@@ -91,7 +91,41 @@ class WidgetSlotView @JvmOverloads constructor(
         isLongClickable = true
     }
 
-    fun setHostController(controller: WidgetHostController) { hostController = controller }
+    fun setHostController(controller: WidgetHostController) {
+        hostController = controller
+        // v47: al primo run, prova ad agganciare il widget Speed Stats di default
+        tryAutoBindSpeedStats(controller)
+    }
+
+    private fun tryAutoBindSpeedStats(controller: WidgetHostController) {
+        val prefs = context.getSharedPreferences("speed_widget_prefs", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("default_widget_set", false)) return
+        if (currentWidgetView != null) return
+
+        try {
+            val packageName = context.packageName
+            val componentName = android.content.ComponentName(
+                packageName,
+                "$packageName.widgets.SpeedStatsWidgetProvider"
+            )
+            val info = controller.appWidgetManager.installedProviders.firstOrNull {
+                it.provider == componentName
+            } ?: return
+
+            val appWidgetId = controller.host.allocateAppWidgetId()
+            val canBind = controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+            if (canBind) {
+                val view = controller.createView(appWidgetId, info)
+                view.setAppWidget(appWidgetId, info)
+                controller.markLastWidget(appWidgetId)
+                placeWidgetView(view, info)
+                prefs.edit().putBoolean("default_widget_set", true).apply()
+            } else {
+                controller.host.deleteAppWidgetId(appWidgetId)
+                prefs.edit().putBoolean("default_widget_set", true).apply()
+            }
+        } catch (_: Throwable) {}
+    }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (currentWidgetView != null) {

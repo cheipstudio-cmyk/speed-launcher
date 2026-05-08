@@ -42,8 +42,18 @@ class IconGridView @JvmOverloads constructor(
 
     init {
         val settings = SpeedApp.instance.settingsRepository
-        cols = settings.gridCols.value ?: 4
-        rows = settings.gridRows.value ?: 4
+        // v34: in landscape scambia cols<->rows per usare lo schermo orizzontalmente
+        val isLandscape = context.resources.configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val savedCols = settings.gridCols.value ?: 4
+        val savedRows = settings.gridRows.value ?: 4
+        if (isLandscape) {
+            cols = savedRows
+            rows = savedCols
+        } else {
+            cols = savedCols
+            rows = savedRows
+        }
         pinnedItems = MutableList(cols * rows) { null }
         columnCount = cols; rowCount = rows
         useDefaultMargins = false
@@ -79,16 +89,11 @@ class IconGridView @JvmOverloads constructor(
 
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
-        if (!initialized && pageIndex == 0 && apps.size > 5) {
-            val toAdd = apps.drop(5).take(cols * rows)
-            for (i in toAdd.indices) {
-                pinnedItems[i] = HomeItem(
-                    key = toAdd[i].key, page = pageIndex,
-                    cellX = i % cols, cellY = i / cols, type = HomeItem.TYPE_APP
-                )
-            }
-            initialized = true
-            persist()
+        val settings = SpeedApp.instance.settingsRepository
+        // v46: home vuota di default. Niente prefill — l'utente la riempie come preferisce.
+        // Markiamo firstRunDone così il tutorial non riparte.
+        if (settings.firstRunDone.value != true && pageIndex == 0) {
+            settings.markFirstRunDone()
         }
         rebuild()
     }

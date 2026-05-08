@@ -46,6 +46,9 @@ class HomeView @JvmOverloads constructor(
     private var trackStartX = 0f
     private var trackStartY = 0f
     private var tracking = false
+    // v46: velocity tracker per swipe rapido
+    private var swipeVelocityTracker: android.view.VelocityTracker? = null
+    private val swipeFastVelocity = resources.displayMetrics.density * 800f  // 800dp/s
 
     /** v26: overlay per fade durante swipe up del drawer */
     private val fadeOverlay = android.view.View(context).apply {
@@ -59,7 +62,7 @@ class HomeView @JvmOverloads constructor(
         )
     }
     // v18: threshold più reattivo (45dp invece di 60dp)
-    private val swipeThreshold = resources.displayMetrics.density * 35f
+    private val swipeThreshold = resources.displayMetrics.density * 22f  // v46: più sensibile
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
@@ -151,14 +154,18 @@ class HomeView @JvmOverloads constructor(
         }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
-        // v43: long press su area home vuota apre menu (Wallpaper/Sort/Settings)
-        // Le icone consumano già il long press, quindi qui arriva solo se cell vuoto
-        binding.pagedHome.setOnLongClickListener {
-            performHapticFeedbackLight()
-            onHomeLongPress?.invoke()
-            true
+        // v46: long press home robusto via GestureDetector (più affidabile di setOnLongClickListener su scroll view)
+        val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onLongPress(e: MotionEvent) {
+                // Ignoro se c'è un'icona sotto (le icone consumano onTouch)
+                performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                onHomeLongPress?.invoke()
+            }
+        })
+        binding.pagedHome.setOnTouchListener { _, ev ->
+            homeGesture.onTouchEvent(ev)
+            false  // non consumo: PagedHomeContainer continua a gestire scroll
         }
-        binding.pagedHome.isLongClickable = true
 
         updateSearchBarText()
         applySearchBarStyle()
@@ -437,6 +444,9 @@ class HomeView @JvmOverloads constructor(
                 trackStartX = ev.x; trackStartY = ev.y
                 tracking = true
                 gestureDetector.onTouchEvent(ev)
+                swipeVelocityTracker?.recycle()
+                swipeVelocityTracker = android.view.VelocityTracker.obtain()
+                swipeVelocityTracker?.addMovement(ev)
                 return false
             }
             MotionEvent.ACTION_MOVE -> {
@@ -444,6 +454,7 @@ class HomeView @JvmOverloads constructor(
                 val dx = abs(ev.x - trackStartX)
                 val dy = ev.y - trackStartY
                 gestureDetector.onTouchEvent(ev)
+                swipeVelocityTracker?.addMovement(ev)
 
                 // v26: durante lo swipe up, aggiorna alpha overlay proporzionale
                 if (dy < 0 && abs(dy) > dx * 1.0f) {
@@ -452,13 +463,19 @@ class HomeView @JvmOverloads constructor(
                     fadeOverlay.alpha = progress * 0.55f
                 }
 
-                if (dy < -swipeThreshold && abs(dy) > dx * 1.0f) {
+                // v46: check velocity per swipe fulmineo (anche con poca distanza)
+                swipeVelocityTracker?.computeCurrentVelocity(1000)
+                val vy = swipeVelocityTracker?.yVelocity ?: 0f
+
+                val isFastSwipeUp = vy < -swipeFastVelocity && abs(dy) > dx * 1.0f && dy < 0
+                val isSlowSwipeUp = dy < -swipeThreshold && abs(dy) > dx * 1.0f
+
+                if (isFastSwipeUp || isSlowSwipeUp) {
                     tracking = false
+                    // v46: vibration al MOMENTO esatto in cui parte il drawer (non ritardata)
                     performHapticFeedbackLight()
-                    // mantieni overlay visibile finché il drawer non è aperto
                     onSwipeUp?.invoke()
-                    // dissolvi overlay leggermente in ritardo
-                    fadeOverlay.animate().alpha(0f).setDuration(220).start()
+                    fadeOverlay.animate().alpha(0f).setDuration(180).start()
                     return true
                 }
                 if (settings.swipeDownNotifications.value == true &&
@@ -472,7 +489,8 @@ class HomeView @JvmOverloads constructor(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 tracking = false
                 gestureDetector.onTouchEvent(ev)
-                // v26: se overlay parzialmente visibile, dissolvilo
+                swipeVelocityTracker?.recycle()
+                swipeVelocityTracker = null
                 if (fadeOverlay.alpha > 0f) {
                     fadeOverlay.animate().alpha(0f).setDuration(180).start()
                 }
@@ -534,6 +552,48 @@ class HomeView @JvmOverloads constructor(
         }
         // v45: animazione "welcome back" quando torni alla home
         playWelcomeAnim()
+    }
+
+    /** v48: applica il tema alla search bar (transparent/light/dark/system) */
+    fun applySearchTheme() {
+        val theme = SpeedApp.instance.settingsRepository.searchTheme.value ?: "system"
+        val card = binding.searchBar as MaterialCardView
+        when (theme) {
+            "transparent" -> {
+                card.setCardBackgroundColor(android.graphics.Color.argb(80, 0, 0, 0))
+                card.cardElevation = 0f
+                card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                card.strokeColor = android.graphics.Color.argb(60, 255, 255, 255)
+            }
+            "light" -> {
+                card.setCardBackgroundColor(android.graphics.Color.argb(230, 245, 245, 245))
+                card.cardElevation = 2 * resources.displayMetrics.density
+                card.strokeWidth = 0
+            }
+            "dark" -> {
+                card.setCardBackgroundColor(android.graphics.Color.argb(230, 27, 27, 31))
+                card.cardElevation = 2 * resources.displayMetrics.density
+                card.strokeWidth = 0
+            }
+            else -> {
+                // System: usa colorSurfaceContainer
+                card.setCardBackgroundColor(resolveAttrColor(com.google.android.material.R.attr.colorSurfaceContainer))
+                card.cardElevation = 2 * resources.displayMetrics.density
+                card.strokeWidth = 0
+            }
+        }
+    }
+
+    /** v48: applica tema alla dock raccomandate (forwardiamo) */
+    fun applyDockTheme() {
+        binding.recommendedRow.refreshTheme()
+        binding.recommendedRowBottom.refreshTheme()
+    }
+
+    private fun resolveAttrColor(attr: Int): Int {
+        val tv = android.util.TypedValue()
+        context.theme.resolveAttribute(attr, tv, true)
+        return tv.data
     }
 
     /** v45: anim leggera quando torni alla home da app */

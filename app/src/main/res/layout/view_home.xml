@@ -41,19 +41,21 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <!-- v48: indicator con più spacing dal dock -->
         <org.cheipstudio.speedlauncher.ui.PageIndicator
             android:id="@+id/pageIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginVertical="10dp" />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp" />
 
         <!-- v32: recommendate in basso (alternativa a quello in alto) -->
         <org.cheipstudio.speedlauncher.ui.RecommendedView
             android:id="@+id/recommendedRowBottom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="8dp" />
 
         <View
             android:layout_width="40dp"

@@ -54,7 +54,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private val handler = Handler(Looper.getMainLooper())
     private val moveSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
     /** v20: dopo armed serve un movimento più ampio per draggare, evita conflitto col menu */
-    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val dragSlop = ViewConfiguration.get(context).scaledTouchSlop / 2  // v46: drag rapido post-arm
     private var downX = 0f
     private var downY = 0f
     private var pressing = false
@@ -69,20 +69,9 @@ class IconCellView(context: Context) : LinearLayout(context) {
         if (pressing && !menuFired && !dragFired) {
             armed = true
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            // v44: drag IMMEDIATO al tick della vibrazione (no più attesa movimento)
-            val a = app
-            if (a != null && dragOriginId.isNotEmpty()) {
-                dragFired = true
-                handler.removeCallbacks(menuRunnable)  // mentre draghi, no menu
-                val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
-                // indicatore visivo: la cella originale appare "sollevata" mentre draggi
-                showDragIndicator(true)
-                startDragAndDrop(data, DragIndicatorShadow(this), a.key, 0)
-            } else {
-                // fallback: se non posso draggare, tieni solo l'effetto pulse
-                scaleX = 0.92f; scaleY = 0.92f
-                animate().scaleX(1f).scaleY(1f).setDuration(150).start()
-            }
+            // v46: pulse leggero per feedback visivo, drag scatta subito al primo MOVE
+            scaleX = 0.92f; scaleY = 0.92f
+            animate().scaleX(1f).scaleY(1f).setDuration(150).start()
         }
     }
 
@@ -155,9 +144,18 @@ class IconCellView(context: Context) : LinearLayout(context) {
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(event.x - downX)
                 val dy = abs(event.y - downY)
-                // v44: il drag parte direttamente da armRunnable, qui solo cancello se troppo movimento prima dell\'arm
-                if (!armed && (dx > moveSlop || dy > moveSlop)) {
-                    // movimento prima dell'arm = è uno scroll, cancella tutto
+                if (armed && !dragFired && !menuFired) {
+                    // v46: post-arm bastano pochissimi pixel per draggare (era touchSlop, ora touchSlop/2)
+                    if ((dx > dragSlop || dy > dragSlop) && dragOriginId.isNotEmpty()) {
+                        dragFired = true
+                        handler.removeCallbacks(menuRunnable)
+                        val a2 = app ?: return true
+                        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a2.key}")
+                        showDragIndicator(true)
+                        startDragAndDrop(data, DragIndicatorShadow(this), a2.key, 0)
+                    }
+                } else if (!armed && (dx > moveSlop || dy > moveSlop)) {
+                    // pre-arm: troppo movimento = scroll, cancello
                     cancelAll()
                 }
                 return true

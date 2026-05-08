@@ -95,16 +95,16 @@
     <string name="screen_lock_admin_explanation">Speed Launcher userà questo permesso solo per spegnere lo schermo quando fai doppio tap sulla barra di ricerca. Nessun altro utilizzo.</string>
     <string name="screen_lock_enable_admin_toast">Abilita Speed Launcher come amministratore per usare il blocco schermo</string>
 
-    <string name="tutorial_swipe_title">Apri tutte le app</string>
-    <string name="tutorial_swipe_desc">Scorri verso l\'alto da qualsiasi punto della home per aprire l\'elenco delle app installate.</string>
-    <string name="tutorial_longpress_icon_title">Sposta, raggruppa, gestisci</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'icona per spostarla. Trascinala su un\'altra per creare una cartella. Tieni premuto più a lungo per il menu Info/Disinstalla.</string>
+    <string name="tutorial_swipe_title">Swipe in alto per il drawer</string>
+    <string name="tutorial_swipe_desc">Trascina dal basso verso l\'alto per aprire la lista di tutte le app. Funziona ovunque sulla home.</string>
+    <string name="tutorial_longpress_icon_title">Tieni premuto un\'app</string>
+    <string name="tutorial_longpress_icon_desc">Sul drawer, tieni premuta un\'app per aggiungerla alla home. In home, tienila premuta per spostarla, modificarla o disinstallarla.</string>
     <string name="tutorial_settings_title">Personalizza tutto</string>
-    <string name="tutorial_settings_desc">Tocca l\'icona ⚙ a destra nella barra di ricerca. Cambia griglia, forma icone, animazioni, colori e molto altro.</string>
+    <string name="tutorial_settings_desc">Forma icone, colori, layout, animazioni, raccomandate AI, gesture e molto altro. Esplora le impostazioni per fare tuo il launcher.</string>
     <string name="tutorial_pages_title">Pagine multiple</string>
     <string name="tutorial_pages_desc">Quando una pagina è piena ne nasce una nuova. Trascina un\'icona oltre il bordo per spostarla. Tocca i puntini in fondo per saltare tra pagine.</string>
-    <string name="tutorial_default_title">Quasi pronto</string>
-    <string name="tutorial_default_desc">Imposta Speed come il tuo launcher principale per usarlo ogni volta che premi il tasto home.</string>
+    <string name="tutorial_default_title">Imposta come predefinito</string>
+    <string name="tutorial_default_desc">Per usarlo davvero, impostalo come launcher di sistema. È un attimo, e puoi tornare indietro quando vuoi.</string>
     <string name="tutorial_set_default_btn">Imposta come predefinito</string>
     <string name="tutorial_next">Avanti</string>
     <string name="tutorial_done">Iniziamo</string>
@@ -209,4 +209,22 @@ Si userà solo per questa funzione.</string>
     <string name="widget_storage">Memoria</string>
     <string name="widget_battery">Batteria</string>
     <string name="widget_charging">In carica</string>
+    <string name="tutorial_welcome_title">Benvenuto in Speed</string>
+    <string name="tutorial_welcome_desc">Un launcher veloce, leggero e personalizzabile. Ti mostro le funzioni principali in pochi passi.</string>
+    <string name="tutorial_home_long_press_title">Tieni premuto sulla home</string>
+    <string name="tutorial_home_long_press_desc">Tieni premuto su un\'area vuota della home per accedere rapidamente a sfondo, riordina alfabetico e impostazioni.</string>
+    <string name="tutorial_set_default">Imposta</string>
+    <string name="settings_section_widget">Widget Speed Stats</string>
+    <string name="settings_widget_theme">Tema widget</string>
+    <string name="widget_theme_system">Sistema</string>
+    <string name="widget_theme_transparent">Trasparente</string>
+    <string name="widget_theme_light">Chiaro</string>
+    <string name="widget_theme_dark">Scuro</string>
+    <string name="settings_widget_auto_refresh">Aggiornamento automatico</string>
+    <string name="settings_widget_auto_refresh_sub">Se disattivo, mostra un pulsante refresh sul widget.</string>
+    <string name="tutorial_widget_title">Speed Stats sulla home</string>
+    <string name="tutorial_widget_desc">Sulla home trovi un widget esclusivo che mostra RAM, memoria e batteria disponibili. Personalizzabile dalle impostazioni con tema e refresh manuale.</string>
+    <string name="settings_section_themes">Tema barre</string>
+    <string name="settings_search_theme">Tema barra ricerca</string>
+    <string name="settings_dock_theme">Tema dock raccomandate</string>
 </resources>
