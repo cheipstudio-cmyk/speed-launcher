@@ -160,10 +160,6 @@ class HomeView @JvmOverloads constructor(
         binding.recommendedRow.onAppLongPress = onRecLong
         binding.recommendedRowBottom.onAppClick = onRecClick
         binding.recommendedRowBottom.onAppLongPress = onRecLong
-        // v122: long press sulla dock → menu modifica raccomandate
-        val longPressHandler: () -> Unit = { showRecommendedEditDialog() }
-        binding.recommendedRow.onContainerLongPress = longPressHandler
-        binding.recommendedRowBottom.onContainerLongPress = longPressHandler
 
         // v18: animazione layout dipende dallo stile selezionato
         applyAnimationStyle()
@@ -809,56 +805,4 @@ class HomeView @JvmOverloads constructor(
         }
     }
 
-    /**
-     * v122: dialog per modificare le raccomandate direttamente dalla dock home.
-     * Mostra modalità (AI/Manuale), e in modalità manuale lascia scegliere le app.
-     */
-    private fun showRecommendedEditDialog() {
-        performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
-        val ctx = context
-        val currentMode = settings.recommendedMode.value ?: SettingsRepository.REC_MODE_AI
-        val items = arrayOf(
-            ctx.getString(org.cheipstudio.speedlauncher.R.string.rec_mode_ai),
-            ctx.getString(org.cheipstudio.speedlauncher.R.string.rec_mode_manual),
-            ctx.getString(org.cheipstudio.speedlauncher.R.string.rec_edit_pick_apps)
-        )
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(
-            ctx,
-            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-        )
-            .setTitle(org.cheipstudio.speedlauncher.R.string.rec_edit_title)
-            .setItems(items) { _, which ->
-                when (which) {
-                    0 -> settings.setRecommendedMode(SettingsRepository.REC_MODE_AI)
-                    1 -> settings.setRecommendedMode(SettingsRepository.REC_MODE_MANUAL)
-                    2 -> showManualPickDialog()
-                }
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun showManualPickDialog() {
-        val ctx = context
-        val all = SpeedApp.instance.appRepository.apps.value ?: return
-        val sorted = all.sortedBy { it.label.lowercase() }
-        val labels = sorted.map { it.label }.toTypedArray()
-        val keys = sorted.map { it.key }
-        val current = settings.recommendedManualApps.value ?: mutableSetOf()
-        val checked = BooleanArray(sorted.size) { idx -> keys[idx] in current }
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(
-            ctx,
-            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-        )
-            .setTitle(org.cheipstudio.speedlauncher.R.string.rec_edit_pick_title)
-            .setMultiChoiceItems(labels, checked) { _, which, isChecked -> checked[which] = isChecked }
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val selected = mutableSetOf<String>()
-                for (i in keys.indices) if (checked[i]) selected.add(keys[i])
-                settings.setRecommendedManualApps(selected)
-                settings.setRecommendedMode(SettingsRepository.REC_MODE_MANUAL)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
 }

@@ -100,15 +100,16 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 val maxScroll = (originalHeight + marginPx).toFloat()
                 val progress = (totalScroll / maxScroll).coerceIn(0f, 1f)
                 
-                // v120: riduco anche l'altezza per far salire la lista insieme
+                // v120+v124: riduco l'altezza con curva ease-out per scorrimento fluido
+                val eased = 1f - (1f - progress) * (1f - progress)
                 val lp = rec.layoutParams
-                val newHeight = (originalHeight * (1f - progress)).toInt().coerceAtLeast(0)
+                val newHeight = (originalHeight * (1f - eased)).toInt().coerceAtLeast(0)
                 if (lp.height != newHeight) {
                     lp.height = newHeight
                     rec.layoutParams = lp
                 }
-                rec.alpha = 1f - progress
-                rec.translationY = 0f  // niente translation: l'altezza si occupa di tutto
+                rec.alpha = 1f - eased
+                rec.translationY = 0f
             }
         })
 

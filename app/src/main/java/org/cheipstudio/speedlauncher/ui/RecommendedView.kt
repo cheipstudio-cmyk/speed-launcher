@@ -27,8 +27,6 @@ class RecommendedView @JvmOverloads constructor(
 
     var onAppClick: ((AppInfo) -> Unit)? = null
     var onAppLongPress: ((AppInfo) -> Unit)? = null
-    /** v122: long press sull'area della dock (non su app singola) → apre menu modifica */
-    var onContainerLongPress: (() -> Unit)? = null
 
     private val density = resources.displayMetrics.density
     private val card: MaterialCardView
@@ -60,20 +58,6 @@ class RecommendedView @JvmOverloads constructor(
         }
         card.addView(row)
         addView(card)
-    }
-
-    // v123: long press intercettato a livello di dispatchTouchEvent così
-    // viene rilevato anche se le icone child consumano i touch.
-    private val longPressDetector = android.view.GestureDetector(context, object : android.view.GestureDetector.SimpleOnGestureListener() {
-        override fun onLongPress(e: android.view.MotionEvent) {
-            onContainerLongPress?.invoke()
-        }
-    })
-
-    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
-        // Passo l'evento al detector (non consumo) e poi lascio passare normalmente
-        longPressDetector.onTouchEvent(ev)
-        return super.dispatchTouchEvent(ev)
     }
 
     private fun resolveAttrColor(attr: Int): Int {
@@ -130,19 +114,14 @@ class RecommendedView @JvmOverloads constructor(
      * Effetto: man mano che il drawer si chiude (offset cala), la card svanisce e scivola in alto.
      */
     fun applyDrawerSlide(slideOffset: Float) {
-        // v56: effetto parallasse più visibile.
-        // slideOffset: -1 (hidden) → 0 (collapsed/peek) → 1 (expanded)
+        // v56+v124: parallasse Pixel-style con interpolazione cubica per fluidità.
         val s = slideOffset.coerceIn(-1f, 1f)
-        // Parallax progress: visibile da 0 (peek) a 1 (expanded)
-        // Curva non lineare per dare effetto "scorrimento" più evidente
-        val raw = ((s).coerceIn(0f, 1f))
-        val visibleProgress = raw  // 0..1 lineare
-        // Alpha: ben visibile da subito, ma fade fino a 0.3 quando in peek
+        val raw = s.coerceIn(0f, 1f)
+        // Cubic ease-out per progress (più rapido all'inizio, smooth verso la fine)
+        val visibleProgress = 1f - (1f - raw) * (1f - raw) * (1f - raw)
         alpha = 0.3f + 0.7f * visibleProgress
-        // Parallax: scivola verso il basso di +56dp quando in peek (più drammatico)
         translationY = (1f - visibleProgress) * (56f * density)
-        // Scala più marcata per profondità
-        val sc = 0.85f + 0.15f * visibleProgress
+        val sc = 0.88f + 0.12f * visibleProgress
         scaleX = sc; scaleY = sc
     }
 
