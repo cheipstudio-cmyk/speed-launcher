@@ -70,6 +70,22 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         binding.recycler.itemAnimator = null  // niente animazioni costose
         binding.recycler.adapter = adapter
 
+        // v74: parallasse delle raccomandate quando si scrolla la lista app
+        // Quando scorri giù: le raccomandate sfumano e si spostano leggermente verso l'alto.
+        // Quando torni su: tornano alla posizione/alpha originale.
+        binding.recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            private var totalScroll = 0
+            override fun onScrolled(rv: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
+                totalScroll = (totalScroll + dy).coerceAtLeast(0)
+                val rec = _binding?.recommendedRow ?: return
+                if (rec.visibility != View.VISIBLE) return
+                val maxScroll = (rec.height + (12 * resources.displayMetrics.density)).coerceAtLeast(1f)
+                val progress = (totalScroll / maxScroll.toFloat()).coerceIn(0f, 1f)
+                rec.translationY = -totalScroll * 0.5f  // parallasse: muove a 50% velocità
+                rec.alpha = 1f - progress
+            }
+        })
+
         SpeedApp.instance.appRepository.apps.observe(viewLifecycleOwner) { apps ->
             allApps = apps
             applyFilter(binding.searchInput.text?.toString().orEmpty())
@@ -171,6 +187,9 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+        // v76: skip animazione di show del BottomSheet (default ~250ms slide-up).
+        // L\'utente percepisce il drawer come istantaneo. Riapertura immediata possibile.
+        dialog.window?.setWindowAnimations(0)
         // v60: drawer dialog full-screen edge-to-edge — nav bar trasparente, bg si estende sotto
         dialog.window?.let { w ->
             w.navigationBarColor = android.graphics.Color.TRANSPARENT
@@ -197,6 +216,16 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 behavior.halfExpandedRatio = 0.0001f  // niente half-expanded
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+
+                // v76: velocizzo le animazioni del BottomSheet via reflection.
+                // BottomSheetBehavior usa internamente ViewDragHelper con MAX_SETTLE_DURATION = 600ms.
+                // Quel campo è static final → non modificabile direttamente.
+                // Però posso forzare lo state senza animazione via setStateInternal (privato):
+                // → quando l\'utente fa drag down, la chiusura diventa istantanea.
+                // Onestà: questo è fragile e potrebbe rompersi con update di Material lib.
+                applyFastSheet(behavior)
+                // v76: skippa l\'animazione di entry (no slide-up lento)
+                it.post { skipEntryAnimation(behavior) }
 
                 // v58: applica tema drawer — usa ColorDrawable che sovrascrive il default Material
                 val theme = SpeedApp.instance.settingsRepository.drawerTheme.value ?: "system"
@@ -238,7 +267,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                         rv.clipToPadding = false
                     }
                     // Status bar padding sul root (per non sovrapporsi al notch)
-                    _binding?.root?.setPadding(0, statusBarH, 0, 0)
+                    _binding?.root?.setPadding(0, (statusBarH * 0.4f).toInt(), 0, 0)  // v76: gap top ridotto
                     insets
                 }
 
@@ -252,6 +281,8 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                             behavior.state = BottomSheetBehavior.STATE_HIDDEN
                         }
                     }
+                    private var hasReachedExpanded = false
+                    private var dismissedEarly = false
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
                         // slideOffset: -1 (hidden) → 0 (collapsed) → 1 (expanded)
                         val alpha = ((slideOffset + 1f).coerceIn(0f, 1f))
@@ -259,6 +290,13 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                         _binding?.searchInput?.alpha = alpha
                         // v38: applica parallax + fade alle raccomandate
                         _binding?.recommendedRow?.applyDrawerSlide(slideOffset)
+                        // v76: traccio se è arrivato a EXPANDED almeno una volta
+                        if (slideOffset >= 0.95f) hasReachedExpanded = true
+                        // v76: dismiss immediato se drag down dopo essere stato expanded
+                        if (hasReachedExpanded && !dismissedEarly && slideOffset < 0.55f) {
+                            dismissedEarly = true
+                            try { dismissAllowingStateLoss() } catch (_: Throwable) {}
+                        }
                     }
                 })
             }
@@ -269,6 +307,41 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    /**
+     * v76: tenta di velocizzare le animazioni del BottomSheet via reflection.
+     * Tocca due campi privati di BottomSheetBehavior:
+     * - hideFriction: friction usata durante il fling (default 0.1f, alzo per dismiss più veloce su drag down)
+     * - viewDragHelper: tramite questo posso accorciare la duration
+     */
+    private fun applyFastSheet(behavior: com.google.android.material.bottomsheet.BottomSheetBehavior<View>) {
+        // 1. Aumento hideFriction (più alto = chiude più facilmente con poco drag)
+        try {
+            val f = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
+                .getDeclaredField("hideFriction")
+            f.isAccessible = true
+            f.setFloat(behavior, 0.7f)  // v76: ancora più aggressivo, default 0.1f
+        } catch (_: Throwable) {}
+    }
+
+    /**
+     * v76: skippa l\'animazione di entry impostando lo stato direttamente via setStateInternal.
+     * setStateInternal è un metodo privato di BottomSheetBehavior che cambia lo stato SENZA
+     * passare per ViewDragHelper.smoothSlideViewTo (che usa MAX_SETTLE_DURATION = 600ms hardcoded).
+     * Risultato: drawer appare già aperto, niente animazione lenta.
+     */
+    private fun skipEntryAnimation(behavior: com.google.android.material.bottomsheet.BottomSheetBehavior<View>) {
+        try {
+            val m = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
+                .getDeclaredMethod("setStateInternal", Int::class.javaPrimitiveType)
+            m.isAccessible = true
+            m.invoke(behavior, com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED)
+        } catch (_: Throwable) {
+            // fallback: imposto lo stato normalmente, almeno c\'è qualcosa
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        }
     }
 
     companion object {

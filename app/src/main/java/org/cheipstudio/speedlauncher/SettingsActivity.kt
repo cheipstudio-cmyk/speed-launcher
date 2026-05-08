@@ -92,6 +92,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.itemIconShape.setOnClickListener { showIconShapeDialog() }
         binding.itemAnimStyle.setOnClickListener { showAnimStyleDialog() }
 
+        // v75: Icon Pack (sperimentale)
+        binding.itemIconPack.setOnClickListener { showIconPackDialog() }
+        settings.iconPackPackage.observe(this) { updateIconPackLabel() }
+        updateIconPackLabel()
+
         buildDotColorPicker()
         binding.itemSearchMode.setOnClickListener { showSearchModeDialog() }
         binding.itemDrawerLayout.setOnClickListener { showDrawerLayoutDialog() }
@@ -381,6 +386,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateAnimLabel() {
         val text = when (settings.animationStyle.value) {
             SettingsRepository.ANIM_STANDARD -> getString(R.string.anim_standard)
+            SettingsRepository.ANIM_FAST -> getString(R.string.anim_fast)
             SettingsRepository.ANIM_NONE -> getString(R.string.anim_none)
             else -> getString(R.string.anim_expressive)
         }
@@ -639,6 +645,65 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchWidgetAutoRefresh.isEnabled = enabled
     }
 
+
+
+    private fun updateIconPackLabel() {
+        val pkg = settings.iconPackPackage.value ?: ""
+        binding.iconPackLabel.text = if (pkg.isEmpty()) {
+            getString(R.string.icon_pack_none)
+        } else {
+            try {
+                val info = packageManager.getApplicationInfo(pkg, 0)
+                packageManager.getApplicationLabel(info).toString()
+            } catch (_: Throwable) {
+                getString(R.string.icon_pack_none)
+            }
+        }
+    }
+
+    private fun showIconPackDialog() {
+        val packs = org.cheipstudio.speedlauncher.tools.IconPackManager
+            .listInstalledIconPacks(this)
+        if (packs.isEmpty()) {
+            // Nessun icon pack installato
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                this,
+                com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+            )
+                .setTitle(R.string.icon_pack_no_pack_installed)
+                .setMessage(R.string.icon_pack_no_pack_installed_msg)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
+        // Lista: "Nessuno" + tutti gli icon pack
+        val labels = mutableListOf(getString(R.string.icon_pack_none))
+        labels.addAll(packs.map { it.name })
+        val values = mutableListOf("")
+        values.addAll(packs.map { it.packageName })
+        val current = settings.iconPackPackage.value ?: ""
+        val sel = values.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.settings_icon_pack)
+            .setSingleChoiceItems(labels.toTypedArray(), sel) { dialog, which ->
+                val picked = values[which]
+                if (picked != current) {
+                    settings.setIconPackPackage(picked)
+                    Toast.makeText(this, R.string.icon_pack_applied, Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                    // v75: restart per applicare l'icon pack a tutte le icone
+                    forceRestartApp()
+                } else {
+                    dialog.dismiss()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     // ============================================================
     // v68: dialog selettori (sostituiscono i RadioGroup)
     // ============================================================
@@ -699,11 +764,13 @@ class SettingsActivity : AppCompatActivity() {
             arrayOf(
                 getString(R.string.anim_expressive),
                 getString(R.string.anim_standard),
+                getString(R.string.anim_fast),
                 getString(R.string.anim_none)
             ),
             arrayOf(
                 SettingsRepository.ANIM_EXPRESSIVE,
                 SettingsRepository.ANIM_STANDARD,
+                SettingsRepository.ANIM_FAST,
                 SettingsRepository.ANIM_NONE
             ),
             settings.animationStyle.value ?: SettingsRepository.ANIM_EXPRESSIVE

@@ -216,4 +216,10 @@
     <string name="memory_cleaned_with_amount">تم تنظيف الذاكرة: %1$d ميجابايت تم تحريرها</string>
     <string name="settings_show_searchbar">عرض شريط البحث</string>
     <string name="settings_show_searchbar_sub">عرض شريط البحث في أعلى الشاشة الرئيسية</string>
+    <string name="anim_fast">سريع</string>
+    <string name="settings_icon_pack">حزمة أيقونات (تجريبي)</string>
+    <string name="icon_pack_none">بلا (أيقونات النظام)</string>
+    <string name="icon_pack_no_pack_installed">لا توجد حزمة أيقونات مثبتة</string>
+    <string name="icon_pack_no_pack_installed_msg">لاستخدام حزمة أيقونات، قم بتنزيل واحدة من Play Store.</string>
+    <string name="icon_pack_applied">تم تطبيق حزمة الأيقونات. جارٍ إعادة التشغيل...</string>
 </resources>

@@ -138,7 +138,13 @@ class RecommendedView @JvmOverloads constructor(
         val byKey = available.associateBy { it.key }
         val countToShow = SpeedApp.instance.settingsRepository.recommendedCount.value ?: 5
         val topKeys = tracker.getTopApps(byKey.keys, topN = countToShow)
-        val topApps = topKeys.mapNotNull { byKey[it] }
+        var topApps = topKeys.mapNotNull { byKey[it] }
+
+        // v75: se l'usage tracker non ha ancora dati (nuovo install), uso fallback:
+        // primi N apps in ordine alfabetico così le raccomandate sono comunque visibili
+        if (topApps.isEmpty() && available.isNotEmpty()) {
+            topApps = available.sortedBy { it.label.lowercase() }.take(countToShow)
+        }
 
         if (topApps.isEmpty()) {
             visibility = GONE
@@ -199,7 +205,7 @@ class RecommendedView @JvmOverloads constructor(
             layoutParams = LinearLayout.LayoutParams(s, s).also { it.gravity = Gravity.CENTER_HORIZONTAL }
         }
         val icon = ImageView(context).apply {
-            setImageDrawable(IconShaper.shape(app.icon, shape))
+            setImageDrawable(IconShaper.shape(app.icon, shape, context, app.packageName, app.componentName))
             val s = (44 * density).toInt()
             layoutParams = FrameLayout.LayoutParams(s, s, Gravity.CENTER)
         }

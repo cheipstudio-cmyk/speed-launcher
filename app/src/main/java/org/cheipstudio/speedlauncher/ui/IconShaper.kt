@@ -17,9 +17,56 @@ object IconShaper {
 
     private const val ICON_SIZE = 192
 
+    /** v75: cache lazy dell\'icon pack manager per il pack attivo. */
+    @Volatile private var iconPackManager: org.cheipstudio.speedlauncher.tools.IconPackManager? = null
+    @Volatile private var lastLoadedPack: String = ""
+
+    private fun ensureIconPack(context: android.content.Context): org.cheipstudio.speedlauncher.tools.IconPackManager? {
+        val pack = org.cheipstudio.speedlauncher.SpeedApp.instance.settingsRepository
+            .iconPackPackage.value ?: ""
+        if (pack.isEmpty()) {
+            iconPackManager = null
+            lastLoadedPack = ""
+            return null
+        }
+        if (pack != lastLoadedPack) {
+            val mgr = org.cheipstudio.speedlauncher.tools.IconPackManager(context)
+            if (mgr.load(pack)) {
+                iconPackManager = mgr
+                lastLoadedPack = pack
+            } else {
+                iconPackManager = null
+                lastLoadedPack = ""
+            }
+        }
+        return iconPackManager
+    }
+
     fun shape(drawable: Drawable, shape: String): Drawable {
         if (shape == SettingsRepository.SHAPE_ORIGINAL) return drawable
         val bmp = renderToBitmap(drawable, ICON_SIZE)
+        val masked = applyMask(bmp, shape)
+        return BitmapDrawable(null, masked)
+    }
+
+    /**
+     * v75: overload con package/activity per applicare icon pack se attivo.
+     * Se un icon pack è attivo e ha l\'icona per questo component, la sostituisce
+     * PRIMA di applicare la maschera della forma.
+     */
+    fun shape(
+        drawable: Drawable,
+        shape: String,
+        context: android.content.Context,
+        packageName: String,
+        activityName: String
+    ): Drawable {
+        val mgr = ensureIconPack(context)
+        val effectiveDrawable = if (mgr != null) {
+            mgr.getIconForComponent(packageName, activityName) ?: drawable
+        } else drawable
+        if (shape == SettingsRepository.SHAPE_ORIGINAL) return effectiveDrawable
+        val bmp = renderToBitmap(effectiveDrawable, ICON_SIZE)
         val masked = applyMask(bmp, shape)
         return BitmapDrawable(null, masked)
     }

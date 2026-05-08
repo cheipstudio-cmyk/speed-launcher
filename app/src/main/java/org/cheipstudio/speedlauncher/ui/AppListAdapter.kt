@@ -53,8 +53,9 @@ class AppListAdapter(
         fun bind(app: AppInfo) {
             val shape = SpeedApp.instance.settingsRepository.iconShape.value
                 ?: SettingsRepository.SHAPE_ORIGINAL
-            binding.icon.setImageDrawable(IconShaper.shape(app.icon, shape))
+            binding.icon.setImageDrawable(IconShaper.shape(app.icon, shape, binding.root.context, app.packageName, app.componentName))
             binding.label.text = app.label
+            binding.label.setTextColor(drawerTextColor(binding.root.context))
             binding.root.setOnClickListener {
                 Anim.pressFeedback(binding.icon)
                 binding.icon.postDelayed({ onClick(app, binding.icon) }, 60)
@@ -72,8 +73,9 @@ class AppListAdapter(
         fun bind(app: AppInfo) {
             val shape = SpeedApp.instance.settingsRepository.iconShape.value
                 ?: SettingsRepository.SHAPE_ORIGINAL
-            icon.setImageDrawable(IconShaper.shape(app.icon, shape))
+            icon.setImageDrawable(IconShaper.shape(app.icon, shape, itemView.context, app.packageName, app.componentName))
             label.text = app.label
+            label.setTextColor(drawerTextColor(itemView.context))
             itemView.setOnClickListener {
                 Anim.pressFeedback(icon)
                 icon.postDelayed({ onClick(app, icon) }, 60)
@@ -81,6 +83,30 @@ class AppListAdapter(
             itemView.setOnLongClickListener {
                 onLongPress?.invoke(app)
                 true
+            }
+        }
+    }
+
+
+    /**
+     * v74: ritorna il colore del testo in base al tema drawer.
+     * - light → testo scuro (su sfondo chiaro)
+     * - dark/transparent → testo bianco
+     * - system → segue il sistema
+     */
+    private fun drawerTextColor(context: android.content.Context): Int {
+        val theme = SpeedApp.instance.settingsRepository.drawerTheme.value ?: "system"
+        return when (theme) {
+            "light" -> android.graphics.Color.argb(230, 25, 25, 28)
+            "dark" -> android.graphics.Color.WHITE
+            "transparent" -> android.graphics.Color.WHITE
+            else -> {
+                val nm = context.resources.configuration.uiMode and
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                if (nm == android.content.res.Configuration.UI_MODE_NIGHT_YES)
+                    android.graphics.Color.WHITE
+                else
+                    android.graphics.Color.argb(230, 25, 25, 28)
             }
         }
     }

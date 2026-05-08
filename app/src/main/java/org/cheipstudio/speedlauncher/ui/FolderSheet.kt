@@ -404,7 +404,7 @@ object FolderSheet {
             layoutParams = LinearLayout.LayoutParams(s, s)
         }
         val icon = ImageView(context).apply {
-            setImageDrawable(IconShaper.shape(app.icon, shape))
+            setImageDrawable(IconShaper.shape(app.icon, shape, context, app.packageName, app.componentName))
             val s = (50 * density).toInt()
             layoutParams = android.widget.FrameLayout.LayoutParams(s, s, Gravity.CENTER)
         }

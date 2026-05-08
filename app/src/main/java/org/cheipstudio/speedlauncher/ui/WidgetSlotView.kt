@@ -93,6 +93,16 @@ class WidgetSlotView @JvmOverloads constructor(
 
     fun setHostController(controller: WidgetHostController) {
         hostController = controller
+        // v74: prova a restorare il widget esistente se l\'app è stata aggiornata
+        try {
+            val view = controller.restoreWidget()
+            if (view != null) {
+                placeholder.visibility = View.GONE
+                removeView(currentWidgetView)
+                currentWidgetView = view
+                addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+            }
+        } catch (_: Throwable) {}
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

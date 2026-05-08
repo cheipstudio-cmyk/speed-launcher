@@ -272,7 +272,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
         this.app = app
         val s = SpeedApp.instance.settingsRepository
         val shape = s.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
-        iconView.setImageDrawable(IconShaper.shape(app.icon, shape))
+        iconView.setImageDrawable(IconShaper.shape(app.icon, shape, context, app.packageName, app.componentName))
         labelView.text = app.label
         packageName = app.packageName
         dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT

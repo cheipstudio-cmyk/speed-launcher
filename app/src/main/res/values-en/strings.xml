@@ -238,4 +238,10 @@ It will only be used for this feature.</string>
     <string name="memory_cleaned_with_amount">Memory cleaned: %1$d MB freed</string>
     <string name="settings_show_searchbar">Show search bar</string>
     <string name="settings_show_searchbar_sub">Display the search bar at the top of home</string>
+    <string name="anim_fast">Fast</string>
+    <string name="settings_icon_pack">Icon pack (experimental)</string>
+    <string name="icon_pack_none">None (system icons)</string>
+    <string name="icon_pack_no_pack_installed">No icon pack installed</string>
+    <string name="icon_pack_no_pack_installed_msg">To use an icon pack, download one from Play Store (e.g. Whicons, Pixel Icon Pack).</string>
+    <string name="icon_pack_applied">Icon pack applied. Restarting...</string>
 </resources>

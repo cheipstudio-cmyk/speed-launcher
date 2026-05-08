@@ -224,6 +224,20 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v75: Icon Pack (sperimentale) -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemIconPack" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_magenta">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_shapes" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_icon_pack" />
+                        <TextView android:id="@+id/iconPackLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ===== DRAWER ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_expressive" />
 

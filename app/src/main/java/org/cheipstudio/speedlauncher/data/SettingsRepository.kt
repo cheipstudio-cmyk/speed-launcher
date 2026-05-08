@@ -60,6 +60,9 @@ class SettingsRepository(context: Context) {
     /** v59: pulitore memoria (button razzo + AI) */
     val memoryCleanerEnabled = MutableLiveData(prefs.getBoolean(KEY_MEMORY_CLEANER, true))
 
+    /** v75: icon pack esterno (package name, "" = nessuno). Sperimentale. */
+    val iconPackPackage = MutableLiveData(prefs.getString(KEY_ICON_PACK, "") ?: "")
+
     init {
         // v48: al primo run di v48 (dopo aggiornamento), imposta TUTTI i temi a "transparent" come default
         if (!prefs.getBoolean(KEY_FIRST_THEMES_SET, false)) {
@@ -185,6 +188,11 @@ class SettingsRepository(context: Context) {
         memoryCleanerEnabled.postValue(on)
     }
 
+    fun setIconPackPackage(pkg: String) {
+        prefs.edit().putString(KEY_ICON_PACK, pkg).apply()
+        iconPackPackage.postValue(pkg)
+    }
+
     fun unhideAllApps() {
         val empty = mutableSetOf<String>()
         prefs.edit().putStringSet(KEY_HIDDEN_APPS, empty).apply()
@@ -294,6 +302,7 @@ class SettingsRepository(context: Context) {
 
         const val ANIM_STANDARD = "standard"
         const val ANIM_EXPRESSIVE = "expressive"
+        const val ANIM_FAST = "fast"
         const val ANIM_NONE = "none"
 
         private const val KEY_DRAWER_LAYOUT = "drawer_layout"
@@ -331,6 +340,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_DOCK_THEME = "dock_theme"
         private const val KEY_DRAWER_THEME = "drawer_theme"
         private const val KEY_MEMORY_CLEANER = "memory_cleaner_enabled"
+        private const val KEY_ICON_PACK = "icon_pack_package"
         private const val KEY_FIRST_THEMES_SET = "first_themes_set"
 
         // Default = arancione/rosso vivace (Material 3)

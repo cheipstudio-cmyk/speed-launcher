@@ -48,6 +48,8 @@ class HomeView @JvmOverloads constructor(
     private var trackStartX = 0f
     private var trackStartY = 0f
     private var tracking = false
+    /** v77: dedup vibrazione swipe per evitare doppi fire dello stesso gesto */
+    private var swipeFireVibrated = false
     // v46: velocity tracker per swipe rapido
     private var swipeVelocityTracker: android.view.VelocityTracker? = null
     private val swipeFastVelocity = resources.displayMetrics.density * 800f  // 800dp/s
@@ -69,16 +71,15 @@ class HomeView @JvmOverloads constructor(
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            // v62: l'haptic veniva chiamato SOLO in onInterceptTouchEvent ma onFling triggera prima
-            // bypassando quel path. Aggiungo qui la vibrazione per swipe veloci.
+            // v77: dedup vibrazione — usa flag swipeFireVibrated, una sola vibrazione per gesto.
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
-                performHapticFeedbackLight()
+                if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 onSwipeUp?.invoke()
                 return true
             }
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
-                performHapticFeedbackLight()
+                if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
@@ -192,6 +193,13 @@ class HomeView @JvmOverloads constructor(
         when (settings.animationStyle.value) {
             SettingsRepository.ANIM_NONE -> {
                 layoutTransition = null
+            }
+            SettingsRepository.ANIM_FAST -> {
+                // v74: fast — animazioni minime per massima fluidità
+                layoutTransition = LayoutTransition().apply {
+                    enableTransitionType(LayoutTransition.CHANGING)
+                    setDuration(40)
+                }
             }
             SettingsRepository.ANIM_STANDARD -> {
                 layoutTransition = LayoutTransition().apply {
@@ -453,6 +461,7 @@ class HomeView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 trackStartX = ev.x; trackStartY = ev.y
                 tracking = true
+                swipeFireVibrated = false  // v77: reset flag dedup
                 gestureDetector.onTouchEvent(ev)
                 swipeVelocityTracker?.recycle()
                 swipeVelocityTracker = android.view.VelocityTracker.obtain()
@@ -482,8 +491,8 @@ class HomeView @JvmOverloads constructor(
 
                 if (isFastSwipeUp || isSlowSwipeUp) {
                     tracking = false
-                    // v46: vibration al MOMENTO esatto in cui parte il drawer (non ritardata)
-                    performHapticFeedbackLight()
+                    // v77: una sola vibrazione per gesto (flag swipeFireVibrated)
+                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                     onSwipeUp?.invoke()
                     fadeOverlay.animate().alpha(0f).setDuration(180).start()
                     return true
@@ -491,7 +500,7 @@ class HomeView @JvmOverloads constructor(
                 if (settings.swipeDownNotifications.value == true &&
                     dy > swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
-                    performHapticFeedbackLight()
+                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                     StatusBarHelper.expandNotifications(context)
                     return true
                 }
@@ -661,35 +670,32 @@ class HomeView @JvmOverloads constructor(
     /**
      * v26: haptic leggero, single-tap. Su API 30+ usa GESTURE_START (più sottile),
      * altrimenti CLOCK_TICK (era KEYBOARD_TAP — troppo forte).
+     * v77: rimosso FLAG_IGNORE_GLOBAL_SETTING (rispetta le impostazioni utente).
+     *      Fallback Vibrator usa amplitudine 60 (su 255) e durata 12ms — molto più sottile.
      */
     private fun performHapticFeedbackLight() {
         if (settings.hapticEnabled.value != true) return
-        // v56: fallback robusto. View.performHapticFeedback può tornare false se la View
-        // non ha focus al momento del gesto. Provo prima la View, se fallisce uso Vibrator diretto.
         val viewSucceeded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            performHapticFeedback(HapticFeedbackConstants.GESTURE_START,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
         } else {
-            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
         }
         if (!viewSucceeded) {
             try {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                     val vm = context.getSystemService(android.os.VibratorManager::class.java)
                     val vib = vm?.defaultVibrator
-                    vib?.vibrate(android.os.VibrationEffect.createPredefined(
-                        android.os.VibrationEffect.EFFECT_TICK))
+                    // v77: ampiezza 60/255 (era DEFAULT_AMPLITUDE = ~150) → vibrazione gentile
+                    vib?.vibrate(android.os.VibrationEffect.createOneShot(12L, 60))
                 } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     @Suppress("DEPRECATION")
                     val vib = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
-                    vib?.vibrate(android.os.VibrationEffect.createOneShot(
-                        20L, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                    vib?.vibrate(android.os.VibrationEffect.createOneShot(12L, 60))
                 } else {
                     @Suppress("DEPRECATION")
                     val vib = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
                     @Suppress("DEPRECATION")
-                    vib?.vibrate(20L)
+                    vib?.vibrate(12L)
                 }
             } catch (_: Throwable) {}
         }

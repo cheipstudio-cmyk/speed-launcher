@@ -12,7 +12,10 @@ class WidgetHostController(private val activity: Activity) {
     val appWidgetManager: AppWidgetManager = AppWidgetManager.getInstance(activity)
     val host: AppWidgetHost = AppWidgetHost(activity, HOST_ID)
 
-    var lastWidgetId: Int = -1
+    private val prefs = activity.getSharedPreferences("speed_widget_host", android.content.Context.MODE_PRIVATE)
+
+    /** v74: lastWidgetId persistito in SharedPreferences per sopravvivere agli update dell\'app */
+    var lastWidgetId: Int = prefs.getInt(KEY_LAST_WIDGET_ID, -1)
         private set
 
     /** Chi ha avviato il flusso bind/configure può aspettarsi una callback */
@@ -21,17 +24,37 @@ class WidgetHostController(private val activity: Activity) {
     var pendingBindAppWidgetId: Int = -1
 
     fun start() { host.startListening() }
+
+    /**
+     * v74: restore widget dopo update app.
+     * Chiamare al boot: ritorna AppWidgetHostView pronto da appendere alla UI, o null se il widget
+     * non è più valido (provider rimosso, id non bindato, ecc).
+     */
+    fun restoreWidget(): AppWidgetHostView? {
+        val id = lastWidgetId
+        if (id < 0) return null
+        return try {
+            val info = appWidgetManager.getAppWidgetInfo(id) ?: return null
+            host.createView(activity, id, info)
+        } catch (_: Throwable) { null }
+    }
     fun startListening() { try { host.startListening() } catch (_: Throwable) {} }
     fun stopListening() { try { host.stopListening() } catch (_: Throwable) {} }
     fun createView(id: Int, info: AppWidgetProviderInfo): AppWidgetHostView =
         host.createView(activity, id, info)
 
-    fun markLastWidget(id: Int) { lastWidgetId = id }
+    fun markLastWidget(id: Int) {
+        lastWidgetId = id
+        prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
+    }
 
     fun deleteWidget(appWidgetId: Int) {
         if (appWidgetId < 0) return
         try { host.deleteAppWidgetId(appWidgetId) } catch (_: Throwable) {}
-        if (appWidgetId == lastWidgetId) lastWidgetId = -1
+        if (appWidgetId == lastWidgetId) {
+            lastWidgetId = -1
+            prefs.edit().putInt(KEY_LAST_WIDGET_ID, -1).apply()
+        }
     }
 
     /** Vecchio flusso ACTION_APPWIDGET_PICK - mantengo per compatibilità ma non usato dalla v12 */
@@ -112,6 +135,7 @@ class WidgetHostController(private val activity: Activity) {
         val view = createView(id, info)
         view.setAppWidget(id, info)
         lastWidgetId = id
+        prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
         pendingPlaceCallback?.invoke(view)
         pendingPlaceCallback = null
         pendingBindWidget = null
@@ -120,6 +144,7 @@ class WidgetHostController(private val activity: Activity) {
 
     companion object {
         const val HOST_ID = 0x53504544
+        private const val KEY_LAST_WIDGET_ID = "last_widget_id"
         const val REQ_PICK = 1001
         const val REQ_CONFIGURE = 1002
         const val REQ_BIND = 1003

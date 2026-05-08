@@ -216,4 +216,10 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="memory_cleaned_with_amount">Bellek temizlendi: %1$d MB serbest bırakıldı</string>
     <string name="settings_show_searchbar">Arama çubuğunu göster</string>
     <string name="settings_show_searchbar_sub">Arama çubuğunu ana ekranın üst kısmında göster</string>
+    <string name="anim_fast">Hızlı</string>
+    <string name="settings_icon_pack">Simge paketi (deneysel)</string>
+    <string name="icon_pack_none">Yok (sistem simgeleri)</string>
+    <string name="icon_pack_no_pack_installed">Hiç simge paketi yüklü değil</string>
+    <string name="icon_pack_no_pack_installed_msg">Bir simge paketi kullanmak için Play Store\'dan indirin.</string>
+    <string name="icon_pack_applied">Simge paketi uygulandı. Yeniden başlatılıyor...</string>
 </resources>

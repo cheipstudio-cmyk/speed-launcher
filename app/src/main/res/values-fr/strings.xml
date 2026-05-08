@@ -216,4 +216,10 @@ Il sera utilisé uniquement pour cette fonction.</string>
     <string name="memory_cleaned_with_amount">Mémoire nettoyée : %1$d Mo libérés</string>
     <string name="settings_show_searchbar">Afficher la barre de recherche</string>
     <string name="settings_show_searchbar_sub">Affiche la barre de recherche en haut de l\'accueil</string>
+    <string name="anim_fast">Rapide</string>
+    <string name="settings_icon_pack">Pack d\'icônes (expérimental)</string>
+    <string name="icon_pack_none">Aucun (icônes système)</string>
+    <string name="icon_pack_no_pack_installed">Aucun pack d\'icônes installé</string>
+    <string name="icon_pack_no_pack_installed_msg">Pour utiliser un pack d\'icônes, téléchargez-en un depuis le Play Store.</string>
+    <string name="icon_pack_applied">Pack d\'icônes appliqué. Redémarrage...</string>
 </resources>
