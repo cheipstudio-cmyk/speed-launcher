@@ -27,6 +27,8 @@ class RecommendedView @JvmOverloads constructor(
 
     var onAppClick: ((AppInfo) -> Unit)? = null
     var onAppLongPress: ((AppInfo) -> Unit)? = null
+    /** v122: long press sull'area della dock (non su app singola) → apre menu modifica */
+    var onContainerLongPress: (() -> Unit)? = null
 
     private val density = resources.displayMetrics.density
     private val card: MaterialCardView

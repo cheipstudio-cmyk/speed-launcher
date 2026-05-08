@@ -818,15 +818,15 @@ class HomeView @JvmOverloads constructor(
         val ctx = context
         val currentMode = settings.recommendedMode.value ?: SettingsRepository.REC_MODE_AI
         val items = arrayOf(
-            ctx.getString(R.string.rec_mode_ai),
-            ctx.getString(R.string.rec_mode_manual),
-            ctx.getString(R.string.rec_edit_pick_apps)
+            ctx.getString(org.cheipstudio.speedlauncher.R.string.rec_mode_ai),
+            ctx.getString(org.cheipstudio.speedlauncher.R.string.rec_mode_manual),
+            ctx.getString(org.cheipstudio.speedlauncher.R.string.rec_edit_pick_apps)
         )
         com.google.android.material.dialog.MaterialAlertDialogBuilder(
             ctx,
             com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
         )
-            .setTitle(R.string.rec_edit_title)
+            .setTitle(org.cheipstudio.speedlauncher.R.string.rec_edit_title)
             .setItems(items) { _, which ->
                 when (which) {
                     0 -> settings.setRecommendedMode(SettingsRepository.REC_MODE_AI)
@@ -850,7 +850,7 @@ class HomeView @JvmOverloads constructor(
             ctx,
             com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
         )
-            .setTitle(R.string.rec_edit_pick_title)
+            .setTitle(org.cheipstudio.speedlauncher.R.string.rec_edit_pick_title)
             .setMultiChoiceItems(labels, checked) { _, which, isChecked -> checked[which] = isChecked }
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val selected = mutableSetOf<String>()
