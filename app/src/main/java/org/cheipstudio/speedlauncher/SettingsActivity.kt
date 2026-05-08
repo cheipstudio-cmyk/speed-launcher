@@ -386,6 +386,15 @@ class SettingsActivity : AppCompatActivity() {
             updateBlurLabel()
         }
 
+        // === v51: CAMBIA SFONDO ===
+        binding.itemChangeWallpaper.setOnClickListener {
+            try {
+                val intent = android.content.Intent(android.content.Intent.ACTION_SET_WALLPAPER)
+                startActivity(android.content.Intent.createChooser(intent,
+                    getString(R.string.settings_change_wallpaper)))
+            } catch (_: Throwable) {}
+        }
+
         // === v48: TEMA SEARCH + TEMA DOCK ===
         updateSearchThemeLabel()
         binding.itemSearchTheme.setOnClickListener { showSearchThemeDialog() }

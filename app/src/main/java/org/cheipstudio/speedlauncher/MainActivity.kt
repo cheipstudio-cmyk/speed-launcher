@@ -103,14 +103,28 @@ class MainActivity : AppCompatActivity() {
      */
     private fun applyWallpaperBlur() {
         val radius = SpeedApp.instance.settingsRepository.wallpaperBlur.value ?: 0
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            try {
-                window.attributes = window.attributes.apply {
-                    blurBehindRadius = radius
-                    flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
-                }
-            } catch (_: Throwable) {}
-        }
+        if (radius == 0) return
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
+
+        try {
+            // Verifico se il device supporta cross-window blur (alcuni device hanno feature off)
+            val wm = getSystemService(android.view.WindowManager::class.java)
+            val supported = wm?.isCrossWindowBlurEnabled == true
+            if (!supported) {
+                // Fallback: dim un po\' più forte come "blur visivo" (non vero blur ma percepibile)
+                val extraDim = (radius / 50f * 0.18f).coerceIn(0f, 0.18f)
+                val currentDim = SpeedApp.instance.settingsRepository.wallpaperDim.value ?: 0
+                val totalAlpha = (currentDim / 100f + extraDim).coerceIn(0f, 1f)
+                binding.homeView.setDimOverlayAlpha(totalAlpha)
+                return
+            }
+            // Cross-window blur supportato
+            window.attributes = window.attributes.apply {
+                blurBehindRadius = radius
+                flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+            }
+            window.setAttributes(window.attributes)
+        } catch (_: Throwable) {}
     }
 
     private fun applyOrientationLock() {

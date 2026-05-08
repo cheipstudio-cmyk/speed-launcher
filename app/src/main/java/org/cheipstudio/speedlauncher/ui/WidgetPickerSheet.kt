@@ -70,7 +70,11 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
             val widthOk = slotWidthPx == 0 || minW <= slotWidthPx * tolerance
             val heightOk = slotHeightPx == 0 || minH <= slotHeightPx * tolerance
             widthOk && heightOk
-        }.sortedBy { it.loadLabel(ctx.packageManager).lowercase() }
+        }.sortedWith(compareBy(
+            // v50: i widget del nostro package (Speed Stats) per primi
+            { if (it.provider.packageName == ctx.packageName) 0 else 1 },
+            { it.loadLabel(ctx.packageManager).lowercase() }
+        ))
 
         allItems = filtered
         adapter.submit(filtered)

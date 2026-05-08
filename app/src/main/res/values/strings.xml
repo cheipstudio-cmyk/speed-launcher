@@ -95,16 +95,16 @@
     <string name="screen_lock_admin_explanation">Speed Launcher userà questo permesso solo per spegnere lo schermo quando fai doppio tap sulla barra di ricerca. Nessun altro utilizzo.</string>
     <string name="screen_lock_enable_admin_toast">Abilita Speed Launcher come amministratore per usare il blocco schermo</string>
 
-    <string name="tutorial_swipe_title">Swipe in alto per il drawer</string>
-    <string name="tutorial_swipe_desc">Trascina dal basso verso l\'alto per aprire la lista di tutte le app. Funziona ovunque sulla home.</string>
-    <string name="tutorial_longpress_icon_title">Tieni premuto un\'app</string>
-    <string name="tutorial_longpress_icon_desc">Sul drawer, tieni premuta un\'app per aggiungerla alla home. In home, tienila premuta per spostarla, modificarla o disinstallarla.</string>
-    <string name="tutorial_settings_title">Personalizza tutto</string>
-    <string name="tutorial_settings_desc">Forma icone, colori, layout, animazioni, raccomandate AI, gesture e molto altro. Esplora le impostazioni per fare tuo il launcher.</string>
+    <string name="tutorial_swipe_title">Apri il drawer</string>
+    <string name="tutorial_swipe_desc">Trascina dal basso verso l\'alto in qualsiasi punto della home per aprire la lista delle app installate.</string>
+    <string name="tutorial_longpress_icon_title">Sposta e gestisci app</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'app per spostarla, modificarla o disinstallarla. Sul drawer per aggiungerla alla home.</string>
+    <string name="tutorial_settings_title">Impostazioni</string>
+    <string name="tutorial_settings_desc">Tema, layout, animazioni, gesti, AI raccomandate, widget, e altro. Tutto personalizzabile dalla pagina impostazioni.</string>
     <string name="tutorial_pages_title">Pagine multiple</string>
     <string name="tutorial_pages_desc">Quando una pagina è piena ne nasce una nuova. Trascina un\'icona oltre il bordo per spostarla. Tocca i puntini in fondo per saltare tra pagine.</string>
     <string name="tutorial_default_title">Imposta come predefinito</string>
-    <string name="tutorial_default_desc">Per usarlo davvero, impostalo come launcher di sistema. È un attimo, e puoi tornare indietro quando vuoi.</string>
+    <string name="tutorial_default_desc">Per usarlo davvero come launcher di sistema, imposta Speed come predefinito. Puoi cambiare quando vuoi.</string>
     <string name="tutorial_set_default_btn">Imposta come predefinito</string>
     <string name="tutorial_next">Avanti</string>
     <string name="tutorial_done">Iniziamo</string>
@@ -188,7 +188,7 @@ Si userà solo per questa funzione.</string>
     <string name="recommended_count_5">5 app</string>
     <string name="settings_section_language">Lingua</string>
     <string name="settings_language">Lingua dell\'app</string>
-    <string name="settings_section_expressive">Material Expressive</string>
+    <string name="settings_section_expressive">Sfondo</string>
     <string name="settings_wallpaper_dim">Oscurazione sfondo</string>
     <string name="settings_wallpaper_blur">Sfocatura sfondo</string>
     <string name="menu_manage_pages">Gestisci pagine</string>
@@ -209,10 +209,10 @@ Si userà solo per questa funzione.</string>
     <string name="widget_storage">Memoria</string>
     <string name="widget_battery">Batteria</string>
     <string name="widget_charging">In carica</string>
-    <string name="tutorial_welcome_title">Benvenuto in Speed</string>
-    <string name="tutorial_welcome_desc">Un launcher veloce, leggero e personalizzabile. Ti mostro le funzioni principali in pochi passi.</string>
-    <string name="tutorial_home_long_press_title">Tieni premuto sulla home</string>
-    <string name="tutorial_home_long_press_desc">Tieni premuto su un\'area vuota della home per accedere rapidamente a sfondo, riordina alfabetico e impostazioni.</string>
+    <string name="tutorial_welcome_title">Benvenuto</string>
+    <string name="tutorial_welcome_desc">Speed Launcher è un launcher veloce e personalizzabile. In 6 passaggi vediamo le funzioni principali.</string>
+    <string name="tutorial_home_long_press_title">Menu home</string>
+    <string name="tutorial_home_long_press_desc">Tieni premuto su un\'area vuota della home per aprire menu rapidi: sfondo, ordine alfabetico, gestione pagine, impostazioni.</string>
     <string name="tutorial_set_default">Imposta</string>
     <string name="settings_section_widget">Widget Speed Stats</string>
     <string name="settings_widget_theme">Tema widget</string>
@@ -222,9 +222,11 @@ Si userà solo per questa funzione.</string>
     <string name="widget_theme_dark">Scuro</string>
     <string name="settings_widget_auto_refresh">Aggiornamento automatico</string>
     <string name="settings_widget_auto_refresh_sub">Se disattivo, mostra un pulsante refresh sul widget.</string>
-    <string name="tutorial_widget_title">Speed Stats sulla home</string>
-    <string name="tutorial_widget_desc">Sulla home trovi un widget esclusivo che mostra RAM, memoria e batteria disponibili. Personalizzabile dalle impostazioni con tema e refresh manuale.</string>
+    <string name="tutorial_widget_title">Widget Speed Stats</string>
+    <string name="tutorial_widget_desc">Tieni premuto sopra il widget vuoto per aggiungere Speed Stats: RAM, memoria e batteria sempre visibili.</string>
     <string name="settings_section_themes">Tema barre</string>
     <string name="settings_search_theme">Tema barra ricerca</string>
     <string name="settings_dock_theme">Tema dock raccomandate</string>
+    <string name="settings_change_wallpaper">Cambia sfondo</string>
+    <string name="settings_change_wallpaper_sub">Imposta un\'immagine come sfondo del launcher</string>
 </resources>

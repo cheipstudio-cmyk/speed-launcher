@@ -43,6 +43,10 @@ class AlphaScrollBar @JvmOverloads constructor(
     }
 
     private val bubblePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var selectedY: Float = 0f
+    private var bubbleScale: Float = 1f
+    private var bubbleAnimator: android.animation.ValueAnimator? = null
     private val bubbleTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
         typeface = Typeface.create("sans-serif", Typeface.BOLD)
@@ -89,45 +93,106 @@ class AlphaScrollBar @JvmOverloads constructor(
             canvas.drawText(letter, width / 2f, textY, labelPaint)
         }
 
-        // overlay bubble grande con la lettera selezionata
+        // v51: card rialzata animata con la lettera selezionata
         val sel = selectedLetter
         if (sel != null) {
-            val bubbleSize = 56 * density
-            val cx = -bubbleSize / 2 - 4 * density  // a sinistra della scrollbar
-            val cy = totalH / 2
-            // sfondo bolla
+            // Posizione: alla altezza del dito (selectedY tracked da onTouch)
+            val cardW = 84 * density
+            val cardH = 84 * density
+            val cx = -cardW - 12 * density  // a sinistra della scrollbar
+            val cy = (selectedY).coerceIn(cardH / 2, totalH - cardH / 2)
+            val left = cx
+            val top = cy - cardH / 2
+            val right = cx + cardW
+            val bottom = cy + cardH / 2
+
+            // Shadow per effetto "rialzata"
+            shadowPaint.color = android.graphics.Color.argb(80, 0, 0, 0)
+            shadowPaint.maskFilter = android.graphics.BlurMaskFilter(8 * density, android.graphics.BlurMaskFilter.Blur.NORMAL)
+            val shadowOffset = 4 * density
+            canvas.drawRoundRect(
+                RectF(left, top + shadowOffset, right, bottom + shadowOffset),
+                24 * density, 24 * density, shadowPaint
+            )
+
+            // Card sfondo
             bubblePaint.color = colorAttr(com.google.android.material.R.attr.colorPrimaryContainer)
-            val rect = RectF(cx - bubbleSize / 2, cy - bubbleSize / 2,
-                cx + bubbleSize / 2, cy + bubbleSize / 2)
-            canvas.drawOval(rect, bubblePaint)
-            // testo
+            val cardScale = bubbleScale  // animato
+            val scaledW = cardW * cardScale
+            val scaledH = cardH * cardScale
+            canvas.drawRoundRect(
+                RectF(cx + (cardW - scaledW) / 2, cy - scaledH / 2,
+                      cx + (cardW + scaledW) / 2, cy + scaledH / 2),
+                24 * density, 24 * density, bubblePaint
+            )
+
+            // Lettera grande
             bubbleTextPaint.color = colorAttr(com.google.android.material.R.attr.colorOnPrimaryContainer)
-            bubbleTextPaint.textSize = 28 * density
+            bubbleTextPaint.textSize = 44 * density * cardScale
+            bubbleTextPaint.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD)
             val fm = bubbleTextPaint.fontMetrics
             val textY = cy - (fm.ascent + fm.descent) / 2
-            canvas.drawText(sel, cx, textY, bubbleTextPaint)
+            canvas.drawText(sel, cx + cardW / 2, textY, bubbleTextPaint)
         }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (letters.isEmpty()) return false
         when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+            MotionEvent.ACTION_DOWN -> {
                 val itemH = height.toFloat() / letters.size
                 val idx = (event.y / itemH).toInt().coerceIn(0, letters.size - 1)
                 val letter = letters[idx]
-                if (letter != selectedLetter) {
-                    selectedLetter = letter
-                    onLetterSelected?.invoke(letter)
-                    performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-                    invalidate()
+                selectedLetter = letter
+                selectedY = event.y
+                onLetterSelected?.invoke(letter)
+                performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                // v51: animazione scale 0.6 → 1.0
+                bubbleAnimator?.cancel()
+                bubbleAnimator = android.animation.ValueAnimator.ofFloat(0.6f, 1f).apply {
+                    duration = 180
+                    interpolator = android.view.animation.OvershootInterpolator(1.6f)
+                    addUpdateListener {
+                        bubbleScale = it.animatedValue as Float
+                        invalidate()
+                    }
+                    start()
                 }
                 parent?.requestDisallowInterceptTouchEvent(true)
                 return true
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                selectedLetter = null
+            MotionEvent.ACTION_MOVE -> {
+                val itemH = height.toFloat() / letters.size
+                val idx = (event.y / itemH).toInt().coerceIn(0, letters.size - 1)
+                val letter = letters[idx]
+                selectedY = event.y
+                if (letter != selectedLetter) {
+                    selectedLetter = letter
+                    onLetterSelected?.invoke(letter)
+                    performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                }
                 invalidate()
+                parent?.requestDisallowInterceptTouchEvent(true)
+                return true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                // v51: animazione scale out 1.0 → 0.4 + alpha → 0
+                bubbleAnimator?.cancel()
+                bubbleAnimator = android.animation.ValueAnimator.ofFloat(bubbleScale, 0f).apply {
+                    duration = 150
+                    interpolator = android.view.animation.AccelerateInterpolator()
+                    addUpdateListener {
+                        bubbleScale = it.animatedValue as Float
+                        invalidate()
+                    }
+                    addListener(object : android.animation.AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: android.animation.Animator) {
+                            selectedLetter = null
+                            invalidate()
+                        }
+                    })
+                    start()
+                }
                 parent?.requestDisallowInterceptTouchEvent(false)
                 return true
             }

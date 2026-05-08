@@ -90,10 +90,58 @@ class IconGridView @JvmOverloads constructor(
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
         val settings = SpeedApp.instance.settingsRepository
-        // v46: home vuota di default. Niente prefill — l'utente la riempie come preferisce.
-        // Markiamo firstRunDone così il tutorial non riparte.
-        if (settings.firstRunDone.value != true && pageIndex == 0) {
+        // v51: al primo run, prefill la home con app comuni se installate
+        if (settings.firstRunDone.value != true && pageIndex == 0 && pinnedItems.all { it == null }) {
+            // Whitelist app comuni in ordine di preferenza
+            val preferred = listOf(
+                "com.google.android.dialer",          // Telefono
+                "com.android.dialer",
+                "com.android.contacts",                // Contatti
+                "com.google.android.contacts",
+                "com.google.android.apps.messaging",  // Messaggi
+                "com.android.mms",
+                "com.google.android.gm",              // Gmail
+                "com.google.android.youtube",         // YouTube
+                "com.google.android.apps.maps",       // Maps
+                "com.android.chrome",                  // Chrome
+                "com.google.android.chrome",
+                "com.whatsapp",                        // WhatsApp
+                "com.instagram.android",               // Instagram
+                "com.spotify.music",                   // Spotify
+                "com.android.camera",                  // Camera
+                "com.android.camera2",
+                "com.google.android.GoogleCamera"
+            )
+            val installed = apps.associateBy { it.packageName }
+            val toAdd = mutableListOf<AppInfo>()
+            val seen = mutableSetOf<String>()
+            for (pkg in preferred) {
+                if (toAdd.size >= 5) break
+                val app = installed[pkg]
+                if (app != null && app.packageName !in seen) {
+                    toAdd.add(app)
+                    seen.add(app.packageName)
+                }
+            }
+            // Fallback: se whitelist ne riempie meno di 5, completo con app comuni rimanenti
+            if (toAdd.size < 5) {
+                for (app in apps) {
+                    if (toAdd.size >= 5) break
+                    if (app.packageName !in seen && app.packageName != "org.cheipstudio.speedlauncher") {
+                        toAdd.add(app)
+                        seen.add(app.packageName)
+                    }
+                }
+            }
+            for (i in toAdd.indices) {
+                pinnedItems[i] = HomeItem(
+                    key = toAdd[i].key, page = pageIndex,
+                    cellX = i % cols, cellY = i / cols, type = HomeItem.TYPE_APP
+                )
+            }
+            initialized = true
             settings.markFirstRunDone()
+            persist()
         }
         rebuild()
     }
@@ -323,7 +371,7 @@ class IconGridView @JvmOverloads constructor(
     }
 
     private fun checkEdgeForPageChange(x: Float, y: Float) {
-        val edgeZone = width * 0.20f
+        val edgeZone = width * 0.08f  // v50: ridotta
         val pager = findPager() ?: return
         val newTarget = when {
             x < edgeZone && pager.currentPage > 0 -> pager.currentPage - 1
@@ -337,7 +385,7 @@ class IconGridView @JvmOverloads constructor(
         edgeHandler.postDelayed({
             if (pendingEdgeTarget == newTarget) pager.snapToPage(newTarget, animate = true)
             pendingEdgeTarget = -1
-        }, 250L)
+        }, 600L)  // v50: aumentato
     }
 
     private fun cancelEdgeScroll() {

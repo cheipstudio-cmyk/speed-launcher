@@ -53,17 +53,17 @@ class TutorialOverlay @JvmOverloads constructor(
         Step(R.string.tutorial_welcome_title, R.string.tutorial_welcome_desc,
              R.drawable.ic_star_outline, 0xFFFFB4A8.toInt()),
         Step(R.string.tutorial_swipe_title, R.string.tutorial_swipe_desc,
-             R.drawable.ic_swipe_up_tutorial, 0xFF89B4FA.toInt()),
+             R.drawable.ic_gesture, 0xFF89B4FA.toInt()),
         Step(R.string.tutorial_longpress_icon_title, R.string.tutorial_longpress_icon_desc,
-             R.drawable.ic_apps_tutorial, 0xFFA6E3A1.toInt()),
+             R.drawable.ic_apps_outline, 0xFFA6E3A1.toInt()),
         Step(R.string.tutorial_home_long_press_title, R.string.tutorial_home_long_press_desc,
-             R.drawable.ic_home_tutorial, 0xFFCBA6F7.toInt()),
+             R.drawable.ic_home_outline, 0xFFCBA6F7.toInt()),
         Step(R.string.tutorial_settings_title, R.string.tutorial_settings_desc,
-             R.drawable.ic_tune_tutorial, 0xFFFFD68C.toInt()),
+             R.drawable.ic_tune, 0xFFFFD68C.toInt()),
         Step(R.string.tutorial_widget_title, R.string.tutorial_widget_desc,
-             R.drawable.ic_widget_tutorial, 0xFF89B4FA.toInt()),
+             R.drawable.ic_widget, 0xFF89B4FA.toInt()),
         Step(R.string.tutorial_default_title, R.string.tutorial_default_desc,
-             R.drawable.ic_home_tutorial, 0xFFA6E3A1.toInt())
+             R.drawable.ic_home_outline, 0xFFA6E3A1.toInt())
     )
 
     init {
@@ -140,14 +140,13 @@ class TutorialOverlay @JvmOverloads constructor(
 
         // Cerchio icona
         iconCircle = FrameLayout(context).apply {
-            val lp = LinearLayout.LayoutParams((96 * density).toInt(), (96 * density).toInt())
+            val lp = LinearLayout.LayoutParams((84 * density).toInt(), (84 * density).toInt())
             lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.topMargin = (8 * density).toInt()
-            lp.bottomMargin = (28 * density).toInt()
+            lp.bottomMargin = (24 * density).toInt()
             layoutParams = lp
         }
         iconView = ImageView(context).apply {
-            val lp = FrameLayout.LayoutParams((44 * density).toInt(), (44 * density).toInt())
+            val lp = FrameLayout.LayoutParams((40 * density).toInt(), (40 * density).toInt())
             lp.gravity = Gravity.CENTER
             layoutParams = lp
             setColorFilter(0xFF1B1B1F.toInt())
@@ -174,12 +173,10 @@ class TutorialOverlay @JvmOverloads constructor(
             textSize = 15f
             setTextColor(resolveAttrColor(com.google.android.material.R.attr.colorOnSurfaceVariant))
             gravity = Gravity.CENTER
-            setLineSpacing(0f, 1.4f)
+            setLineSpacing(0f, 1.3f)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.leftMargin = (8 * density).toInt()
-            lp.rightMargin = (8 * density).toInt()
             layoutParams = lp
         }
         contentInner.addView(descView)

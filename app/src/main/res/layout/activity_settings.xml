@@ -118,6 +118,37 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ===== TEMA BARRE (v48) ===== -->
+            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_themes" />
+
+            <!-- Tema barra ricerca -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemSearchTheme" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_search_theme" />
+                        <TextView android:id="@+id/searchThemeValue" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Tema dock raccomandate -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDockTheme" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_coral">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_star_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_dock_theme" />
+                        <TextView android:id="@+id/dockThemeValue" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ===== LINGUA (v38) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_language" />
 
@@ -134,8 +165,22 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ===== MATERIAL EXPRESSIVE (v38) ===== -->
+            <!-- ===== SFONDO (v51 ex Material Expressive) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_expressive" />
+
+            <!-- Cambia sfondo -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemChangeWallpaper" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_expressive">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_change_wallpaper" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_change_wallpaper_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -512,6 +557,40 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ===== WIDGET SPEED STATS (v47) ===== -->
+            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_widget" />
+
+            <!-- Tema widget -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetTheme" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_cyan">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_theme" />
+                        <TextView android:id="@+id/widgetThemeValue" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Auto-refresh -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_refresh">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_refresh" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_auto_refresh" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_widget_auto_refresh_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchWidgetAutoRefresh"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ===== SISTEMA ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_general" />
 
@@ -648,71 +727,6 @@
                             android:textColor="?attr/colorError" />
                         <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_reset_everything_sub" />
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ===== TEMA BARRE (v48) ===== -->
-            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_themes" />
-
-            <!-- Tema barra ricerca -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemSearchTheme" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_search_theme" />
-                        <TextView android:id="@+id/searchThemeValue" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Tema dock raccomandate -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDockTheme" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_coral">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_star_outline" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_dock_theme" />
-                        <TextView android:id="@+id/dockThemeValue" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ===== WIDGET SPEED STATS (v47) ===== -->
-            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_widget" />
-
-            <!-- Tema widget -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetTheme" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_cyan">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_theme" />
-                        <TextView android:id="@+id/widgetThemeValue" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Auto-refresh -->
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_refresh">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_refresh" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_auto_refresh" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_widget_auto_refresh_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchWidgetAutoRefresh"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
