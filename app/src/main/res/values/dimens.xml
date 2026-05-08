@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- v101: dimens richiesti da view_home.xml -->
+    <dimen name="home_top_padding">48dp</dimen>
+    <dimen name="home_bottom_padding">24dp</dimen>
+    <dimen name="home_horizontal_padding">12dp</dimen>
+    <dimen name="widget_slot_height">160dp</dimen>
+</resources>
