@@ -169,4 +169,22 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_section_expressive">Material Expressive</string>
     <string name="settings_wallpaper_dim">Duvar kağıdını karart</string>
     <string name="settings_wallpaper_blur">Duvar kağıdı bulanıklığı</string>
+    <string name="menu_manage_pages">Sayfaları yönet</string>
+    <string name="page_manager_title">Sayfaları yönet</string>
+    <string name="page_manager_sub">Boş olmayan sayfalar dahil ana ekran sayfalarını ekle veya kaldır.</string>
+    <string name="page_manager_page_label">Sayfa %1$d</string>
+    <string name="page_manager_add">Sayfa ekle</string>
+    <string name="page_manager_remove">Kaldır</string>
+    <string name="page_manager_confirm_remove_title">Sayfayı kaldır?</string>
+    <string name="page_manager_confirm_remove_msg">Sayfa %1$d ve tüm simgeleri silinecek.</string>
+    <plurals name="page_manager_icons_count">
+        <item quantity="one">%1$d simge</item>
+        <item quantity="other">%1$d simge</item>
+    </plurals>
+    <string name="widget_label">Speed Stats</string>
+    <string name="widget_description">Mevcut RAM, depolama ve pili gösterir.</string>
+    <string name="widget_ram">RAM</string>
+    <string name="widget_storage">Depolama</string>
+    <string name="widget_battery">Pil</string>
+    <string name="widget_charging">Şarj oluyor</string>
 </resources>

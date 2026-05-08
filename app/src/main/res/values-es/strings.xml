@@ -169,4 +169,22 @@ Se usará solo para esta función.</string>
     <string name="settings_section_expressive">Material Expressive</string>
     <string name="settings_wallpaper_dim">Oscurecer fondo</string>
     <string name="settings_wallpaper_blur">Desenfoque del fondo</string>
+    <string name="menu_manage_pages">Gestionar páginas</string>
+    <string name="page_manager_title">Gestionar páginas</string>
+    <string name="page_manager_sub">Añade o elimina páginas de inicio, incluso las que no están vacías.</string>
+    <string name="page_manager_page_label">Página %1$d</string>
+    <string name="page_manager_add">Añadir página</string>
+    <string name="page_manager_remove">Eliminar</string>
+    <string name="page_manager_confirm_remove_title">¿Eliminar la página?</string>
+    <string name="page_manager_confirm_remove_msg">La página %1$d y todos sus iconos se eliminarán.</string>
+    <plurals name="page_manager_icons_count">
+        <item quantity="one">%1$d icono</item>
+        <item quantity="other">%1$d iconos</item>
+    </plurals>
+    <string name="widget_label">Speed Stats</string>
+    <string name="widget_description">Muestra la RAM, el almacenamiento y la batería disponibles.</string>
+    <string name="widget_ram">RAM</string>
+    <string name="widget_storage">Memoria</string>
+    <string name="widget_battery">Batería</string>
+    <string name="widget_charging">Cargando</string>
 </resources>

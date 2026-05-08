@@ -191,4 +191,22 @@ Si userà solo per questa funzione.</string>
     <string name="settings_section_expressive">Material Expressive</string>
     <string name="settings_wallpaper_dim">Oscurazione sfondo</string>
     <string name="settings_wallpaper_blur">Sfocatura sfondo</string>
+    <string name="menu_manage_pages">Gestisci pagine</string>
+    <string name="page_manager_title">Gestisci pagine</string>
+    <string name="page_manager_sub">Aggiungi o rimuovi pagine della home, anche quelle non vuote.</string>
+    <string name="page_manager_page_label">Pagina %1$d</string>
+    <string name="page_manager_add">Aggiungi pagina</string>
+    <string name="page_manager_remove">Rimuovi</string>
+    <string name="page_manager_confirm_remove_title">Rimuovere la pagina?</string>
+    <string name="page_manager_confirm_remove_msg">La pagina %1$d e tutte le sue icone verranno eliminate.</string>
+    <plurals name="page_manager_icons_count">
+        <item quantity="one">%1$d icona</item>
+        <item quantity="other">%1$d icone</item>
+    </plurals>
+    <string name="widget_label">Speed Stats</string>
+    <string name="widget_description">Mostra RAM, archiviazione e batteria disponibili.</string>
+    <string name="widget_ram">RAM</string>
+    <string name="widget_storage">Memoria</string>
+    <string name="widget_battery">Batteria</string>
+    <string name="widget_charging">In carica</string>
 </resources>

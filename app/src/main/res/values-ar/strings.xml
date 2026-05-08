@@ -169,4 +169,22 @@
     <string name="settings_section_expressive">Material Expressive</string>
     <string name="settings_wallpaper_dim">تعتيم الخلفية</string>
     <string name="settings_wallpaper_blur">ضبابية الخلفية</string>
+    <string name="menu_manage_pages">إدارة الصفحات</string>
+    <string name="page_manager_title">إدارة الصفحات</string>
+    <string name="page_manager_sub">أضف أو احذف صفحات الشاشة الرئيسية، حتى غير الفارغة.</string>
+    <string name="page_manager_page_label">صفحة %1$d</string>
+    <string name="page_manager_add">إضافة صفحة</string>
+    <string name="page_manager_remove">حذف</string>
+    <string name="page_manager_confirm_remove_title">حذف هذه الصفحة؟</string>
+    <string name="page_manager_confirm_remove_msg">سيتم حذف الصفحة %1$d وجميع أيقوناتها.</string>
+    <plurals name="page_manager_icons_count">
+        <item quantity="one">أيقونة %1$d</item>
+        <item quantity="other">%1$d أيقونات</item>
+    </plurals>
+    <string name="widget_label">Speed Stats</string>
+    <string name="widget_description">يعرض ذاكرة الوصول العشوائي والتخزين والبطارية المتاحة.</string>
+    <string name="widget_ram">RAM</string>
+    <string name="widget_storage">التخزين</string>
+    <string name="widget_battery">البطارية</string>
+    <string name="widget_charging">قيد الشحن</string>
 </resources>

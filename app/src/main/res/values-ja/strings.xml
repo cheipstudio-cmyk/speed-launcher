@@ -169,4 +169,22 @@
     <string name="settings_section_expressive">Material Expressive</string>
     <string name="settings_wallpaper_dim">壁紙の暗転</string>
     <string name="settings_wallpaper_blur">壁紙のぼかし</string>
+    <string name="menu_manage_pages">ページを管理</string>
+    <string name="page_manager_title">ページを管理</string>
+    <string name="page_manager_sub">空でないページも含め、ホームページを追加または削除します。</string>
+    <string name="page_manager_page_label">ページ %1$d</string>
+    <string name="page_manager_add">ページを追加</string>
+    <string name="page_manager_remove">削除</string>
+    <string name="page_manager_confirm_remove_title">このページを削除しますか？</string>
+    <string name="page_manager_confirm_remove_msg">ページ %1$d とそのすべてのアイコンが削除されます。</string>
+    <plurals name="page_manager_icons_count">
+        <item quantity="one">%1$d アイコン</item>
+        <item quantity="other">%1$d アイコン</item>
+    </plurals>
+    <string name="widget_label">Speed Stats</string>
+    <string name="widget_description">利用可能なRAM、ストレージ、バッテリーを表示します。</string>
+    <string name="widget_ram">RAM</string>
+    <string name="widget_storage">ストレージ</string>
+    <string name="widget_battery">バッテリー</string>
+    <string name="widget_charging">充電中</string>
 </resources>

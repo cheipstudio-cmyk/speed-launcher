@@ -63,14 +63,26 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private var dragFired = false
 
     private val ARM_DELAY = 500L
-    private val MENU_DELAY = 2000L
+    private val MENU_DELAY = 1500L  // v44: ridotto da 2000ms
 
     private val armRunnable = Runnable {
         if (pressing && !menuFired && !dragFired) {
             armed = true
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            scaleX = 0.92f; scaleY = 0.92f  // feedback visivo: armato
-            animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+            // v44: drag IMMEDIATO al tick della vibrazione (no più attesa movimento)
+            val a = app
+            if (a != null && dragOriginId.isNotEmpty()) {
+                dragFired = true
+                handler.removeCallbacks(menuRunnable)  // mentre draghi, no menu
+                val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
+                // indicatore visivo: la cella originale appare "sollevata" mentre draggi
+                showDragIndicator(true)
+                startDragAndDrop(data, DragIndicatorShadow(this), a.key, 0)
+            } else {
+                // fallback: se non posso draggare, tieni solo l'effetto pulse
+                scaleX = 0.92f; scaleY = 0.92f
+                animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+            }
         }
     }
 
@@ -110,6 +122,17 @@ class IconCellView(context: Context) : LinearLayout(context) {
         }
         addView(labelView)
 
+        // v44: ripristina alpha alla fine del drag
+        setOnDragListener { _, ev ->
+            when (ev.action) {
+                android.view.DragEvent.ACTION_DRAG_ENDED -> {
+                    showDragIndicator(false)
+                    false
+                }
+                else -> false
+            }
+        }
+
         setWillNotDraw(false)
         val s = SpeedApp.instance.settingsRepository
         dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
@@ -132,15 +155,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(event.x - downX)
                 val dy = abs(event.y - downY)
-                if (armed && !dragFired && !menuFired) {
-                    // dopo armed: serve movimento ampio (dragSlop) per evitare di rubare il menu
-                    if ((dx > dragSlop || dy > dragSlop) && dragOriginId.isNotEmpty()) {
-                        dragFired = true
-                        handler.removeCallbacks(menuRunnable)
-                        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a.key}")
-                        startDragAndDrop(data, View.DragShadowBuilder(this), a.key, 0)
-                    }
-                } else if (!armed && (dx > moveSlop || dy > moveSlop)) {
+                // v44: il drag parte direttamente da armRunnable, qui solo cancello se troppo movimento prima dell\'arm
+                if (!armed && (dx > moveSlop || dy > moveSlop)) {
                     // movimento prima dell'arm = è uno scroll, cancella tutto
                     cancelAll()
                 }
@@ -167,9 +183,50 @@ class IconCellView(context: Context) : LinearLayout(context) {
 
     private fun cancelAll() {
         pressing = false; armed = false
+        showDragIndicator(false)
         handler.removeCallbacks(armRunnable)
         handler.removeCallbacks(menuRunnable)
     }
+
+    /**
+     * v44: indicatore visivo durante drag.
+     * Quando ON: alpha ridotto, leggermente più piccolo (la cella "fantasma" del posto originale).
+     * Quando OFF: ripristina.
+     */
+    private fun showDragIndicator(on: Boolean) {
+        if (on) {
+            animate().alpha(0.35f).scaleX(0.92f).scaleY(0.92f)
+                .setDuration(140)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
+        } else {
+            animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(140)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
+        }
+    }
+
+    /**
+     * v44: shadow custom durante drag — disegna l\'icona ingrandita (1.1x) con leggero glow.
+     * Sostituisce DragShadowBuilder default che è solo grigio piatto.
+     */
+    private class DragIndicatorShadow(view: View) : View.DragShadowBuilder(view) {
+        private val scale = 1.15f
+        override fun onProvideShadowMetrics(outShadowSize: android.graphics.Point, outShadowTouchPoint: android.graphics.Point) {
+            val w = (view.width * scale).toInt()
+            val h = (view.height * scale).toInt()
+            outShadowSize.set(w, h)
+            outShadowTouchPoint.set(w / 2, h / 2)
+        }
+        override fun onDrawShadow(canvas: android.graphics.Canvas) {
+            canvas.save()
+            canvas.scale(scale, scale)
+            view.draw(canvas)
+            canvas.restore()
+        }
+    }
+
 
     fun bind(app: AppInfo) {
         this.app = app

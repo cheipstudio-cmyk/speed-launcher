@@ -74,10 +74,36 @@
             </intent-filter>
         </receiver>
 
+        <!-- v31: Accessibility service per spegnere lo schermo senza forzare il PIN -->
+        <service
+            android:name=".SpeedAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/speed_accessibility_config" />
+        </service>
+
         <receiver
             android:name="androidx.appwidget.AppWidgetHostView"
             tools:node="remove" />
 
+        <!-- v44: widget Speed Stats 2x4 -->
+        <receiver
+            android:name=".widgets.SpeedStatsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.cheipstudio.speedlauncher.WIDGET_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_speed_stats_info" />
+        </receiver>
     </application>
 
 </manifest>
