@@ -26,22 +26,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # v93: usa Gradle 8.4 installato dal sistema (non dal wrapper).
-      # Il wrapper del repo è corrotto (jar punta a Gradle 9.4.1 anche
-      # se properties dice 8.4). Bypassiamo il wrapper completamente.
-      - name: Setup Gradle 8.4
+      # v97: scarica Gradle 8.4, poi usa il SUO `gradle wrapper` task
+      # per riscrivere il wrapper del progetto (jar + properties) in modo
+      # corretto. Poi continua con ./gradlew normale.
+      - name: Setup Gradle 8.4 & regenerate wrapper
         run: |
-          # Scarica Gradle 8.4 direttamente
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/gradle-install
-          # Aggiungo al PATH
-          echo "/opt/gradle-install/gradle-8.4/bin" >> $GITHUB_PATH
+          # Rigenera il wrapper del progetto con Gradle 8.4
+          /opt/gradle-install/gradle-8.4/bin/gradle wrapper --gradle-version=8.4 --distribution-type=bin
+          # Verifica
+          cat gradle/wrapper/gradle-wrapper.properties
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
 
       - name: Verify Gradle version
-        run: gradle --version
+        run: ./gradlew --version
 
       - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Rename APK
         run: |
