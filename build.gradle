@@ -1,0 +1,9 @@
+// Top-level build file (v99)
+// I plugin sono ora dichiarati in settings.gradle (pluginManagement)
+allprojects {
+    // Repositories sono in settings.gradle (RepositoriesMode.PREFER_SETTINGS)
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

@@ -69,13 +69,42 @@ class IconGridView @JvmOverloads constructor(
 
     fun applyGridSize(newCols: Int, newRows: Int) {
         if (newCols == cols && newRows == rows) return
-        val old = pinnedItems.filterNotNull()
+        // v100: salvo gli items con la loro posizione originale (cellX/cellY)
+        val oldItems = pinnedItems.toList()
+        val oldCols = cols
         cols = newCols; rows = newRows
         columnCount = cols; rowCount = rows
         pinnedItems = MutableList(cols * rows) { null }
-        for ((i, item) in old.withIndex()) if (i < cols * rows) {
-            pinnedItems[i] = item.copy(cellX = i % cols, cellY = i / cols)
+
+        // v100: tento di preservare le posizioni originali quando possibile
+        // Solo se l\'item entra ancora nella nuova griglia (cellX < newCols, cellY < newRows)
+        val orphans = mutableListOf<HomeItem>()
+        for (item in oldItems) {
+            if (item == null) continue
+            if (item.cellX < newCols && item.cellY < newRows) {
+                val idx = item.cellY * newCols + item.cellX
+                if (idx in pinnedItems.indices && pinnedItems[idx] == null) {
+                    pinnedItems[idx] = item
+                } else {
+                    orphans.add(item)
+                }
+            } else {
+                orphans.add(item)
+            }
         }
+
+        // Item che non entrano più nella griglia: riempio gli slot vuoti rimasti
+        for (item in orphans) {
+            val emptyIdx = pinnedItems.indexOf(null)
+            if (emptyIdx >= 0) {
+                pinnedItems[emptyIdx] = item.copy(
+                    cellX = emptyIdx % newCols,
+                    cellY = emptyIdx / newCols
+                )
+            }
+            // Se non c\'è più spazio l\'item viene perso (raro: succede solo riducendo griglia molto)
+        }
+
         persist(); rebuild()
     }
 
