@@ -431,7 +431,7 @@ class IconGridView @JvmOverloads constructor(
     }
 
     private fun checkEdgeForPageChange(x: Float, y: Float) {
-        val edgeZone = width * 0.08f  // v50: ridotta
+        val edgeZone = width * 0.12f  // v64: 12% — via di mezzo tra 20% (troppo larga) e 8% (troppo stretta)
         val pager = findPager() ?: return
         val newTarget = when {
             x < edgeZone && pager.currentPage > 0 -> pager.currentPage - 1
@@ -445,7 +445,7 @@ class IconGridView @JvmOverloads constructor(
         edgeHandler.postDelayed({
             if (pendingEdgeTarget == newTarget) pager.snapToPage(newTarget, animate = true)
             pendingEdgeTarget = -1
-        }, 600L)  // v50: aumentato
+        }, 400L)  // v64: 400ms — abbastanza per drag fini, non troppo lento
     }
 
     private fun cancelEdgeScroll() {
