@@ -57,7 +57,11 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/SpeedLauncher-${{ github.ref_name }}.apk
+          # v112: il file ha nome custom (SpeedLauncher-VERSION-debug.apk), uso wildcard
+          APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" -type f | head -1)
+          echo "APK trovato: $APK_PATH"
+          cp "$APK_PATH" release/SpeedLauncher-${{ github.ref_name }}.apk
+          ls -la release/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
