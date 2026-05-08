@@ -45,12 +45,8 @@ class SettingsActivity : AppCompatActivity() {
         val res = BackupManager.importFromJson(this, content)
         if (res.isSuccess) {
             Toast.makeText(this, R.string.backup_imported_ok, Toast.LENGTH_LONG).show()
-            // restart per applicare
-            val i = Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            startActivity(i)
-            finish()
+            // v72: force restart per applicare il backup
+            forceRestartApp()
         } else {
             val msg = res.exceptionOrNull()?.message ?: getString(R.string.backup_import_fail)
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
@@ -88,28 +84,11 @@ class SettingsActivity : AppCompatActivity() {
             binding.appIconInfo.setImageDrawable(packageManager.getApplicationIcon(packageName))
         } catch (_: Throwable) {}
 
-        when {
-            settings.gridCols.value == 4 && settings.gridRows.value == 4 -> binding.gridRadio4x4.isChecked = true
-            settings.gridCols.value == 4 && settings.gridRows.value == 5 -> binding.gridRadio4x5.isChecked = true
-            settings.gridCols.value == 4 && settings.gridRows.value == 6 -> binding.gridRadio4x6.isChecked = true
-            settings.gridCols.value == 5 && settings.gridRows.value == 5 -> binding.gridRadio5x5.isChecked = true
-            settings.gridCols.value == 5 && settings.gridRows.value == 6 -> binding.gridRadio5x6.isChecked = true
-            settings.gridCols.value == 6 && settings.gridRows.value == 5 -> binding.gridRadio6x5.isChecked = true
-            settings.gridCols.value == 6 && settings.gridRows.value == 6 -> binding.gridRadio6x6.isChecked = true
-        }
+        // v71: Grid → modal
+        binding.itemGridSize.setOnClickListener { showGridSizeDialog() }
+        settings.gridCols.observe(this) { updateGridLabel() }
+        settings.gridRows.observe(this) { updateGridLabel() }
         updateGridLabel()
-        binding.gridRadioGroup.setOnCheckedChangeListener { _, id ->
-            when (id) {
-                R.id.gridRadio4x4 -> settings.setGrid(4, 4)
-                R.id.gridRadio4x5 -> settings.setGrid(4, 5)
-                R.id.gridRadio4x6 -> settings.setGrid(4, 6)
-                R.id.gridRadio5x5 -> settings.setGrid(5, 5)
-                R.id.gridRadio5x6 -> settings.setGrid(5, 6)
-                R.id.gridRadio6x5 -> settings.setGrid(6, 5)
-                R.id.gridRadio6x6 -> settings.setGrid(6, 6)
-            }
-            updateGridLabel()
-        }
         binding.itemIconShape.setOnClickListener { showIconShapeDialog() }
         binding.itemAnimStyle.setOnClickListener { showAnimStyleDialog() }
 
@@ -118,16 +97,25 @@ class SettingsActivity : AppCompatActivity() {
         binding.itemDrawerLayout.setOnClickListener { showDrawerLayoutDialog() }
         binding.itemFolderBg.setOnClickListener { showFolderBgDialog() }
         binding.itemBadgeMode.setOnClickListener { showBadgeModeDialog() }
-        binding.itemSearchStyle.setOnClickListener { showSearchStyleDialog() }
 
         binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
         binding.switchShowWidget.setOnCheckedChangeListener { _, c -> settings.setShowWidgetSlot(c) }
+        // v72: enabled/disabled delle card widget dipendenti
+        settings.showWidgetSlot.observe(this) { enabled ->
+            applyWidgetDependentEnabled(enabled == true)
+        }
+        applyWidgetDependentEnabled(settings.showWidgetSlot.value == true)
 
         // v63: toggle "mostra barra ricerca"
         binding.switchShowSearchbar.isChecked = settings.showSearchBar.value != false
         binding.switchShowSearchbar.setOnCheckedChangeListener { _, isChecked ->
             settings.setShowSearchBar(isChecked)
         }
+        // v71: enabled/disabled delle voci dipendenti dalla searchbar
+        settings.showSearchBar.observe(this) { enabled ->
+            applySearchBarDependentEnabled(enabled != false)
+        }
+        applySearchBarDependentEnabled(settings.showSearchBar.value != false)
         binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
         binding.switchHaptic.setOnCheckedChangeListener { _, c -> settings.setHapticEnabled(c) }
 
@@ -135,7 +123,6 @@ class SettingsActivity : AppCompatActivity() {
         settings.iconShape.observe(this) { updateShapeLabel() }
         settings.animationStyle.observe(this) { updateAnimLabel() }
         settings.searchMode.observe(this) { updateSearchModeLabel() }
-        settings.searchBarStyle.observe(this) { updateStyleLabel() }
         settings.drawerLayout.observe(this) { updateDrawerLayoutLabel() }
         settings.folderBgStyle.observe(this) { updateFolderBgLabel() }
         settings.notificationBadgeMode.observe(this) { updateBadgeLabel() }
@@ -150,7 +137,6 @@ class SettingsActivity : AppCompatActivity() {
         updateShapeLabel()
         updateAnimLabel()
         updateSearchModeLabel()
-        updateStyleLabel()
         updateDrawerLayoutLabel()
         updateFolderBgLabel()
         updateBadgeLabel()
@@ -169,7 +155,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle(R.string.settings_reset_layout)
                 .setMessage(R.string.settings_reset_layout_msg)
                 .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
-                    settings.resetHomeLayout(); finish()
+                    settings.resetHomeLayout(); forceRestartApp()
                 }
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
@@ -178,7 +164,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle(R.string.settings_reset_settings)
                 .setMessage(R.string.settings_reset_settings_msg)
                 .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
-                    settings.resetSettings(); finish()
+                    settings.resetSettings(); forceRestartApp()
                 }
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
@@ -193,7 +179,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
-        binding.itemShowTutorial.setOnClickListener { settings.resetTutorial(); finish() }
+        binding.itemShowTutorial.setOnClickListener { settings.resetTutorial(); forceRestartApp() }
 
         binding.itemDefaultLauncher.setOnClickListener {
             try { startActivity(Intent(AndroidSettings.ACTION_HOME_SETTINGS)) } catch (_: Throwable) {}
@@ -590,16 +576,6 @@ class SettingsActivity : AppCompatActivity() {
         binding.folderBgLabel.text = text
     }
 
-    private fun updateStyleLabel() {
-        val text = when (settings.searchBarStyle.value) {
-            SettingsRepository.STYLE_TRANSPARENT -> getString(R.string.style_transparent)
-            SettingsRepository.STYLE_DARK -> getString(R.string.style_dark)
-            SettingsRepository.STYLE_LIGHT -> getString(R.string.style_light)
-            else -> getString(R.string.style_system)
-        }
-        binding.styleValueLabel.text = text
-    }
-
     private fun updateSearchModeLabel() {
         val v = settings.searchMode.value
         binding.searchModeLabel.text = when (v) {
@@ -618,6 +594,49 @@ class SettingsActivity : AppCompatActivity() {
             SettingsRepository.DRAWER_LIST -> getString(R.string.drawer_list)
             else -> getString(R.string.drawer_list)
         }
+    }
+
+
+    private fun showGridSizeDialog() {
+        val cols = settings.gridCols.value ?: 4
+        val rows = settings.gridRows.value ?: 5
+        val current = "${cols}x${rows}"
+        val options = listOf("4x4","4x5","4x6","5x5","5x6","6x5","6x6")
+        val labels = options.map {
+            val parts = it.split("x")
+            "${parts[0]} × ${parts[1]}"
+        }.toTypedArray()
+        val sel = options.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(R.string.settings_grid_size)
+            .setSingleChoiceItems(labels, sel) { dialog, which ->
+                val parts = options[which].split("x")
+                settings.setGrid(parts[0].toInt(), parts[1].toInt())
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+
+    /** v71: abilita/disabilita visivamente le card che dipendono dalla searchbar */
+    private fun applySearchBarDependentEnabled(enabled: Boolean) {
+        binding.itemSearchMode.isEnabled = enabled
+        binding.itemSearchMode.alpha = if (enabled) 1.0f else 0.45f
+        binding.itemSearchTheme.isEnabled = enabled
+        binding.itemSearchTheme.alpha = if (enabled) 1.0f else 0.45f
+    }
+
+    /** v72: abilita/disabilita visivamente le card widget dipendenti dal toggle "Mostra widget" */
+    private fun applyWidgetDependentEnabled(enabled: Boolean) {
+        binding.itemWidgetTheme.isEnabled = enabled
+        binding.itemWidgetTheme.alpha = if (enabled) 1.0f else 0.45f
+        binding.itemWidgetAutoRefresh.isEnabled = enabled
+        binding.itemWidgetAutoRefresh.alpha = if (enabled) 1.0f else 0.45f
+        binding.switchWidgetAutoRefresh.isEnabled = enabled
     }
 
     // ============================================================
@@ -706,23 +725,6 @@ class SettingsActivity : AppCompatActivity() {
         ) { settings.setSearchMode(it) }
     }
 
-    private fun showSearchStyleDialog() {
-        showSelectionDialog(
-            R.string.settings_searchbar_style,
-            arrayOf(
-                getString(R.string.style_system),
-                getString(R.string.style_transparent),
-                getString(R.string.style_dark),
-                getString(R.string.style_light)
-            ),
-            arrayOf(
-                SettingsRepository.STYLE_SYSTEM,
-                SettingsRepository.STYLE_TRANSPARENT,
-                SettingsRepository.STYLE_DARK,
-                SettingsRepository.STYLE_LIGHT
-            ),
-            settings.searchBarStyle.value ?: SettingsRepository.STYLE_SYSTEM
-        ) { settings.setSearchBarStyle(it) }
     }
 
     private fun showDrawerLayoutDialog() {
