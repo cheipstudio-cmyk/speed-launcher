@@ -60,11 +60,20 @@ class RecommendedView @JvmOverloads constructor(
         }
         card.addView(row)
         addView(card)
-        // v122: long press sull'area card → menu modifica raccomandate
-        card.setOnLongClickListener {
+    }
+
+    // v123: long press intercettato a livello di dispatchTouchEvent così
+    // viene rilevato anche se le icone child consumano i touch.
+    private val longPressDetector = android.view.GestureDetector(context, object : android.view.GestureDetector.SimpleOnGestureListener() {
+        override fun onLongPress(e: android.view.MotionEvent) {
             onContainerLongPress?.invoke()
-            onContainerLongPress != null
         }
+    })
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        // Passo l'evento al detector (non consumo) e poi lascio passare normalmente
+        longPressDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun resolveAttrColor(attr: Int): Int {

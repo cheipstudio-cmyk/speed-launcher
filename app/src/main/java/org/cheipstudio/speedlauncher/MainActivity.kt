@@ -274,34 +274,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openDrawer() {
-        // v59+v122: gestione robusta drawer, evita stati zombie
-        // Solo se è REALMENTE visibile blocco il nuovo open
-        if (drawerSheet?.isVisible == true && drawerSheet?.isResumed == true) return
-        // Se c'è uno stato intermedio (added ma non visibile), forzo cleanup
+        // v59: rimuovo qualsiasi fragment "drawer" precedente per prevenire doppi
+        if (drawerSheet?.isAdded == true || drawerSheet?.isVisible == true) return
         cleanupOldDrawer()
-        drawerSheet = AppDrawerSheet().also { sheet ->
-            sheet.onAppLongPress = { app -> openAppActions(app) }
-            // v122: quando il drawer si chiude, azzero il riferimento
-            sheet.onDismissCallback = { 
-                if (drawerSheet === sheet) drawerSheet = null
-            }
-            try { sheet.show(supportFragmentManager, "drawer") } catch (_: Throwable) {
-                drawerSheet = null
-                // Riprovo dopo 100ms
-                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    try {
-                        cleanupOldDrawer()
-                        AppDrawerSheet().also { retry ->
-                            retry.onAppLongPress = { app -> openAppActions(app) }
-                            retry.onDismissCallback = { 
-                                if (drawerSheet === retry) drawerSheet = null
-                            }
-                            retry.show(supportFragmentManager, "drawer")
-                            drawerSheet = retry
-                        }
-                    } catch (_: Throwable) {}
-                }, 100)
-            }
+        drawerSheet = AppDrawerSheet().also {
+            it.onAppLongPress = { app -> openAppActions(app) }
+            // v123: callback per resettare drawerSheet quando si chiude (evita stati zombie)
+            it.onDismissCallback = { drawerSheet = null }
+            try { it.show(supportFragmentManager, "drawer") } catch (_: Throwable) {}
         }
     }
 
