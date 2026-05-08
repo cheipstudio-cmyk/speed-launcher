@@ -36,13 +36,18 @@ jobs:
           cat gradle/wrapper/gradle-wrapper.properties
 
       # v102: genera debug.keystore (referenziato da app/build.gradle)
-      - name: Generate debug keystore
+      - name: Generate debug keystore (only if missing)
         run: |
-          keytool -genkey -v -keystore debug.keystore \
-            -storepass android -alias androiddebugkey \
-            -keypass android -keyalg RSA -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          if [ ! -f debug.keystore ]; then
+            echo "Generating new debug.keystore"
+            keytool -genkey -v -keystore debug.keystore \
+              -storepass android -alias androiddebugkey \
+              -keypass android -keyalg RSA -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          else
+            echo "Using existing debug.keystore from repo"
+          fi
           ls -la debug.keystore
 
       - name: Grant execute permission

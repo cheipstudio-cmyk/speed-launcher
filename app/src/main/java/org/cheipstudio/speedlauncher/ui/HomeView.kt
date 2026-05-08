@@ -635,9 +635,12 @@ class HomeView @JvmOverloads constructor(
         try { binding.recommendedRowBottom.refreshNotificationBadges() } catch (_: Throwable) {}
     }
 
-    /** v63: applica visibilità della barra di ricerca secondo il toggle */
+    /** v63: applica visibilità della barra di ricerca secondo il toggle.
+     *  v114: anche nascosta se drawer è disabilitato (la barra apre il drawer). */
     fun applySearchBarVisibility() {
-        val show = SpeedApp.instance.settingsRepository.showSearchBar.value != false
+        val s = SpeedApp.instance.settingsRepository
+        val drawerOn = s.drawerEnabled.value != false
+        val show = drawerOn && s.showSearchBar.value != false
         binding.searchBar.visibility = if (show) View.VISIBLE else View.GONE
     }
 

@@ -82,6 +82,10 @@ class MainActivity : AppCompatActivity() {
         SpeedApp.instance.settingsRepository.showSearchBar.observe(this) {
             binding.homeView.applySearchBarVisibility()
         }
+        // v114: osservo toggle "drawer abilitato" per aggiornare barra
+        SpeedApp.instance.settingsRepository.drawerEnabled.observe(this) {
+            binding.homeView.applySearchBarVisibility()
+        }
         SpeedApp.instance.appRepository.apps.observe(this) { binding.homeView.refreshApps(it) }
 
         binding.homeView.onSwipeUp = { openDrawer() }
