@@ -214,6 +214,10 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 behavior.skipCollapsed = true
                 behavior.isHideable = true
                 behavior.halfExpandedRatio = 0.0001f  // niente half-expanded
+                // v78: skippa l'animazione di entry PRIMA di settare lo state.
+                // setStateInternal non triggera ViewDragHelper (no settle 600ms),
+                // poi behavior.state già combacia → niente animazione, drawer immediatamente aperto.
+                skipEntryAnimation(behavior)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
 
@@ -224,8 +228,6 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 // → quando l\'utente fa drag down, la chiusura diventa istantanea.
                 // Onestà: questo è fragile e potrebbe rompersi con update di Material lib.
                 applyFastSheet(behavior)
-                // v76: skippa l\'animazione di entry (no slide-up lento)
-                it.post { skipEntryAnimation(behavior) }
 
                 // v58: applica tema drawer — usa ColorDrawable che sovrascrive il default Material
                 val theme = SpeedApp.instance.settingsRepository.drawerTheme.value ?: "system"
@@ -283,8 +285,19 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                     }
                     private var hasReachedExpanded = false
                     private var dismissedEarly = false
+                    private val callbackStartTime = System.currentTimeMillis()
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
                         // slideOffset: -1 (hidden) → 0 (collapsed) → 1 (expanded)
+                        // v78: grace period — ignoro onSlide nei primi 250ms post-show
+                        // per evitare race condition con setStateInternal che ancora deve stabilizzarsi.
+                        val elapsedMs = System.currentTimeMillis() - callbackStartTime
+                        if (elapsedMs < 250) {
+                            // Forzo aspetto "completamente aperto" per niente flicker
+                            _binding?.recycler?.alpha = 1f
+                            _binding?.searchInput?.alpha = 1f
+                            _binding?.recommendedRow?.applyDrawerSlide(1f)
+                            return
+                        }
                         val alpha = ((slideOffset + 1f).coerceIn(0f, 1f))
                         _binding?.recycler?.alpha = alpha
                         _binding?.searchInput?.alpha = alpha

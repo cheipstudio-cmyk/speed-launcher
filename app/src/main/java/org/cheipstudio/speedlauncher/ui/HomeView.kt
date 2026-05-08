@@ -450,6 +450,27 @@ class HomeView @JvmOverloads constructor(
         }
     }
 
+    /**
+     * v79: pulisce eventuali residui visivi dopo return dal multitasking.
+     * Quando l'utente chiude tutte le app, Android ripristina il launcher snapshot
+     * salvato — può lasciare overlay/alpha non resettati. Questo metodo forza tutto
+     * allo stato "home pulita" in modo immediato.
+     */
+    fun cleanupGhostState() {
+        // 1. Reset fade overlay (può rimanere visibile se swipe up era stato interrotto)
+        fadeOverlay.animate().cancel()
+        fadeOverlay.alpha = 0f
+        // 2. Reset eventuali transformazioni residue su pages e search bar
+        binding.searchBar.alpha = 1f
+        binding.searchBar.translationY = 0f
+        binding.searchBar.scaleX = 1f
+        binding.searchBar.scaleY = 1f
+        // 3. Force redraw pulito dell'intero launcher
+        invalidate()
+        post { invalidate() }
+    }
+
+
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         val activity = context as? androidx.fragment.app.FragmentActivity
         if (activity != null) {

@@ -232,6 +232,8 @@ class MainActivity : AppCompatActivity() {
         // v48: re-apply temi (in caso cambiati da settings)
         binding.homeView.applySearchTheme()
         binding.homeView.applyDockTheme()
+        // v79: cleanup ghost residui dopo return dal multitasking
+        binding.homeView.cleanupGhostState()
     }
 
     override fun onPause() {
