@@ -89,6 +89,38 @@ class IconGridView @JvmOverloads constructor(
         rebuild()
     }
 
+    /** v61: rimuove il button memory cleaner da questa pagina (se presente) */
+    fun removeMemoryCleaner(): Boolean {
+        var changed = false
+        for (i in pinnedItems.indices) {
+            val item = pinnedItems[i]
+            if (item?.type == HomeItem.TYPE_TOOL && item.key == HomeItem.TOOL_MEMORY_CLEANER) {
+                pinnedItems[i] = null
+                changed = true
+            }
+        }
+        if (changed) { persist(); rebuild() }
+        return changed
+    }
+
+    /** v61: aggiunge il button memory cleaner nella prima cella libera (se non già presente) */
+    fun addMemoryCleanerIfMissing(): Boolean {
+        // Già presente?
+        if (pinnedItems.any { it?.type == HomeItem.TYPE_TOOL && it.key == HomeItem.TOOL_MEMORY_CLEANER }) {
+            return false
+        }
+        val emptyIdx = pinnedItems.indexOfFirst { it == null }
+        if (emptyIdx < 0) return false
+        pinnedItems[emptyIdx] = HomeItem(
+            key = HomeItem.TOOL_MEMORY_CLEANER,
+            page = pageIndex,
+            cellX = emptyIdx % cols, cellY = emptyIdx / cols,
+            type = HomeItem.TYPE_TOOL
+        )
+        persist(); rebuild()
+        return true
+    }
+
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
         val settings = SpeedApp.instance.settingsRepository

@@ -535,6 +535,25 @@ class HomeView @JvmOverloads constructor(
         }
     }
     fun refreshDots() { for (page in pages) page.invalidate() }
+
+    /** v61: applica toggle pulitore memoria — aggiunge/rimuove il button da tutte le pagine */
+    fun applyMemoryCleanerToggle(enabled: Boolean) {
+        if (enabled) {
+            // Lo metto solo nella pagina 0 (default), se non c'è già su nessuna pagina
+            val alreadyPresent = pages.any { p ->
+                // Controllo via layoutStore — pinnedItems non è esposto
+                layoutStore.loadPage(p.pageIndex).any {
+                    it.type == HomeItem.TYPE_TOOL && it.key == HomeItem.TOOL_MEMORY_CLEANER
+                }
+            }
+            if (!alreadyPresent && pages.isNotEmpty()) {
+                pages[0].addMemoryCleanerIfMissing()
+            }
+        } else {
+            // Lo rimuovo da TUTTE le pagine
+            for (p in pages) p.removeMemoryCleaner()
+        }
+    }
     fun pinApp(app: AppInfo): Boolean {
         for (page in pages) if (page.pinApp(app)) { maybeCreateNextPage(); return true }
         ensurePageExists(pages.size)

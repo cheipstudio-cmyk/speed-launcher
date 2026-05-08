@@ -67,6 +67,10 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.attachWidgetHost(widgetHostController)
 
         SpeedApp.instance.notificationCounter.counts.observe(this) { binding.homeView.refreshDots() }
+        // v61: osservo toggle pulitore memoria per aggiungere/rimuovere il button razzo dalla home
+        SpeedApp.instance.settingsRepository.memoryCleanerEnabled.observe(this) { enabled ->
+            binding.homeView.applyMemoryCleanerToggle(enabled == true)
+        }
         SpeedApp.instance.appRepository.apps.observe(this) { binding.homeView.refreshApps(it) }
 
         binding.homeView.onSwipeUp = { openDrawer() }
