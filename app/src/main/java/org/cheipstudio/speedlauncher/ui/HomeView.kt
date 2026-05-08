@@ -69,7 +69,13 @@ class HomeView @JvmOverloads constructor(
     private val swipeThreshold = resources.displayMetrics.density * 22f  // v46: più sensibile
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent): Boolean = true
+        override fun onDown(e: MotionEvent): Boolean {
+            // v120: NON consumo onDown se drawer è disabilitato e nessun gesto verticale è abilitato
+            // (evita glitch e refresh inutili della home quando l'utente fa swipe a vuoto)
+            val drawerOn = settings.drawerEnabled.value != false
+            val swipeDownOn = settings.swipeDownNotifications.value == true
+            return drawerOn || swipeDownOn
+        }
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             // v77: dedup vibrazione — usa flag swipeFireVibrated, una sola vibrazione per gesto.
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
@@ -79,6 +85,8 @@ class HomeView @JvmOverloads constructor(
                     onSwipeUp?.invoke()
                     return true
                 }
+                // v120: drawer disabilitato → ignoro fling up senza consumare
+                return false
             }
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
@@ -422,16 +430,21 @@ class HomeView @JvmOverloads constructor(
 
         targetGrid.handleIncomingDrop(key, fromGrid, fromIdx, targetIdx)
         maybeCreateNextPage()
-        // v88: snap alla pagina di destinazione + refresh indicator forzato.
-        // Prima, droppando su una nuova pagina, l\'utente non la vedeva
-        // finché non scrollava manualmente.
+        // v88+v120: snap alla pagina di destinazione + refresh COMPLETO
+        // (icona spariva visivamente fino a quando si tornava alla home)
         post {
             trimEmptyPages()
             updatePageIndicator()
             if (binding.pagedHome.currentPage != targetPage) {
                 binding.pagedHome.snapToPage(targetPage, true)
             }
-            // Refresh visuale grid per far apparire subito l\'icona droppata
+            // v120: refresh completo apps su TUTTE le pagine — non solo invalidate
+            // perché l'icona droppata in pagina vuota non comparirà finché non
+            // chiamiamo refresh con la lista delle app.
+            val allApps = SpeedApp.instance.appRepository.apps.value
+            if (allApps != null) {
+                pages.forEach { grid -> grid.refresh(allApps) }
+            }
             targetGrid.invalidate()
             targetGrid.requestLayout()
         }

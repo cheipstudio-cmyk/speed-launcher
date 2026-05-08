@@ -82,6 +82,22 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v88: Auto-add nuove app installate -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemAutoAddNewApps" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_auto_add_new_apps" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_auto_add_new_apps_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchAutoAddNewApps"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- ===== ASPETTO ICONE ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_ai" />
@@ -159,7 +175,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-
             <!-- Tema dock raccomandate -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDockTheme" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
@@ -173,8 +188,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-
 
             <!-- ===== LINGUA (v38) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_appearance" />
@@ -339,23 +352,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- v88: Auto-add nuove app installate -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemAutoAddNewApps" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_auto_add_new_apps" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_auto_add_new_apps_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchAutoAddNewApps"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerLayout" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
@@ -440,13 +436,10 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-
-
             <!-- Tema barra ricerca -->
 
             <!-- ===== GESTI ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_widget" />
-
 
             <!-- Tema widget -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetTheme" style="@style/PixelCard">

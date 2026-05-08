@@ -69,19 +69,37 @@ jobs:
           ls -la release/
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release/SpeedLauncher-${{ github.ref_name }}.apk
-          tag_name: ${{ github.ref_name }}
-          name: Speed Launcher ${{ github.ref_name }}
-          body: |
-            Speed Launcher beta build.
-            
-            Scarica l'APK qui sotto e installa.
-            Se Android blocca l'installazione, abilita "Sorgenti sconosciute" nelle impostazioni di sicurezza.
-            
-            Gli utenti che hanno già una versione precedente (v0.83+) possono aggiornare direttamente 
-            dall'app: Impostazioni → Controlla aggiornamenti.
-          draft: false
-          prerelease: false
-          make_latest: "true"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG="${{ github.ref_name }}"
+          APK_FILE="release/SpeedLauncher-${TAG}.apk"
+          
+          # v120: trasformo TUTTE le prerelease passate in release normali
+          # (così l'API releases/latest non si confonde)
+          echo "=== Convertendo prerelease vecchie in release normali ==="
+          gh release list --limit 50 --json tagName,isPrerelease | \
+            jq -r '.[] | select(.isPrerelease == true) | .tagName' | \
+            while read OLD_TAG; do
+              echo "Converting $OLD_TAG to non-prerelease..."
+              gh release edit "$OLD_TAG" --prerelease=false 2>&1 || true
+            done
+          
+          # Se la release esiste già, la elimino e ricreo
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, deleting..."
+            gh release delete "$TAG" --yes --cleanup-tag=false
+          fi
+          
+          # Crea release nuova: latest, NON prerelease
+          echo "Creating new release $TAG as latest..."
+          gh release create "$TAG" \
+            --title "Speed Launcher $TAG" \
+            --notes "Speed Launcher beta build. Scarica l\'APK qui sotto. Se Android blocca, abilita Sorgenti sconosciute. Aggiornabile in-app: Impostazioni → Controlla aggiornamenti." \
+            --latest \
+            "$APK_FILE"
+          
+          # Verifica
+          echo "=== Verifica finale ==="
+          gh release view "$TAG"

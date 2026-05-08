@@ -179,11 +179,12 @@ class RecommendedView @JvmOverloads constructor(
                 showCard = true
             }
         }
-        card.visibility = if (showCard) VISIBLE else GONE
+        // v120: card SEMPRE visible — usato come container per row
+        // showCard=false significa solo "background trasparente" (come nel drawer),
+        // NON "nascondi tutto". Bug precedente: card.GONE nascondeva anche row dentro.
+        card.visibility = VISIBLE
         if (!showCard) {
-            // se nel drawer non vogliamo card, nascondiamo card e mettiamo row direttamente in this
-            // (manteniamo struttura semplice: in drawer la row viene mostrata senza card di sfondo
-            // tramite cardBackgroundColor trasparente)
+            // Nel drawer: card trasparente, row direttamente visibile
             card.setCardBackgroundColor(Color.TRANSPARENT)
             card.cardElevation = 0f
         } else {
