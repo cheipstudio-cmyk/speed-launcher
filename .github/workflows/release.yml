@@ -32,8 +32,6 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      # v87: rimosso --no-configuration-cache (causava il bug
-      # dataBindingMergeDependencyArtifactsDebug FAILED). Solo --no-daemon.
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
