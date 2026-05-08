@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         // v48: applica tema search bar + dock raccomandate
         binding.homeView.applySearchTheme()
         binding.homeView.applyDockTheme()
+        binding.homeView.applySearchBarVisibility()
 
         // v38: applica lingua scelta dall'utente al primo onCreate
         val langCode = SpeedApp.instance.settingsRepository.language.value ?: "auto"
@@ -71,6 +72,10 @@ class MainActivity : AppCompatActivity() {
         SpeedApp.instance.settingsRepository.memoryCleanerEnabled.observe(this) { enabled ->
             binding.homeView.applyMemoryCleanerToggle(enabled == true)
         }
+        // v63: osservo toggle "mostra barra ricerca"
+        SpeedApp.instance.settingsRepository.showSearchBar.observe(this) {
+            binding.homeView.applySearchBarVisibility()
+        }
         SpeedApp.instance.appRepository.apps.observe(this) { binding.homeView.refreshApps(it) }
 
         binding.homeView.onSwipeUp = { openDrawer() }
@@ -85,10 +90,33 @@ class MainActivity : AppCompatActivity() {
                     getString(R.string.memory_cleaned_with_amount, freedMb)
                 else
                     getString(R.string.memory_cleaned)
-                com.google.android.material.snackbar.Snackbar.make(
+                // v62: snackbar custom con icona Speed Launcher
+                val snackbar = com.google.android.material.snackbar.Snackbar.make(
                     binding.root, msg,
                     com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
-                ).show()
+                )
+                try {
+                    val sbView = snackbar.view
+                    val tv = sbView.findViewById<android.widget.TextView>(
+                        com.google.android.material.R.id.snackbar_text)
+                    val icon = androidx.core.content.ContextCompat.getDrawable(this, R.mipmap.ic_launcher)
+                    if (icon != null) {
+                        val density = resources.displayMetrics.density
+                        val sz = (24 * density).toInt()
+                        icon.setBounds(0, 0, sz, sz)
+                        tv?.setCompoundDrawables(icon, null, null, null)
+                        tv?.compoundDrawablePadding = (12 * density).toInt()
+                    }
+                    // Background con corner Material 3
+                    sbView.background = androidx.core.content.ContextCompat.getDrawable(this,
+                        R.drawable.bg_snackbar_speed) ?: sbView.background
+                } catch (_: Throwable) {}
+                snackbar.show()
+
+                // v62: aggiorno il widget Speed Stats per mostrare la nuova RAM libera
+                try {
+                    org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider.refreshAll(this)
+                } catch (_: Throwable) {}
             } catch (_: Throwable) {}
         }
 

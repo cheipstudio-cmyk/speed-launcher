@@ -234,6 +234,12 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
         binding.switchShowWidget.setOnCheckedChangeListener { _, c -> settings.setShowWidgetSlot(c) }
+
+        // v63: toggle "mostra barra ricerca"
+        binding.switchShowSearchbar.isChecked = settings.showSearchBar.value != false
+        binding.switchShowSearchbar.setOnCheckedChangeListener { _, isChecked ->
+            settings.setShowSearchBar(isChecked)
+        }
         binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
         binding.switchHaptic.setOnCheckedChangeListener { _, c -> settings.setHapticEnabled(c) }
         binding.switchSwipeDown.isChecked = settings.swipeDownNotifications.value == true
@@ -267,7 +273,9 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle(R.string.settings_reset_everything)
                 .setMessage(R.string.settings_reset_everything_msg)
                 .setPositiveButton(R.string.settings_reset_confirm) { _, _ ->
-                    settings.resetEverything(); finish()
+                    settings.resetEverything()
+                    // v60: force restart del processo per applicare reset totale
+                    forceRestartApp()
                 }
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
@@ -613,6 +621,25 @@ class SettingsActivity : AppCompatActivity() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    /**
+     * v60: termina il processo e riavvia l\'app dalla MainActivity.
+     * Necessario dopo reset totale per ricaricare tutte le impostazioni in stato fresh.
+     */
+    private fun forceRestartApp() {
+        try {
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            finishAffinity()
+            Runtime.getRuntime().exit(0)
+        } catch (_: Throwable) {
+            finishAffinity()
+            Runtime.getRuntime().exit(0)
+        }
     }
 
     private fun showWidgetThemeDialog() {

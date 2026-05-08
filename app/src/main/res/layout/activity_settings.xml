@@ -135,23 +135,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ===== TEMA BARRE (v48) ===== -->
-            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_themes" />
-
-            <!-- Tema barra ricerca -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemSearchTheme" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_search_theme" />
-                        <TextView android:id="@+id/searchThemeValue" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <!-- Tema dock raccomandate -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDockTheme" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
@@ -166,19 +149,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- v57: Tema drawer -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerTheme" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_violet">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_tutorial" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_drawer_theme" />
-                        <TextView android:id="@+id/drawerThemeValue" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+
 
             <!-- ===== LINGUA (v38) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_language" />
@@ -301,21 +272,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_widget" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_widget_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchShowWidget"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <!-- ===== ASPETTO ICONE ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_appearance" />
@@ -452,6 +408,19 @@
                     </RadioGroup>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+            <!-- v57: Tema drawer -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerTheme" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_violet">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_tutorial" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_drawer_theme" />
+                        <TextView android:id="@+id/drawerThemeValue" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- ===== CARTELLE ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_folders" />
@@ -487,6 +456,23 @@
 
             <!-- ===== RICERCA ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_searchbar" />
+
+            <!-- v63: Mostra barra ricerca (toggle, default ON) -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_searchbar" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_searchbar_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowSearchbar"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCardGroup">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -535,6 +521,20 @@
                         <com.google.android.material.radiobutton.MaterialRadioButton
                             android:id="@+id/searchModeGoogle" style="@style/PixelRadio" android:text="@string/settings_search_google" />
                     </RadioGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Tema barra ricerca -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemSearchTheme" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_search_theme" />
+                        <TextView android:id="@+id/searchThemeValue" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -590,6 +590,22 @@
 
             <!-- ===== WIDGET SPEED STATS (v47) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_widget" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_widget" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_widget_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowWidget"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Tema widget -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetTheme" style="@style/PixelCard">

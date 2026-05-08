@@ -299,44 +299,51 @@ class IconCellView(context: Context) : LinearLayout(context) {
             val b = bounds
             // colore sempre aggiornato dalle settings
             dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
+            // v60: design rifatto. Più piccolo, pulito, con shadow morbida invece di bordo grosso.
             if (mode == SettingsRepository.BADGE_COUNT) {
                 val displayCount = if (count > 99) "99+" else count.toString()
-                val textSize = 10 * density
+                val textSize = 9.5f * density
                 dotTextPaint.textSize = textSize
+                dotTextPaint.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
                 val textWidth = dotTextPaint.measureText(displayCount)
-                val padH = 5 * density
-                val padV = 2 * density
-                val pillW = (textWidth + padH * 2).coerceAtLeast(16 * density)
-                val pillH = textSize + padV * 2 + (2 * density)
-                // v37: pill con bordo per stacco visivo
-                val cx = b.right - pillW / 2 - (2 * density)
-                val cy = b.top + pillH / 2 + (2 * density)
+                val padH = 5f * density
+                val padV = 2f * density
+                val minSize = 16f * density
+                val pillW = (textWidth + padH * 2).coerceAtLeast(minSize)
+                val pillH = (textSize + padV * 2).coerceAtLeast(minSize)
+                val cx = b.right - pillW / 2 - 2f * density
+                val cy = b.top + pillH / 2 + 2f * density
                 val rect = android.graphics.RectF(
                     cx - pillW / 2, cy - pillH / 2,
                     cx + pillW / 2, cy + pillH / 2
                 )
-                val borderRect = android.graphics.RectF(
-                    rect.left - 1.5f * density, rect.top - 1.5f * density,
-                    rect.right + 1.5f * density, rect.bottom + 1.5f * density
-                )
-                val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = if (isNightMode()) Color.argb(220, 0, 0, 0) else Color.argb(220, 255, 255, 255)
+                val cornerR = pillH / 2
+                // Shadow morbida sotto il pill
+                val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.argb(80, 0, 0, 0)
+                    maskFilter = android.graphics.BlurMaskFilter(2.5f * density, android.graphics.BlurMaskFilter.Blur.NORMAL)
                 }
-                canvas.drawRoundRect(borderRect, (pillH + 3 * density) / 2, (pillH + 3 * density) / 2, borderPaint)
-                canvas.drawRoundRect(rect, pillH / 2, pillH / 2, dotPaint)
+                val shadowRect = android.graphics.RectF(rect.left, rect.top + density, rect.right, rect.bottom + density)
+                canvas.drawRoundRect(shadowRect, cornerR, cornerR, shadowPaint)
+                // Pill principale
+                canvas.drawRoundRect(rect, cornerR, cornerR, dotPaint)
+                // Testo bianco
+                dotTextPaint.color = Color.WHITE
                 val fm = dotTextPaint.fontMetrics
                 val textY = cy - (fm.ascent + fm.descent) / 2
                 canvas.drawText(displayCount, cx, textY, dotTextPaint)
             } else {
-                // v37: dot con bordo sottile per stacco visivo, raggio leggermente maggiore
-                val r = 5.5f * density
-                val cx = b.right - r - (1.5f * density)
-                val cy = b.top + r + (1.5f * density)
-                // bordo (alone) bianco/scuro adattivo: 1.5dp di padding
-                val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = if (isNightMode()) Color.argb(220, 0, 0, 0) else Color.argb(220, 255, 255, 255)
+                // v60: dot pulito 5dp con shadow morbida (no bordo brutto)
+                val r = 5f * density
+                val cx = b.right - r - 2f * density
+                val cy = b.top + r + 2f * density
+                // Shadow morbida sotto
+                val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.argb(80, 0, 0, 0)
+                    maskFilter = android.graphics.BlurMaskFilter(2.5f * density, android.graphics.BlurMaskFilter.Blur.NORMAL)
                 }
-                canvas.drawCircle(cx, cy, r + 1.5f * density, borderPaint)
+                canvas.drawCircle(cx, cy + density, r, shadowPaint)
+                // Dot principale
                 canvas.drawCircle(cx, cy, r, dotPaint)
             }
         }

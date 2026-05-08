@@ -16,6 +16,8 @@ class SettingsRepository(context: Context) {
     val gridCols = MutableLiveData(prefs.getInt(KEY_COLS, defaultCols))
     val gridRows = MutableLiveData(prefs.getInt(KEY_ROWS, defaultRows))
     val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, false))
+    /** v63: mostra barra di ricerca in home (default true) */
+    val showSearchBar = MutableLiveData(prefs.getBoolean(KEY_SHOW_SEARCHBAR, true))
     val hapticEnabled = MutableLiveData(prefs.getBoolean(KEY_HAPTIC, true))
     val tutorialSeen = MutableLiveData(prefs.getBoolean(KEY_TUTORIAL_SEEN, false))
     val searchMode = MutableLiveData(prefs.getString(KEY_SEARCH_MODE, MODE_APPS) ?: MODE_APPS)
@@ -74,7 +76,6 @@ class SettingsRepository(context: Context) {
         }
     }
     val showDock = MutableLiveData(false)
-    val showSearchBar = MutableLiveData(true)
 
     fun setGrid(cols: Int, rows: Int) {
         prefs.edit().putInt(KEY_COLS, cols).putInt(KEY_ROWS, rows).apply()
@@ -192,7 +193,12 @@ class SettingsRepository(context: Context) {
     fun markTutorialSeen() {
         prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, true).apply(); tutorialSeen.postValue(true)
     }
-    fun resetTutorial() {
+    fun setShowSearchBar(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_SEARCHBAR, on).apply()
+        showSearchBar.postValue(on)
+    }
+
+        fun resetTutorial() {
         prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, false).apply(); tutorialSeen.postValue(false)
     }
     fun resetHomeLayout() {
@@ -219,17 +225,49 @@ class SettingsRepository(context: Context) {
         wallpaperBlur.postValue(0)
     }
     fun resetEverything() {
-        homeLayoutPrefs.edit().clear().apply()
-        resetSettings()
-        // v27: reset anche del firstRunDone così la home si ripopola alla prossima apertura
-        prefs.edit().putBoolean(KEY_FIRST_RUN_DONE, false).apply()
-        firstRunDone.postValue(false)
+        // v60: reset TOTALE — cancella ogni SharedPreferences dell\'app, cache, e segnala riavvio
+        try { homeLayoutPrefs.edit().clear().commit() } catch (_: Throwable) {}
+        try { prefs.edit().clear().commit() } catch (_: Throwable) {}
+        try { widgetPrefs.edit().clear().commit() } catch (_: Throwable) {}
+        // Cancello anche le altre SharedPreferences create dall\'app
+        try {
+            context.getSharedPreferences("speed_prefill", Context.MODE_PRIVATE).edit().clear().commit()
+        } catch (_: Throwable) {}
+        try {
+            context.getSharedPreferences("speed_app_usage", Context.MODE_PRIVATE).edit().clear().commit()
+        } catch (_: Throwable) {}
+        try {
+            context.getSharedPreferences("speed_notification_prefs", Context.MODE_PRIVATE).edit().clear().commit()
+        } catch (_: Throwable) {}
+        // Cancello la cache app
+        try { clearDir(context.cacheDir) } catch (_: Throwable) {}
+        try { clearDir(context.codeCacheDir) } catch (_: Throwable) {}
+        // Cancello tutte le altre SharedPreferences sconosciute
+        try {
+            val prefsDir = java.io.File(context.applicationInfo.dataDir, "shared_prefs")
+            if (prefsDir.exists()) {
+                for (f in prefsDir.listFiles() ?: emptyArray()) {
+                    try { f.delete() } catch (_: Throwable) {}
+                }
+            }
+        } catch (_: Throwable) {}
+    }
+
+    private fun clearDir(dir: java.io.File?) {
+        if (dir == null || !dir.exists()) return
+        for (f in dir.listFiles() ?: emptyArray()) {
+            try {
+                if (f.isDirectory) clearDir(f)
+                f.delete()
+            } catch (_: Throwable) {}
+        }
     }
 
     companion object {
         private const val KEY_COLS = "grid_cols"
         private const val KEY_ROWS = "grid_rows"
         private const val KEY_SHOW_WIDGETS = "show_widgets"
+        private const val KEY_SHOW_SEARCHBAR = "show_searchbar"
         private const val KEY_HAPTIC = "haptic_enabled"
         private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
         private const val KEY_SEARCH_MODE = "search_mode"

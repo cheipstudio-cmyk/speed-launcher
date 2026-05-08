@@ -214,4 +214,6 @@ Il sera utilisé uniquement pour cette fonction.</string>
     <string name="settings_memory_cleaner_sub">Affiche un bouton fusée sur l\'accueil pour libérer la mémoire en un tap</string>
     <string name="memory_cleaned">Mémoire nettoyée</string>
     <string name="memory_cleaned_with_amount">Mémoire nettoyée : %1$d Mo libérés</string>
+    <string name="settings_show_searchbar">Afficher la barre de recherche</string>
+    <string name="settings_show_searchbar_sub">Affiche la barre de recherche en haut de l\'accueil</string>
 </resources>

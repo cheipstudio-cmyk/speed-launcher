@@ -236,4 +236,6 @@ It will only be used for this feature.</string>
     <string name="settings_memory_cleaner_sub">Show a rocket button on home to free memory with one tap</string>
     <string name="memory_cleaned">Memory cleaned</string>
     <string name="memory_cleaned_with_amount">Memory cleaned: %1$d MB freed</string>
+    <string name="settings_show_searchbar">Show search bar</string>
+    <string name="settings_show_searchbar_sub">Display the search bar at the top of home</string>
 </resources>

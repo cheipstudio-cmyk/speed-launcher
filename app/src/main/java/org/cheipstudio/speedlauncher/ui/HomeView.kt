@@ -69,13 +69,16 @@ class HomeView @JvmOverloads constructor(
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            // v26: niente haptic qui - lo facciamo SOLO in onInterceptTouchEvent quando il threshold è confermato
+            // v62: l'haptic veniva chiamato SOLO in onInterceptTouchEvent ma onFling triggera prima
+            // bypassando quel path. Aggiungo qui la vibrazione per swipe veloci.
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
+                performHapticFeedbackLight()
                 onSwipeUp?.invoke()
                 return true
             }
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
+                performHapticFeedbackLight()
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
@@ -536,12 +539,16 @@ class HomeView @JvmOverloads constructor(
     }
     fun refreshDots() { for (page in pages) page.invalidate() }
 
+    /** v63: applica visibilità della barra di ricerca secondo il toggle */
+    fun applySearchBarVisibility() {
+        val show = SpeedApp.instance.settingsRepository.showSearchBar.value != false
+        binding.searchBar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
     /** v61: applica toggle pulitore memoria — aggiunge/rimuove il button da tutte le pagine */
     fun applyMemoryCleanerToggle(enabled: Boolean) {
         if (enabled) {
-            // Lo metto solo nella pagina 0 (default), se non c'è già su nessuna pagina
             val alreadyPresent = pages.any { p ->
-                // Controllo via layoutStore — pinnedItems non è esposto
                 layoutStore.loadPage(p.pageIndex).any {
                     it.type == HomeItem.TYPE_TOOL && it.key == HomeItem.TOOL_MEMORY_CLEANER
                 }
@@ -550,7 +557,6 @@ class HomeView @JvmOverloads constructor(
                 pages[0].addMemoryCleanerIfMissing()
             }
         } else {
-            // Lo rimuovo da TUTTE le pagine
             for (p in pages) p.removeMemoryCleaner()
         }
     }

@@ -65,6 +65,9 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         } else {
             _binding?.recommendedRow?.visibility = View.GONE
         }
+        // v62: optimization recycler — fixed size + no overdraw
+        binding.recycler.setHasFixedSize(true)
+        binding.recycler.itemAnimator = null  // niente animazioni costose
         binding.recycler.adapter = adapter
 
         SpeedApp.instance.appRepository.apps.observe(viewLifecycleOwner) { apps ->
@@ -168,6 +171,20 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+        // v60: drawer dialog full-screen edge-to-edge — nav bar trasparente, bg si estende sotto
+        dialog.window?.let { w ->
+            w.navigationBarColor = android.graphics.Color.TRANSPARENT
+            w.statusBarColor = android.graphics.Color.TRANSPARENT
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                w.setDecorFitsSystemWindows(false)
+            } else {
+                @Suppress("DEPRECATION")
+                w.decorView.systemUiVisibility = w.decorView.systemUiVisibility or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            }
+        }
         dialog.setOnShowListener {
             val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             sheet?.let {
@@ -203,6 +220,27 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 // v58: BottomSheet wrapper trasparente, il colore del tema va sul nostro root LinearLayout
                 it.background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
                 _binding?.root?.background = android.graphics.drawable.ColorDrawable(bgColor)
+                // v62: forzo il root LinearLayout a estendersi tutto il MATCH_PARENT (no fit insets)
+                _binding?.root?.fitsSystemWindows = false
+                _binding?.root?.setPadding(0, 0, 0, 0)
+                // Il bottomSheet wrapper anch'esso non deve fittare gli insets
+                it.fitsSystemWindows = false
+                it.setPadding(0, 0, 0, 0)
+
+                // v62: padding bottom dinamico al recycler in base all'altezza della nav bar
+                androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(it) { _, insets ->
+                    val sysBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+                    val navBarH = sysBars.bottom
+                    val statusBarH = sysBars.top
+                    _binding?.recycler?.let { rv ->
+                        rv.setPadding(rv.paddingLeft, rv.paddingTop, rv.paddingRight,
+                            navBarH + (16 * resources.displayMetrics.density).toInt())
+                        rv.clipToPadding = false
+                    }
+                    // Status bar padding sul root (per non sovrapporsi al notch)
+                    _binding?.root?.setPadding(0, statusBarH, 0, 0)
+                    insets
+                }
 
                 // Slide callback per fade fluido dei contenuti durante drag
                 behavior.addBottomSheetCallback(object : com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback() {

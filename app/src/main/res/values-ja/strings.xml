@@ -214,4 +214,6 @@
     <string name="settings_memory_cleaner_sub">ホームにロケットボタンを表示してワンタップでメモリを解放</string>
     <string name="memory_cleaned">メモリをクリーンしました</string>
     <string name="memory_cleaned_with_amount">メモリクリーン: %1$d MB 解放</string>
+    <string name="settings_show_searchbar">検索バーを表示</string>
+    <string name="settings_show_searchbar_sub">ホームの上部に検索バーを表示</string>
 </resources>

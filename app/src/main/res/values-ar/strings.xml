@@ -214,4 +214,6 @@
     <string name="settings_memory_cleaner_sub">عرض زر صاروخ على الشاشة الرئيسية لتحرير الذاكرة بضغطة واحدة</string>
     <string name="memory_cleaned">تم تنظيف الذاكرة</string>
     <string name="memory_cleaned_with_amount">تم تنظيف الذاكرة: %1$d ميجابايت تم تحريرها</string>
+    <string name="settings_show_searchbar">عرض شريط البحث</string>
+    <string name="settings_show_searchbar_sub">عرض شريط البحث في أعلى الشاشة الرئيسية</string>
 </resources>
