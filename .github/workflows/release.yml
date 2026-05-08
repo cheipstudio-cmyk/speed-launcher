@@ -26,14 +26,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
+      # v91: NON uso gradle/actions/setup-gradle perché installava Gradle 9.4.1
+      # ignorando il wrapper. Usiamo il wrapper del progetto (Gradle 8.4) che è
+      # compatibile con AGP 8.2.2.
       - name: Grant execute permission
         run: chmod +x gradlew
 
+      - name: Verify Gradle version
+        run: ./gradlew --version
+
       - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Rename APK
         run: |
