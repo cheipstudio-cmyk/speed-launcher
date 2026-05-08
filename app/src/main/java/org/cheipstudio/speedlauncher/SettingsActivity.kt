@@ -725,7 +725,6 @@ class SettingsActivity : AppCompatActivity() {
         ) { settings.setSearchMode(it) }
     }
 
-    }
 
     private fun showDrawerLayoutDialog() {
         showSelectionDialog(
