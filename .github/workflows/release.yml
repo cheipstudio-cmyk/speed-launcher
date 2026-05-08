@@ -26,21 +26,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # v99: il repo non ha gradlew. Scarico Gradle 8.4 e ricreo l'infrastruttura.
       - name: Setup Gradle 8.4 and create wrapper
         run: |
-          # Scarica Gradle 8.4
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/gradle-install
           export PATH="/opt/gradle-install/gradle-8.4/bin:$PATH"
-          
-          # Crea wrapper jar e script ufficiali tramite gradle wrapper task
-          # Per fare questo serve che il progetto sia valido. Già abbiamo settings.gradle.
           gradle wrapper --gradle-version=8.4 --distribution-type=bin
-          
-          # Verifica
           ls -la gradle/wrapper/
           cat gradle/wrapper/gradle-wrapper.properties
+
+      # v102: genera debug.keystore (referenziato da app/build.gradle)
+      - name: Generate debug keystore
+        run: |
+          keytool -genkey -v -keystore debug.keystore \
+            -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          ls -la debug.keystore
 
       - name: Grant execute permission
         run: chmod +x gradlew
