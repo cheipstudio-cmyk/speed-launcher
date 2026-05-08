@@ -1,37 +1,32 @@
 package org.cheipstudio.speedlauncher
 
 import android.app.Application
+import com.google.android.material.color.DynamicColors
 import org.cheipstudio.speedlauncher.data.AppRepository
 import org.cheipstudio.speedlauncher.data.AppUsageTracker
 import org.cheipstudio.speedlauncher.data.SettingsRepository
 import org.cheipstudio.speedlauncher.notifications.NotificationCounter
 
-/**
- * Application class — punto centrale per le singleton repositories.
- * v102: ricreato dopo perdita del file.
- */
 class SpeedApp : Application() {
 
-    lateinit var settingsRepository: SettingsRepository
-        private set
-    lateinit var appRepository: AppRepository
-        private set
-    lateinit var notificationCounter: NotificationCounter
-        private set
-    lateinit var usageTracker: AppUsageTracker
-        private set
+    val appRepository: AppRepository by lazy { AppRepository(this) }
+    val notificationCounter: NotificationCounter by lazy { NotificationCounter() }
+    val settingsRepository: SettingsRepository by lazy { SettingsRepository(this) }
+    val usageTracker: AppUsageTracker by lazy { AppUsageTracker(this) }
 
-    /** v88: handler globale per drag & drop fra pagine home / drawer */
+    /**
+     * Handler globale per drag & drop di icone tra grid e altre destinazioni.
+     * Signature: (originId, appKey, targetId) -> Unit
+     * - originId: "grid{N}:{idx}" della cella di origine
+     * - appKey: chiave dell'app trascinata
+     * - targetId: "grid{N}:{idx}" della cella destinazione
+     */
     var dragHandler: ((String, String, String) -> Unit)? = null
 
     override fun onCreate() {
         super.onCreate()
         instance = this
-        settingsRepository = SettingsRepository(this)
-        appRepository = AppRepository(this)
-        notificationCounter = NotificationCounter()
-        usageTracker = AppUsageTracker(this)
-        // v88: avvia osservazione package changes (install/uninstall)
+        DynamicColors.applyToActivitiesIfAvailable(this)
         appRepository.observePackageChanges()
     }
 
