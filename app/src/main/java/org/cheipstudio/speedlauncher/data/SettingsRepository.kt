@@ -200,22 +200,24 @@ class SettingsRepository(context: Context) {
     }
 
     fun setIconPackPackage(pkg: String) {
-        prefs.edit().putString(KEY_ICON_PACK, pkg).apply()
+        prefs.edit().putString(KEY_ICON_PACK, pkg).commit()
         iconPackPackage.postValue(pkg)
     }
 
     fun setRecommendedMode(mode: String) {
-        prefs.edit().putString(KEY_REC_MODE, mode).apply()
+        prefs.edit().putString(KEY_REC_MODE, mode).commit()
         recommendedMode.postValue(mode)
     }
 
     fun setRecommendedManualApps(keys: Set<String>) {
-        prefs.edit().putStringSet(KEY_REC_MANUAL_APPS, keys).apply()
+        prefs.edit().putStringSet(KEY_REC_MANUAL_APPS, keys).commit()
         recommendedManualApps.postValue(keys.toMutableSet())
     }
 
     fun setDrawerEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_DRAWER_ENABLED, enabled).apply()
+        // v86: commit sincrono — viene chiamato forceRestart subito dopo,
+        // se usiamo apply() async la pref può non essere persistita.
+        prefs.edit().putBoolean(KEY_DRAWER_ENABLED, enabled).commit()
         drawerEnabled.postValue(enabled)
     }
 

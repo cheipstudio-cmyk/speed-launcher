@@ -9,9 +9,15 @@ on:
 permissions:
   contents: write
 
+# v86: cancella job vecchi se ne parte uno nuovo (no race su stesso tag)
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -21,11 +27,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Grant execute permission
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache --stacktrace
 
       - name: Rename APK
         run: |
@@ -39,9 +48,12 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Speed Launcher ${{ github.ref_name }}
           body: |
-            Beta build di Speed Launcher.
+            Speed Launcher beta build.
             
             Scarica l'APK qui sotto e installa.
-            Se Android blocca l'installazione, abilita "Sorgenti sconosciute" nelle impostazioni di sicurezza del telefono.
+            Se Android blocca l'installazione, abilita "Sorgenti sconosciute" nelle impostazioni di sicurezza.
+            
+            Gli utenti che hanno già una versione precedente (v0.83+) possono aggiornare direttamente 
+            dall'app: Impostazioni → Controlla aggiornamenti.
           draft: false
           prerelease: true

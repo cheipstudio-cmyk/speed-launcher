@@ -830,6 +830,14 @@ class SettingsActivity : AppCompatActivity() {
     private fun showRecommendedManualPicker() {
         val apps = org.cheipstudio.speedlauncher.SpeedApp.instance.appRepository.apps.value
             ?: emptyList()
+        if (apps.isEmpty()) {
+            // v86: se appRepository non ha ancora caricato (race condition),
+            // ritento dopo 300ms invece che mostrare lista vuota.
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                showRecommendedManualPicker()
+            }, 300)
+            return
+        }
         val hidden = settings.hiddenApps.value ?: emptySet<String>()
         val available = apps.filter { !hidden.contains(it.key) }
             .sortedBy { it.label.lowercase() }
@@ -840,16 +848,16 @@ class SettingsActivity : AppCompatActivity() {
         val checked = BooleanArray(available.size) { i -> current.contains(available[i].key) }
         val selected = current.toMutableSet()
 
+        // v86: niente setMessage — su alcune versioni Material il messaggio
+        // mangia la lista. Metto il count nel titolo direttamente.
         com.google.android.material.dialog.MaterialAlertDialogBuilder(
             this,
             com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
         )
             .setTitle(getString(R.string.rec_mode_pick_apps_title, countNeeded))
-            .setMessage(getString(R.string.rec_mode_pick_apps_msg))
             .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
                 val key = available[which].key
                 if (isChecked) selected.add(key) else selected.remove(key)
-                // Validazione al click del positive button, non qui
             }
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 if (selected.size == countNeeded) {
