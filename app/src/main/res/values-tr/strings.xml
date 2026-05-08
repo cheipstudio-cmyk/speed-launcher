@@ -161,4 +161,15 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_recommended_position">Önerilenler konumu</string>
     <string name="recommended_pos_top">Üst, simgelerin üzerinde</string>
     <string name="recommended_pos_bottom">Alt, arama çubuğu yakınında</string>
+    <string name="settings_recommended_count">Önerilen uygulama sayısı</string>
+    <string name="recommended_count_4">4 uygulama</string>
+    <string name="recommended_count_5">5 uygulama</string>
+    <string name="settings_section_language">Dil</string>
+    <string name="settings_language">Uygulama dili</string>
+    <string name="settings_section_expressive">Material Expressive</string>
+    <string name="settings_icon_bg">Renkli simge arka planı</string>
+    <string name="settings_icon_bg_sub">Her simgenin altında yumuşak kart, ana ekran ve çekmece</string>
+    <string name="settings_wallpaper_dim">Duvar kağıdını karart</string>
+    <string name="settings_wallpaper_parallax">Duvar kağıdı parallax</string>
+    <string name="settings_wallpaper_parallax_sub">Sayfa değiştirirken arka plan hareket eder</string>
 </resources>

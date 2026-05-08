@@ -41,6 +41,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
         typeface = android.graphics.Typeface.DEFAULT_BOLD
     }
     private var lastNotifCount: Int = 0
+    // v40: traccia l'ultimo packageName per cui abbiamo "registrato" il count, per evitare bounce random su recycling
+    private var lastBouncedPackage: String = ""
     var packageName: String = ""
         private set
 
@@ -177,6 +179,38 @@ class IconCellView(context: Context) : LinearLayout(context) {
         labelView.text = app.label
         packageName = app.packageName
         dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
+        // v40: sincronizza lastNotifCount al count attuale così la cella riciclata non triggera bounce random
+        lastNotifCount = SpeedApp.instance.notificationCounter.countFor(packageName)
+
+        // v38: Material Expressive — sfondo colorato sotto l'icona
+        applyIconBackground(s.iconBgEnabled.value == true)
+    }
+
+    /**
+     * v38: applica/rimuove uno sfondo "card" sotto l'icona, stile Material Expressive.
+     * Quando attivo: rounded square con colorSurfaceContainer + padding interno per non
+     * mangiare l'icona. Disabilitato di default.
+     */
+    private fun applyIconBackground(enabled: Boolean) {
+        if (!enabled) {
+            iconView.background = null
+            iconView.setPadding(0, 0, 0, 0)
+            return
+        }
+        val density = resources.displayMetrics.density
+        val tv = android.util.TypedValue()
+        context.theme.resolveAttribute(
+            com.google.android.material.R.attr.colorSurfaceContainer, tv, true
+        )
+        val bgColor = tv.data
+        val bgDrawable = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            cornerRadius = 16 * density
+            setColor(bgColor)
+        }
+        iconView.background = bgDrawable
+        val pad = (6 * density).toInt()
+        iconView.setPadding(pad, pad, pad, pad)
     }
 
     /**
@@ -205,24 +239,41 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val padV = 2 * density
                 val pillW = (textWidth + padH * 2).coerceAtLeast(16 * density)
                 val pillH = textSize + padV * 2 + (2 * density)
-                // v36: posiziona dentro i bounds (padding 2dp dal bordo)
+                // v37: pill con bordo per stacco visivo
                 val cx = b.right - pillW / 2 - (2 * density)
                 val cy = b.top + pillH / 2 + (2 * density)
                 val rect = android.graphics.RectF(
                     cx - pillW / 2, cy - pillH / 2,
                     cx + pillW / 2, cy + pillH / 2
                 )
+                val borderRect = android.graphics.RectF(
+                    rect.left - 1.5f * density, rect.top - 1.5f * density,
+                    rect.right + 1.5f * density, rect.bottom + 1.5f * density
+                )
+                val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = if (isNightMode()) Color.argb(220, 0, 0, 0) else Color.argb(220, 255, 255, 255)
+                }
+                canvas.drawRoundRect(borderRect, (pillH + 3 * density) / 2, (pillH + 3 * density) / 2, borderPaint)
                 canvas.drawRoundRect(rect, pillH / 2, pillH / 2, dotPaint)
                 val fm = dotTextPaint.fontMetrics
                 val textY = cy - (fm.ascent + fm.descent) / 2
                 canvas.drawText(displayCount, cx, textY, dotTextPaint)
             } else {
-                // v36: dot dentro i bounds (radius=5dp, padding 2dp dal bordo)
-                val r = 5 * density
-                val cx = b.right - r - (2 * density)
-                val cy = b.top + r + (2 * density)
+                // v37: dot con bordo sottile per stacco visivo, raggio leggermente maggiore
+                val r = 5.5f * density
+                val cx = b.right - r - (1.5f * density)
+                val cy = b.top + r + (1.5f * density)
+                // bordo (alone) bianco/scuro adattivo: 1.5dp di padding
+                val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = if (isNightMode()) Color.argb(220, 0, 0, 0) else Color.argb(220, 255, 255, 255)
+                }
+                canvas.drawCircle(cx, cy, r + 1.5f * density, borderPaint)
                 canvas.drawCircle(cx, cy, r, dotPaint)
             }
+        }
+        private fun isNightMode(): Boolean {
+            val flags = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+            return flags == android.content.res.Configuration.UI_MODE_NIGHT_YES
         }
         override fun setAlpha(alpha: Int) {}
         override fun setColorFilter(filter: android.graphics.ColorFilter?) {}
@@ -243,11 +294,18 @@ class IconCellView(context: Context) : LinearLayout(context) {
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
-        // v33: trigger refresh badge animation se count è cambiato
-        val count = SpeedApp.instance.notificationCounter.countFor(packageName)
+        // v33+v40: trigger badge animation solo se count cambia REALMENTE per QUESTA app
+        // (e non per via di un bind/recycling). Confronto anche packageName.
+        val pkg = packageName
+        if (pkg.isEmpty()) return
+        val count = SpeedApp.instance.notificationCounter.countFor(pkg)
         if (count != lastNotifCount) {
-            if (count > 0 && lastNotifCount == 0) Anim.bounceIn(iconView)
+            // bounce solo quando la stessa app passa da 0 → >0 notifiche
+            if (count > 0 && lastNotifCount == 0 && lastBouncedPackage == pkg) {
+                Anim.bounceIn(iconView)
+            }
             lastNotifCount = count
+            lastBouncedPackage = pkg
             badgeDrawable.invalidateSelf()
         }
     }

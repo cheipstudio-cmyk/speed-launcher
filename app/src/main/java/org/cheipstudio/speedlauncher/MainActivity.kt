@@ -47,6 +47,18 @@ class MainActivity : AppCompatActivity() {
         // v30: orientation in base al setting (default = portrait only)
         applyOrientationLock()
 
+        // v38: applica dim e attach wallpaper parallax
+        applyWallpaperDim()
+        binding.homeView.attachWallpaperParallax(window)
+
+        // v38: applica lingua scelta dall'utente al primo onCreate
+        val langCode = SpeedApp.instance.settingsRepository.language.value ?: "auto"
+        if (langCode != "auto") {
+            try {
+                LanguageHelper.applyLanguage(langCode)
+            } catch (_: Throwable) {}
+        }
+
         widgetHostController = WidgetHostController(this).also { it.start() }
         binding.homeView.attachWidgetHost(widgetHostController)
 
@@ -69,6 +81,12 @@ class MainActivity : AppCompatActivity() {
         if (SpeedApp.instance.settingsRepository.tutorialSeen.value != true) {
             showTutorial()
         }
+    }
+
+    private fun applyWallpaperDim() {
+        val dim = SpeedApp.instance.settingsRepository.wallpaperDim.value ?: 0
+        val alpha = (dim.coerceIn(0, 100)) / 100f
+        binding.homeView.setDimOverlayAlpha(alpha)
     }
 
     private fun applyOrientationLock() {
@@ -98,6 +116,8 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.reapplySettings()
         // v30: ri-applica orientation se è cambiata
         applyOrientationLock()
+        // v38: applica eventuali cambi di dim
+        applyWallpaperDim()
     }
 
     override fun onPause() {

@@ -161,4 +161,15 @@
     <string name="settings_recommended_position">おすすめの位置</string>
     <string name="recommended_pos_top">上、アイコンの上</string>
     <string name="recommended_pos_bottom">下、検索バー近く</string>
+    <string name="settings_recommended_count">おすすめアプリ数</string>
+    <string name="recommended_count_4">4 アプリ</string>
+    <string name="recommended_count_5">5 アプリ</string>
+    <string name="settings_section_language">言語</string>
+    <string name="settings_language">アプリの言語</string>
+    <string name="settings_section_expressive">Material Expressive</string>
+    <string name="settings_icon_bg">アイコンの色付き背景</string>
+    <string name="settings_icon_bg_sub">ホームとドロワーでアイコンの下に柔らかいカード</string>
+    <string name="settings_wallpaper_dim">壁紙の暗転</string>
+    <string name="settings_wallpaper_parallax">壁紙パララックス</string>
+    <string name="settings_wallpaper_parallax_sub">ページ変更時に背景が動く</string>
 </resources>

@@ -183,4 +183,15 @@ It will only be used for this feature.</string>
     <string name="settings_recommended_position">Recommended position</string>
     <string name="recommended_pos_top">Top, above icons</string>
     <string name="recommended_pos_bottom">Bottom, near search bar</string>
+    <string name="settings_recommended_count">Recommended apps count</string>
+    <string name="recommended_count_4">4 apps</string>
+    <string name="recommended_count_5">5 apps</string>
+    <string name="settings_section_language">Language</string>
+    <string name="settings_language">App language</string>
+    <string name="settings_section_expressive">Material Expressive</string>
+    <string name="settings_icon_bg">Colored icon background</string>
+    <string name="settings_icon_bg_sub">Soft card behind each icon, in home and drawer</string>
+    <string name="settings_wallpaper_dim">Wallpaper dim</string>
+    <string name="settings_wallpaper_parallax">Wallpaper parallax</string>
+    <string name="settings_wallpaper_parallax_sub">Background moves when changing page</string>
 </resources>

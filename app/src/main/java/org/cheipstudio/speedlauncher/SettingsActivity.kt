@@ -91,15 +91,23 @@ class SettingsActivity : AppCompatActivity() {
 
         when {
             settings.gridCols.value == 4 && settings.gridRows.value == 4 -> binding.gridRadio4x4.isChecked = true
+            settings.gridCols.value == 4 && settings.gridRows.value == 5 -> binding.gridRadio4x5.isChecked = true
+            settings.gridCols.value == 4 && settings.gridRows.value == 6 -> binding.gridRadio4x6.isChecked = true
             settings.gridCols.value == 5 && settings.gridRows.value == 5 -> binding.gridRadio5x5.isChecked = true
             settings.gridCols.value == 5 && settings.gridRows.value == 6 -> binding.gridRadio5x6.isChecked = true
+            settings.gridCols.value == 6 && settings.gridRows.value == 5 -> binding.gridRadio6x5.isChecked = true
+            settings.gridCols.value == 6 && settings.gridRows.value == 6 -> binding.gridRadio6x6.isChecked = true
         }
         updateGridLabel()
         binding.gridRadioGroup.setOnCheckedChangeListener { _, id ->
             when (id) {
                 R.id.gridRadio4x4 -> settings.setGrid(4, 4)
+                R.id.gridRadio4x5 -> settings.setGrid(4, 5)
+                R.id.gridRadio4x6 -> settings.setGrid(4, 6)
                 R.id.gridRadio5x5 -> settings.setGrid(5, 5)
                 R.id.gridRadio5x6 -> settings.setGrid(5, 6)
+                R.id.gridRadio6x5 -> settings.setGrid(6, 5)
+                R.id.gridRadio6x6 -> settings.setGrid(6, 6)
             }
             updateGridLabel()
         }
@@ -325,6 +333,63 @@ class SettingsActivity : AppCompatActivity() {
             settings.setLandscapeAllowed(on)
         }
 
+        // v32: recommendedPosition
+        when (settings.recommendedPosition.value) {
+            SettingsRepository.REC_POS_BOTTOM -> binding.recPosBottom.isChecked = true
+            else -> binding.recPosTop.isChecked = true
+        }
+        updateRecPosLabel()
+        binding.recommendedPositionGroup.setOnCheckedChangeListener { _, id ->
+            val pos = when (id) {
+                R.id.recPosBottom -> SettingsRepository.REC_POS_BOTTOM
+                else -> SettingsRepository.REC_POS_TOP
+            }
+            settings.setRecommendedPosition(pos)
+            updateRecPosLabel()
+        }
+
+        // v37: recommendedCount (4 o 5)
+        when (settings.recommendedCount.value) {
+            4 -> binding.recCount4.isChecked = true
+            else -> binding.recCount5.isChecked = true
+        }
+        updateRecCountLabel()
+        binding.recommendedCountGroup.setOnCheckedChangeListener { _, id ->
+            val n = when (id) {
+                R.id.recCount4 -> 4
+                else -> 5
+            }
+            settings.setRecommendedCount(n)
+            updateRecCountLabel()
+        }
+
+        // v38: language picker
+        updateLanguageLabel()
+        binding.itemLanguage.setOnClickListener {
+            showLanguageDialog()
+        }
+
+        // v38: icon bg toggle (Material Expressive)
+        binding.switchIconBg.isChecked = settings.iconBgEnabled.value == true
+        binding.switchIconBg.setOnCheckedChangeListener { _, on ->
+            settings.setIconBgEnabled(on)
+        }
+
+        // v38: wallpaper dim slider
+        val currentDim = settings.wallpaperDim.value ?: 0
+        binding.wallpaperDimSlider.value = currentDim.toFloat()
+        updateDimLabel()
+        binding.wallpaperDimSlider.addOnChangeListener { _, value, _ ->
+            settings.setWallpaperDim(value.toInt())
+            updateDimLabel()
+        }
+
+        // v38: wallpaper parallax toggle
+        binding.switchWallpaperParallax.isChecked = settings.wallpaperParallax.value == true
+        binding.switchWallpaperParallax.setOnCheckedChangeListener { _, on ->
+            settings.setWallpaperParallax(on)
+        }
+
         binding.itemContact.setOnClickListener {
             try {
                 val versionName = try {
@@ -407,6 +472,51 @@ class SettingsActivity : AppCompatActivity() {
             else -> getString(R.string.anim_expressive)
         }
         binding.animStyleLabel.text = text
+    }
+
+    private fun updateRecPosLabel() {
+        val text = when (settings.recommendedPosition.value) {
+            SettingsRepository.REC_POS_BOTTOM -> getString(R.string.recommended_pos_bottom)
+            else -> getString(R.string.recommended_pos_top)
+        }
+        binding.recommendedPositionLabel.text = text
+    }
+
+    private fun updateRecCountLabel() {
+        val n = settings.recommendedCount.value ?: 5
+        binding.recommendedCountLabel.text = if (n == 4)
+            getString(R.string.recommended_count_4) else getString(R.string.recommended_count_5)
+    }
+
+    private fun updateLanguageLabel() {
+        val code = settings.language.value ?: "auto"
+        binding.languageLabel.text = LanguageHelper.displayNameFor(code)
+    }
+
+    private fun updateDimLabel() {
+        val v = settings.wallpaperDim.value ?: 0
+        binding.wallpaperDimLabel.text = "$v%"
+    }
+
+    private fun showLanguageDialog() {
+        val items = LanguageHelper.SUPPORTED_LANGUAGES
+        val labels = items.map { it.second }.toTypedArray()
+        val codes = items.map { it.first }
+        val current = settings.language.value ?: "auto"
+        val checkedIndex = codes.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.settings_language)
+            .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
+                val code = codes[which]
+                settings.setLanguage(code)
+                LanguageHelper.applyLanguage(code)
+                updateLanguageLabel()
+                dialog.dismiss()
+                // recreate per applicare la lingua
+                recreate()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun updateBadgeLabel() {

@@ -99,22 +99,25 @@ class HomeView @JvmOverloads constructor(
         // v26: aggiungo overlay per fade al drawer
         addView(fadeOverlay)
 
-        // v30: setup callback Raccomandate
-        binding.recommendedRow.onAppClick = { app ->
-            SpeedApp.instance.usageTracker.recordLaunch(app.key)
+        // v32: setup callback per entrambe le RecommendedView (top + bottom)
+        val onRecClick: (org.cheipstudio.speedlauncher.data.AppInfo) -> Unit = { app ->
             try {
                 val launchIntent = context.packageManager.getLaunchIntentForPackage(app.packageName)
                 if (launchIntent != null) {
                     launchIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(launchIntent)
                 }
+                SpeedApp.instance.usageTracker.recordLaunch(app.key)
             } catch (_: Throwable) {}
-            // refresh dopo qualche istante
             postDelayed({ refreshRecommended() }, 500)
         }
-        binding.recommendedRow.onAppLongPress = { app ->
+        val onRecLong: (org.cheipstudio.speedlauncher.data.AppInfo) -> Unit = { app ->
             onAppMenuRequest?.invoke(app)
         }
+        binding.recommendedRow.onAppClick = onRecClick
+        binding.recommendedRow.onAppLongPress = onRecLong
+        binding.recommendedRowBottom.onAppClick = onRecClick
+        binding.recommendedRowBottom.onAppLongPress = onRecLong
 
         // v18: animazione layout dipende dallo stile selezionato
         applyAnimationStyle()
@@ -434,14 +437,23 @@ class HomeView @JvmOverloads constructor(
         refreshRecommended()
     }
 
-    /** v30: aggiorna la sezione Raccomandate se AI mode è attivo */
+    /** v32: aggiorna la sezione Raccomandate se AI mode è attivo + posizione top/bottom */
     fun refreshRecommended() {
         val aiOn = settings.aiLauncherMode.value == true
-        if (aiOn) {
-            binding.recommendedRow.visibility = android.view.View.VISIBLE
-            binding.recommendedRow.refresh("home")
-        } else {
+        val pos = settings.recommendedPosition.value ?: org.cheipstudio.speedlauncher.data.SettingsRepository.REC_POS_TOP
+        if (!aiOn) {
             binding.recommendedRow.visibility = android.view.View.GONE
+            binding.recommendedRowBottom.visibility = android.view.View.GONE
+            return
+        }
+        if (pos == org.cheipstudio.speedlauncher.data.SettingsRepository.REC_POS_BOTTOM) {
+            binding.recommendedRow.visibility = android.view.View.GONE
+            binding.recommendedRowBottom.visibility = android.view.View.VISIBLE
+            binding.recommendedRowBottom.refresh("home")
+        } else {
+            binding.recommendedRow.visibility = android.view.View.VISIBLE
+            binding.recommendedRowBottom.visibility = android.view.View.GONE
+            binding.recommendedRow.refresh("home")
         }
     }
     fun refreshDots() { for (page in pages) page.invalidate() }
@@ -455,6 +467,33 @@ class HomeView @JvmOverloads constructor(
         post { trimEmptyPages() }
     }
     fun isPinned(app: AppInfo) = pages.any { it.isPinned(app) }
+
+    /** v38: imposta l'alpha del dim overlay (0..1) */
+    fun setDimOverlayAlpha(alpha: Float) {
+        binding.dimOverlay.alpha = alpha.coerceIn(0f, 1f)
+    }
+
+    /**
+     * v38: collega il scroll delle pagine al wallpaper offsets di Android.
+     * Effetto: il wallpaper si muove leggermente quando cambi pagina, parallax classico.
+     */
+    fun attachWallpaperParallax(window: android.view.Window) {
+        val wm = android.app.WallpaperManager.getInstance(context)
+        val previous = binding.pagedHome.onPageChanged
+        binding.pagedHome.onPageChanged = { page ->
+            previous?.invoke(page)
+            val parallaxOn = settings.wallpaperParallax.value == true
+            if (parallaxOn) {
+                val pageCount = binding.pagedHome.pageCount
+                if (pageCount > 1) {
+                    val xOffset = page.toFloat() / (pageCount - 1).toFloat()
+                    try {
+                        wm.setWallpaperOffsets(window.decorView.windowToken, xOffset.coerceIn(0f, 1f), 0f)
+                    } catch (_: Throwable) {}
+                }
+            }
+        }
+    }
 
     /** v27: chiamato da MainActivity quando si preme home dalla home */
     fun snapToFirstPage() {

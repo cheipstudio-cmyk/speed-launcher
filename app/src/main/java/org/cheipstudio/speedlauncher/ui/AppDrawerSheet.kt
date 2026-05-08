@@ -185,6 +185,8 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                         val alpha = ((slideOffset + 1f).coerceIn(0f, 1f))
                         _binding?.recycler?.alpha = alpha
                         _binding?.searchInput?.alpha = alpha
+                        // v38: applica parallax + fade alle raccomandate
+                        _binding?.recommendedRow?.applyDrawerSlide(slideOffset)
                     }
                 })
             }

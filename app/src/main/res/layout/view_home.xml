@@ -4,6 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.FrameLayout">
 
+    <!-- v38: dim overlay sotto tutti i contenuti, alpha controllato da wallpaperDim setting -->
+    <View
+        android:id="@+id/dimOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0"
+        android:clickable="false"
+        android:focusable="false" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -37,6 +47,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginVertical="10dp" />
+
+        <!-- v32: recommendate in basso (alternativa a quello in alto) -->
+        <org.cheipstudio.speedlauncher.ui.RecommendedView
+            android:id="@+id/recommendedRowBottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
 
         <View
             android:layout_width="40dp"
