@@ -41,6 +41,9 @@ class RecommendedView @JvmOverloads constructor(
             setCardBackgroundColor(themedBgColor())
             val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             layoutParams = lp
+            // v131: hardware layer — applyDrawerSlide fa alpha+scale+translation insieme,
+            // accelerare su GPU rende il parallasse più fluido
+            setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
         }
         row = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -114,14 +117,13 @@ class RecommendedView @JvmOverloads constructor(
      * Effetto: man mano che il drawer si chiude (offset cala), la card svanisce e scivola in alto.
      */
     fun applyDrawerSlide(slideOffset: Float) {
-        // v56+v124: parallasse Pixel-style con interpolazione cubica per fluidità.
+        // v56: effetto parallasse più visibile.
         val s = slideOffset.coerceIn(-1f, 1f)
-        val raw = s.coerceIn(0f, 1f)
-        // Cubic ease-out per progress (più rapido all'inizio, smooth verso la fine)
-        val visibleProgress = 1f - (1f - raw) * (1f - raw) * (1f - raw)
+        val raw = ((s).coerceIn(0f, 1f))
+        val visibleProgress = raw
         alpha = 0.3f + 0.7f * visibleProgress
         translationY = (1f - visibleProgress) * (56f * density)
-        val sc = 0.88f + 0.12f * visibleProgress
+        val sc = 0.85f + 0.15f * visibleProgress
         scaleX = sc; scaleY = sc
     }
 

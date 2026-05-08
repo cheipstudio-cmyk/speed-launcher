@@ -61,6 +61,8 @@ class HomeView @JvmOverloads constructor(
         isClickable = false
         isFocusable = false
         // v26: non intercetta tap finché alpha > 0 (e anche allora è solo decorativo)
+        // v131: hardware layer per animazione alpha più fluida durante swipe
+        setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
         )

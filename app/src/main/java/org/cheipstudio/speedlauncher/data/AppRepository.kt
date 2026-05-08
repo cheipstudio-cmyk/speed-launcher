@@ -15,6 +15,9 @@ import java.text.Collator
 class AppRepository(private val context: Context) {
 
     private val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+    
+    /** v131: cache icone — evita re-fetch costoso ad ogni reload (getBadgedIcon scaling/badging) */
+    private val iconCache = mutableMapOf<String, android.graphics.drawable.Drawable>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val apps = MutableLiveData<List<AppInfo>>(emptyList())
@@ -49,12 +52,19 @@ class AppRepository(private val context: Context) {
             for (activity in activities) {
                 // Skip se è Speed Launcher stesso E sono il launcher di default
                 if (isDefaultLauncher && activity.applicationInfo.packageName == ownPkg) continue
+                val pkg = activity.applicationInfo.packageName
+                val cls = activity.componentName.className
+                val cacheKey = "$pkg/$cls"
+                // v131: usa cache se presente, altrimenti decodifica e cacha
+                val icon = iconCache[cacheKey] ?: activity.getBadgedIcon(0).also {
+                    iconCache[cacheKey] = it
+                }
                 result.add(
                     AppInfo(
-                        packageName = activity.applicationInfo.packageName,
-                        componentName = activity.componentName.className,
-                        label = activity.label?.toString() ?: activity.applicationInfo.packageName,
-                        icon = activity.getBadgedIcon(0),
+                        packageName = pkg,
+                        componentName = cls,
+                        label = activity.label?.toString() ?: pkg,
+                        icon = icon,
                         userHandle = user
                     )
                 )
@@ -77,7 +87,14 @@ class AppRepository(private val context: Context) {
         })
     }
 
+    /** v131: invalida cache icone per un pacchetto (es. package aggiornato/rimosso) */
+    private fun invalidateIconCache(packageName: String) {
+        iconCache.entries.removeAll { it.key.startsWith("$packageName/") }
+    }
+
     private fun reloadAndNotify(packageName: String) {
+        // v131: invalida cache vecchia per il pacchetto cambiato
+        invalidateIconCache(packageName)
         scope.launch {
             val list = withContext(Dispatchers.IO) { loadApps() }
             apps.postValue(list)
