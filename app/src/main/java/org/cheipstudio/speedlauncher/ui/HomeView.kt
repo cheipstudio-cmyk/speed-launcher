@@ -423,7 +423,8 @@ class HomeView @JvmOverloads constructor(
 
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
-        binding.searchBar.visibility = View.VISIBLE
+        // v69: rispetto il toggle showSearchBar invece di forzare VISIBLE
+        binding.searchBar.visibility = if (settings.showSearchBar.value != false) View.VISIBLE else View.GONE
         updateSearchBarText()
         applySearchBarStyle()
         applyAnimationStyle()

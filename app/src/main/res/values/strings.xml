@@ -28,7 +28,7 @@
     <string name="settings_section_searchbar">Barra di ricerca</string>
     <string name="settings_section_search">Ricerca</string>
     <string name="settings_section_gestures">Gesti</string>
-    <string name="settings_section_advanced">Avanzate</string>
+    <string name="settings_section_advanced">Reset</string>
     <string name="settings_section_general">Sistema</string>
     <string name="settings_section_info">Info</string>
 
@@ -175,7 +175,7 @@ Si userà solo per questa funzione.</string>
     <string name="accessibility_service_description">Permette a Speed Launcher di spegnere lo schermo come fa il pulsante power. Nessun altro evento viene letto.</string>
     <string name="accessibility_service_summary">Spegne lo schermo al doppio tap sulla barra di ricerca</string>
     <string name="folder_rename_title">Rinomina cartella</string>
-    <string name="settings_section_home_layout">Layout home</string>
+    <string name="settings_section_home_layout">Home</string>
     <string name="settings_grid_4x5">4 × 5</string>
     <string name="settings_grid_4x6">4 × 6</string>
     <string name="settings_grid_6x5">6 × 5</string>

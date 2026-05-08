@@ -28,7 +28,7 @@
     <string name="settings_section_searchbar">Search bar</string>
     <string name="settings_section_search">Search</string>
     <string name="settings_section_gestures">Gestures</string>
-    <string name="settings_section_advanced">Advanced</string>
+    <string name="settings_section_advanced">Reset</string>
     <string name="settings_section_general">System</string>
     <string name="settings_section_info">Info</string>
 
@@ -175,7 +175,7 @@ It will only be used for this feature.</string>
     <string name="accessibility_service_description">Allows Speed Launcher to turn off the screen like the power button. No other events are read.</string>
     <string name="accessibility_service_summary">Turns off screen on double-tap of search bar</string>
     <string name="folder_rename_title">Rename folder</string>
-    <string name="settings_section_home_layout">Home layout</string>
+    <string name="settings_section_home_layout">Home</string>
     <string name="settings_grid_4x5">4 × 5</string>
     <string name="settings_grid_4x6">4 × 6</string>
     <string name="settings_grid_6x5">6 × 5</string>

@@ -110,127 +110,15 @@ class SettingsActivity : AppCompatActivity() {
             }
             updateGridLabel()
         }
-
-        when (settings.iconShape.value) {
-            SettingsRepository.SHAPE_ORIGINAL -> binding.shapeOriginal.isChecked = true
-            SettingsRepository.SHAPE_SQUIRCLE -> binding.shapeSquircle.isChecked = true
-            SettingsRepository.SHAPE_CIRCLE -> binding.shapeCircle.isChecked = true
-            SettingsRepository.SHAPE_SQUARE -> binding.shapeSquare.isChecked = true
-            SettingsRepository.SHAPE_TEARDROP -> binding.shapeTeardrop.isChecked = true
-        }
-        updateShapeLabel()
-        binding.iconShapeGroup.setOnCheckedChangeListener { _, id ->
-            val shape = when (id) {
-                R.id.shapeOriginal -> SettingsRepository.SHAPE_ORIGINAL
-                R.id.shapeSquircle -> SettingsRepository.SHAPE_SQUIRCLE
-                R.id.shapeCircle -> SettingsRepository.SHAPE_CIRCLE
-                R.id.shapeSquare -> SettingsRepository.SHAPE_SQUARE
-                R.id.shapeTeardrop -> SettingsRepository.SHAPE_TEARDROP
-                else -> SettingsRepository.SHAPE_ORIGINAL
-            }
-            settings.setIconShape(shape)
-            updateShapeLabel()
-        }
-
-        when (settings.animationStyle.value) {
-            SettingsRepository.ANIM_EXPRESSIVE -> binding.animExpressive.isChecked = true
-            SettingsRepository.ANIM_STANDARD -> binding.animStandard.isChecked = true
-            SettingsRepository.ANIM_NONE -> binding.animNone.isChecked = true
-        }
-        updateAnimLabel()
-        binding.animStyleGroup.setOnCheckedChangeListener { _, id ->
-            val style = when (id) {
-                R.id.animExpressive -> SettingsRepository.ANIM_EXPRESSIVE
-                R.id.animStandard -> SettingsRepository.ANIM_STANDARD
-                R.id.animNone -> SettingsRepository.ANIM_NONE
-                else -> SettingsRepository.ANIM_EXPRESSIVE
-            }
-            settings.setAnimationStyle(style)
-            updateAnimLabel()
-        }
+        binding.itemIconShape.setOnClickListener { showIconShapeDialog() }
+        binding.itemAnimStyle.setOnClickListener { showAnimStyleDialog() }
 
         buildDotColorPicker()
-
-        binding.searchModeApps.isChecked = settings.searchMode.value == SettingsRepository.MODE_APPS
-        binding.searchModeGoogle.isChecked = settings.searchMode.value == SettingsRepository.MODE_GOOGLE
-        binding.searchModeGroup.setOnCheckedChangeListener { _, id ->
-            when (id) {
-                R.id.searchModeApps -> settings.setSearchMode(SettingsRepository.MODE_APPS)
-                R.id.searchModeGoogle -> settings.setSearchMode(SettingsRepository.MODE_GOOGLE)
-            }
-        }
-
-        // v20: drawer layout
-        when (settings.drawerLayout.value) {
-            SettingsRepository.DRAWER_GRID3 -> binding.drawerLayoutGrid3.isChecked = true
-            SettingsRepository.DRAWER_GRID4 -> binding.drawerLayoutGrid4.isChecked = true
-            SettingsRepository.DRAWER_GRID5 -> binding.drawerLayoutGrid5.isChecked = true
-            SettingsRepository.DRAWER_LIST -> binding.drawerLayoutList.isChecked = true
-        }
-        binding.drawerLayoutGroup.setOnCheckedChangeListener { _, id ->
-            val layout = when (id) {
-                R.id.drawerLayoutGrid3 -> SettingsRepository.DRAWER_GRID3
-                R.id.drawerLayoutGrid5 -> SettingsRepository.DRAWER_GRID5
-                R.id.drawerLayoutList -> SettingsRepository.DRAWER_LIST
-                else -> SettingsRepository.DRAWER_GRID4
-            }
-            settings.setDrawerLayout(layout)
-        }
-
-        // v22: folder bg
-        when (settings.folderBgStyle.value) {
-            SettingsRepository.FOLDER_BG_TRANSPARENT -> binding.folderBgTransparent.isChecked = true
-            SettingsRepository.FOLDER_BG_DARK -> binding.folderBgDark.isChecked = true
-            SettingsRepository.FOLDER_BG_LIGHT -> binding.folderBgLight.isChecked = true
-            else -> binding.folderBgSystem.isChecked = true
-        }
-        updateFolderBgLabel()
-        binding.folderBgGroup.setOnCheckedChangeListener { _, id ->
-            val style = when (id) {
-                R.id.folderBgTransparent -> SettingsRepository.FOLDER_BG_TRANSPARENT
-                R.id.folderBgDark -> SettingsRepository.FOLDER_BG_DARK
-                R.id.folderBgLight -> SettingsRepository.FOLDER_BG_LIGHT
-                else -> SettingsRepository.FOLDER_BG_SYSTEM
-            }
-            settings.setFolderBgStyle(style)
-            updateFolderBgLabel()
-        }
-
-        // v23: badge mode
-        when (settings.notificationBadgeMode.value) {
-            SettingsRepository.BADGE_COUNT -> binding.badgeCount.isChecked = true
-            SettingsRepository.BADGE_OFF -> binding.badgeOff.isChecked = true
-            else -> binding.badgeDot.isChecked = true
-        }
-        updateBadgeLabel()
-        binding.badgeModeGroup.setOnCheckedChangeListener { _, id ->
-            val mode = when (id) {
-                R.id.badgeCount -> SettingsRepository.BADGE_COUNT
-                R.id.badgeOff -> SettingsRepository.BADGE_OFF
-                else -> SettingsRepository.BADGE_DOT
-            }
-            settings.setNotificationBadgeMode(mode)
-            updateBadgeLabel()
-        }
-
-        when (settings.searchBarStyle.value) {
-            SettingsRepository.STYLE_SYSTEM -> binding.styleSystem.isChecked = true
-            SettingsRepository.STYLE_TRANSPARENT -> binding.styleTransparent.isChecked = true
-            SettingsRepository.STYLE_DARK -> binding.styleDark.isChecked = true
-            SettingsRepository.STYLE_LIGHT -> binding.styleLight.isChecked = true
-        }
-        updateStyleLabel()
-        binding.searchStyleGroup.setOnCheckedChangeListener { _, id ->
-            val style = when (id) {
-                R.id.styleSystem -> SettingsRepository.STYLE_SYSTEM
-                R.id.styleTransparent -> SettingsRepository.STYLE_TRANSPARENT
-                R.id.styleDark -> SettingsRepository.STYLE_DARK
-                R.id.styleLight -> SettingsRepository.STYLE_LIGHT
-                else -> SettingsRepository.STYLE_SYSTEM
-            }
-            settings.setSearchBarStyle(style)
-            updateStyleLabel()
-        }
+        binding.itemSearchMode.setOnClickListener { showSearchModeDialog() }
+        binding.itemDrawerLayout.setOnClickListener { showDrawerLayoutDialog() }
+        binding.itemFolderBg.setOnClickListener { showFolderBgDialog() }
+        binding.itemBadgeMode.setOnClickListener { showBadgeModeDialog() }
+        binding.itemSearchStyle.setOnClickListener { showSearchStyleDialog() }
 
         binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
         binding.switchShowWidget.setOnCheckedChangeListener { _, c -> settings.setShowWidgetSlot(c) }
@@ -242,6 +130,32 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
         binding.switchHaptic.setOnCheckedChangeListener { _, c -> settings.setHapticEnabled(c) }
+
+        // v68: observers per aggiornamento subtitle in tempo reale
+        settings.iconShape.observe(this) { updateShapeLabel() }
+        settings.animationStyle.observe(this) { updateAnimLabel() }
+        settings.searchMode.observe(this) { updateSearchModeLabel() }
+        settings.searchBarStyle.observe(this) { updateStyleLabel() }
+        settings.drawerLayout.observe(this) { updateDrawerLayoutLabel() }
+        settings.folderBgStyle.observe(this) { updateFolderBgLabel() }
+        settings.notificationBadgeMode.observe(this) { updateBadgeLabel() }
+        settings.recommendedPosition.observe(this) { updateRecPosLabel() }
+        settings.recommendedCount.observe(this) { updateRecCountLabel() }
+        // Già presenti come label di tema
+        settings.searchTheme.observe(this) { updateSearchThemeLabel() }
+        settings.drawerTheme.observe(this) { updateDrawerThemeLabel() }
+        settings.dockTheme.observe(this) { updateDockThemeLabel() }
+        settings.widgetTheme.observe(this) { updateWidgetThemeLabel() }
+        // Inizializzo i label
+        updateShapeLabel()
+        updateAnimLabel()
+        updateSearchModeLabel()
+        updateStyleLabel()
+        updateDrawerLayoutLabel()
+        updateFolderBgLabel()
+        updateBadgeLabel()
+        updateRecPosLabel()
+        updateRecCountLabel()
         binding.switchSwipeDown.isChecked = settings.swipeDownNotifications.value == true
         binding.switchSwipeDown.setOnCheckedChangeListener { _, c -> settings.setSwipeDownNotifications(c) }
         binding.switchDoubleTapLock.isChecked = settings.doubleTapLock.value == true
@@ -339,36 +253,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchLandscape.setOnCheckedChangeListener { _, on ->
             settings.setLandscapeAllowed(on)
         }
-
-        // v32: recommendedPosition
-        when (settings.recommendedPosition.value) {
-            SettingsRepository.REC_POS_BOTTOM -> binding.recPosBottom.isChecked = true
-            else -> binding.recPosTop.isChecked = true
-        }
-        updateRecPosLabel()
-        binding.recommendedPositionGroup.setOnCheckedChangeListener { _, id ->
-            val pos = when (id) {
-                R.id.recPosBottom -> SettingsRepository.REC_POS_BOTTOM
-                else -> SettingsRepository.REC_POS_TOP
-            }
-            settings.setRecommendedPosition(pos)
-            updateRecPosLabel()
-        }
-
-        // v37: recommendedCount (4 o 5)
-        when (settings.recommendedCount.value) {
-            4 -> binding.recCount4.isChecked = true
-            else -> binding.recCount5.isChecked = true
-        }
-        updateRecCountLabel()
-        binding.recommendedCountGroup.setOnCheckedChangeListener { _, id ->
-            val n = when (id) {
-                R.id.recCount4 -> 4
-                else -> 5
-            }
-            settings.setRecommendedCount(n)
-            updateRecCountLabel()
-        }
+        binding.itemRecommendedPosition.setOnClickListener { showRecommendedPositionDialog() }
+        binding.itemRecommendedCount.setOnClickListener { showRecommendedCountDialog() }
 
         // v38: language picker
         updateLanguageLabel()
@@ -713,4 +599,212 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.styleValueLabel.text = text
     }
+
+    private fun updateSearchModeLabel() {
+        val v = settings.searchMode.value
+        binding.searchModeLabel.text = when (v) {
+            SettingsRepository.MODE_APPS -> getString(R.string.settings_search_apps)
+            SettingsRepository.MODE_GOOGLE -> getString(R.string.settings_search_google)
+            else -> getString(R.string.settings_search_apps)
+        }
+    }
+
+    private fun updateDrawerLayoutLabel() {
+        val v = settings.drawerLayout.value
+        binding.drawerLayoutLabel.text = when (v) {
+            SettingsRepository.DRAWER_GRID3 -> getString(R.string.drawer_grid3)
+            SettingsRepository.DRAWER_GRID4 -> getString(R.string.drawer_grid4)
+            SettingsRepository.DRAWER_GRID5 -> getString(R.string.drawer_grid5)
+            SettingsRepository.DRAWER_LIST -> getString(R.string.drawer_list)
+            else -> getString(R.string.drawer_list)
+        }
+    }
+
+    // ============================================================
+    // v68: dialog selettori (sostituiscono i RadioGroup)
+    // ============================================================
+
+    /**
+     * Helper generico: mostra dialog con scelta singola tra opzioni.
+     * @param titleRes resource del titolo
+     * @param labels lista delle label da mostrare
+     * @param values lista valori (parallela a labels) da passare a onPicked
+     * @param current valore attualmente selezionato
+     * @param onPicked callback con il valore scelto
+     */
+    private fun <T> showSelectionDialog(
+        titleRes: Int,
+        labels: Array<String>,
+        values: Array<T>,
+        current: T,
+        onPicked: (T) -> Unit
+    ) {
+        val sel = values.indexOf(current).coerceAtLeast(0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(titleRes)
+            .setSingleChoiceItems(labels, sel) { dialog, which ->
+                onPicked(values[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showIconShapeDialog() {
+        showSelectionDialog(
+            R.string.settings_icon_shape,
+            arrayOf(
+                getString(R.string.shape_original),
+                getString(R.string.shape_circle),
+                getString(R.string.shape_squircle),
+                getString(R.string.shape_square),
+                getString(R.string.shape_teardrop)
+            ),
+            arrayOf(
+                SettingsRepository.SHAPE_ORIGINAL,
+                SettingsRepository.SHAPE_CIRCLE,
+                SettingsRepository.SHAPE_SQUIRCLE,
+                SettingsRepository.SHAPE_SQUARE,
+                SettingsRepository.SHAPE_TEARDROP
+            ),
+            settings.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
+        ) { settings.setIconShape(it) }
+    }
+
+    private fun showAnimStyleDialog() {
+        showSelectionDialog(
+            R.string.settings_anim_style,
+            arrayOf(
+                getString(R.string.anim_expressive),
+                getString(R.string.anim_standard),
+                getString(R.string.anim_none)
+            ),
+            arrayOf(
+                SettingsRepository.ANIM_EXPRESSIVE,
+                SettingsRepository.ANIM_STANDARD,
+                SettingsRepository.ANIM_NONE
+            ),
+            settings.animationStyle.value ?: SettingsRepository.ANIM_EXPRESSIVE
+        ) { settings.setAnimationStyle(it) }
+    }
+
+    private fun showSearchModeDialog() {
+        showSelectionDialog(
+            R.string.settings_search_mode,
+            arrayOf(
+                getString(R.string.settings_search_apps),
+                getString(R.string.settings_search_google)
+            ),
+            arrayOf(
+                SettingsRepository.MODE_APPS,
+                SettingsRepository.MODE_GOOGLE
+            ),
+            settings.searchMode.value ?: SettingsRepository.MODE_APPS
+        ) { settings.setSearchMode(it) }
+    }
+
+    private fun showSearchStyleDialog() {
+        showSelectionDialog(
+            R.string.settings_searchbar_style,
+            arrayOf(
+                getString(R.string.style_system),
+                getString(R.string.style_transparent),
+                getString(R.string.style_dark),
+                getString(R.string.style_light)
+            ),
+            arrayOf(
+                SettingsRepository.STYLE_SYSTEM,
+                SettingsRepository.STYLE_TRANSPARENT,
+                SettingsRepository.STYLE_DARK,
+                SettingsRepository.STYLE_LIGHT
+            ),
+            settings.searchBarStyle.value ?: SettingsRepository.STYLE_SYSTEM
+        ) { settings.setSearchBarStyle(it) }
+    }
+
+    private fun showDrawerLayoutDialog() {
+        showSelectionDialog(
+            R.string.settings_drawer_layout,
+            arrayOf(
+                getString(R.string.drawer_grid3),
+                getString(R.string.drawer_grid4),
+                getString(R.string.drawer_grid5),
+                getString(R.string.drawer_list)
+            ),
+            arrayOf(
+                SettingsRepository.DRAWER_GRID3,
+                SettingsRepository.DRAWER_GRID4,
+                SettingsRepository.DRAWER_GRID5,
+                SettingsRepository.DRAWER_LIST
+            ),
+            settings.drawerLayout.value ?: SettingsRepository.DRAWER_LIST
+        ) { settings.setDrawerLayout(it) }
+    }
+
+    private fun showFolderBgDialog() {
+        showSelectionDialog(
+            R.string.settings_folder_bg,
+            arrayOf(
+                getString(R.string.folder_bg_system),
+                getString(R.string.folder_bg_transparent),
+                getString(R.string.folder_bg_light),
+                getString(R.string.folder_bg_dark)
+            ),
+            arrayOf(
+                SettingsRepository.FOLDER_BG_SYSTEM,
+                SettingsRepository.FOLDER_BG_TRANSPARENT,
+                SettingsRepository.FOLDER_BG_LIGHT,
+                SettingsRepository.FOLDER_BG_DARK
+            ),
+            settings.folderBgStyle.value ?: SettingsRepository.FOLDER_BG_SYSTEM
+        ) { settings.setFolderBgStyle(it) }
+    }
+
+    private fun showBadgeModeDialog() {
+        showSelectionDialog(
+            R.string.settings_badge_mode,
+            arrayOf(
+                getString(R.string.badge_off),
+                getString(R.string.badge_dot),
+                getString(R.string.badge_count)
+            ),
+            arrayOf(
+                SettingsRepository.BADGE_OFF,
+                SettingsRepository.BADGE_DOT,
+                SettingsRepository.BADGE_COUNT
+            ),
+            settings.notificationBadgeMode.value ?: SettingsRepository.BADGE_DOT
+        ) { settings.setNotificationBadgeMode(it) }
+    }
+
+    private fun showRecommendedPositionDialog() {
+        showSelectionDialog(
+            R.string.settings_recommended_position,
+            arrayOf(
+                getString(R.string.recommended_pos_top),
+                getString(R.string.recommended_pos_bottom)
+            ),
+            arrayOf(
+                SettingsRepository.REC_POS_TOP,
+                SettingsRepository.REC_POS_BOTTOM
+            ),
+            settings.recommendedPosition.value ?: SettingsRepository.REC_POS_BOTTOM
+        ) { settings.setRecommendedPosition(it) }
+    }
+
+    private fun showRecommendedCountDialog() {
+        showSelectionDialog(
+            R.string.settings_recommended_count,
+            arrayOf(
+                getString(R.string.recommended_count_4),
+                getString(R.string.recommended_count_5)
+            ),
+            arrayOf(4, 5),
+            settings.recommendedCount.value ?: 5
+        ) { settings.setRecommendedCount(it) }
+    }
+
 }
