@@ -1,6 +1,7 @@
 package org.cheipstudio.speedlauncher
 
 import android.app.Application
+import com.google.android.material.color.DynamicColors
 import org.cheipstudio.speedlauncher.data.AppRepository
 import org.cheipstudio.speedlauncher.data.AppUsageTracker
 import org.cheipstudio.speedlauncher.data.SettingsRepository
@@ -27,6 +28,8 @@ class SpeedApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        // v113: Material You — accent color del sistema applicato a tutte le activities
+        DynamicColors.applyToActivitiesIfAvailable(this)
         settingsRepository = SettingsRepository(this)
         appRepository = AppRepository(this)
         notificationCounter = NotificationCounter()

@@ -469,8 +469,11 @@ class HomeView @JvmOverloads constructor(
 
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
-        // v69: rispetto il toggle showSearchBar invece di forzare VISIBLE
-        binding.searchBar.visibility = if (settings.showSearchBar.value != false) View.VISIBLE else View.GONE
+        // v113: barra ricerca nascosta se drawer disabilitato (anche se showSearchBar è true)
+        // perché senza drawer la barra non ha funzione (apre il drawer che non esiste)
+        val drawerOn = settings.drawerEnabled.value != false
+        val searchBarVisible = drawerOn && settings.showSearchBar.value != false
+        binding.searchBar.visibility = if (searchBarVisible) View.VISIBLE else View.GONE
         updateSearchBarText()
         applySearchBarStyle()
         applyAnimationStyle()

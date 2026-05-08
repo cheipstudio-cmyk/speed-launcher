@@ -655,13 +655,38 @@ class SettingsActivity : AppCompatActivity() {
         val store = org.cheipstudio.speedlauncher.data.HomeLayoutStore(this)
         if (drawerEnabled) {
             org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.removeAutoAdded(store)
+            forceRestartApp()
         } else {
             val cols = settings.gridCols.value ?: 4
             val rows = settings.gridRows.value ?: 5
-            org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
+            // v113: aspetto che apps siano caricate prima di popolare,
+            // altrimenti populate riceve lista vuota e non aggiunge nulla.
+            val appRepo = org.cheipstudio.speedlauncher.SpeedApp.instance.appRepository
+            val current = appRepo.apps.value
+            if (current != null && current.isNotEmpty()) {
+                org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
+                forceRestartApp()
+            } else {
+                // Aspetto la prima emission popolata, max 3 secondi
+                val observer = object : androidx.lifecycle.Observer<List<org.cheipstudio.speedlauncher.data.AppInfo>> {
+                    override fun onChanged(apps: List<org.cheipstudio.speedlauncher.data.AppInfo>) {
+                        if (apps.isNotEmpty()) {
+                            appRepo.apps.removeObserver(this)
+                            org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
+                            forceRestartApp()
+                        }
+                    }
+                }
+                appRepo.apps.observeForever(observer)
+                // Forza reload se non sono ancora caricate
+                appRepo.reload()
+                // Safety: se non arriva nulla in 3s, restart comunque
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    appRepo.apps.removeObserver(observer)
+                    forceRestartApp()
+                }, 3000)
+            }
         }
-        // Restart per riapplicare il layout
-        forceRestartApp()
     }
 
     /** v85: dialog di conferma + reset griglia automatica */
