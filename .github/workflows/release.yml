@@ -84,3 +84,4 @@ jobs:
             dall'app: Impostazioni → Controlla aggiornamenti.
           draft: false
           prerelease: false
+          make_latest: "true"
