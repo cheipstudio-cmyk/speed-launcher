@@ -150,9 +150,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     private fun applyFilter(q: String) {
         val normalized = normalize(q)
         val hidden = SpeedApp.instance.settingsRepository.hiddenApps.value ?: mutableSetOf()
-        val ownPkg = context?.packageName ?: ""
-        // v55: backup filter — Speed Launcher non deve mai apparire nel proprio drawer
-        val visible = allApps.filter { !hidden.contains(it.key) && it.packageName != ownPkg }
+        val visible = allApps.filter { !hidden.contains(it.key) }
         val filtered = if (normalized.isBlank()) visible
         else visible.filter { normalize(it.label).contains(normalized) }
         adapter.submitList(filtered) {
@@ -174,14 +172,46 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             sheet?.let {
                 val behavior = BottomSheetBehavior.from(it)
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                // v57: configurazione che forza chiusura con UN solo swipe (no peek state)
+                behavior.peekHeight = 0
+                behavior.isFitToContents = true
                 behavior.skipCollapsed = true
                 behavior.isHideable = true
+                behavior.halfExpandedRatio = 0.0001f  // niente half-expanded
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+
+                // v57: applica tema drawer (transparent/light/dark/system)
+                val theme = SpeedApp.instance.settingsRepository.drawerTheme.value ?: "system"
+                val isLight = when (theme) {
+                    "light" -> true
+                    "dark" -> false
+                    "transparent" -> false
+                    else -> {
+                        val nm = resources.configuration.uiMode and
+                            android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                        nm != android.content.res.Configuration.UI_MODE_NIGHT_YES
+                    }
+                }
+                val bgColor = when (theme) {
+                    "transparent" -> android.graphics.Color.argb(220, 0, 0, 0)
+                    "light" -> android.graphics.Color.argb(245, 245, 245, 245)
+                    "dark" -> android.graphics.Color.argb(245, 27, 27, 31)
+                    else -> if (isLight) android.graphics.Color.argb(245, 245, 245, 245)
+                            else android.graphics.Color.argb(245, 27, 27, 31)
+                }
+                it.setBackgroundColor(bgColor)
 
                 // Slide callback per fade fluido dei contenuti durante drag
                 behavior.addBottomSheetCallback(object : com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {}
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+                        // v57: dismiss immediato a HIDDEN, e se per caso entra in COLLAPSED forza HIDDEN
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                            try { dismissAllowingStateLoss() } catch (_: Throwable) {}
+                        } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                            behavior.state = BottomSheetBehavior.STATE_HIDDEN
+                        }
+                    }
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
                         // slideOffset: -1 (hidden) → 0 (collapsed) → 1 (expanded)
                         val alpha = ((slideOffset + 1f).coerceIn(0f, 1f))

@@ -139,7 +139,7 @@
 
     <string name="settings_section_ai">وضع المشغل الذكي</string>
     <string name="settings_ai_launcher_mode">موصى به</string>
-    <string name="settings_ai_launcher_mode_sub">إظهار التطبيقات المستخدمة مؤخراً في أعلى الشاشة الرئيسية والدرج</string>
+    <string name="settings_ai_launcher_mode_sub">عرض التطبيقات الأكثر استخداما كاختصارات في الشاشة الرئيسية والدرج</string>
     <string name="settings_landscape">الوضع الأفقي (تجريبي)</string>
     <string name="settings_landscape_sub">للأجهزة اللوحية أو الاختبار فقط. قد يحدث خلل على الهواتف.</string>
     <string name="recommended_header">موصى به</string>
@@ -207,4 +207,6 @@
     <string name="settings_dock_theme">سمة الرصيف</string>
     <string name="settings_change_wallpaper">تغيير الخلفية</string>
     <string name="settings_change_wallpaper_sub">تعيين صورة كخلفية للمشغل</string>
+    <string name="settings_drawer_theme">سمة الدرج</string>
+    <string name="settings_wallpaper_blur_sub">تمويه الخلفية تجريبي. يتطلب Android 12+ مع تمكين cross-window blur (غير متوفر على جميع الأجهزة)</string>
 </resources>

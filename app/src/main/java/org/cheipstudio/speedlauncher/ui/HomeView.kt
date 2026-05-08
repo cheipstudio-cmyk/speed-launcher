@@ -627,10 +627,34 @@ class HomeView @JvmOverloads constructor(
      */
     private fun performHapticFeedbackLight() {
         if (settings.hapticEnabled.value != true) return
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+        // v56: fallback robusto. View.performHapticFeedback può tornare false se la View
+        // non ha focus al momento del gesto. Provo prima la View, se fallisce uso Vibrator diretto.
+        val viewSucceeded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            performHapticFeedback(HapticFeedbackConstants.GESTURE_START,
+                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
         } else {
-            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK,
+                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        }
+        if (!viewSucceeded) {
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    val vm = context.getSystemService(android.os.VibratorManager::class.java)
+                    val vib = vm?.defaultVibrator
+                    vib?.vibrate(android.os.VibrationEffect.createPredefined(
+                        android.os.VibrationEffect.EFFECT_TICK))
+                } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    @Suppress("DEPRECATION")
+                    val vib = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+                    vib?.vibrate(android.os.VibrationEffect.createOneShot(
+                        20L, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    val vib = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+                    @Suppress("DEPRECATION")
+                    vib?.vibrate(20L)
+                }
+            } catch (_: Throwable) {}
         }
     }
 }

@@ -87,6 +87,7 @@
     </LinearLayout>
 
     <ImageView android:id="@+id/refreshBtn"
+        android:clickable="true" android:focusable="true"
         android:layout_width="32dp" android:layout_height="32dp"
         android:layout_gravity="top|end" android:padding="6dp"
         android:background="@drawable/bg_widget_refresh_btn_light"

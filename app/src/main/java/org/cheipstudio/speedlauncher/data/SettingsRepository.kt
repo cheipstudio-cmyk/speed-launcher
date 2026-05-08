@@ -53,6 +53,7 @@ class SettingsRepository(context: Context) {
     // v48: tema search bar + tema dock raccomandate (system/transparent/light/dark)
     val searchTheme = MutableLiveData(prefs.getString(KEY_SEARCH_THEME, "system") ?: "system")
     val dockTheme = MutableLiveData(prefs.getString(KEY_DOCK_THEME, "system") ?: "system")
+    val drawerTheme = MutableLiveData(prefs.getString(KEY_DRAWER_THEME, "system") ?: "system")
 
     init {
         // v48: al primo run di v48 (dopo aggiornamento), imposta TUTTI i temi a "transparent" come default
@@ -60,6 +61,7 @@ class SettingsRepository(context: Context) {
             prefs.edit()
                 .putString(KEY_SEARCH_THEME, "transparent")
                 .putString(KEY_DOCK_THEME, "transparent")
+                .putString(KEY_DRAWER_THEME, "system")
                 .putBoolean(KEY_FIRST_THEMES_SET, true)
                 .apply()
             widgetPrefs.edit().putString(KEY_WIDGET_THEME, "transparent").apply()
@@ -169,6 +171,11 @@ class SettingsRepository(context: Context) {
         dockTheme.postValue(v)
     }
 
+    fun setDrawerTheme(v: String) {
+        prefs.edit().putString(KEY_DRAWER_THEME, v).apply()
+        drawerTheme.postValue(v)
+    }
+
     fun unhideAllApps() {
         val empty = mutableSetOf<String>()
         prefs.edit().putStringSet(KEY_HIDDEN_APPS, empty).apply()
@@ -276,6 +283,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_WIDGET_AUTO_REFRESH = "widget_auto_refresh"
         private const val KEY_SEARCH_THEME = "search_theme"
         private const val KEY_DOCK_THEME = "dock_theme"
+        private const val KEY_DRAWER_THEME = "drawer_theme"
         private const val KEY_FIRST_THEMES_SET = "first_themes_set"
 
         // Default = arancione/rosso vivace (Material 3)

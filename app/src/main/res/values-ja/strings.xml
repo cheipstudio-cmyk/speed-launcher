@@ -139,7 +139,7 @@
 
     <string name="settings_section_ai">AI ランチャーモード</string>
     <string name="settings_ai_launcher_mode">おすすめ</string>
-    <string name="settings_ai_launcher_mode_sub">最近よく使うアプリをホームとドロワーの上部に表示</string>
+    <string name="settings_ai_launcher_mode_sub">よく使うアプリをホームとドロワーにショートカットとして表示</string>
     <string name="settings_landscape">横向きモード (実験的)</string>
     <string name="settings_landscape_sub">タブレットまたはテスト専用。スマートフォンでは不具合が出る可能性。</string>
     <string name="recommended_header">おすすめ</string>
@@ -207,4 +207,6 @@
     <string name="settings_dock_theme">ドックのテーマ</string>
     <string name="settings_change_wallpaper">壁紙を変更</string>
     <string name="settings_change_wallpaper_sub">ランチャーの背景に画像を設定</string>
+    <string name="settings_drawer_theme">ドロワーのテーマ</string>
+    <string name="settings_wallpaper_blur_sub">背景のぼかし(試験運用)。Android 12 以降で cross-window blur 有効が必要(全機種非対応)。</string>
 </resources>

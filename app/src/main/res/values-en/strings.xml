@@ -161,7 +161,7 @@
 
     <string name="settings_section_ai">AI Launcher Mode</string>
     <string name="settings_ai_launcher_mode">Recommended</string>
-    <string name="settings_ai_launcher_mode_sub">Show most recently used apps at the top of home and drawer</string>
+    <string name="settings_ai_launcher_mode_sub">Show your most-used apps as shortcuts on home and in the drawer</string>
     <string name="settings_landscape">Landscape mode (experimental)</string>
     <string name="settings_landscape_sub">Tablets or testing only. May glitch on phones.</string>
     <string name="recommended_header">Recommended</string>
@@ -229,4 +229,6 @@ It will only be used for this feature.</string>
     <string name="settings_dock_theme">Dock theme</string>
     <string name="settings_change_wallpaper">Change wallpaper</string>
     <string name="settings_change_wallpaper_sub">Set an image as the launcher background</string>
+    <string name="settings_drawer_theme">Drawer theme</string>
+    <string name="settings_wallpaper_blur_sub">Experimental wallpaper blur. Requires Android 12+ with cross-window blur enabled (not available on all devices)</string>
 </resources>

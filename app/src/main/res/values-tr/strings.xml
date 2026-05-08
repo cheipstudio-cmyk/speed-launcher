@@ -139,7 +139,7 @@
 
     <string name="settings_section_ai">AI Başlatıcı Modu</string>
     <string name="settings_ai_launcher_mode">Önerilenler</string>
-    <string name="settings_ai_launcher_mode_sub">En son kullanılan uygulamaları ana ekran ve çekmecenin üstünde göster</string>
+    <string name="settings_ai_launcher_mode_sub">En çok kullanılan uygulamaları ana ekranda ve çekmecede kısayol olarak göster</string>
     <string name="settings_landscape">Yatay mod (deneysel)</string>
     <string name="settings_landscape_sub">Yalnızca tablet veya test. Telefonlarda hata verebilir.</string>
     <string name="recommended_header">Önerilenler</string>
@@ -207,4 +207,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_dock_theme">Dock teması</string>
     <string name="settings_change_wallpaper">Duvar kağıdını değiştir</string>
     <string name="settings_change_wallpaper_sub">Launcher arka planı olarak bir resim ayarla</string>
+    <string name="settings_drawer_theme">Çekmece teması</string>
+    <string name="settings_wallpaper_blur_sub">Deneysel duvar kağıdı bulanıklığı. Cross-window blur etkin Android 12+ gerektirir (tüm cihazlarda yok)</string>
 </resources>

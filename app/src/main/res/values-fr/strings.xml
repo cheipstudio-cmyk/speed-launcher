@@ -139,7 +139,7 @@
 
     <string name="settings_section_ai">Mode IA</string>
     <string name="settings_ai_launcher_mode">Recommandées</string>
-    <string name="settings_ai_launcher_mode_sub">Affiche les apps les plus utilisées récemment en haut de l\'accueil et du tiroir</string>
+    <string name="settings_ai_launcher_mode_sub">Affiche les apps les plus utilisées comme raccourcis sur l\'accueil et dans le tiroir</string>
     <string name="settings_landscape">Mode paysage (expérimental)</string>
     <string name="settings_landscape_sub">Tablettes ou tests uniquement. Peut bugger sur téléphone.</string>
     <string name="recommended_header">Recommandées</string>
@@ -207,4 +207,6 @@ Il sera utilisé uniquement pour cette fonction.</string>
     <string name="settings_dock_theme">Thème du dock</string>
     <string name="settings_change_wallpaper">Changer le fond</string>
     <string name="settings_change_wallpaper_sub">Définir une image comme fond du launcher</string>
+    <string name="settings_drawer_theme">Thème du tiroir</string>
+    <string name="settings_wallpaper_blur_sub">Flou expérimental du fond. Nécessite Android 12+ avec cross-window blur activé (pas disponible sur tous les appareils)</string>
 </resources>

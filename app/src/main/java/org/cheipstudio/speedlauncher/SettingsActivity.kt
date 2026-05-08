@@ -402,6 +402,10 @@ class SettingsActivity : AppCompatActivity() {
         updateDockThemeLabel()
         binding.itemDockTheme.setOnClickListener { showDockThemeDialog() }
 
+        // === v57: TEMA DRAWER ===
+        updateDrawerThemeLabel()
+        binding.itemDrawerTheme.setOnClickListener { showDrawerThemeDialog() }
+
         // === v47: WIDGET SPEED STATS ===
         updateWidgetThemeLabel()
         binding.itemWidgetTheme.setOnClickListener { showWidgetThemeDialog() }
@@ -547,6 +551,19 @@ class SettingsActivity : AppCompatActivity() {
             settings.searchTheme.value ?: "system") { picked ->
             settings.setSearchTheme(picked)
             updateSearchThemeLabel()
+        }
+    }
+
+    private fun updateDrawerThemeLabel() {
+        val current = settings.drawerTheme.value ?: "system"
+        binding.drawerThemeValue.text = themeLabel(current)
+    }
+
+    private fun showDrawerThemeDialog() {
+        showGenericThemeDialog(R.string.settings_drawer_theme,
+            settings.drawerTheme.value ?: "system") { picked ->
+            settings.setDrawerTheme(picked)
+            updateDrawerThemeLabel()
         }
     }
 

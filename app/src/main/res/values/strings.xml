@@ -161,7 +161,7 @@
 
     <string name="settings_section_ai">AI Launcher Mode</string>
     <string name="settings_ai_launcher_mode">Raccomandate</string>
-    <string name="settings_ai_launcher_mode_sub">Mostra le app più usate di recente in cima alla home e al drawer</string>
+    <string name="settings_ai_launcher_mode_sub">Mostra le app più usate di recente come scorciatoie sulla home e nel drawer</string>
     <string name="settings_landscape">Modalità orizzontale (sperimentale)</string>
     <string name="settings_landscape_sub">Solo per tablet o test. Su telefoni il layout può glitchare.</string>
     <string name="recommended_header">Raccomandate</string>
@@ -229,4 +229,6 @@ Si userà solo per questa funzione.</string>
     <string name="settings_dock_theme">Tema dock raccomandate</string>
     <string name="settings_change_wallpaper">Cambia sfondo</string>
     <string name="settings_change_wallpaper_sub">Imposta un\'immagine come sfondo del launcher</string>
+    <string name="settings_drawer_theme">Tema drawer</string>
+    <string name="settings_wallpaper_blur_sub">Sfocatura sperimentale dello sfondo. Richiede Android 12+ con cross-window blur abilitato (non disponibile su tutti i device)</string>
 </resources>

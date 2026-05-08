@@ -114,14 +114,19 @@ class RecommendedView @JvmOverloads constructor(
      * Effetto: man mano che il drawer si chiude (offset cala), la card svanisce e scivola in alto.
      */
     fun applyDrawerSlide(slideOffset: Float) {
+        // v56: effetto parallasse più visibile.
+        // slideOffset: -1 (hidden) → 0 (collapsed/peek) → 1 (expanded)
         val s = slideOffset.coerceIn(-1f, 1f)
-        val visibleProgress = ((s + 1f) / 2f).coerceIn(0f, 1f)  // 0..1
-        // alpha: 0 quando collassato, 1 quando espanso, parallax sul translate
-        alpha = visibleProgress
-        // parallax: si solleva di -32dp quando scompare
-        translationY = -(1f - visibleProgress) * (32 * density)
-        // scala leggera per profondità
-        val sc = 0.9f + 0.1f * visibleProgress
+        // Parallax progress: visibile da 0 (peek) a 1 (expanded)
+        // Curva non lineare per dare effetto "scorrimento" più evidente
+        val raw = ((s).coerceIn(0f, 1f))
+        val visibleProgress = raw  // 0..1 lineare
+        // Alpha: ben visibile da subito, ma fade fino a 0.3 quando in peek
+        alpha = 0.3f + 0.7f * visibleProgress
+        // Parallax: scivola verso il basso di +56dp quando in peek (più drammatico)
+        translationY = (1f - visibleProgress) * (56f * density)
+        // Scala più marcata per profondità
+        val sc = 0.85f + 0.15f * visibleProgress
         scaleX = sc; scaleY = sc
     }
 
