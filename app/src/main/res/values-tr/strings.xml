@@ -256,4 +256,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="auto_grid_reset_confirm_title">Izgarayı sıfırla?</string>
     <string name="auto_grid_reset_confirm_msg">Mevcut ana ekran düzenini temizleyecek ve tüm uygulamalarla alfabetik olarak yeniden oluşturacak.</string>
     <string name="auto_grid_reset_done">Izgara yeniden oluşturuldu</string>
+    <string name="settings_auto_add_new_apps">Yeni uygulamaları ana ekrana ekle</string>
+    <string name="settings_auto_add_new_apps_sub">Yeni yüklenen uygulamalar otomatik olarak ana ekranda görünür</string>
 </resources>

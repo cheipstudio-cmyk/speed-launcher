@@ -241,7 +241,7 @@ class RecommendedView @JvmOverloads constructor(
         cell.addView(label)
 
         cell.setOnClickListener { onAppClick?.invoke(app) }
-        cell.setOnLongClickListener { onAppLongPress?.invoke(app); true }
+        // v87: rimosso onLongClickListener — niente modal sulla dock raccomandate
         return cell
     }
 

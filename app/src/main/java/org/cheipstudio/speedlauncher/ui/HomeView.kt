@@ -108,6 +108,21 @@ class HomeView @JvmOverloads constructor(
     })
 
     init {
+        // v88: wire auto-add per nuove app installate
+        SpeedApp.instance.appRepository.onNewPackageInstalled = { appKey ->
+            if (settings.autoAddNewApps.value == true) {
+                val store = org.cheipstudio.speedlauncher.data.HomeLayoutStore(context)
+                val cols = settings.gridCols.value ?: 4
+                val rows = settings.gridRows.value ?: 5
+                val added = org.cheipstudio.speedlauncher.tools.HomeAutoPopulator
+                    .addSingleApp(store, appKey, cols, rows)
+                if (added) {
+                    // Reload pages dal disk
+                    post { reloadAllPagesFromStore() }
+                }
+            }
+        }
+
         // v26: aggiungo overlay per fade al drawer
         addView(fadeOverlay)
 
@@ -400,7 +415,19 @@ class HomeView @JvmOverloads constructor(
 
         targetGrid.handleIncomingDrop(key, fromGrid, fromIdx, targetIdx)
         maybeCreateNextPage()
-        post { trimEmptyPages() }
+        // v88: snap alla pagina di destinazione + refresh indicator forzato.
+        // Prima, droppando su una nuova pagina, l\'utente non la vedeva
+        // finché non scrollava manualmente.
+        post {
+            trimEmptyPages()
+            updatePageIndicator()
+            if (binding.pagedHome.currentPage != targetPage) {
+                binding.pagedHome.snapToPage(targetPage, true)
+            }
+            // Refresh visuale grid per far apparire subito l\'icona droppata
+            targetGrid.invalidate()
+            targetGrid.requestLayout()
+        }
     }
 
     private fun openFolder(folder: HomeItem) {
@@ -560,6 +587,23 @@ class HomeView @JvmOverloads constructor(
         for (page in pages) page.refresh(apps)
         maybeCreateNextPage()
         refreshRecommended()
+    }
+
+    /**
+     * v88: ricarica tutte le pagine dal layoutStore.
+     * Usato dopo addSingleApp (auto-add nuove app installate) per
+     * far apparire subito la nuova app senza riavvio.
+     */
+    fun reloadAllPagesFromStore() {
+        val apps = SpeedApp.instance.appRepository.apps.value ?: return
+        // Trova max page nel layout
+        val items = layoutStore.load()
+        val maxPage = items.maxOfOrNull { it.page } ?: 0
+        // Espandi pages se serve
+        ensurePageExists(maxPage)
+        // Refresh ogni pagina
+        for (page in pages) page.refresh(apps)
+        updatePageIndicator()
     }
 
     /** v32: aggiorna la sezione Raccomandate se AI mode è attivo + posizione top/bottom */

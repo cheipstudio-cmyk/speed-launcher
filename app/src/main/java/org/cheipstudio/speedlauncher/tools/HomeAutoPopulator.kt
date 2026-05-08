@@ -72,6 +72,43 @@ object HomeAutoPopulator {
     }
 
     /**
+     * v88: aggiunge una singola app appena installata al primo slot vuoto disponibile.
+     * Se non c'è slot, crea nuova pagina. Marca come autoAdded così se l'utente
+     * disabilita l'opzione "auto-add" può rimuoverla.
+     */
+    fun addSingleApp(store: HomeLayoutStore, appKey: String, gridCols: Int, gridRows: Int): Boolean {
+        val current = store.load().toMutableList()
+        val presentKeys = collectPresentKeys(current)
+        if (presentKeys.contains(appKey)) return false  // già presente
+
+        // Cerco primo slot vuoto in pagine esistenti
+        val occupiedByPage = current.groupBy { it.page }
+            .mapValues { (_, items) -> items.map { it.cellX to it.cellY }.toSet() }
+        val maxPage = current.maxOfOrNull { it.page } ?: -1
+
+        for (page in 0..(maxPage + 1).coerceAtMost(50)) {
+            val occupied = occupiedByPage[page] ?: emptySet()
+            for (y in 0 until gridRows) {
+                for (x in 0 until gridCols) {
+                    if (!occupied.contains(x to y)) {
+                        current.add(HomeItem(
+                            key = appKey,
+                            page = page,
+                            cellX = x,
+                            cellY = y,
+                            type = HomeItem.TYPE_APP,
+                            autoAdded = true
+                        ))
+                        store.save(current)
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    /**
      * Rimuove tutti gli item con autoAdded=true. Chiamare quando l'utente riabilita il drawer.
      * Mantiene tutte le personalizzazioni manuali.
      */

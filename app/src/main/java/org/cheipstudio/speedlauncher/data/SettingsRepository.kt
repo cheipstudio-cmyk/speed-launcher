@@ -74,6 +74,9 @@ class SettingsRepository(context: Context) {
     /** v85: drawer abilitato. Se false, tutte le app vengono auto-popolate in home (stile iOS). */
     val drawerEnabled = MutableLiveData(prefs.getBoolean(KEY_DRAWER_ENABLED, true))
 
+    /** v88: aggiungi automaticamente nuove app installate alla home */
+    val autoAddNewApps = MutableLiveData(prefs.getBoolean(KEY_AUTO_ADD_NEW_APPS, false))
+
     init {
         // v48: al primo run di v48 (dopo aggiornamento), imposta TUTTI i temi a "transparent" come default
         if (!prefs.getBoolean(KEY_FIRST_THEMES_SET, false)) {
@@ -219,6 +222,11 @@ class SettingsRepository(context: Context) {
         // se usiamo apply() async la pref può non essere persistita.
         prefs.edit().putBoolean(KEY_DRAWER_ENABLED, enabled).commit()
         drawerEnabled.postValue(enabled)
+    }
+
+    fun setAutoAddNewApps(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_ADD_NEW_APPS, enabled).apply()
+        autoAddNewApps.postValue(enabled)
     }
 
     fun unhideAllApps() {
@@ -375,6 +383,7 @@ class SettingsRepository(context: Context) {
         const val REC_MODE_AI = "ai"
         const val REC_MODE_MANUAL = "manual"
         private const val KEY_DRAWER_ENABLED = "drawer_enabled"
+        private const val KEY_AUTO_ADD_NEW_APPS = "auto_add_new_apps"
         private const val KEY_FIRST_THEMES_SET = "first_themes_set"
 
         // Default = arancione/rosso vivace (Material 3)

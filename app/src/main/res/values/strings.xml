@@ -278,4 +278,6 @@ Vuoi scaricarla?</string>
     <string name="auto_grid_reset_confirm_title">Reset griglia?</string>
     <string name="auto_grid_reset_confirm_msg">Cancellerà la disposizione attuale della home e la ricreerà con tutte le app in ordine alfabetico.</string>
     <string name="auto_grid_reset_done">Griglia rigenerata</string>
+    <string name="settings_auto_add_new_apps">Aggiungi nuove app in home</string>
+    <string name="settings_auto_add_new_apps_sub">Le app appena installate appaiono automaticamente in home</string>
 </resources>

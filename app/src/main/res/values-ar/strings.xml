@@ -256,4 +256,6 @@
     <string name="auto_grid_reset_confirm_title">إعادة تعيين الشبكة؟</string>
     <string name="auto_grid_reset_confirm_msg">سيتم مسح التخطيط الحالي وإعادة إنشائه بجميع التطبيقات أبجديًا.</string>
     <string name="auto_grid_reset_done">تم إعادة إنشاء الشبكة</string>
+    <string name="settings_auto_add_new_apps">إضافة التطبيقات الجديدة إلى الرئيسية</string>
+    <string name="settings_auto_add_new_apps_sub">التطبيقات المثبتة حديثًا تظهر تلقائيًا على الشاشة الرئيسية</string>
 </resources>

@@ -278,4 +278,6 @@ Download now?</string>
     <string name="auto_grid_reset_confirm_title">Reset grid?</string>
     <string name="auto_grid_reset_confirm_msg">Will clear the current home layout and recreate it with all apps alphabetically.</string>
     <string name="auto_grid_reset_done">Grid regenerated</string>
+    <string name="settings_auto_add_new_apps">Add new apps to home</string>
+    <string name="settings_auto_add_new_apps_sub">Newly installed apps appear automatically on home</string>
 </resources>

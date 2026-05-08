@@ -256,4 +256,6 @@ Se usará solo para esta función.</string>
     <string name="auto_grid_reset_confirm_title">¿Restablecer cuadrícula?</string>
     <string name="auto_grid_reset_confirm_msg">Borrará la disposición actual y la recreará con todas las apps alfabéticamente.</string>
     <string name="auto_grid_reset_done">Cuadrícula regenerada</string>
+    <string name="settings_auto_add_new_apps">Añadir nuevas apps al inicio</string>
+    <string name="settings_auto_add_new_apps_sub">Las apps recién instaladas aparecen automáticamente en inicio</string>
 </resources>

@@ -256,4 +256,6 @@ Télécharger maintenant ?</string>
     <string name="auto_grid_reset_confirm_title">Réinitialiser la grille ?</string>
     <string name="auto_grid_reset_confirm_msg">Effacera la disposition actuelle et la recréera avec toutes les apps alphabétiquement.</string>
     <string name="auto_grid_reset_done">Grille régénérée</string>
+    <string name="settings_auto_add_new_apps">Ajouter les nouvelles apps à l\'accueil</string>
+    <string name="settings_auto_add_new_apps_sub">Les apps nouvellement installées apparaissent sur l\'accueil</string>
 </resources>

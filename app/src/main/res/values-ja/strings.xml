@@ -256,4 +256,6 @@
     <string name="auto_grid_reset_confirm_title">グリッドをリセット？</string>
     <string name="auto_grid_reset_confirm_msg">現在のホームレイアウトを消去し、すべてのアプリでアルファベット順に再作成します。</string>
     <string name="auto_grid_reset_done">グリッドを再生成しました</string>
+    <string name="settings_auto_add_new_apps">新しいアプリをホームに追加</string>
+    <string name="settings_auto_add_new_apps_sub">新しくインストールされたアプリが自動的にホームに表示されます</string>
 </resources>

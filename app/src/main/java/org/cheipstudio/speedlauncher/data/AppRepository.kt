@@ -19,6 +19,9 @@ class AppRepository(private val context: Context) {
 
     val apps = MutableLiveData<List<AppInfo>>(emptyList())
 
+    /** v88: callback chiamata quando una nuova app viene installata (dopo reload) */
+    var onNewPackageInstalled: ((String) -> Unit)? = null
+
     init {
         reload()
     }
@@ -58,11 +61,28 @@ class AppRepository(private val context: Context) {
     fun observePackageChanges() {
         launcherApps.registerCallback(object : LauncherApps.Callback() {
             override fun onPackageRemoved(packageName: String, user: UserHandle) = reload()
-            override fun onPackageAdded(packageName: String, user: UserHandle) = reload()
+            override fun onPackageAdded(packageName: String, user: UserHandle) {
+                // v88: notifica listener della nuova app, poi reload
+                reloadAndNotify(packageName)
+            }
             override fun onPackageChanged(packageName: String, user: UserHandle) = reload()
             override fun onPackagesAvailable(p: Array<out String>?, u: UserHandle, r: Boolean) = reload()
             override fun onPackagesUnavailable(p: Array<out String>?, u: UserHandle, r: Boolean) = reload()
         })
+    }
+
+    private fun reloadAndNotify(packageName: String) {
+        scope.launch {
+            val list = withContext(Dispatchers.IO) { loadApps() }
+            apps.postValue(list)
+            // Trovo la nuova app aggiunta (può avere più componentName, prendo il primo)
+            val newApp = list.firstOrNull { it.packageName == packageName }
+            if (newApp != null) {
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    onNewPackageInstalled?.invoke(newApp.key)
+                }
+            }
+        }
     }
 
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
@@ -80,15 +100,6 @@ class AppRepository(private val context: Context) {
 
     /**
      * v82: animazione di apertura "Pixel-style".
-     *
-     * Strategia in cascata (la prima che funziona vince):
-     * 1. Android 12+ con view nota: makeScaleUpAnimation + splashScreenStyle ICON_PREFERRED
-     *    → zoom dall'icona + splash dell'app sincronizzata
-     * 2. Android 5.1+: makeClipRevealAnimation
-     *    → reveal circolare dal punto dell'icona, più fluido del classico scale up
-     * 3. Fallback: makeScaleUpAnimation
-     *    → zoom dall'icona compatibile con tutto
-     * 4. Senza view: nessuna animazione custom (sistema default)
      */
     private fun buildLaunchAnimation(
         view: android.view.View?
@@ -96,8 +107,6 @@ class AppRepository(private val context: Context) {
         if (view == null || view.width == 0 || view.height == 0) {
             return null to null
         }
-
-        // Bounds della view sorgente (per il sistema)
         val loc = IntArray(2)
         view.getLocationOnScreen(loc)
         val bounds = android.graphics.Rect(
@@ -105,14 +114,11 @@ class AppRepository(private val context: Context) {
             loc[0] + view.width, loc[1] + view.height
         )
 
-        // Tier 1: Android 12+ — clipReveal + splashScreen ICON_PREFERRED (Pixel-like)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             try {
                 val options = android.app.ActivityOptions.makeClipRevealAnimation(
                     view, 0, 0, view.width, view.height
                 )
-                // splashScreenStyle ICON_PREFERRED → app target mostra la sua icona splash
-                // sincronizzata col reveal del launcher
                 options.setSplashScreenStyle(
                     android.window.SplashScreen.SPLASH_SCREEN_STYLE_ICON
                 )
@@ -120,7 +126,6 @@ class AppRepository(private val context: Context) {
             } catch (_: Throwable) {}
         }
 
-        // Tier 2: Android 5.1+ — clipReveal (cerchio che si espande dall'icona)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
             try {
                 val options = android.app.ActivityOptions.makeClipRevealAnimation(
@@ -130,7 +135,6 @@ class AppRepository(private val context: Context) {
             } catch (_: Throwable) {}
         }
 
-        // Tier 3: fallback scaleUp (zoom dall'icona)
         val options = android.app.ActivityOptions.makeScaleUpAnimation(
             view, 0, 0, view.width, view.height
         )

@@ -122,6 +122,12 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.itemAutoGridReset.setOnClickListener { showAutoGridResetDialog() }
 
+        // v88: auto-add nuove app installate
+        binding.switchAutoAddNewApps.isChecked = settings.autoAddNewApps.value == true
+        binding.switchAutoAddNewApps.setOnCheckedChangeListener { _, on ->
+            settings.setAutoAddNewApps(on)
+        }
+
         // v63: toggle "mostra barra ricerca"
         binding.switchShowSearchbar.isChecked = settings.showSearchBar.value != false
         binding.switchShowSearchbar.setOnCheckedChangeListener { _, isChecked ->
@@ -268,21 +274,30 @@ class SettingsActivity : AppCompatActivity() {
             showLanguageDialog()
         }
 
-        // v38: wallpaper dim slider
-        val currentDim = settings.wallpaperDim.value ?: 0
-        binding.wallpaperDimSlider.value = currentDim.toFloat()
+        // v88: slider con clamp ai bounds + sanitize del valore corrente
+        // (un valore salvato fuori range causava il "random" visivo)
+        val currentDim = (settings.wallpaperDim.value ?: 0).coerceIn(0, 100)
+        // step=5: forzo allineamento alla griglia per evitare valori sporchi
+        val safeDim = ((currentDim / 5) * 5).coerceIn(0, 100)
+        binding.wallpaperDimSlider.value = safeDim.toFloat()
         updateDimLabel()
-        binding.wallpaperDimSlider.addOnChangeListener { _, value, _ ->
-            settings.setWallpaperDim(value.toInt())
+        binding.wallpaperDimSlider.addOnChangeListener { _, value, fromUser ->
+            // v88: applica solo se è l\'utente a slidare (evita loop di setup)
+            if (!fromUser) return@addOnChangeListener
+            val v = value.toInt()
+            settings.setWallpaperDim(v)
             updateDimLabel()
         }
 
-        // v41: wallpaper blur slider (radius 0..50)
-        val currentBlur = settings.wallpaperBlur.value ?: 0
-        binding.wallpaperBlurSlider.value = currentBlur.toFloat()
+        // v41: wallpaper blur slider (radius 0..50, step 2)
+        val currentBlur = (settings.wallpaperBlur.value ?: 0).coerceIn(0, 50)
+        val safeBlur = ((currentBlur / 2) * 2).coerceIn(0, 50)
+        binding.wallpaperBlurSlider.value = safeBlur.toFloat()
         updateBlurLabel()
-        binding.wallpaperBlurSlider.addOnChangeListener { _, value, _ ->
-            settings.setWallpaperBlur(value.toInt())
+        binding.wallpaperBlurSlider.addOnChangeListener { _, value, fromUser ->
+            if (!fromUser) return@addOnChangeListener
+            val v = value.toInt()
+            settings.setWallpaperBlur(v)
             updateBlurLabel()
         }
 

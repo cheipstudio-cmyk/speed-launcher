@@ -51,20 +51,30 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         )
         applyDrawerLayout()
         // v30: setup Raccomandate
-        val aiOn = SpeedApp.instance.settingsRepository.aiLauncherMode.value == true
-        if (aiOn) {
-            _binding?.recommendedRow?.visibility = View.VISIBLE
-            _binding?.recommendedRow?.refresh("drawer")
-            _binding?.recommendedRow?.onAppClick = { app ->
-                SpeedApp.instance.appRepository.launch(app)
-                dismissAllowingStateLoss()
+        // v88: observe live per garantire che la card si aggiorni quando le app si caricano
+        // o quando l\'utente cambia recommendedMode/recommendedManualApps in Settings.
+        fun setupRecommendedDrawer() {
+            val aiOn = SpeedApp.instance.settingsRepository.aiLauncherMode.value == true
+            if (aiOn) {
+                _binding?.recommendedRow?.visibility = View.VISIBLE
+                _binding?.recommendedRow?.refresh("drawer")
+                _binding?.recommendedRow?.onAppClick = { app ->
+                    SpeedApp.instance.appRepository.launch(app)
+                    dismissAllowingStateLoss()
+                }
+                // v87: niente long press sulla dock raccomandate
+                _binding?.recommendedRow?.onAppLongPress = null
+            } else {
+                _binding?.recommendedRow?.visibility = View.GONE
             }
-            _binding?.recommendedRow?.onAppLongPress = { app ->
-                onAppLongPress?.invoke(app)
-            }
-        } else {
-            _binding?.recommendedRow?.visibility = View.GONE
         }
+        setupRecommendedDrawer()
+        // v88: observers per refresh live
+        SpeedApp.instance.appRepository.apps.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
+        SpeedApp.instance.settingsRepository.aiLauncherMode.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
+        SpeedApp.instance.settingsRepository.recommendedMode.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
+        SpeedApp.instance.settingsRepository.recommendedManualApps.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
+        SpeedApp.instance.settingsRepository.recommendedCount.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         // v62: optimization recycler — fixed size + no overdraw
         binding.recycler.setHasFixedSize(true)
         binding.recycler.itemAnimator = null  // niente animazioni costose
