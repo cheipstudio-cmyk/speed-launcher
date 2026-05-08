@@ -150,7 +150,9 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     private fun applyFilter(q: String) {
         val normalized = normalize(q)
         val hidden = SpeedApp.instance.settingsRepository.hiddenApps.value ?: mutableSetOf()
-        val visible = allApps.filter { !hidden.contains(it.key) }
+        val ownPkg = context?.packageName ?: ""
+        // v55: backup filter — Speed Launcher non deve mai apparire nel proprio drawer
+        val visible = allApps.filter { !hidden.contains(it.key) && it.packageName != ownPkg }
         val filtered = if (normalized.isBlank()) visible
         else visible.filter { normalize(it.label).contains(normalized) }
         adapter.submitList(filtered) {

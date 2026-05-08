@@ -90,8 +90,11 @@ class IconGridView @JvmOverloads constructor(
     fun refresh(apps: List<AppInfo>) {
         allApps = apps
         val settings = SpeedApp.instance.settingsRepository
-        // v51: al primo run, prefill la home con app comuni se installate
-        if (settings.firstRunDone.value != true && pageIndex == 0 && pinnedItems.all { it == null }) {
+        // v55: prefill se non l\'abbiamo MAI fatto (flag separato da firstRunDone) AND home vuota
+        // Usa SharedPreferences direttamente perché è un flag one-shot
+        val prefillPrefs = context.getSharedPreferences("speed_prefill", android.content.Context.MODE_PRIVATE)
+        val alreadyPrefilled = prefillPrefs.getBoolean("default_apps_prefilled", false)
+        if (!alreadyPrefilled && pageIndex == 0 && pinnedItems.all { it == null } && apps.isNotEmpty()) {
             // Whitelist app comuni in ordine di preferenza
             val preferred = listOf(
                 "com.google.android.dialer",          // Telefono
@@ -141,6 +144,8 @@ class IconGridView @JvmOverloads constructor(
             }
             initialized = true
             settings.markFirstRunDone()
+            // v55: marca prefill done (separato da firstRunDone)
+            prefillPrefs.edit().putBoolean("default_apps_prefilled", true).apply()
             persist()
         }
         rebuild()
