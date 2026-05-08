@@ -716,84 +716,86 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ===== INFO ===== -->
+            <!-- ===== INFO (v49 ridisegnata) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_info" />
 
-            <!-- Hero card: icona app + nome + versione + tag experimental -->
+            <!-- Card unica info: icona + nome + versione, layout pulito -->
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal"
-                    android:paddingTop="32dp"
-                    android:paddingBottom="28dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
                     <ImageView
                         android:id="@+id/appIconInfo"
-                        android:layout_width="88dp"
-                        android:layout_height="88dp" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/app_name"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="24sp"
-                        android:fontFamily="sans-serif-medium" />
-                    <TextView
-                        android:id="@+id/versionValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="14sp" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/info_experimental_warn"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:letterSpacing="0.08"
-                        android:textAllCaps="true" />
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/app_name"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="20sp"
+                            android:fontFamily="sans-serif-medium" />
+                        <TextView
+                            android:id="@+id/versionValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="@string/info_experimental_warn"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="10sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.08"
+                            android:textAllCaps="true" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- v42: footer con due chip outlined invece di card uguali -->
-            <LinearLayout
+            <!-- Cheip Studio + Contattaci come voci card normali (uniformi al resto) -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemCheipStudio" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_link">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_link_external" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/info_studio_label" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/info_studio_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemContact" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_email">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_email_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_contact_label" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_contact_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Footer: spacer per non far appoggiare la sezione al bordo -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="8dp"
-                android:weightSum="2">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/itemCheipStudio"
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:text="@string/info_studio_label"
-                    app:icon="@drawable/ic_link_external"
-                    app:iconGravity="textStart" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/itemContact"
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    android:text="@string/settings_contact_label"
-                    app:icon="@drawable/ic_email_outline"
-                    app:iconGravity="textStart" />
-            </LinearLayout>
-
+                android:layout_height="32dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

@@ -11,7 +11,7 @@
     <string name="action_unpin">إزالة من الرئيسية</string>
     <string name="action_info">معلومات التطبيق</string>
     <string name="action_uninstall">إلغاء التثبيت</string>
-    <string name="widget_placeholder_hint">اضغط مطولاً لإضافة عنصر واجهة</string>
+    <string name="widget_placeholder_hint">اضغط مطولا لإضافة ودجت</string>
     <string name="widget_remove_title">إزالة العنصر؟</string>
     <string name="widget_remove_message">اضغط مطولاً على عنصر لفتح هذه الشاشة. تأكيد الإزالة؟</string>
     <string name="widget_remove_confirm">إزالة</string>

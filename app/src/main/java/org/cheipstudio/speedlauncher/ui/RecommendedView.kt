@@ -89,7 +89,8 @@ class RecommendedView @JvmOverloads constructor(
     private fun themedBgColor(): Int {
         val theme = SpeedApp.instance.settingsRepository.dockTheme.value ?: "system"
         return when (theme) {
-            "transparent" -> Color.TRANSPARENT
+            // v49: stessi identici valori di HomeView.applySearchTheme
+            "transparent" -> Color.argb(80, 0, 0, 0)
             "light" -> Color.argb(230, 245, 245, 245)
             "dark" -> Color.argb(230, 27, 27, 31)
             else -> softBgColor()

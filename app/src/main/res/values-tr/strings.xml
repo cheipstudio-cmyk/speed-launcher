@@ -11,7 +11,7 @@
     <string name="action_unpin">Ana ekrandan kaldır</string>
     <string name="action_info">Uygulama bilgisi</string>
     <string name="action_uninstall">Kaldır</string>
-    <string name="widget_placeholder_hint">Widget eklemek için basılı tutun</string>
+    <string name="widget_placeholder_hint">Widget eklemek için uzun bas</string>
     <string name="widget_remove_title">Widget kaldırılsın mı?</string>
     <string name="widget_remove_message">Bu ekranı açmak için bir widget\'i basılı tutun. Kaldırma onaylansın mı?</string>
     <string name="widget_remove_confirm">Kaldır</string>

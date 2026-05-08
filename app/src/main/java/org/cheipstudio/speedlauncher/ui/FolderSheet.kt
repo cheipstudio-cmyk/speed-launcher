@@ -199,16 +199,29 @@ object FolderSheet {
         }
 
         val decor = activity.window?.decorView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
-            try {
-                val blur = RenderEffect.createBlurEffect(40f, 40f, Shader.TileMode.CLAMP)
-                decor.setRenderEffect(blur)
-            } catch (_: Throwable) {}
-        }
+        // v49: blur applicato con animazione DURANTE l'apertura del dialog (no più glitch al pre-show)
 
-        // v36+v41: helper per chiudere fluido con animazione di uscita
+        // v49: helper per chiudere fluido con animazione di uscita + blur che svanisce
         fun closeFolder() {
-            // anim: scale + fade then dismiss
+            // Blur fade out parallelo
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
+                val blurOut = android.animation.ValueAnimator.ofFloat(40f, 0f).apply {
+                    duration = 180
+                    interpolator = android.view.animation.AccelerateInterpolator()
+                    addUpdateListener { v ->
+                        try {
+                            val r = v.animatedValue as Float
+                            if (r > 0.5f) {
+                                val blur = RenderEffect.createBlurEffect(r, r, Shader.TileMode.CLAMP)
+                                decor.setRenderEffect(blur)
+                            } else {
+                                decor.setRenderEffect(null)
+                            }
+                        } catch (_: Throwable) {}
+                    }
+                }
+                blurOut.start()
+            }
             card.animate()
                 .alpha(0f)
                 .scaleX(0.85f)
@@ -252,7 +265,7 @@ object FolderSheet {
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
-        // v41: animazione di entrata fluida (scale + fade)
+        // v49: animazione di entrata fluida (scale + fade) + blur progressivo
         dialog.setOnShowListener {
             card.alpha = 0f
             card.scaleX = 0.85f
@@ -264,6 +277,23 @@ object FolderSheet {
                 .setDuration(260)
                 .setInterpolator(android.view.animation.OvershootInterpolator(1.1f))
                 .start()
+            // v49: blur che cresce da 0 a 40 in 220ms, sincronizzato con l'entrata
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
+                val anim = android.animation.ValueAnimator.ofFloat(0f, 40f).apply {
+                    duration = 220
+                    interpolator = android.view.animation.DecelerateInterpolator()
+                    addUpdateListener { v ->
+                        try {
+                            val r = v.animatedValue as Float
+                            if (r > 0.5f) {
+                                val blur = RenderEffect.createBlurEffect(r, r, Shader.TileMode.CLAMP)
+                                decor.setRenderEffect(blur)
+                            }
+                        } catch (_: Throwable) {}
+                    }
+                }
+                anim.start()
+            }
         }
         dialog.show()
     }

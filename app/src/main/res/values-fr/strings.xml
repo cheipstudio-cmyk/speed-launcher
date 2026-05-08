@@ -11,7 +11,7 @@
     <string name="action_unpin">Retirer de l\'accueil</string>
     <string name="action_info">Infos de l\'app</string>
     <string name="action_uninstall">Désinstaller</string>
-    <string name="widget_placeholder_hint">Maintenez pour ajouter un widget</string>
+    <string name="widget_placeholder_hint">Appui long pour ajouter un widget</string>
     <string name="widget_remove_title">Supprimer le widget ?</string>
     <string name="widget_remove_message">Maintenez un widget pour ouvrir cet écran. Confirmer la suppression ?</string>
     <string name="widget_remove_confirm">Supprimer</string>

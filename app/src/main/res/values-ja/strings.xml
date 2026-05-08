@@ -11,7 +11,7 @@
     <string name="action_unpin">ホームから削除</string>
     <string name="action_info">アプリ情報</string>
     <string name="action_uninstall">アンインストール</string>
-    <string name="widget_placeholder_hint">長押しでウィジェット追加</string>
+    <string name="widget_placeholder_hint">長押しでウィジェットを追加</string>
     <string name="widget_remove_title">ウィジェットを削除しますか?</string>
     <string name="widget_remove_message">ウィジェットを長押しでこの画面が開きます。削除しますか?</string>
     <string name="widget_remove_confirm">削除</string>
