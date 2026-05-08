@@ -26,24 +26,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # v98: forzo Gradle 8.4 nelle properties del wrapper (sovrascrivo).
-      # Il jar wrapper userà QUESTA versione perché legge sempre il properties.
-      - name: Force Gradle 8.4 in wrapper.properties
+      # v99: il repo non ha gradlew. Scarico Gradle 8.4 e ricreo l'infrastruttura.
+      - name: Setup Gradle 8.4 and create wrapper
         run: |
-          mkdir -p gradle/wrapper
-          cat > gradle/wrapper/gradle-wrapper.properties << 'PROPS'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          PROPS
+          # Scarica Gradle 8.4
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /opt/gradle-install
+          export PATH="/opt/gradle-install/gradle-8.4/bin:$PATH"
+          
+          # Crea wrapper jar e script ufficiali tramite gradle wrapper task
+          # Per fare questo serve che il progetto sia valido. Già abbiamo settings.gradle.
+          gradle wrapper --gradle-version=8.4 --distribution-type=bin
+          
+          # Verifica
+          ls -la gradle/wrapper/
           cat gradle/wrapper/gradle-wrapper.properties
 
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      - name: Verify Gradle version
+      - name: Verify Gradle version via wrapper
         run: ./gradlew --version
 
       - name: Build debug APK
