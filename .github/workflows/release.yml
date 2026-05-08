@@ -26,11 +26,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # v91: NON uso gradle/actions/setup-gradle perché installava Gradle 9.4.1
-      # ignorando il wrapper. Usiamo il wrapper del progetto (Gradle 8.4) che è
-      # compatibile con AGP 8.2.2.
       - name: Grant execute permission
         run: chmod +x gradlew
+
+      # v92: forzo il wrapper a Gradle 8.4 PRIMA di buildare.
+      # Questo sovrascrive gradle-wrapper.properties e ri-scarica il jar corretto.
+      - name: Force Gradle 8.4 wrapper
+        run: |
+          cat > gradle/wrapper/gradle-wrapper.properties << 'PROPS'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          PROPS
+          cat gradle/wrapper/gradle-wrapper.properties
 
       - name: Verify Gradle version
         run: ./gradlew --version
