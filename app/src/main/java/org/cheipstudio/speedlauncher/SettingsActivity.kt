@@ -545,41 +545,17 @@ class SettingsActivity : AppCompatActivity() {
 
     /** v83: check + download + install update (via GitHub Releases) */
     private fun handleCheckUpdate() {
-        binding.checkUpdateLabel.text = getString(R.string.update_checking)
-        org.cheipstudio.speedlauncher.tools.UpdateChecker.checkForUpdate(this) { info ->
-            binding.checkUpdateLabel.text = getString(R.string.settings_check_update_sub)
-            if (info == null) {
-                Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
-                return@checkForUpdate
-            }
-            // v83: gestione errori specifici
-            when (info.errorReason) {
-                "no_release" -> {
-                    Toast.makeText(this, R.string.update_no_release_yet, Toast.LENGTH_LONG).show()
-                    return@checkForUpdate
-                }
-                "no_internet" -> {
-                    Toast.makeText(this, R.string.update_no_internet, Toast.LENGTH_LONG).show()
-                    return@checkForUpdate
-                }
-                null -> {} // tutto ok
-                else -> {
-                    Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
-                    return@checkForUpdate
-                }
-            }
-            if (info.isUpdateAvailable && info.downloadUrl != null) {
-                showUpdateAvailableDialog(info)
-            } else {
-                com.google.android.material.dialog.MaterialAlertDialogBuilder(
-                    this,
-                    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-                )
-                    .setTitle(R.string.update_no_update_title)
-                    .setMessage(getString(R.string.update_no_update_msg, info.currentVersion))
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-            }
+        // v121: con repo privata l'API GitHub non risponde. Apro direttamente
+        // la pagina releases nel browser, l'utente sceglie e scarica l'APK.
+        try {
+            val intent = android.content.Intent(
+                android.content.Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://github.com/cheipstudio-cmyk/speed-launcher/releases")
+            )
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        } catch (_: Throwable) {
+            Toast.makeText(this, "Browser non disponibile", Toast.LENGTH_SHORT).show()
         }
     }
 
