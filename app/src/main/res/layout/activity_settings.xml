@@ -319,7 +319,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ===== LAYOUT HOME ===== -->
+            <!-- ===== DRAWER ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_drawer" />
 
             <!-- v85: Toggle drawer abilitato/disabilitato -->

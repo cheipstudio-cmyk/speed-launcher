@@ -659,34 +659,98 @@ class SettingsActivity : AppCompatActivity() {
         } else {
             val cols = settings.gridCols.value ?: 4
             val rows = settings.gridRows.value ?: 5
-            // v113: aspetto che apps siano caricate prima di popolare,
-            // altrimenti populate riceve lista vuota e non aggiunge nulla.
             val appRepo = org.cheipstudio.speedlauncher.SpeedApp.instance.appRepository
             val current = appRepo.apps.value
-            if (current != null && current.isNotEmpty()) {
+
+            // v116: logica semplificata e diagnostica
+            // Se le app sono già caricate, popola subito.
+            if (current != null && current.size > 5) {
+                val before = store.load().size
                 org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
-                forceRestartApp()
-            } else {
-                // Aspetto la prima emission popolata, max 3 secondi
-                val observer = object : androidx.lifecycle.Observer<List<org.cheipstudio.speedlauncher.data.AppInfo>> {
-                    override fun onChanged(apps: List<org.cheipstudio.speedlauncher.data.AppInfo>) {
-                        if (apps.isNotEmpty()) {
-                            appRepo.apps.removeObserver(this)
-                            org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
-                            forceRestartApp()
-                        }
-                    }
-                }
-                appRepo.apps.observeForever(observer)
-                // Forza reload se non sono ancora caricate
-                appRepo.reload()
-                // Safety: se non arriva nulla in 3s, restart comunque
+                val after = store.load().size
+                Toast.makeText(this, "App aggiunte: ${after - before} (totale: $after)", Toast.LENGTH_LONG).show()
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    appRepo.apps.removeObserver(observer)
                     forceRestartApp()
-                }, 3000)
+                }, 1200)
+            } else {
+                // App non caricate. Forzo reload sincrono e aspetto.
+                Toast.makeText(this, "Caricamento app in corso...", Toast.LENGTH_SHORT).show()
+                Thread {
+                    // Forza reload sincrono delle app (lo carico io qui)
+                    val launcherApps = getSystemService(android.content.Context.LAUNCHER_APPS_SERVICE) as android.content.pm.LauncherApps
+                    val activities = try {
+                        launcherApps.getActivityList(null, android.os.Process.myUserHandle())
+                    } catch (_: Throwable) { emptyList() }
+                    
+                    // Costruisco la lista di chiavi
+                    val keys = activities.map { 
+                        "${it.applicationInfo.packageName}/${it.componentName.className}" 
+                    }
+                    
+                    runOnUiThread {
+                        if (keys.isEmpty()) {
+                            Toast.makeText(this, "Errore: nessuna app trovata", Toast.LENGTH_LONG).show()
+                            forceRestartApp()
+                            return@runOnUiThread
+                        }
+                        
+                        // Popolo manualmente con queste chiavi
+                        populateWithKeys(store, keys, cols, rows)
+                        Toast.makeText(this, "App aggiunte: ${keys.size}", Toast.LENGTH_LONG).show()
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            forceRestartApp()
+                        }, 1200)
+                    }
+                }.start()
             }
         }
+    }
+
+    /** v116: popolamento manuale (bypass HomeAutoPopulator se app non sono pronte) */
+    private fun populateWithKeys(
+        store: org.cheipstudio.speedlauncher.data.HomeLayoutStore,
+        keys: List<String>,
+        cols: Int,
+        rows: Int
+    ) {
+        val current = store.load().toMutableList()
+        val presentKeys = current.flatMap {
+            if (it.type == org.cheipstudio.speedlauncher.data.HomeItem.TYPE_FOLDER)
+                it.folderApps + it.key
+            else listOf(it.key)
+        }.toSet()
+
+        val toAdd = keys.filter { it !in presentKeys }
+        if (toAdd.isEmpty()) return
+
+        val occupiedByPage = current.groupBy { it.page }
+            .mapValues { (_, items) -> items.map { it.cellX to it.cellY }.toMutableSet() }
+            .toMutableMap()
+
+        val queue = ArrayDeque(toAdd)
+        var page = 0
+        while (queue.isNotEmpty() && page <= 50) {
+            val occupied = occupiedByPage.getOrPut(page) { mutableSetOf() }
+            for (y in 0 until rows) {
+                for (x in 0 until cols) {
+                    if (queue.isEmpty()) break
+                    if (occupied.contains(x to y)) continue
+                    val key = queue.removeFirst()
+                    current.add(org.cheipstudio.speedlauncher.data.HomeItem(
+                        key = key,
+                        page = page,
+                        cellX = x,
+                        cellY = y,
+                        type = org.cheipstudio.speedlauncher.data.HomeItem.TYPE_APP,
+                        autoAdded = true
+                    ))
+                    occupied.add(x to y)
+                }
+                if (queue.isEmpty()) break
+            }
+            page++
+        }
+        store.save(current)
     }
 
     /** v85: dialog di conferma + reset griglia automatica */

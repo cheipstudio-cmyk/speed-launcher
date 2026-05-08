@@ -15,16 +15,9 @@
         android:layout_marginBottom="4dp"
         android:background="@drawable/bg_drag_handle" />
 
-    <!-- v41: dock raccomandate, parallax via applyDrawerSlide -->
-    <org.cheipstudio.speedlauncher.ui.RecommendedView
-        android:id="@+id/recommendedRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginBottom="12dp" />
-
     <!-- Search input -->
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
@@ -46,6 +39,15 @@
             android:inputType="text"
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- v117: dock raccomandate ORA SOTTO la search bar (richiesta utente) -->
+    <org.cheipstudio.speedlauncher.ui.RecommendedView
+        android:id="@+id/recommendedRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="4dp" />
 
     <!-- v29: Recycler + Alphascrollbar in FrameLayout. v51: clipChildren=false per la bubble -->
     <FrameLayout

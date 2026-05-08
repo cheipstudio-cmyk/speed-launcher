@@ -108,6 +108,13 @@ class HomeView @JvmOverloads constructor(
     })
 
     init {
+        // v116: observer DIRETTO su drawerEnabled per garantire refresh barra
+        // (il fix in MainActivity può non funzionare se HomeView è ricreata prima dell'observe)
+        SpeedApp.instance.settingsRepository.drawerEnabled.observeForever {
+            // Aggiorno barra quando cambia drawer
+            try { applySearchBarVisibility() } catch (_: Throwable) {}
+        }
+
         // v88: wire auto-add per nuove app installate
         SpeedApp.instance.appRepository.onNewPackageInstalled = { appKey ->
             if (settings.autoAddNewApps.value == true) {
