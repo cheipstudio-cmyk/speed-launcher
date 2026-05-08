@@ -204,6 +204,8 @@ class RecommendedView @JvmOverloads constructor(
             layoutParams = FrameLayout.LayoutParams(s, s, Gravity.CENTER)
         }
         iconWrap.addView(icon)
+        // v67: badge notifiche sull'icon (overlay drawable, refresh on demand)
+        attachNotificationBadge(icon, app.packageName)
         cell.addView(iconWrap)
 
         val label = TextView(context).apply {
@@ -224,5 +226,78 @@ class RecommendedView @JvmOverloads constructor(
         cell.setOnClickListener { onAppClick?.invoke(app) }
         cell.setOnLongClickListener { onAppLongPress?.invoke(app); true }
         return cell
+    }
+
+    /**
+     * v67: applica overlay badge notifiche sull'icon view (raccomandate dock).
+     * Stesso design delle icone home (v67): dot 5dp pulito senza shadow, o pill con count.
+     */
+    private fun attachNotificationBadge(iconView: ImageView, packageName: String) {
+        val badge = object : android.graphics.drawable.Drawable() {
+            override fun draw(canvas: android.graphics.Canvas) {
+                val count = SpeedApp.instance.notificationCounter.countFor(packageName)
+                if (count <= 0) return
+                val s = SpeedApp.instance.settingsRepository
+                val mode = s.notificationBadgeMode.value ?: SettingsRepository.BADGE_DOT
+                if (mode == SettingsRepository.BADGE_OFF) return
+                val dotPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                    color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
+                }
+                val b = bounds
+                if (mode == SettingsRepository.BADGE_COUNT) {
+                    val txt = if (count > 99) "99+" else count.toString()
+                    val tp = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        color = Color.WHITE
+                        textSize = 9.5f * density
+                        textAlign = android.graphics.Paint.Align.CENTER
+                        typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                    }
+                    val txtW = tp.measureText(txt)
+                    val padH = 5f * density; val padV = 2f * density
+                    val pillW = (txtW + padH * 2).coerceAtLeast(16f * density)
+                    val pillH = (tp.textSize + padV * 2).coerceAtLeast(16f * density)
+                    val cx = b.right - pillW / 2 - 2f * density
+                    val cy = b.top + pillH / 2 + 2f * density
+                    val rect = android.graphics.RectF(cx - pillW / 2, cy - pillH / 2, cx + pillW / 2, cy + pillH / 2)
+                    val cornerR = pillH / 2
+                    canvas.drawRoundRect(rect, cornerR, cornerR, dotPaint)
+                    val fm = tp.fontMetrics
+                    canvas.drawText(txt, cx, cy - (fm.ascent + fm.descent) / 2, tp)
+                } else {
+                    val r = 5f * density
+                    val cx = b.right - r - 2f * density
+                    val cy = b.top + r + 2f * density
+                    canvas.drawCircle(cx, cy, r, dotPaint)
+                }
+            }
+            override fun setAlpha(a: Int) {}
+            override fun setColorFilter(f: android.graphics.ColorFilter?) {}
+            @Deprecated("API")
+            override fun getOpacity() = android.graphics.PixelFormat.TRANSLUCENT
+        }
+        // Posiziono il drawable a coprire la stessa area dell'iconView
+        iconView.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (iconView.width > 0) {
+                    badge.setBounds(0, 0, iconView.width, iconView.height)
+                    iconView.overlay.clear()
+                    iconView.overlay.add(badge)
+                    try { iconView.viewTreeObserver.removeOnGlobalLayoutListener(this) } catch (_: Throwable) {}
+                }
+            }
+        })
+    }
+
+    /** v67: chiama questa per refresh dei dot (es. quando arriva una notifica) */
+    fun refreshNotificationBadges() {
+        // Non posso enumerare le icone direttamente, ma faccio invalidate ricorsivo
+        invalidateRecursive(this)
+    }
+
+    private fun invalidateRecursive(view: View) {
+        view.invalidate()
+        if (view is android.view.ViewGroup) {
+            for (i in 0 until view.childCount) invalidateRecursive(view.getChildAt(i))
+        }
     }
 }

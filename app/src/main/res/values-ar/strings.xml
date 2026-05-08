@@ -86,8 +86,8 @@
     <string name="screen_lock_enable_admin_toast">فعّل Speed Launcher كمسؤول لاستخدام قفل الشاشة</string>
     <string name="tutorial_swipe_title">افتح الدرج</string>
     <string name="tutorial_swipe_desc">اسحب من الأسفل إلى الأعلى من أي مكان في الشاشة الرئيسية لفتح قائمة التطبيقات.</string>
-    <string name="tutorial_longpress_icon_title">نقل وإدارة</string>
-    <string name="tutorial_longpress_icon_desc">اضغط مطولا على التطبيق للنقل أو التحرير أو الإلغاء. في الدرج للتثبيت.</string>
+    <string name="tutorial_longpress_icon_title">نقل التطبيقات أو إدارتها</string>
+    <string name="tutorial_longpress_icon_desc">اضغط مطولاً على تطبيق: بعد لحظة يمكنك نقله. استمر بالضغط لفتح قائمة المعلومات أو الإلغاء.</string>
     <string name="tutorial_settings_title">الإعدادات</string>
     <string name="tutorial_settings_desc">السمات، التخطيط، الحركات، الإيماءات، الذكاء الاصطناعي، الودجت والمزيد. كل شيء قابل للتخصيص.</string>
     <string name="tutorial_pages_title">صفحات متعددة</string>

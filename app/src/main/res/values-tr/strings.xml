@@ -86,8 +86,8 @@
     <string name="screen_lock_enable_admin_toast">Ekran kilidini kullanmak için Speed Launcher\'ı yönetici olarak etkinleştirin</string>
     <string name="tutorial_swipe_title">Çekmeceyi aç</string>
     <string name="tutorial_swipe_desc">Ana ekranın herhangi bir yerinden yukarı kaydırarak yüklü uygulamaların listesini aç.</string>
-    <string name="tutorial_longpress_icon_title">Taşı ve yönet</string>
-    <string name="tutorial_longpress_icon_desc">Uygulamaya uzun bas: taşı, düzenle veya kaldır. Çekmecede sabitlemek için uzun bas.</string>
+    <string name="tutorial_longpress_icon_title">Uygulamaları taşı veya yönet</string>
+    <string name="tutorial_longpress_icon_desc">Bir uygulamayı basılı tut: bir an sonra taşıyabilirsin. Basılı tutmaya devam et, bilgi veya kaldırma menüsü açılır.</string>
     <string name="tutorial_settings_title">Ayarlar</string>
     <string name="tutorial_settings_desc">Tema, düzen, animasyonlar, hareketler, AI, widget ve daha fazlası. Hepsi özelleştirilebilir.</string>
     <string name="tutorial_pages_title">Birden fazla sayfa</string>

@@ -318,14 +318,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
                     cx + pillW / 2, cy + pillH / 2
                 )
                 val cornerR = pillH / 2
-                // Shadow morbida sotto il pill
-                val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.argb(80, 0, 0, 0)
-                    maskFilter = android.graphics.BlurMaskFilter(2.5f * density, android.graphics.BlurMaskFilter.Blur.NORMAL)
-                }
-                val shadowRect = android.graphics.RectF(rect.left, rect.top + density, rect.right, rect.bottom + density)
-                canvas.drawRoundRect(shadowRect, cornerR, cornerR, shadowPaint)
-                // Pill principale
+                // v67: rimossa shadow nera (era percepita come bordo)
                 canvas.drawRoundRect(rect, cornerR, cornerR, dotPaint)
                 // Testo bianco
                 dotTextPaint.color = Color.WHITE
@@ -333,17 +326,10 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val textY = cy - (fm.ascent + fm.descent) / 2
                 canvas.drawText(displayCount, cx, textY, dotTextPaint)
             } else {
-                // v60: dot pulito 5dp con shadow morbida (no bordo brutto)
+                // v67: dot pulito 5dp, niente shadow (era percepita come bordo)
                 val r = 5f * density
                 val cx = b.right - r - 2f * density
                 val cy = b.top + r + 2f * density
-                // Shadow morbida sotto
-                val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.argb(80, 0, 0, 0)
-                    maskFilter = android.graphics.BlurMaskFilter(2.5f * density, android.graphics.BlurMaskFilter.Blur.NORMAL)
-                }
-                canvas.drawCircle(cx, cy + density, r, shadowPaint)
-                // Dot principale
                 canvas.drawCircle(cx, cy, r, dotPaint)
             }
         }

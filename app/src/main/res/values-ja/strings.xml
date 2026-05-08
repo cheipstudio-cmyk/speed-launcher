@@ -86,8 +86,8 @@
     <string name="screen_lock_enable_admin_toast">画面ロックを使用するには Speed Launcher を管理者として有効化してください</string>
     <string name="tutorial_swipe_title">ドロワーを開く</string>
     <string name="tutorial_swipe_desc">ホームの任意の場所から下から上にスワイプしてインストール済みアプリ一覧を開きます。</string>
-    <string name="tutorial_longpress_icon_title">移動と管理</string>
-    <string name="tutorial_longpress_icon_desc">アプリを長押し: 移動、編集、アンインストール。ドロワーでは長押しでホームに固定。</string>
+    <string name="tutorial_longpress_icon_title">アプリを移動・管理</string>
+    <string name="tutorial_longpress_icon_desc">アプリを長押し:少し経つと移動できます。さらに押し続けると情報や削除のメニューが開きます。</string>
     <string name="tutorial_settings_title">設定</string>
     <string name="tutorial_settings_desc">テーマ、レイアウト、アニメーション、ジェスチャー、AI、ウィジェットなど。すべて設定からカスタマイズ可能。</string>
     <string name="tutorial_pages_title">複数ページ</string>

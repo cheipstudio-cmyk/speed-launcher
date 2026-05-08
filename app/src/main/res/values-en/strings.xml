@@ -97,8 +97,8 @@
 
     <string name="tutorial_swipe_title">Open the drawer</string>
     <string name="tutorial_swipe_desc">Swipe up from the bottom anywhere on the home to open the list of installed apps.</string>
-    <string name="tutorial_longpress_icon_title">Move and manage apps</string>
-    <string name="tutorial_longpress_icon_desc">Long press an app to move, edit or uninstall. From the drawer, long press to pin to home.</string>
+    <string name="tutorial_longpress_icon_title">Move or manage apps</string>
+    <string name="tutorial_longpress_icon_desc">Long-press an app: after a moment you can move it. Keep holding and the menu opens with info or uninstall.</string>
     <string name="tutorial_settings_title">Settings</string>
     <string name="tutorial_settings_desc">Themes, layout, animations, gestures, AI suggestions, widgets and more. All customizable from settings.</string>
     <string name="tutorial_pages_title">Multiple pages</string>

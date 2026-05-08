@@ -86,8 +86,8 @@
     <string name="screen_lock_enable_admin_toast">Activez Speed Launcher comme administrateur pour utiliser le verrouillage d\'écran</string>
     <string name="tutorial_swipe_title">Ouvrir le tiroir</string>
     <string name="tutorial_swipe_desc">Glissez du bas vers le haut depuis n\'importe où sur l\'accueil pour ouvrir la liste des apps installées.</string>
-    <string name="tutorial_longpress_icon_title">Déplacer et gérer</string>
-    <string name="tutorial_longpress_icon_desc">Appui long sur une app pour la déplacer, modifier ou désinstaller. Sur le tiroir pour l\'épingler.</string>
+    <string name="tutorial_longpress_icon_title">Déplacer ou gérer les apps</string>
+    <string name="tutorial_longpress_icon_desc">Appui long sur une app: après un instant, vous pouvez la déplacer. Continuez à appuyer et le menu s\'ouvre pour les infos ou la désinstaller.</string>
     <string name="tutorial_settings_title">Paramètres</string>
     <string name="tutorial_settings_desc">Thèmes, mise en page, animations, gestes, IA, widgets et plus. Tout personnalisable.</string>
     <string name="tutorial_pages_title">Pages multiples</string>

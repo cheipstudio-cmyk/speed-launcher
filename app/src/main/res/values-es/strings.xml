@@ -86,8 +86,8 @@
     <string name="screen_lock_enable_admin_toast">Activa Speed Launcher como administrador para usar el bloqueo de pantalla</string>
     <string name="tutorial_swipe_title">Abrir el cajón</string>
     <string name="tutorial_swipe_desc">Desliza desde abajo hacia arriba desde cualquier punto del inicio para abrir la lista de apps.</string>
-    <string name="tutorial_longpress_icon_title">Mover y gestionar</string>
-    <string name="tutorial_longpress_icon_desc">Mantén pulsada una app para moverla, editar o desinstalar. En el cajón para anclarla.</string>
+    <string name="tutorial_longpress_icon_title">Mover o gestionar apps</string>
+    <string name="tutorial_longpress_icon_desc">Mantén pulsada una app: tras un instante puedes moverla. Sigue pulsando y se abre el menú con info o desinstalar.</string>
     <string name="tutorial_settings_title">Ajustes</string>
     <string name="tutorial_settings_desc">Temas, diseño, animaciones, gestos, IA, widgets y más. Todo personalizable desde ajustes.</string>
     <string name="tutorial_pages_title">Páginas múltiples</string>

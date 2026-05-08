@@ -537,7 +537,12 @@ class HomeView @JvmOverloads constructor(
             binding.recommendedRow.refresh("home")
         }
     }
-    fun refreshDots() { for (page in pages) page.invalidate() }
+    fun refreshDots() {
+        for (page in pages) page.invalidate()
+        // v67: refresh anche dot del dock raccomandate
+        try { binding.recommendedRow.refreshNotificationBadges() } catch (_: Throwable) {}
+        try { binding.recommendedRowBottom.refreshNotificationBadges() } catch (_: Throwable) {}
+    }
 
     /** v63: applica visibilità della barra di ricerca secondo il toggle */
     fun applySearchBarVisibility() {

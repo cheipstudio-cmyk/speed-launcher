@@ -97,8 +97,8 @@
 
     <string name="tutorial_swipe_title">Apri il drawer</string>
     <string name="tutorial_swipe_desc">Trascina dal basso verso l\'alto in qualsiasi punto della home per aprire la lista delle app installate.</string>
-    <string name="tutorial_longpress_icon_title">Sposta e gestisci app</string>
-    <string name="tutorial_longpress_icon_desc">Tieni premuta un\'app per spostarla, modificarla o disinstallarla. Sul drawer per aggiungerla alla home.</string>
+    <string name="tutorial_longpress_icon_title">Sposta o gestisci le app</string>
+    <string name="tutorial_longpress_icon_desc">Tieni premuto su un\'app: dopo un attimo si abilita lo spostamento. Continui a tenere premuto e si apre il menu per info o disinstallarla.</string>
     <string name="tutorial_settings_title">Impostazioni</string>
     <string name="tutorial_settings_desc">Tema, layout, animazioni, gesti, AI raccomandate, widget, e altro. Tutto personalizzabile dalla pagina impostazioni.</string>
     <string name="tutorial_pages_title">Pagine multiple</string>
@@ -126,7 +126,7 @@
 
     <string name="settings_badge_mode">Pallini di notifica</string>
     <string name="badge_dot">Pallino semplice</string>
-    <string name="badge_count">Pallone con numero</string>
+    <string name="badge_count">Pallino con numero</string>
     <string name="badge_off">Disattivato</string>
 
     <string name="folder_delete_confirm_title">Eliminare la cartella?</string>

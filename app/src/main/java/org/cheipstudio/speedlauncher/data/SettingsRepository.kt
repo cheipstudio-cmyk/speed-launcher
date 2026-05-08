@@ -231,22 +231,22 @@ class SettingsRepository(context: Context) {
         try { widgetPrefs.edit().clear().commit() } catch (_: Throwable) {}
         // Cancello anche le altre SharedPreferences create dall\'app
         try {
-            context.getSharedPreferences("speed_prefill", Context.MODE_PRIVATE).edit().clear().commit()
+            ctx.getSharedPreferences("speed_prefill", Context.MODE_PRIVATE).edit().clear().commit()
         } catch (_: Throwable) {}
         try {
-            context.getSharedPreferences("speed_app_usage", Context.MODE_PRIVATE).edit().clear().commit()
+            ctx.getSharedPreferences("speed_app_usage", Context.MODE_PRIVATE).edit().clear().commit()
         } catch (_: Throwable) {}
         try {
-            context.getSharedPreferences("speed_notification_prefs", Context.MODE_PRIVATE).edit().clear().commit()
+            ctx.getSharedPreferences("speed_notification_prefs", Context.MODE_PRIVATE).edit().clear().commit()
         } catch (_: Throwable) {}
         // Cancello la cache app
-        try { clearDir(context.cacheDir) } catch (_: Throwable) {}
-        try { clearDir(context.codeCacheDir) } catch (_: Throwable) {}
+        try { clearDir(ctx.cacheDir) } catch (_: Throwable) {}
+        try { clearDir(ctx.codeCacheDir) } catch (_: Throwable) {}
         // Cancello tutte le altre SharedPreferences sconosciute
         try {
-            val prefsDir = java.io.File(context.applicationInfo.dataDir, "shared_prefs")
+            val prefsDir = java.io.File(ctx.applicationInfo.dataDir, "shared_prefs")
             if (prefsDir.exists()) {
-                for (f in prefsDir.listFiles() ?: emptyArray()) {
+                for (f in prefsDir.listFiles() ?: arrayOf<java.io.File>()) {
                     try { f.delete() } catch (_: Throwable) {}
                 }
             }
