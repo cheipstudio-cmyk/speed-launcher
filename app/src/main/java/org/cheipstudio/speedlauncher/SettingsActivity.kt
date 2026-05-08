@@ -82,7 +82,6 @@ class SettingsActivity : AppCompatActivity() {
         val versionName = info?.versionName ?: "1.0"
         val versionCode = info?.longVersionCode ?: 1L
         binding.versionValue.text = getString(R.string.version_value, versionName)
-        binding.buildValue.text = getString(R.string.build_value, versionCode.toString())
 
         // v19: icona dell'app nella sezione info
         try {
