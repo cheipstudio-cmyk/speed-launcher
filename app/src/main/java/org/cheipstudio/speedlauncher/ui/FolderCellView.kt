@@ -22,15 +22,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.HomeItem
+import org.cheipstudio.speedlauncher.data.SettingsRepository
 import kotlin.math.abs
 
 /**
- * v18: design moderno per le cartelle:
- * - Squircle (superellipse) come maschera, non rettangolo arrotondato
- * - Gradient soft sopra il blur, non solid color
- * - 4 icone in 2x2 ma con padding maggiore per dare aria
- * - Icone cresciute al 28% lato (era ~24%)
- * - Bordo sottile bianco per lo "stacked" feel
+ * v18: design moderno per le cartelle.
+ * v95: aggiunto badge notifiche sulla preview (dot/count) se una qualsiasi
+ *      delle app dentro la cartella ha notifiche attive.
  */
 class FolderCellView(context: Context) : LinearLayout(context) {
 
@@ -48,7 +46,6 @@ class FolderCellView(context: Context) : LinearLayout(context) {
     private var pressing = false; private var dragFired = false; private var moved = false
 
     private val DRAG_THRESHOLD = 500L
-
     private val dragRunnable = Runnable {
         if (pressing && !dragFired && dragOriginId.isNotEmpty()) {
             dragFired = true
@@ -85,6 +82,25 @@ class FolderCellView(context: Context) : LinearLayout(context) {
         isClickable = true; isFocusable = true
     }
 
+    // v95: observer per badge notifiche, lifecycle-aware via attach/detach
+    private val notifObserver = androidx.lifecycle.Observer<Map<String, Int>> {
+        previewView.invalidate()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        try {
+            SpeedApp.instance.notificationCounter.counts.observeForever(notifObserver)
+        } catch (_: Throwable) {}
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        try {
+            SpeedApp.instance.notificationCounter.counts.removeObserver(notifObserver)
+        } catch (_: Throwable) {}
+    }
+
     fun bind(folder: HomeItem) {
         this.folder = folder
         labelView.text = if (folder.name.isNotEmpty()) folder.name else context.getString(
@@ -94,6 +110,9 @@ class FolderCellView(context: Context) : LinearLayout(context) {
         val byKey = apps.associateBy { it.key }
         val drawables = folder.folderApps.take(4).mapNotNull { byKey[it]?.icon }
         previewView.setIcons(drawables)
+        // v95: passa anche i package name per il conteggio notifiche
+        val pkgNames = folder.folderApps.mapNotNull { byKey[it]?.packageName }
+        previewView.setFolderPackages(pkgNames)
     }
 
     @Suppress("ClickableViewAccessibility")
@@ -141,11 +160,27 @@ class FolderCellView(context: Context) : LinearLayout(context) {
             color = Color.argb(60, 0, 0, 0)
             maskFilter = android.graphics.BlurMaskFilter(8f, android.graphics.BlurMaskFilter.Blur.NORMAL)
         }
+        private val badgeDotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#FF5252")
+            style = Paint.Style.FILL
+        }
+        private val badgePillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#FF5252")
+            style = Paint.Style.FILL
+        }
+        private val badgeTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = 22f
+            textAlign = Paint.Align.CENTER
+            isFakeBoldText = true
+        }
         private var icons: List<Drawable> = emptyList()
+        private var folderPackages: List<String> = emptyList()
         private var maskPath: Path? = null
         private var size = 0
 
         fun setIcons(list: List<Drawable>) { icons = list; invalidate() }
+        fun setFolderPackages(list: List<String>) { folderPackages = list; invalidate() }
 
         override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
             super.onSizeChanged(w, h, oldw, oldh)
@@ -157,6 +192,7 @@ class FolderCellView(context: Context) : LinearLayout(context) {
                 intArrayOf(Color.parseColor("#66FFFFFF"), Color.parseColor("#33FFFFFF")),
                 null, Shader.TileMode.CLAMP
             )
+            badgeTextPaint.textSize = w * 0.22f
         }
 
         override fun onDraw(canvas: Canvas) {
@@ -176,22 +212,67 @@ class FolderCellView(context: Context) : LinearLayout(context) {
             canvas.drawPath(path, borderPaint)
 
             // icone in 2x2
-            if (icons.isEmpty()) return
-            canvas.save()
-            canvas.clipPath(path)
-            val pad = s * 0.14f
-            val gap = s * 0.06f
-            val cellSize = (s - 2 * pad - gap) / 2f
-            for (i in 0 until icons.size.coerceAtMost(4)) {
-                val col = i % 2
-                val row = i / 2
-                val x = pad + col * (cellSize + gap)
-                val y = pad + row * (cellSize + gap)
-                val d = icons[i]
-                d.setBounds(x.toInt(), y.toInt(), (x + cellSize).toInt(), (y + cellSize).toInt())
-                d.draw(canvas)
+            if (icons.isNotEmpty()) {
+                canvas.save()
+                canvas.clipPath(path)
+                val pad = s * 0.14f
+                val gap = s * 0.06f
+                val cellSize = (s - 2 * pad - gap) / 2f
+                for (i in 0 until icons.size.coerceAtMost(4)) {
+                    val col = i % 2
+                    val row = i / 2
+                    val x = pad + col * (cellSize + gap)
+                    val y = pad + row * (cellSize + gap)
+                    val d = icons[i]
+                    d.setBounds(x.toInt(), y.toInt(), (x + cellSize).toInt(), (y + cellSize).toInt())
+                    d.draw(canvas)
+                }
+                canvas.restore()
             }
-            canvas.restore()
+
+            // v95: badge notifiche se almeno un'app dentro la cartella ha notifiche
+            drawNotificationBadge(canvas, s)
+        }
+
+        private fun drawNotificationBadge(canvas: Canvas, s: Float) {
+            val counter = try { SpeedApp.instance.notificationCounter } catch (_: Throwable) { return }
+            val settings = try { SpeedApp.instance.settingsRepository } catch (_: Throwable) { return }
+            val mode = settings.notificationBadgeMode.value ?: SettingsRepository.BADGE_DOT
+            if (mode == SettingsRepository.BADGE_OFF) return
+
+            // Somma notifiche di tutte le app dentro la cartella
+            var totalCount = 0
+            for (pkg in folderPackages) {
+                totalCount += counter.countFor(pkg)
+            }
+            if (totalCount <= 0) return
+
+            // Colore custom da settings se presente
+            val dotColorStr = settings.notificationDotColor.value
+            if (dotColorStr != null) {
+                try {
+                    val col = if (dotColorStr.startsWith("#")) Color.parseColor(dotColorStr)
+                              else Color.parseColor("#$dotColorStr")
+                    badgeDotPaint.color = col
+                    badgePillPaint.color = col
+                } catch (_: Throwable) {}
+            }
+
+            if (mode == SettingsRepository.BADGE_COUNT) {
+                // pill in alto a destra
+                val text = if (totalCount > 99) "99+" else totalCount.toString()
+                val tw = badgeTextPaint.measureText(text)
+                val ph = s * 0.26f
+                val pw = (tw + s * 0.18f).coerceAtLeast(ph)
+                val rect = RectF(s - pw - 2f, 2f, s - 2f, ph + 2f)
+                canvas.drawRoundRect(rect, ph / 2, ph / 2, badgePillPaint)
+                val baseline = rect.centerY() - (badgeTextPaint.descent() + badgeTextPaint.ascent()) / 2
+                canvas.drawText(text, rect.centerX(), baseline, badgeTextPaint)
+            } else {
+                // dot in alto a destra
+                val r = s * 0.10f
+                canvas.drawCircle(s - r - 2f, r + 2f, r, badgeDotPaint)
+            }
         }
 
         private fun buildSquirclePath(s: Float): Path {

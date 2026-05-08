@@ -45,8 +45,11 @@ class SettingsActivity : AppCompatActivity() {
         val res = BackupManager.importFromJson(this, content)
         if (res.isSuccess) {
             Toast.makeText(this, R.string.backup_imported_ok, Toast.LENGTH_LONG).show()
-            // v72: force restart per applicare il backup
-            forceRestartApp()
+            // v94: aspetto 800ms che il toast sia visto, poi restart per applicare il backup.
+            // Senza delay, forceRestartApp() killa il processo prima che il Toast appaia.
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                forceRestartApp()
+            }, 800)
         } else {
             val msg = res.exceptionOrNull()?.message ?: getString(R.string.backup_import_fail)
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show()

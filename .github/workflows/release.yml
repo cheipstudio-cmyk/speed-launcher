@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -26,27 +26,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
-
-      # v92: forzo il wrapper a Gradle 8.4 PRIMA di buildare.
-      # Questo sovrascrive gradle-wrapper.properties e ri-scarica il jar corretto.
-      - name: Force Gradle 8.4 wrapper
+      # v93: usa Gradle 8.4 installato dal sistema (non dal wrapper).
+      # Il wrapper del repo è corrotto (jar punta a Gradle 9.4.1 anche
+      # se properties dice 8.4). Bypassiamo il wrapper completamente.
+      - name: Setup Gradle 8.4
         run: |
-          cat > gradle/wrapper/gradle-wrapper.properties << 'PROPS'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          PROPS
-          cat gradle/wrapper/gradle-wrapper.properties
+          # Scarica Gradle 8.4 direttamente
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /opt/gradle-install
+          # Aggiungo al PATH
+          echo "/opt/gradle-install/gradle-8.4/bin" >> $GITHUB_PATH
 
       - name: Verify Gradle version
-        run: ./gradlew --version
+        run: gradle --version
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Rename APK
         run: |

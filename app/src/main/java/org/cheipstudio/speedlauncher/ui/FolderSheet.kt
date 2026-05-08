@@ -324,6 +324,85 @@ object FolderSheet {
         dialog.show()
     }
 
+
+    /**
+     * v95: attacca un overlay drawable per disegnare dot/count notifiche
+     * sull'icona di un'app dentro la cartella aperta.
+     */
+    private fun attachNotificationBadge(iconView: android.widget.ImageView, packageName: String) {
+        val ctx = iconView.context
+        val badge = object : android.graphics.drawable.Drawable() {
+            override fun draw(canvas: android.graphics.Canvas) {
+                val count = SpeedApp.instance.notificationCounter.countFor(packageName)
+                if (count <= 0) return
+                val s = SpeedApp.instance.settingsRepository
+                val mode = s.notificationBadgeMode.value ?: org.cheipstudio.speedlauncher.data.SettingsRepository.BADGE_DOT
+                if (mode == org.cheipstudio.speedlauncher.data.SettingsRepository.BADGE_OFF) return
+
+                val dotColorStr = s.notificationDotColor.value
+                val color = try {
+                    if (dotColorStr != null) {
+                        if (dotColorStr.startsWith("#")) android.graphics.Color.parseColor(dotColorStr)
+                        else android.graphics.Color.parseColor("#$dotColorStr")
+                    } else android.graphics.Color.parseColor("#FF5252")
+                } catch (_: Throwable) { android.graphics.Color.parseColor("#FF5252") }
+
+                val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                    this.color = color
+                }
+                val w = bounds.width().toFloat()
+
+                if (mode == org.cheipstudio.speedlauncher.data.SettingsRepository.BADGE_COUNT) {
+                    val text = if (count > 99) "99+" else count.toString()
+                    val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        this.color = android.graphics.Color.WHITE
+                        textSize = w * 0.22f
+                        textAlign = android.graphics.Paint.Align.CENTER
+                        isFakeBoldText = true
+                    }
+                    val tw = textPaint.measureText(text)
+                    val ph = w * 0.30f
+                    val pw = (tw + w * 0.18f).coerceAtLeast(ph)
+                    val rect = android.graphics.RectF(w - pw - 2f, 2f, w - 2f, ph + 2f)
+                    canvas.drawRoundRect(rect, ph / 2, ph / 2, paint)
+                    val baseline = rect.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
+                    canvas.drawText(text, rect.centerX(), baseline, textPaint)
+                } else {
+                    val r = w * 0.10f
+                    canvas.drawCircle(w - r - 2f, r + 2f, r, paint)
+                }
+            }
+            override fun setAlpha(alpha: Int) {}
+            override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {}
+            @Deprecated("Deprecated in Java")
+            override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
+        }
+        iconView.overlay.add(badge)
+        iconView.viewTreeObserver.addOnGlobalLayoutListener {
+            badge.setBounds(0, 0, iconView.width, iconView.height)
+        }
+        // v95: observer lifecycle-aware via attach/detach listener della view
+        val obs = androidx.lifecycle.Observer<Map<String, Int>> { iconView.invalidate() }
+        iconView.addOnAttachStateChangeListener(object : android.view.View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: android.view.View) {
+                try {
+                    SpeedApp.instance.notificationCounter.counts.observeForever(obs)
+                } catch (_: Throwable) {}
+            }
+            override fun onViewDetachedFromWindow(v: android.view.View) {
+                try {
+                    SpeedApp.instance.notificationCounter.counts.removeObserver(obs)
+                } catch (_: Throwable) {}
+            }
+        })
+        // Se già attaccata, registro subito
+        if (iconView.isAttachedToWindow) {
+            try {
+                SpeedApp.instance.notificationCounter.counts.observeForever(obs)
+            } catch (_: Throwable) {}
+        }
+    }
+
     private fun resolveAttr(context: Context, attr: Int): Int {
         val tv = android.util.TypedValue()
         context.theme.resolveAttribute(attr, tv, true)
@@ -409,6 +488,8 @@ object FolderSheet {
             layoutParams = android.widget.FrameLayout.LayoutParams(s, s, Gravity.CENTER)
         }
         iconWrap.addView(icon)
+        // v95: badge notifiche sull\'icona dentro la cartella aperta
+        attachNotificationBadge(icon, app.packageName)
         cell.addView(iconWrap)
 
         val label = TextView(context).apply {
