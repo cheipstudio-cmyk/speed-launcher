@@ -50,9 +50,9 @@ class RecommendedView @JvmOverloads constructor(
                 (8 * density).toInt(),
                 (10 * density).toInt()
             )
-            layoutParams = MaterialCardView.LayoutParams(
-                MaterialCardView.LayoutParams.MATCH_PARENT,
-                MaterialCardView.LayoutParams.WRAP_CONTENT
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
             )
         }
         card.addView(row)
