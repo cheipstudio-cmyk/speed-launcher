@@ -80,19 +80,33 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         binding.recycler.itemAnimator = null  // niente animazioni costose
         binding.recycler.adapter = adapter
 
-        // v74: parallasse delle raccomandate quando si scrolla la lista app
-        // Quando scorri giù: le raccomandate sfumano e si spostano leggermente verso l'alto.
-        // Quando torni su: tornano alla posizione/alpha originale.
+        // v74+v120: parallasse + collapse delle raccomandate.
+        // Bug precedente: translationY muoveva visivamente la riga ma lasciava lo spazio
+        // allocato → lista non saliva, parte grigia rimaneva. Ora modifico anche
+        // l'altezza del LayoutParams così la lista sale insieme.
         binding.recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
             private var totalScroll = 0
+            private var originalHeight = -1
             override fun onScrolled(rv: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 totalScroll = (totalScroll + dy).coerceAtLeast(0)
                 val rec = _binding?.recommendedRow ?: return
                 if (rec.visibility != View.VISIBLE) return
-                val maxScroll = (rec.height + (12 * resources.displayMetrics.density)).coerceAtLeast(1f)
-                val progress = (totalScroll / maxScroll.toFloat()).coerceIn(0f, 1f)
-                rec.translationY = -totalScroll * 0.5f  // parallasse: muove a 50% velocità
+                if (originalHeight < 0 && rec.height > 0) originalHeight = rec.height
+                if (originalHeight <= 0) return
+                
+                val marginPx = (12 * resources.displayMetrics.density).toInt()
+                val maxScroll = (originalHeight + marginPx).toFloat()
+                val progress = (totalScroll / maxScroll).coerceIn(0f, 1f)
+                
+                // v120: riduco anche l'altezza per far salire la lista insieme
+                val lp = rec.layoutParams
+                val newHeight = (originalHeight * (1f - progress)).toInt().coerceAtLeast(0)
+                if (lp.height != newHeight) {
+                    lp.height = newHeight
+                    rec.layoutParams = lp
+                }
                 rec.alpha = 1f - progress
+                rec.translationY = 0f  // niente translation: l'altezza si occupa di tutto
             }
         })
 
