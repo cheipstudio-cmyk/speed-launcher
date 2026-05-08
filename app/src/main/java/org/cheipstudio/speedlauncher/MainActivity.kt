@@ -73,6 +73,20 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.onSearchTap = { openDrawerWithSearch() }
         binding.homeView.onHomeLongPress = { openHomeMenu() }
         binding.homeView.onAppMenuRequest = { app -> openAppActions(app) }
+        // v59: tap pulitore memoria → pulisce + snackbar
+        binding.homeView.onMemoryCleanerRequest = {
+            try {
+                val freedMb = org.cheipstudio.speedlauncher.tools.MemoryCleaner.clean(this)
+                val msg = if (freedMb > 0)
+                    getString(R.string.memory_cleaned_with_amount, freedMb)
+                else
+                    getString(R.string.memory_cleaned)
+                com.google.android.material.snackbar.Snackbar.make(
+                    binding.root, msg,
+                    com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
+                ).show()
+            } catch (_: Throwable) {}
+        }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -101,30 +115,56 @@ class MainActivity : AppCompatActivity() {
      * scuro/chiaro è impercettibile. Per blur SOLO del wallpaper servirebbe
      * Window.setBackgroundBlurRadius (API 31+) che è la soluzione corretta.
      */
+    /**
+     * v58: applica blur SUL WALLPAPER catturando il drawable di sistema e renderizzandolo
+     * in un ImageView dietro le icone con setRenderEffect.
+     * Stesso approccio delle cartelle, funziona su Android 12+ senza richiedere cross-window blur.
+     */
     private fun applyWallpaperBlur() {
         val radius = SpeedApp.instance.settingsRepository.wallpaperBlur.value ?: 0
-        if (radius == 0) return
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
 
+        // ImageView wallpaper blur: lo creo una sola volta come primo child del binding.root (FrameLayout)
+        val rootChild = binding.root as? android.view.ViewGroup ?: return
+
+        var blurView = rootChild.findViewById<android.widget.ImageView>(R.id.wallpaperBlurView)
+        if (blurView == null) {
+            blurView = android.widget.ImageView(this).apply {
+                id = R.id.wallpaperBlurView
+                scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            }
+            rootChild.addView(blurView, 0)  // come PRIMO child = sotto tutto
+        }
+
+        if (radius == 0) {
+            // Niente blur: rimuovo la visualizzazione del wallpaper catturato
+            try { blurView.setRenderEffect(null) } catch (_: Throwable) {}
+            blurView.visibility = android.view.View.GONE
+            return
+        }
+
         try {
-            // Verifico se il device supporta cross-window blur (alcuni device hanno feature off)
-            val wm = getSystemService(android.view.WindowManager::class.java)
-            val supported = wm?.isCrossWindowBlurEnabled == true
-            if (!supported) {
-                // Fallback: dim un po\' più forte come "blur visivo" (non vero blur ma percepibile)
-                val extraDim = (radius / 50f * 0.18f).coerceIn(0f, 0.18f)
-                val currentDim = SpeedApp.instance.settingsRepository.wallpaperDim.value ?: 0
-                val totalAlpha = (currentDim / 100f + extraDim).coerceIn(0f, 1f)
-                binding.homeView.setDimOverlayAlpha(totalAlpha)
-                return
+            // Catturo il wallpaper di sistema
+            val wm = android.app.WallpaperManager.getInstance(this)
+            val drawable = try { wm.drawable } catch (_: Throwable) { null }
+            if (drawable != null) {
+                blurView.setImageDrawable(drawable)
+                blurView.visibility = android.view.View.VISIBLE
+                val r = radius.coerceIn(1, 100).toFloat()
+                blurView.setRenderEffect(
+                    android.graphics.RenderEffect.createBlurEffect(r, r,
+                        android.graphics.Shader.TileMode.CLAMP)
+                )
+            } else {
+                blurView.visibility = android.view.View.GONE
             }
-            // Cross-window blur supportato
-            window.attributes = window.attributes.apply {
-                blurBehindRadius = radius
-                flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
-            }
-            window.setAttributes(window.attributes)
-        } catch (_: Throwable) {}
+        } catch (_: Throwable) {
+            blurView.visibility = android.view.View.GONE
+        }
     }
 
     private fun applyOrientationLock() {
@@ -180,19 +220,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openDrawer() {
-        if (drawerSheet?.isAdded == true) return
+        // v59: rimuovo qualsiasi fragment "drawer" precedente per prevenire doppi
+        if (drawerSheet?.isAdded == true || drawerSheet?.isVisible == true) return
+        cleanupOldDrawer()
         drawerSheet = AppDrawerSheet().also {
             it.onAppLongPress = { app -> openAppActions(app) }
-            it.show(supportFragmentManager, "drawer")
+            try { it.show(supportFragmentManager, "drawer") } catch (_: Throwable) {}
         }
     }
 
     private fun openDrawerWithSearch() {
-        if (drawerSheet?.isAdded == true) return
+        if (drawerSheet?.isAdded == true || drawerSheet?.isVisible == true) return
+        cleanupOldDrawer()
         drawerSheet = AppDrawerSheet.newInstance(focusSearch = true).also {
             it.onAppLongPress = { app -> openAppActions(app) }
-            it.show(supportFragmentManager, "drawer")
+            try { it.show(supportFragmentManager, "drawer") } catch (_: Throwable) {}
         }
+    }
+
+    /** v59: rimuove qualsiasi fragment drawer fantasma */
+    private fun cleanupOldDrawer() {
+        try {
+            supportFragmentManager.executePendingTransactions()
+            val existing = supportFragmentManager.findFragmentByTag("drawer")
+            if (existing != null) {
+                supportFragmentManager.beginTransaction().remove(existing).commitNowAllowingStateLoss()
+            }
+            // Rimuovo anche eventuali altri DialogFragment "stuck"
+            for (f in supportFragmentManager.fragments.toList()) {
+                if (f is AppDrawerSheet && f != drawerSheet) {
+                    supportFragmentManager.beginTransaction().remove(f).commitNowAllowingStateLoss()
+                }
+            }
+        } catch (_: Throwable) {}
     }
 
     private fun openHomeMenu() {

@@ -55,6 +55,9 @@ class SettingsRepository(context: Context) {
     val dockTheme = MutableLiveData(prefs.getString(KEY_DOCK_THEME, "system") ?: "system")
     val drawerTheme = MutableLiveData(prefs.getString(KEY_DRAWER_THEME, "system") ?: "system")
 
+    /** v59: pulitore memoria (button razzo + AI) */
+    val memoryCleanerEnabled = MutableLiveData(prefs.getBoolean(KEY_MEMORY_CLEANER, true))
+
     init {
         // v48: al primo run di v48 (dopo aggiornamento), imposta TUTTI i temi a "transparent" come default
         if (!prefs.getBoolean(KEY_FIRST_THEMES_SET, false)) {
@@ -176,6 +179,11 @@ class SettingsRepository(context: Context) {
         drawerTheme.postValue(v)
     }
 
+    fun setMemoryCleanerEnabled(on: Boolean) {
+        prefs.edit().putBoolean(KEY_MEMORY_CLEANER, on).apply()
+        memoryCleanerEnabled.postValue(on)
+    }
+
     fun unhideAllApps() {
         val empty = mutableSetOf<String>()
         prefs.edit().putStringSet(KEY_HIDDEN_APPS, empty).apply()
@@ -284,6 +292,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_SEARCH_THEME = "search_theme"
         private const val KEY_DOCK_THEME = "dock_theme"
         private const val KEY_DRAWER_THEME = "drawer_theme"
+        private const val KEY_MEMORY_CLEANER = "memory_cleaner_enabled"
         private const val KEY_FIRST_THEMES_SET = "first_themes_set"
 
         // Default = arancione/rosso vivace (Material 3)

@@ -26,6 +26,8 @@ class IconGridView @JvmOverloads constructor(
 ) : GridLayout(context, attrs, defStyleAttr) {
 
     var onAppLaunch: ((AppInfo, View) -> Unit)? = null
+    /** v59: tap su memory cleaner button */
+    var onMemoryCleanerTap: ((android.view.View) -> Unit)? = null
     var onAppLongPress: ((AppInfo, View) -> Unit)? = null
     var onFolderOpen: ((HomeItem) -> Unit)? = null
     var pageIndex: Int = 0
@@ -141,6 +143,19 @@ class IconGridView @JvmOverloads constructor(
                     key = toAdd[i].key, page = pageIndex,
                     cellX = i % cols, cellY = i / cols, type = HomeItem.TYPE_APP
                 )
+            }
+            // v59: aggiungo il memory cleaner come bottone fisso al primo run (se abilitato)
+            val cleanerEnabled = settings.memoryCleanerEnabled.value == true
+            if (cleanerEnabled) {
+                val cleanerIdx = toAdd.size.coerceAtMost(pinnedItems.size - 1)
+                if (cleanerIdx in pinnedItems.indices && pinnedItems[cleanerIdx] == null) {
+                    pinnedItems[cleanerIdx] = HomeItem(
+                        key = HomeItem.TOOL_MEMORY_CLEANER,
+                        page = pageIndex,
+                        cellX = cleanerIdx % cols, cellY = cleanerIdx / cols,
+                        type = HomeItem.TYPE_TOOL
+                    )
+                }
             }
             initialized = true
             settings.markFirstRunDone()
@@ -335,6 +350,14 @@ class IconGridView @JvmOverloads constructor(
                     bind(item)
                     dragOriginId = "grid${pageIndex}:$i"
                     onOpen = { f -> onFolderOpen?.invoke(f) }
+                }
+                // v59: tool memory cleaner
+                item.type == HomeItem.TYPE_TOOL && item.key == HomeItem.TOOL_MEMORY_CLEANER -> {
+                    IconCellView(context).apply {
+                        bindMemoryCleaner()
+                        dragOriginId = "grid${pageIndex}:$i"
+                        onMemoryCleaner = { onMemoryCleanerTap?.invoke(this) }
+                    }
                 }
                 else -> {
                     val app = byKey[item.key]

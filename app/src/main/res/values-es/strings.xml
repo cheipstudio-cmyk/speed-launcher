@@ -208,5 +208,10 @@ Se usará solo para esta función.</string>
     <string name="settings_change_wallpaper">Cambiar fondo</string>
     <string name="settings_change_wallpaper_sub">Establecer una imagen como fondo del launcher</string>
     <string name="settings_drawer_theme">Tema del cajón</string>
-    <string name="settings_wallpaper_blur_sub">Desenfoque experimental del fondo. Requiere Android 12+ con cross-window blur activado (no disponible en todos los dispositivos)</string>
+    <string name="settings_wallpaper_blur_sub">Desenfoque del fondo detrás de los iconos. Funciona en Android 12+ si la app es el launcher predeterminado</string>
+    <string name="tool_memory_cleaner">Limpiar</string>
+    <string name="settings_memory_cleaner">Limpiador de memoria</string>
+    <string name="settings_memory_cleaner_sub">Muestra un botón cohete en inicio para liberar memoria con un toque</string>
+    <string name="memory_cleaned">Memoria limpiada</string>
+    <string name="memory_cleaned_with_amount">Memoria limpiada: %1$d MB liberados</string>
 </resources>

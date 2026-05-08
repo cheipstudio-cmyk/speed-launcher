@@ -208,5 +208,10 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_change_wallpaper">Duvar kağıdını değiştir</string>
     <string name="settings_change_wallpaper_sub">Launcher arka planı olarak bir resim ayarla</string>
     <string name="settings_drawer_theme">Çekmece teması</string>
-    <string name="settings_wallpaper_blur_sub">Deneysel duvar kağıdı bulanıklığı. Cross-window blur etkin Android 12+ gerektirir (tüm cihazlarda yok)</string>
+    <string name="settings_wallpaper_blur_sub">Simgelerin arkasındaki arka plan bulanıklığı. Android 12+ ve varsayılan launcher ise çalışır</string>
+    <string name="tool_memory_cleaner">Temizle</string>
+    <string name="settings_memory_cleaner">Bellek temizleyici</string>
+    <string name="settings_memory_cleaner_sub">Tek dokunuşla bellek boşaltmak için ana ekranda roket düğmesi göster</string>
+    <string name="memory_cleaned">Bellek temizlendi</string>
+    <string name="memory_cleaned_with_amount">Bellek temizlendi: %1$d MB serbest bırakıldı</string>
 </resources>

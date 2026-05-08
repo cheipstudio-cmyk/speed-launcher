@@ -40,6 +40,8 @@ class HomeView @JvmOverloads constructor(
     var onSearchTap: (() -> Unit)? = null
     var onHomeLongPress: (() -> Unit)? = null
     var onAppMenuRequest: ((AppInfo) -> Unit)? = null
+    /** v59: callback per tap sul button razzo memory cleaner */
+    var onMemoryCleanerRequest: (() -> Unit)? = null
     /** v18: double tap su searchbar = blocca schermo */
     var onLockScreen: (() -> Unit)? = null
 
@@ -277,6 +279,10 @@ class HomeView @JvmOverloads constructor(
             onAppLaunch = { app, view -> SpeedApp.instance.appRepository.launch(app, view) }
             onAppLongPress = { app, _ -> onAppMenuRequest?.invoke(app) }
             onFolderOpen = { folder -> openFolder(folder) }
+            // v59: tap su button razzo memory cleaner → pulisce + snackbar
+            onMemoryCleanerTap = { _ ->
+                onMemoryCleanerRequest?.invoke()
+            }
             setLayout(layoutStore.loadPage(idx))
         }
         pages.add(page)

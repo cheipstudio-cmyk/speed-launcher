@@ -395,6 +395,13 @@ class SettingsActivity : AppCompatActivity() {
             } catch (_: Throwable) {}
         }
 
+        // v59: Pulitore memoria AI
+        binding.switchMemoryCleaner.isChecked = settings.memoryCleanerEnabled.value == true
+        binding.switchMemoryCleaner.setOnCheckedChangeListener { _, isChecked ->
+            settings.setMemoryCleanerEnabled(isChecked)
+        }
+
+
         // === v48: TEMA SEARCH + TEMA DOCK ===
         updateSearchThemeLabel()
         binding.itemSearchTheme.setOnClickListener { showSearchThemeDialog() }

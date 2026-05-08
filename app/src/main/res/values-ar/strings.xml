@@ -208,5 +208,10 @@
     <string name="settings_change_wallpaper">تغيير الخلفية</string>
     <string name="settings_change_wallpaper_sub">تعيين صورة كخلفية للمشغل</string>
     <string name="settings_drawer_theme">سمة الدرج</string>
-    <string name="settings_wallpaper_blur_sub">تمويه الخلفية تجريبي. يتطلب Android 12+ مع تمكين cross-window blur (غير متوفر على جميع الأجهزة)</string>
+    <string name="settings_wallpaper_blur_sub">تمويه الخلفية خلف الرموز. يعمل على Android 12+ إذا كان التطبيق هو المشغل الافتراضي</string>
+    <string name="tool_memory_cleaner">تنظيف</string>
+    <string name="settings_memory_cleaner">منظف الذاكرة</string>
+    <string name="settings_memory_cleaner_sub">عرض زر صاروخ على الشاشة الرئيسية لتحرير الذاكرة بضغطة واحدة</string>
+    <string name="memory_cleaned">تم تنظيف الذاكرة</string>
+    <string name="memory_cleaned_with_amount">تم تنظيف الذاكرة: %1$d ميجابايت تم تحريرها</string>
 </resources>

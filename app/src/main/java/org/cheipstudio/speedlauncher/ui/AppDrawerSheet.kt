@@ -181,7 +181,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
 
-                // v57: applica tema drawer (transparent/light/dark/system)
+                // v58: applica tema drawer — usa ColorDrawable che sovrascrive il default Material
                 val theme = SpeedApp.instance.settingsRepository.drawerTheme.value ?: "system"
                 val isLight = when (theme) {
                     "light" -> true
@@ -194,13 +194,15 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                     }
                 }
                 val bgColor = when (theme) {
-                    "transparent" -> android.graphics.Color.argb(220, 0, 0, 0)
+                    "transparent" -> android.graphics.Color.argb(150, 0, 0, 0)
                     "light" -> android.graphics.Color.argb(245, 245, 245, 245)
                     "dark" -> android.graphics.Color.argb(245, 27, 27, 31)
                     else -> if (isLight) android.graphics.Color.argb(245, 245, 245, 245)
                             else android.graphics.Color.argb(245, 27, 27, 31)
                 }
-                it.setBackgroundColor(bgColor)
+                // v58: BottomSheet wrapper trasparente, il colore del tema va sul nostro root LinearLayout
+                it.background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+                _binding?.root?.background = android.graphics.drawable.ColorDrawable(bgColor)
 
                 // Slide callback per fade fluido dei contenuti durante drag
                 behavior.addBottomSheetCallback(object : com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback() {

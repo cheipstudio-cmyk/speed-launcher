@@ -230,5 +230,10 @@ It will only be used for this feature.</string>
     <string name="settings_change_wallpaper">Change wallpaper</string>
     <string name="settings_change_wallpaper_sub">Set an image as the launcher background</string>
     <string name="settings_drawer_theme">Drawer theme</string>
-    <string name="settings_wallpaper_blur_sub">Experimental wallpaper blur. Requires Android 12+ with cross-window blur enabled (not available on all devices)</string>
+    <string name="settings_wallpaper_blur_sub">Background blur behind icons. Works on Android 12+ if the app is the default launcher</string>
+    <string name="tool_memory_cleaner">Clean</string>
+    <string name="settings_memory_cleaner">Memory cleaner</string>
+    <string name="settings_memory_cleaner_sub">Show a rocket button on home to free memory with one tap</string>
+    <string name="memory_cleaned">Memory cleaned</string>
+    <string name="memory_cleaned_with_amount">Memory cleaned: %1$d MB freed</string>
 </resources>

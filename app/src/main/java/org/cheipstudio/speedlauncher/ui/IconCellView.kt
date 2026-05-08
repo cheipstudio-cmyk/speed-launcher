@@ -47,7 +47,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
         private set
 
     private var app: AppInfo? = null
+    /** v59: se true, è un button tool (memory cleaner) — comportamento speciale */
+    var isMemoryCleaner: Boolean = false
     var onLaunch: ((AppInfo, View) -> Unit)? = null
+    /** v59: callback per tap su memory cleaner (no app collegata) */
+    var onMemoryCleaner: (() -> Unit)? = null
     var onMenu: ((AppInfo, View) -> Unit)? = null
     var dragOriginId: String = ""
 
@@ -79,6 +83,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
         if (pressing && armed && !menuFired && !dragFired) {
             menuFired = true
             performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            // v59: tool memory cleaner non ha menu Info/Disinstalla
+            if (isMemoryCleaner) return@Runnable
             val a = app ?: return@Runnable
             onMenu?.invoke(a, this)
         }
@@ -131,7 +137,9 @@ class IconCellView(context: Context) : LinearLayout(context) {
 
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val a = app ?: return super.onTouchEvent(event)
+        // v59: per memory cleaner non c\'è app, ma il touch deve essere processato per drag/tap
+        if (app == null && !isMemoryCleaner) return super.onTouchEvent(event)
+        val a = app  // può essere null se isMemoryCleaner
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x; downY = event.y
@@ -149,10 +157,13 @@ class IconCellView(context: Context) : LinearLayout(context) {
                     if ((dx > dragSlop || dy > dragSlop) && dragOriginId.isNotEmpty()) {
                         dragFired = true
                         handler.removeCallbacks(menuRunnable)
-                        val a2 = app ?: return true
-                        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${a2.key}")
+                        // v59: per memory cleaner uso key speciale
+                        val key = if (isMemoryCleaner)
+                            org.cheipstudio.speedlauncher.data.HomeItem.TOOL_MEMORY_CLEANER
+                        else (app?.key ?: return true)
+                        val data = ClipData.newPlainText("speedDrag", "$dragOriginId|$key")
                         showDragIndicator(true)
-                        startDragAndDrop(data, DragIndicatorShadow(this), a2.key, 0)
+                        startDragAndDrop(data, DragIndicatorShadow(this), key, 0)
                     }
                 } else if (!armed && (dx > moveSlop || dy > moveSlop)) {
                     // pre-arm: troppo movimento = scroll, cancello
@@ -167,7 +178,12 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 cancelAll()
                 if (!wasArmed && !wasMenu && !wasDrag) {
                     // tap normale
-                    onLaunch?.invoke(a, this)
+                    if (isMemoryCleaner) {
+                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        onMemoryCleaner?.invoke()
+                    } else if (a != null) {
+                        onLaunch?.invoke(a, this)
+                    }
                 }
                 return true
             }
@@ -226,7 +242,33 @@ class IconCellView(context: Context) : LinearLayout(context) {
     }
 
 
+    /**
+     * v59: bind come tool memory cleaner (icona razzo, no app collegata).
+     * Tap = pulisce memoria + snackbar.
+     * Long press = solo drag, nessun menu (no info, no rimuovi).
+     */
+    fun bindMemoryCleaner() {
+        isMemoryCleaner = true
+        this.app = null
+        packageName = ""
+        // Icona razzo bianca su sfondo gradiente arancio/rosso
+        val ctx = context
+        val density = resources.displayMetrics.density
+        val size = (52 * density).toInt()
+        val rocketIcon = androidx.core.content.ContextCompat.getDrawable(ctx,
+            org.cheipstudio.speedlauncher.R.drawable.ic_rocket_launch)
+        val bg = androidx.core.content.ContextCompat.getDrawable(ctx,
+            org.cheipstudio.speedlauncher.R.drawable.bg_memory_cleaner)
+        // LayerDrawable: bg + razzo padded
+        val padding = (12 * density).toInt()
+        val layer = android.graphics.drawable.LayerDrawable(arrayOf(bg, rocketIcon))
+        layer.setLayerInset(1, padding, padding, padding, padding)
+        iconView.setImageDrawable(layer)
+        labelView.text = ctx.getString(org.cheipstudio.speedlauncher.R.string.tool_memory_cleaner)
+    }
+
     fun bind(app: AppInfo) {
+        isMemoryCleaner = false
         this.app = app
         val s = SpeedApp.instance.settingsRepository
         val shape = s.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
