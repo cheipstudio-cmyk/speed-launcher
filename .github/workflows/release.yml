@@ -83,4 +83,4 @@ jobs:
             Gli utenti che hanno già una versione precedente (v0.83+) possono aggiornare direttamente 
             dall'app: Impostazioni → Controlla aggiornamenti.
           draft: false
-          prerelease: true
+          prerelease: false
