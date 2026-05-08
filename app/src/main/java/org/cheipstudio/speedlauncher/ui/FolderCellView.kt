@@ -247,16 +247,12 @@ class FolderCellView(context: Context) : LinearLayout(context) {
             }
             if (totalCount <= 0) return
 
-            // Colore custom da settings se presente
-            val dotColorStr = settings.notificationDotColor.value
-            if (dotColorStr != null) {
-                try {
-                    val col = if (dotColorStr.startsWith("#")) Color.parseColor(dotColorStr)
-                              else Color.parseColor("#$dotColorStr")
-                    badgeDotPaint.color = col
-                    badgePillPaint.color = col
-                } catch (_: Throwable) {}
-            }
+            // Colore custom da settings (dotColor è un Int)
+            try {
+                val col = settings.dotColor.value ?: SettingsRepository.DOT_DEFAULT
+                badgeDotPaint.color = col
+                badgePillPaint.color = col
+            } catch (_: Throwable) {}
 
             if (mode == SettingsRepository.BADGE_COUNT) {
                 // pill in alto a destra

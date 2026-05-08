@@ -339,13 +339,7 @@ object FolderSheet {
                 val mode = s.notificationBadgeMode.value ?: org.cheipstudio.speedlauncher.data.SettingsRepository.BADGE_DOT
                 if (mode == org.cheipstudio.speedlauncher.data.SettingsRepository.BADGE_OFF) return
 
-                val dotColorStr = s.notificationDotColor.value
-                val color = try {
-                    if (dotColorStr != null) {
-                        if (dotColorStr.startsWith("#")) android.graphics.Color.parseColor(dotColorStr)
-                        else android.graphics.Color.parseColor("#$dotColorStr")
-                    } else android.graphics.Color.parseColor("#FF5252")
-                } catch (_: Throwable) { android.graphics.Color.parseColor("#FF5252") }
+                val color = s.dotColor.value ?: org.cheipstudio.speedlauncher.data.SettingsRepository.DOT_DEFAULT
 
                 val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                     this.color = color

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="home_horizontal_padding">16dp</dimen>
-    <dimen name="home_top_padding">48dp</dimen>
-    <dimen name="home_bottom_padding">24dp</dimen>
-    <dimen name="widget_slot_height">140dp</dimen>
-</resources>
