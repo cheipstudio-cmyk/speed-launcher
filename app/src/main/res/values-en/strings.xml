@@ -162,8 +162,8 @@
     <string name="settings_section_ai">AI Launcher Mode</string>
     <string name="settings_ai_launcher_mode">Recommended</string>
     <string name="settings_ai_launcher_mode_sub">Show most recently used apps at the top of home and drawer</string>
-    <string name="settings_landscape">Landscape mode</string>
-    <string name="settings_landscape_sub">Allow launcher rotation (recommended on tablets)</string>
+    <string name="settings_landscape">Landscape mode (experimental)</string>
+    <string name="settings_landscape_sub">Tablets or testing only. May glitch on phones.</string>
     <string name="recommended_header">Recommended</string>
 
     <string name="accessibility_dialog_title">Enable to turn off screen</string>

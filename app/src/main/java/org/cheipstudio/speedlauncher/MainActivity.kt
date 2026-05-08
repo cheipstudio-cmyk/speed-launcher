@@ -183,6 +183,15 @@ class MainActivity : AppCompatActivity() {
             it.onSorted = {
                 recreate()
             }
+            it.onManagePages = {
+                org.cheipstudio.speedlauncher.ui.PageManagerSheet.show(
+                    context = this,
+                    getPageCount = { binding.homeView.getPageCount() },
+                    getPageIconCount = { idx -> binding.homeView.getPageIconCount(idx) },
+                    onAddPage = { binding.homeView.addEmptyPage() },
+                    onRemovePage = { idx -> binding.homeView.forceRemovePageAt(idx) }
+                )
+            }
             it.show(supportFragmentManager, "homemenu")
         }
     }

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:paddingTop="12dp">
 
-    <!-- Drag handle Material 3 -->
+    <!-- Drag handle -->
     <View
         android:layout_width="32dp"
         android:layout_height="4dp"
@@ -15,7 +15,7 @@
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_drag_handle" />
 
-    <!-- v41: dock raccomandate sopra la search bar, soggetto a parallax via applyDrawerSlide -->
+    <!-- v41: dock raccomandate, parallax via applyDrawerSlide -->
     <org.cheipstudio.speedlauncher.ui.RecommendedView
         android:id="@+id/recommendedRow"
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
         android:layout_marginHorizontal="12dp"
         android:layout_marginBottom="12dp" />
 
-    <!-- Search input Material -->
+    <!-- Search input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,14 +47,29 @@
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
+    <!-- v29: Recycler + Alphascrollbar in FrameLayout -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingHorizontal="8dp"
-        android:paddingBottom="32dp" />
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="8dp"
+            android:paddingBottom="32dp" />
+
+        <org.cheipstudio.speedlauncher.ui.AlphaScrollBar
+            android:id="@+id/alphaScrollBar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:layout_marginEnd="2dp"
+            android:paddingVertical="8dp"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </LinearLayout>

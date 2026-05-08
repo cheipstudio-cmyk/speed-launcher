@@ -162,8 +162,8 @@
     <string name="settings_section_ai">AI Launcher Mode</string>
     <string name="settings_ai_launcher_mode">Raccomandate</string>
     <string name="settings_ai_launcher_mode_sub">Mostra le app più usate di recente in cima alla home e al drawer</string>
-    <string name="settings_landscape">Modalità orizzontale</string>
-    <string name="settings_landscape_sub">Consenti la rotazione del launcher (consigliata su tablet)</string>
+    <string name="settings_landscape">Modalità orizzontale (sperimentale)</string>
+    <string name="settings_landscape_sub">Solo per tablet o test. Su telefoni il layout può glitchare.</string>
     <string name="recommended_header">Raccomandate</string>
 
     <string name="accessibility_dialog_title">Abilita per spegnere lo schermo</string>

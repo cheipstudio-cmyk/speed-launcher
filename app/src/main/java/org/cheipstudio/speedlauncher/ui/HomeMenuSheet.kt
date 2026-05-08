@@ -16,6 +16,7 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
 
     var onSettings: (() -> Unit)? = null
     var onSorted: (() -> Unit)? = null
+    var onManagePages: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -37,6 +38,10 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
             Toast.makeText(context, R.string.sort_done, Toast.LENGTH_SHORT).show()
             dismissAllowingStateLoss()
             onSorted?.invoke()
+        }
+        view.findViewById<View>(R.id.menuPages)?.setOnClickListener {
+            dismissAllowingStateLoss()
+            onManagePages?.invoke()
         }
         view.findViewById<View>(R.id.menuSettings).setOnClickListener {
             dismissAllowingStateLoss()

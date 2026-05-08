@@ -151,6 +151,15 @@ class HomeView @JvmOverloads constructor(
         }
         binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
 
+        // v43: long press su area home vuota apre menu (Wallpaper/Sort/Settings)
+        // Le icone consumano già il long press, quindi qui arriva solo se cell vuoto
+        binding.pagedHome.setOnLongClickListener {
+            performHapticFeedbackLight()
+            onHomeLongPress?.invoke()
+            true
+        }
+        binding.pagedHome.isLongClickable = true
+
         updateSearchBarText()
         applySearchBarStyle()
 
@@ -271,6 +280,51 @@ class HomeView @JvmOverloads constructor(
         while (pages.size <= idx) addPageAt(pages.size)
         updatePageIndicator()
     }
+
+    /** v43: aggiunge una pagina vuota in fondo */
+    fun addEmptyPage() {
+        addPageAt(pages.size)
+        layoutStore.savePage(pages.size - 1, emptyList())
+        updatePageIndicator()
+    }
+
+    /** v43: rimuove una pagina per indice (anche se non vuota — sposta il contenuto fuori, lo scarta) */
+    fun forceRemovePageAt(idx: Int) {
+        if (idx !in 0 until pages.size) return
+        if (pages.size <= 1) return  // tieni almeno una pagina
+        // sposta verso sinistra: re-salva tutte le pagine dopo idx con i nuovi indici
+        pages.removeAt(idx)
+        binding.pagedHome.removePage(idx)
+        // Ricalcola e salva di nuovo gli indici di pagina (gli items hanno page=N che va decrementato)
+        for (i in idx until pages.size) {
+            pages[i].pageIndex = i
+        }
+        // Persisti: sposta tutte le pagine a partire da idx una posizione indietro
+        val totalAfter = pages.size
+        // Carica items, riassegna page=i e cellX/cellY, salva, ricarica nelle griglie
+        val itemsByPage = mutableListOf<List<HomeItem>>()
+        for (i in 0 until totalAfter) {
+            val items = pages[i].getItems().map { it.copy(page = i) }
+            itemsByPage.add(items)
+        }
+        for (i in 0 until totalAfter) {
+            layoutStore.savePage(i, itemsByPage[i])
+            pages[i].setLayout(itemsByPage[i])
+        }
+        // Cancello la pagina vecchia in coda (oltre totalAfter)
+        layoutStore.savePage(totalAfter, emptyList())
+        if (binding.pagedHome.currentPage >= totalAfter) {
+            binding.pagedHome.snapToPage(totalAfter - 1, true)
+        }
+        updatePageIndicator()
+    }
+
+    /** v43: numero di pagine */
+    fun getPageCount(): Int = pages.size
+
+    /** v43: numero di icone su una pagina */
+    fun getPageIconCount(idx: Int): Int =
+        if (idx in 0 until pages.size) pages[idx].getItems().size else 0
 
     private fun trimEmptyPages() {
         while (pages.size > 1 && pages.last().isEmpty()) {
@@ -477,6 +531,33 @@ class HomeView @JvmOverloads constructor(
     fun snapToFirstPage() {
         if (binding.pagedHome.currentPage > 0) {
             binding.pagedHome.snapToPage(0, animate = true)
+        }
+        // v45: animazione "welcome back" quando torni alla home
+        playWelcomeAnim()
+    }
+
+    /** v45: anim leggera quando torni alla home da app */
+    private fun playWelcomeAnim() {
+        // Search bar: rapida riappare con leggero scale + alpha
+        binding.searchBar.apply {
+            alpha = 0.6f
+            scaleX = 0.96f; scaleY = 0.96f
+            animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(280)
+                .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+                .start()
+        }
+        // Icone home: stagger leggerissimo (rimane snappy)
+        for (i in 0 until pages.size) {
+            val grid = pages[i]
+            grid.alpha = 0.85f
+            grid.translationY = 12f
+            grid.animate()
+                .alpha(1f).translationY(0f)
+                .setDuration(240)
+                .setStartDelay((i * 30L).coerceAtMost(60L))
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
         }
     }
 

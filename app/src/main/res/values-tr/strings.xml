@@ -140,8 +140,8 @@
     <string name="settings_section_ai">AI Başlatıcı Modu</string>
     <string name="settings_ai_launcher_mode">Önerilenler</string>
     <string name="settings_ai_launcher_mode_sub">En son kullanılan uygulamaları ana ekran ve çekmecenin üstünde göster</string>
-    <string name="settings_landscape">Yatay mod</string>
-    <string name="settings_landscape_sub">Başlatıcının döndürülmesine izin ver (tabletlerde önerilir)</string>
+    <string name="settings_landscape">Yatay mod (deneysel)</string>
+    <string name="settings_landscape_sub">Yalnızca tablet veya test. Telefonlarda hata verebilir.</string>
     <string name="recommended_header">Önerilenler</string>
 
     <string name="accessibility_dialog_title">Ekranı kapatmak için etkinleştir</string>
