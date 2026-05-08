@@ -280,4 +280,9 @@ Vuoi scaricarla?</string>
     <string name="auto_grid_reset_done">Griglia rigenerata</string>
     <string name="settings_auto_add_new_apps">Aggiungi nuove app in home</string>
     <string name="settings_auto_add_new_apps_sub">Le app appena installate appaiono automaticamente in home</string>
+    <string name="rec_edit_title">Raccomandate</string>
+    <string name="rec_mode_ai">Modalità AI (più usate)</string>
+    <string name="rec_mode_manual">Modalità manuale</string>
+    <string name="rec_edit_pick_apps">Scegli le app manuali...</string>
+    <string name="rec_edit_pick_title">Seleziona app raccomandate</string>
 </resources>

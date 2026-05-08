@@ -280,4 +280,9 @@ Download now?</string>
     <string name="auto_grid_reset_done">Grid regenerated</string>
     <string name="settings_auto_add_new_apps">Add new apps to home</string>
     <string name="settings_auto_add_new_apps_sub">Newly installed apps appear automatically on home</string>
+    <string name="rec_edit_title">Recommended</string>
+    <string name="rec_mode_ai">AI mode (most used)</string>
+    <string name="rec_mode_manual">Manual mode</string>
+    <string name="rec_edit_pick_apps">Pick manual apps...</string>
+    <string name="rec_edit_pick_title">Select recommended apps</string>
 </resources>

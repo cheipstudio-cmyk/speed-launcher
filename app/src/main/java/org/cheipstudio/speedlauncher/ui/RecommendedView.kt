@@ -58,6 +58,11 @@ class RecommendedView @JvmOverloads constructor(
         }
         card.addView(row)
         addView(card)
+        // v122: long press sull'area card → menu modifica raccomandate
+        card.setOnLongClickListener {
+            onContainerLongPress?.invoke()
+            onContainerLongPress != null
+        }
     }
 
     private fun resolveAttrColor(attr: Int): Int {

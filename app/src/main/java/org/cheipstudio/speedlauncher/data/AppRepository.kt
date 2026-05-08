@@ -36,6 +36,10 @@ class AppRepository(private val context: Context) {
     private fun loadApps(): List<AppInfo> {
         val result = mutableListOf<AppInfo>()
         val users: List<UserHandle> = listOf(Process.myUserHandle())
+        // v122: escludo Speed Launcher stesso quando è il default launcher attivo
+        // (se l'utente usa un altro launcher, deve poter aprire Speed Launcher dal drawer)
+        val ownPkg = context.packageName
+        val isDefaultLauncher = isMyselfDefaultLauncher()
         for (user in users) {
             val activities = try {
                 launcherApps.getActivityList(null, user)
@@ -43,6 +47,8 @@ class AppRepository(private val context: Context) {
                 emptyList()
             }
             for (activity in activities) {
+                // Skip se è Speed Launcher stesso E sono il launcher di default
+                if (isDefaultLauncher && activity.applicationInfo.packageName == ownPkg) continue
                 result.add(
                     AppInfo(
                         packageName = activity.applicationInfo.packageName,
@@ -139,5 +145,19 @@ class AppRepository(private val context: Context) {
             view, 0, 0, view.width, view.height
         )
         return bounds to options
+    }
+
+    /** v122: verifica se Speed Launcher è il launcher di default attivo */
+    private fun isMyselfDefaultLauncher(): Boolean {
+        return try {
+            val intent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+                addCategory(android.content.Intent.CATEGORY_HOME)
+            }
+            val resolveInfo = context.packageManager.resolveActivity(
+                intent,
+                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+            )
+            resolveInfo?.activityInfo?.packageName == context.packageName
+        } catch (_: Throwable) { false }
     }
 }

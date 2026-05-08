@@ -27,6 +27,8 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
 
     /** v20: callback per long-press dal drawer */
     var onAppLongPress: ((AppInfo) -> Unit)? = null
+    /** v122: callback richiamata quando il drawer si chiude */
+    var onDismissCallback: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -379,6 +381,12 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             // fallback: imposto lo stato normalmente, almeno c\'è qualcosa
             behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
         }
+    }
+
+    /** v122: avvisa MainActivity quando il drawer si chiude (per resettare drawerSheet) */
+    override fun onDismiss(dialog: android.content.DialogInterface) {
+        super.onDismiss(dialog)
+        try { onDismissCallback?.invoke() } catch (_: Throwable) {}
     }
 
     companion object {
