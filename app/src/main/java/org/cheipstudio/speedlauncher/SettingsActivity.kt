@@ -153,16 +153,22 @@ class SettingsActivity : AppCompatActivity() {
 
         // v138: widget position
         binding.itemWidgetPosition.setOnClickListener { showWidgetPositionDialog() }
+        binding.itemWidgetPosition.isClickable = true
+        binding.itemWidgetPosition.isFocusable = true
         settings.widgetPosition.observe(this) { updateWidgetPositionLabel() }
         updateWidgetPositionLabel()
         
         // v138: widget height
         binding.itemWidgetHeight.setOnClickListener { showWidgetHeightDialog() }
+        binding.itemWidgetHeight.isClickable = true
+        binding.itemWidgetHeight.isFocusable = true
         settings.widgetHeight.observe(this) { updateWidgetHeightLabel() }
         updateWidgetHeightLabel()
         
         // v138: widget width
         binding.itemWidgetWidth.setOnClickListener { showWidgetWidthDialog() }
+        binding.itemWidgetWidth.isClickable = true
+        binding.itemWidgetWidth.isFocusable = true
         settings.widgetWidthPercent.observe(this) { updateWidgetWidthLabel() }
         updateWidgetWidthLabel()
 
@@ -211,6 +217,8 @@ class SettingsActivity : AppCompatActivity() {
         
         // v139: RSS feeds
         binding.itemRssFeeds.setOnClickListener { showRssFeedsDialog() }
+        binding.itemRssFeeds.isClickable = true
+        binding.itemRssFeeds.isFocusable = true
         settings.rssFeeds.observe(this) { updateRssFeedsLabel() }
         updateRssFeedsLabel()
         // v63: toggle "mostra barra ricerca"
@@ -449,6 +457,8 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "https://t.me/speed_launcher", Toast.LENGTH_LONG).show()
             }
         }
+    
+        ensureCardsClickable()
     }
 
     private fun resolveAttr(attr: Int): Int {
@@ -1593,5 +1603,22 @@ override fun onResume() {
     override fun finish() {
         super.finish()
         overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
+    }
+
+    /** v162: forza isClickable/isFocusable/isEnabled=true sulle card item* dopo tutti gli observer
+     *  per garantire che il tap parta anche se altre logiche le hanno disabilitate. */
+    private fun ensureCardsClickable() {
+        val cards = listOf(
+            binding.itemRssFeeds,
+            binding.itemWidgetPosition,
+            binding.itemWidgetHeight,
+            binding.itemWidgetWidth
+        )
+        for (card in cards) {
+            card.isClickable = true
+            card.isFocusable = true
+            card.alpha = 1f
+            card.isEnabled = true
+        }
     }
 }

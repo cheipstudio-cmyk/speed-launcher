@@ -225,18 +225,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // v160: animazione di entrata Pixel-style: zoom-out + fade dolce
+        // v162: animazione entrata home Pixel-style — staggered (sfondo zoom-out, contenuti fade-up)
         try {
             val homeContent = binding.homeView
+            // Step 1: zoom-out totale rapido (stile recents Pixel)
             homeContent.alpha = 0f
-            homeContent.scaleX = 1.06f
-            homeContent.scaleY = 1.06f
+            homeContent.scaleX = 1.10f
+            homeContent.scaleY = 1.10f
             homeContent.animate()
                 .alpha(1f)
                 .scaleX(1f)
                 .scaleY(1f)
-                .setDuration(220)
-                .setInterpolator(android.view.animation.PathInterpolator(0.0f, 0.0f, 0.2f, 1.0f))
+                .setDuration(280)
+                .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                 .start()
         } catch (_: Throwable) {}
         widgetHostController.startListening()
