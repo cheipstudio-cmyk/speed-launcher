@@ -142,12 +142,6 @@ class WidgetSlotView @JvmOverloads constructor(
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
         val canBind = controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
-        // v209: toast diagnostico per debug widget
-        try {
-            android.widget.Toast.makeText(context, 
-                "Widget: canBind=$canBind, config=${info.configure != null}", 
-                android.widget.Toast.LENGTH_LONG).show()
-        } catch (_: Throwable) {}
         if (!canBind) {
             val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -164,6 +158,9 @@ class WidgetSlotView @JvmOverloads constructor(
                 component = info.configure
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             }
+            // v210: salvo pendingId per recuperare in REQ_CONFIGURE quando data è null
+            controller.pendingBindWidget = info
+            controller.pendingBindAppWidgetId = appWidgetId
             controller.pendingPlaceCallback = { v -> placeWidgetView(v, info) }
             activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
         } else {

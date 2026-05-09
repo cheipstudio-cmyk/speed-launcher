@@ -93,22 +93,29 @@ class WidgetHostController(private val activity: Activity) {
                 }
             }
             REQ_CONFIGURE -> {
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    val id = data.getIntExtra(
+                // v210: data può essere null da molte app di config (es. Spotify/Calendar) ma il widget è valido
+                // Usa pendingBindAppWidgetId che abbiamo salvato prima di lanciare config
+                if (resultCode == Activity.RESULT_OK) {
+                    val id = data?.getIntExtra(
                         AppWidgetManager.EXTRA_APPWIDGET_ID,
                         AppWidgetManager.INVALID_APPWIDGET_ID
-                    )
-                    val info = appWidgetManager.getAppWidgetInfo(id)
-                    if (id != AppWidgetManager.INVALID_APPWIDGET_ID && info != null) {
-                        placeWidget(id, info)
+                    ) ?: pendingBindAppWidgetId
+                    val resolvedId = if (id == AppWidgetManager.INVALID_APPWIDGET_ID) pendingBindAppWidgetId else id
+                    val info = if (resolvedId >= 0) appWidgetManager.getAppWidgetInfo(resolvedId) else null
+                    if (resolvedId >= 0 && info != null) {
+                        placeWidget(resolvedId, info)
                     } else {
+                        if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
                         pendingPlaceCallback?.invoke(null)
                         pendingPlaceCallback = null
                     }
                 } else {
+                    if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
                     pendingPlaceCallback?.invoke(null)
                     pendingPlaceCallback = null
                 }
+                pendingBindAppWidgetId = -1
+                pendingBindWidget = null
             }
             REQ_PICK -> {
                 if (resultCode == Activity.RESULT_OK && data != null) {

@@ -233,20 +233,30 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
 
     override fun onResume() {
         super.onResume()
-        // v200: animazione entrata home Material Expressive — fade dolce
-        // + rimbalzo elastic widget e search bar
+        // v210: animazione entrata home Material Expressive — fade dolce
+        // SAFETY: alpha torna a 1 anche se animazione viene cancellata (fix schermo nero landscape)
         try {
             val homeContent = binding.homeView
             homeContent.alpha = 0f
             homeContent.scaleX = 1.04f
             homeContent.scaleY = 1.04f
+            homeContent.animate().cancel()
             homeContent.animate()
                 .alpha(1f)
                 .scaleX(1f)
                 .scaleY(1f)
                 .setDuration(280)
                 .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
+                .withEndAction { homeContent.alpha = 1f; homeContent.scaleX = 1f; homeContent.scaleY = 1f }
                 .start()
+            // Fallback: se entro 600ms l'anim non finisce, forza i valori
+            homeContent.postDelayed({
+                if (homeContent.alpha < 1f) {
+                    homeContent.alpha = 1f
+                    homeContent.scaleX = 1f
+                    homeContent.scaleY = 1f
+                }
+            }, 600)
             
             // Rimbalzo widget - spring effect
             try {
