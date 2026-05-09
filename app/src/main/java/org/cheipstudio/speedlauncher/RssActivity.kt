@@ -128,11 +128,13 @@ class RssActivity : AppCompatActivity() {
                 try {
                     val result = fetchFeed(feed)
                     android.util.Log.d("RssActivity", "Feed $feed → ${result.size} articles")
-                    if (result.isEmpty()) errors.add("$feed: 0 articoli")
+                    if (result.isEmpty()) {
+                        errors.add("$feed: 0 articoli (vedi adb logcat -s RssActivity)")
+                    }
                     all.addAll(result)
                 } catch (t: Throwable) {
                     android.util.Log.e("RssActivity", "Feed $feed failed", t)
-                    errors.add("$feed: ${t.message?.take(60)}")
+                    errors.add("$feed: ${t.javaClass.simpleName}: ${t.message?.take(80)}")
                 }
             }
             // Se tutti i feed sono falliti, mostro errori in toast
@@ -147,8 +149,11 @@ class RssActivity : AppCompatActivity() {
                 listView.adapter?.notifyDataSetChanged()
                 if (items.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
-                    val msg = errorSummary ?: "Nessun articolo trovato"
-                    Toast.makeText(this@RssActivity, msg, Toast.LENGTH_LONG).show()
+                    val detail = if (errors.isNotEmpty()) "\n\n" + errors.joinToString("\n\n") else ""
+                    emptyView.text = getString(R.string.rss_empty) + detail
+                    emptyView.textSize = 13f
+                    emptyView.gravity = android.view.Gravity.START
+                    emptyView.setPadding(48, 48, 48, 48)
                 }
             }
         }

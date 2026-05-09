@@ -86,7 +86,13 @@ class WidgetSlotView @JvmOverloads constructor(
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
         setOnLongClickListener {
-            if (currentWidgetView == null) { showCustomPicker(); true } else false
+            if (currentWidgetView == null) {
+                showCustomPicker()
+            } else {
+                // v181: long press su widget montato → resize sheet
+                showResizeSheet()
+            }
+            true
         }
         isLongClickable = true
     }
@@ -235,5 +241,25 @@ class WidgetSlotView @JvmOverloads constructor(
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
         requestLayout()
         invalidate()
+    }
+
+    private fun showResizeSheet() {
+        try {
+            val activity = (context as? androidx.fragment.app.FragmentActivity) ?: return
+            val sheet = org.cheipstudio.speedlauncher.ui.WidgetResizeSheet()
+            sheet.onChanged = {
+                // re-applico config widget al cambio  
+                try {
+                    org.cheipstudio.speedlauncher.SpeedApp.instance
+                    (parent as? android.view.View)?.requestLayout()
+                } catch (_: Throwable) {}
+            }
+            sheet.onRemove = {
+                org.cheipstudio.speedlauncher.ui.WidgetRemoveSheet.show(context) {
+                    removeWidget()
+                }
+            }
+            sheet.show(activity.supportFragmentManager, "widget_resize")
+        } catch (_: Throwable) {}
     }
 }

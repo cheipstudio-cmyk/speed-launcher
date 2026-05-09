@@ -359,4 +359,8 @@ Vuoi scaricarla?</string>
     <string name="search_universal">Cerca ovunque</string>
     <string name="settings_idx_system">Sistema</string>
     <string name="settings_idx_system_sub">Launcher predefinito, accesso notifiche, modalità orizzontale</string>
+    <string name="widget_resize_title">Personalizza widget</string>
+    <string name="position_top">In alto</string>
+    <string name="position_above_search">Sopra ricerca</string>
+    <string name="position_below_search">Sotto ricerca</string>
 </resources>
