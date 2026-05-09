@@ -54,7 +54,7 @@
             android:stateNotNeeded="true"
             android:theme="@style/Theme.SpeedLauncher.Home"
             android:windowSoftInputMode="adjustNothing"
-            android:configChanges="keyboard|keyboardHidden|navigation|uiMode">
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />

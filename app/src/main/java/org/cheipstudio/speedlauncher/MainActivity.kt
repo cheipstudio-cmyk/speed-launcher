@@ -233,31 +233,28 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
 
     override fun onResume() {
         super.onResume()
-        // v210: animazione entrata home Material Expressive — fade dolce
-        // SAFETY: alpha torna a 1 anche se animazione viene cancellata (fix schermo nero landscape)
+        // v211: animazione entrata home — solo se NON in landscape (causava schermo nero al rotate)
         try {
+            val isLandscape = resources.configuration.orientation ==
+                android.content.res.Configuration.ORIENTATION_LANDSCAPE
             val homeContent = binding.homeView
-            homeContent.alpha = 0f
-            homeContent.scaleX = 1.04f
-            homeContent.scaleY = 1.04f
-            homeContent.animate().cancel()
-            homeContent.animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(280)
-                .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
-                .withEndAction { homeContent.alpha = 1f; homeContent.scaleX = 1f; homeContent.scaleY = 1f }
-                .start()
-            // Fallback: se entro 600ms l'anim non finisce, forza i valori
-            homeContent.postDelayed({
-                if (homeContent.alpha < 1f) {
-                    homeContent.alpha = 1f
-                    homeContent.scaleX = 1f
-                    homeContent.scaleY = 1f
-                }
-            }, 600)
+            // Garantisco sempre stato visibile
+            homeContent.alpha = 1f
+            homeContent.scaleX = 1f
+            homeContent.scaleY = 1f
+            if (!isLandscape) {
+                homeContent.alpha = 0f
+                homeContent.scaleX = 1.04f
+                homeContent.scaleY = 1.04f
+                homeContent.animate().cancel()
+                homeContent.animate()
+                    .alpha(1f).scaleX(1f).scaleY(1f)
+                    .setDuration(280)
+                    .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
+                    .start()
+            }
             
+            if (!isLandscape) {
             // Rimbalzo widget - spring effect
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.widgetSlot)
@@ -320,6 +317,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     }
                 } catch (_: Throwable) {}
             }
+            } // fine if !isLandscape v211
         } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()

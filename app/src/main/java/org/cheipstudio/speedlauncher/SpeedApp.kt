@@ -34,13 +34,26 @@ class SpeedApp : Application() {
                 android.util.Log.e("SpeedApp", "FATAL on ${thread.name}", ex)
                 val sw = java.io.StringWriter()
                 ex.printStackTrace(java.io.PrintWriter(sw))
+                val crashText = sw.toString().take(8000)
                 getSharedPreferences("speed_crash", Context.MODE_PRIVATE)
                     .edit()
-                    .putString("last_crash", sw.toString().take(8000))
+                    .putString("last_crash", crashText)
                     .putLong("last_crash_time", System.currentTimeMillis())
                     .commit()
+                // v211: salvo anche su file accessibile da file manager
+                try {
+                    val dir = getExternalFilesDir(null)
+                    if (dir != null) {
+                        val f = java.io.File(dir, "last_crash.txt")
+                        f.writeText(
+                            "Time: ${java.util.Date()}\n" +
+                            "Thread: ${thread.name}\n" +
+                            "Message: ${ex.message}\n\n" +
+                            crashText
+                        )
+                    }
+                } catch (_: Throwable) {}
             } catch (_: Throwable) {}
-            // Chiamo il default handler dopo
             try { android.os.Process.killProcess(android.os.Process.myPid()) } catch (_: Throwable) {}
         }
         instance = this
