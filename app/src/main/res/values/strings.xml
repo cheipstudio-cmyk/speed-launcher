@@ -340,8 +340,6 @@ Vuoi scaricarla?</string>
     <string name="rec_picker_available_header">Disponibili</string>
     <string name="rec_picker_drag_hint">Trascina la maniglia per riordinare</string>
     <string name="rec_picker_counter">%1$d di %2$d selezionate</string>
-    <string name="settings_telegram_label">Gruppo Telegram</string>
-    <string name="settings_telegram_sub">Unisciti alla community Speed Launcher</string>
     <string name="settings_show_folder_labels">Etichette nelle cartelle</string>
     <string name="settings_show_folder_labels_sub">Mostra il nome sotto ogni icona dentro le cartelle</string>
     <string name="settings_show_dock_labels">Etichette dock raccomandate</string>

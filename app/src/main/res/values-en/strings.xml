@@ -340,8 +340,6 @@ Download now?</string>
     <string name="rec_picker_available_header">Available</string>
     <string name="rec_picker_drag_hint">Drag the handle to reorder</string>
     <string name="rec_picker_counter">%1$d of %2$d selected</string>
-    <string name="settings_telegram_label">Telegram group</string>
-    <string name="settings_telegram_sub">Join the Speed Launcher community</string>
     <string name="settings_show_folder_labels">Labels in folders</string>
     <string name="settings_show_folder_labels_sub">Show name below each icon in folders</string>
     <string name="settings_show_dock_labels">Dock recommended labels</string>
