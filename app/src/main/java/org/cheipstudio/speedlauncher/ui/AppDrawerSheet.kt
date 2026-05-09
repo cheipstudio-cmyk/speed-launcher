@@ -245,7 +245,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         val density = ctx.resources.displayMetrics.density
         
         // Helper per creare action row (icona + label)
-        fun addAction(label: String, iconRes: Int, onClick: () -> Unit) {
+        fun addAction(label: String, iconRes: Int, preserveColors: Boolean = false, onClick: () -> Unit) {
             val row = android.widget.LinearLayout(ctx).apply {
                 orientation = android.widget.LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
@@ -255,21 +255,48 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                     context.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
                     setBackgroundResource(tvSel.resourceId)
                 }
-                setPadding((12 * density).toInt(), (12 * density).toInt(), (12 * density).toInt(), (12 * density).toInt())
+                setPadding((16 * density).toInt(), (14 * density).toInt(), (16 * density).toInt(), (14 * density).toInt())
+            }
+            // v207: icona dentro chip rotondo colorSurfaceContainerHighest M3 style
+            val iconFrame = android.widget.FrameLayout(ctx).apply {
+                val sz = (40 * density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(sz, sz).apply {
+                    marginEnd = (16 * density).toInt()
+                }
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    val tv = android.util.TypedValue()
+                    ctx.theme.resolveAttribute(
+                        com.google.android.material.R.attr.colorSurfaceContainerHighest, tv, true
+                    )
+                    setColor(tv.data)
+                }
             }
             val icon = android.widget.ImageView(ctx).apply {
                 setImageResource(iconRes)
-                val s = (24 * density).toInt()
-                layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply {
-                    marginEnd = (16 * density).toInt()
+                val s = (22 * density).toInt()
+                layoutParams = android.widget.FrameLayout.LayoutParams(s, s).apply {
+                    gravity = android.view.Gravity.CENTER
                 }
-                setColorFilter(android.graphics.Color.WHITE)
+                if (!preserveColors) {
+                    val tv = android.util.TypedValue()
+                    ctx.theme.resolveAttribute(
+                        com.google.android.material.R.attr.colorOnSurface, tv, true
+                    )
+                    setColorFilter(tv.data)
+                }
             }
-            row.addView(icon)
+            iconFrame.addView(icon)
+            row.addView(iconFrame)
             val txt = android.widget.TextView(ctx).apply {
                 text = label
                 textSize = 15f
-                setTextColor(android.graphics.Color.WHITE)
+                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                val tv = android.util.TypedValue()
+                ctx.theme.resolveAttribute(
+                    com.google.android.material.R.attr.colorOnSurface, tv, true
+                )
+                setTextColor(tv.data)
             }
             row.addView(txt)
             row.setOnClickListener {
@@ -280,7 +307,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         }
         
         // 1. Cerca su Google
-        addAction(ctx.getString(R.string.search_action_google, query), android.R.drawable.ic_menu_search) {
+        addAction(ctx.getString(R.string.search_action_google, query), R.drawable.ic_search_google, preserveColors = true) {
             try {
                 val intent = android.content.Intent(android.content.Intent.ACTION_WEB_SEARCH).apply {
                     putExtra(android.app.SearchManager.QUERY, query)
@@ -297,7 +324,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         
         // 2. Cerca su Maps (se la query suona come una location > 2 char)
         if (query.length > 2) {
-            addAction(ctx.getString(R.string.search_action_maps, query), android.R.drawable.ic_menu_mylocation) {
+            addAction(ctx.getString(R.string.search_action_maps, query), R.drawable.ic_search_maps) {
                 try {
                     val u = android.net.Uri.parse("geo:0,0?q=${android.net.Uri.encode(query)}")
                     startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u))
@@ -307,7 +334,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         
         // 3. Telefono se la query è solo numeri
         if (query.matches(Regex("""^[+\d\s().\-]{4,}$"""))) {
-            addAction(ctx.getString(R.string.search_action_call, query), android.R.drawable.ic_menu_call) {
+            addAction(ctx.getString(R.string.search_action_call, query), R.drawable.ic_search_call) {
                 try {
                     val u = android.net.Uri.parse("tel:${android.net.Uri.encode(query)}")
                     startActivity(android.content.Intent(android.content.Intent.ACTION_DIAL, u))
@@ -316,7 +343,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         }
         
         // 4. YouTube search
-        addAction(ctx.getString(R.string.search_action_youtube, query), android.R.drawable.ic_menu_camera) {
+        addAction(ctx.getString(R.string.search_action_youtube, query), R.drawable.ic_search_youtube, preserveColors = true) {
             try {
                 val u = android.net.Uri.parse("https://www.youtube.com/results?search_query=${android.net.Uri.encode(query)}")
                 startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u))
@@ -327,7 +354,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         val mode = SpeedApp.instance.settingsRepository.searchMode.value
         if (mode == org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_UNIVERSAL) {
             // Cerca tra i contatti
-            addAction(ctx.getString(R.string.search_action_contacts, query), android.R.drawable.ic_menu_myplaces) {
+            addAction(ctx.getString(R.string.search_action_contacts, query), R.drawable.ic_search_contacts) {
                 try {
                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
                         data = android.provider.ContactsContract.Contacts.CONTENT_URI
@@ -339,7 +366,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             }
             
             // Cerca tra i file
-            addAction(ctx.getString(R.string.search_action_files, query), android.R.drawable.ic_menu_save) {
+            addAction(ctx.getString(R.string.search_action_files, query), R.drawable.ic_search_files) {
                 try {
                     // Apre il file picker di sistema con pre-filtro nome
                     val intent = android.content.Intent(android.content.Intent.ACTION_GET_CONTENT).apply {
@@ -352,7 +379,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             }
             
             // Cerca su Play Store
-            addAction(ctx.getString(R.string.search_action_playstore, query), android.R.drawable.stat_sys_download) {
+            addAction(ctx.getString(R.string.search_action_playstore, query), R.drawable.ic_search_playstore, preserveColors = true) {
                 try {
                     val u = android.net.Uri.parse("market://search?q=${android.net.Uri.encode(query)}")
                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, u).apply {

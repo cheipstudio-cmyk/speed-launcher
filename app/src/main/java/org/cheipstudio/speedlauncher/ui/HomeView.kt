@@ -656,6 +656,7 @@ class HomeView @JvmOverloads constructor(
     fun reapplySettings() {
         refreshRecommended()
         applySettings()
+        applyWidgetConfig()  // v206: deve girare anche al rotation change
         val cols = settings.gridCols.value ?: 4
         val rows = settings.gridRows.value ?: 4
         for (page in pages) {

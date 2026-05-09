@@ -223,6 +223,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // v206: con configChanges nel manifest, l'activity non si ricrea
+        // → riapplico tutto manualmente per landscape ↔ portrait
+        try {
+            binding.homeView.reapplySettings()
+        } catch (_: Throwable) {}
+    }
+
     override fun onResume() {
         super.onResume()
         // v200: animazione entrata home Material Expressive — fade dolce

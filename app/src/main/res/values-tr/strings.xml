@@ -284,7 +284,7 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="search_action_maps">Haritalar\'da ara: %1$s</string>
     <string name="search_action_playstore">Play Store\'da «%1$s» ara</string>
     <string name="search_action_youtube">YouTube\'da ara: %1$s</string>
-    <string name="search_universal">Her yerde ara</string>
+    <string name="search_universal">Tümünü ara</string>
     <string name="settings_blur_drawer">Çekmece açıkken bulanık</string>
     <string name="settings_blur_drawer_sub">Çekmecenin arkasındaki ana ekranı bulanıklaştır</string>
     <string name="settings_blur_folder">Klasörler açıkken bulanık</string>

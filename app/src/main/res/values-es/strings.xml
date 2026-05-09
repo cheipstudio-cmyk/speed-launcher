@@ -284,7 +284,7 @@ Se usará solo para esta función.</string>
     <string name="search_action_maps">Buscar en Mapas: %1$s</string>
     <string name="search_action_playstore">Buscar «%1$s» en Play Store</string>
     <string name="search_action_youtube">Buscar en YouTube: %1$s</string>
-    <string name="search_universal">Buscar en todas partes</string>
+    <string name="search_universal">Buscar todo</string>
     <string name="settings_blur_drawer">Desenfoque cajón abierto</string>
     <string name="settings_blur_drawer_sub">Desenfoca la home detrás del cajón</string>
     <string name="settings_blur_folder">Desenfoque carpetas abiertas</string>

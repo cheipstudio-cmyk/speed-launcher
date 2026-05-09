@@ -356,7 +356,7 @@ Vuoi scaricarla?</string>
     <string name="widget_speed_time_description">Ora, data e batteria</string>
     <string name="widget_time_label">Ora</string>
     <string name="widget_battery_label">Batteria</string>
-    <string name="search_universal">Cerca ovunque</string>
+    <string name="search_universal">Cerca tutto</string>
     <string name="settings_idx_system">Sistema</string>
     <string name="settings_idx_system_sub">Launcher predefinito, accesso notifiche, modalità orizzontale</string>
     <string name="widget_resize_title">Personalizza widget</string>

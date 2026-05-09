@@ -284,7 +284,7 @@
     <string name="search_action_maps">البحث في الخرائط: %1$s</string>
     <string name="search_action_playstore">البحث عن «%1$s» في Play Store</string>
     <string name="search_action_youtube">البحث في YouTube: %1$s</string>
-    <string name="search_universal">البحث في كل مكان</string>
+    <string name="search_universal">بحث شامل</string>
     <string name="settings_blur_drawer">تمويه عند فتح الدرج</string>
     <string name="settings_blur_drawer_sub">تمويه الشاشة الرئيسية خلف الدرج</string>
     <string name="settings_blur_folder">تمويه عند فتح المجلدات</string>

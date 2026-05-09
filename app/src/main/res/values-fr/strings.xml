@@ -284,7 +284,7 @@ Télécharger maintenant ?</string>
     <string name="search_action_maps">Rechercher sur Maps : %1$s</string>
     <string name="search_action_playstore">Rechercher « %1$s » sur Play Store</string>
     <string name="search_action_youtube">Rechercher sur YouTube : %1$s</string>
-    <string name="search_universal">Rechercher partout</string>
+    <string name="search_universal">Tout chercher</string>
     <string name="settings_blur_drawer">Flou tiroir ouvert</string>
     <string name="settings_blur_drawer_sub">Floute l\'accueil derrière le tiroir</string>
     <string name="settings_blur_folder">Flou dossiers ouverts</string>
