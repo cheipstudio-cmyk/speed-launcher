@@ -1592,10 +1592,11 @@ override fun onResume() {
             val child = container.getChildAt(i)
             if (child is android.widget.TextView && isPixelSectionTitle(child)) {
                 currentVisible = keepTitles.contains(child.text?.toString())
-                child.visibility = if (currentVisible) android.view.View.VISIBLE else android.view.View.GONE
+                // v180: in filter mode, NASCONDO sempre i section title (già nella toolbar)
+                child.visibility = android.view.View.GONE
                 continue
             }
-            // Anche il PixelPageTitle ("Impostazioni" grande in alto) lo nascondo SEMPRE in filter mode
+            // PixelPageTitle ("Impostazioni" grande in alto) sempre nascosto in filter mode
             if (child is android.widget.TextView && isPixelPageTitle(child)) {
                 child.visibility = android.view.View.GONE
                 continue

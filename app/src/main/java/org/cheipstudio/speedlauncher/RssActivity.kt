@@ -189,14 +189,23 @@ class RssActivity : AppCompatActivity() {
                 return out
             }
             
-            // Parse con XmlPullParser nativo Android (più affidabile)
-            val parser = android.util.Xml.newPullParser()
-            parser.setFeature(org.xmlpull.v1.XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-            // Usa charset del Content-Type quando disponibile, altrimenti UTF-8
+            // Leggo TUTTO il body in memoria (consente debug + retry)
+            val bodyBytes = finalConn.inputStream.use { it.readBytes() }
+            android.util.Log.d("RssActivity", "$url body=${bodyBytes.size} bytes, contentType=${finalConn.contentType}")
+            if (bodyBytes.size < 50) {
+                android.util.Log.w("RssActivity", "Body too small: ${String(bodyBytes)}")
+                return out
+            }
+            
+            // Charset detection
             val charset = finalConn.contentType?.let { ct ->
                 Regex("""charset=([^;\s]+)""", RegexOption.IGNORE_CASE).find(ct)?.groupValues?.get(1)
             } ?: "UTF-8"
-            parser.setInput(finalConn.inputStream, charset)
+            
+            // Parse con XmlPullParser nativo Android (più affidabile)
+            val parser = android.util.Xml.newPullParser()
+            parser.setFeature(org.xmlpull.v1.XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
+            parser.setInput(java.io.ByteArrayInputStream(bodyBytes), charset)
             
             var sourceTitle = ""
             var inItem = false

@@ -13,29 +13,23 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="6dp"
-        android:background="@drawable/widget_clickable_bg">
+        android:gravity="center">
 
-        <TextClock
+        <TextView
             android:id="@+id/timeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:fontFamily="sans-serif"
-            android:format12Hour="HH:mm"
-            android:format24Hour="HH:mm" />
+            android:text="--:--" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="11sp"
             android:textColor="#CCFFFFFF"
-            android:text="@string/widget_time_label"
-            android:textAllCaps="true"
-            android:letterSpacing="0.05" />
+            android:text="@string/widget_time_label" />
 
     </LinearLayout>
 
@@ -51,30 +45,24 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="6dp"
-        android:background="@drawable/widget_clickable_bg">
+        android:gravity="center">
 
-        <TextClock
-            android:id="@+id/dateText"
+        <TextView
+            android:id="@+id/dateDay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:format12Hour="d"
-            android:format24Hour="d" />
+            android:text="--" />
 
-        <TextClock
+        <TextView
             android:id="@+id/dateMonth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="11sp"
             android:textColor="#CCFFFFFF"
-            android:format12Hour="MMM yyyy"
-            android:format24Hour="MMM yyyy"
-            android:textAllCaps="true"
-            android:letterSpacing="0.05" />
+            android:text="--" />
 
     </LinearLayout>
 
@@ -90,9 +78,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="6dp"
-        android:background="@drawable/widget_clickable_bg">
+        android:gravity="center">
 
         <TextView
             android:id="@+id/batteryText"
@@ -108,9 +94,7 @@
             android:layout_height="wrap_content"
             android:textSize="11sp"
             android:textColor="#CCFFFFFF"
-            android:text="@string/widget_battery_label"
-            android:textAllCaps="true"
-            android:letterSpacing="0.05" />
+            android:text="@string/widget_battery_label" />
 
     </LinearLayout>
 

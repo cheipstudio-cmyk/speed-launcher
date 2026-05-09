@@ -26,7 +26,7 @@
             app:collapsedTitleTextAppearance="@style/PixelCollapsedTitle"
             app:expandedTitleGravity="bottom|start"
             app:collapsedTitleGravity="start|center_vertical"
-            app:titleCollapseMode="fade"
+            app:titleCollapseMode="scale"
             app:title="@string/settings_title"
             app:contentScrim="?attr/colorSurface"
             app:statusBarScrim="?attr/colorSurface"
