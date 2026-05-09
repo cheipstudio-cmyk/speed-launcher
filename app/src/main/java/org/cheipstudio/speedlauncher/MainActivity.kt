@@ -251,8 +251,24 @@ class MainActivity : AppCompatActivity() {
             binding.homeView.cleanupGhostState()
             binding.homeView.requestLayout()
             binding.homeView.invalidate()
-            // Anche il root container
             binding.root.invalidate()
+        }
+    }
+    
+    // v132: cleanup AGGRESSIVO al ritorno focus (es. dopo multitasking close)
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && ::widgetHostController.isInitialized) {
+            try {
+                binding.homeView.cleanupGhostState()
+                binding.homeView.invalidate()
+                binding.root.invalidate()
+                // Force frame refresh
+                binding.homeView.post {
+                    binding.homeView.requestLayout()
+                    binding.homeView.invalidate()
+                }
+            } catch (_: Throwable) {}
         }
     }
 
@@ -274,14 +290,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openDrawer() {
-        // v59: rimuovo qualsiasi fragment "drawer" precedente per prevenire doppi
-        if (drawerSheet?.isAdded == true || drawerSheet?.isVisible == true) return
+        // v59+v132: gestione robusta drawer
+        // Check più rigoroso: se è davvero VISIBILE blocca, altrimenti cleanup e procedi
+        val existing = drawerSheet
+        if (existing != null && existing.isVisible && existing.isResumed) return
         cleanupOldDrawer()
-        drawerSheet = AppDrawerSheet().also {
-            it.onAppLongPress = { app -> openAppActions(app) }
-            // v123: callback per resettare drawerSheet quando si chiude (evita stati zombie)
-            it.onDismissCallback = { drawerSheet = null }
-            try { it.show(supportFragmentManager, "drawer") } catch (_: Throwable) {}
+        // Se dopo cleanup c'è ancora un fragment "drawer", aspetto un tick prima di crearne uno nuovo
+        if (supportFragmentManager.findFragmentByTag("drawer") != null) {
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                cleanupOldDrawer()
+                doShowDrawer()
+            }
+            return
+        }
+        doShowDrawer()
+    }
+    
+    private fun doShowDrawer() {
+        try {
+            val sheet = AppDrawerSheet()
+            sheet.onAppLongPress = { app -> openAppActions(app) }
+            sheet.onDismissCallback = { drawerSheet = null }
+            sheet.show(supportFragmentManager, "drawer")
+            drawerSheet = sheet
+        } catch (_: Throwable) {
+            drawerSheet = null
         }
     }
 

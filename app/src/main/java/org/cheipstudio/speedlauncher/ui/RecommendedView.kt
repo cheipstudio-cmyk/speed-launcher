@@ -138,10 +138,14 @@ class RecommendedView @JvmOverloads constructor(
         // v84: supporta modalità "ai" (default, da usage) o "manual" (scelta utente)
         val mode = settings.recommendedMode.value ?: SettingsRepository.REC_MODE_AI
         var topApps: List<AppInfo> = if (mode == SettingsRepository.REC_MODE_MANUAL) {
-            // Modalità manuale: prendo le app scelte dall\'utente, in ordine
-            val manualKeys = settings.recommendedManualApps.value ?: mutableSetOf()
-            val list = manualKeys.mapNotNull { byKey[it] }.take(countToShow)
-            list
+            // v132: usa la lista ordinata se presente, altrimenti fallback al Set
+            val orderedKeys = settings.recommendedManualOrder.value ?: emptyList()
+            if (orderedKeys.isNotEmpty()) {
+                orderedKeys.mapNotNull { byKey[it] }.take(countToShow)
+            } else {
+                val manualKeys = settings.recommendedManualApps.value ?: mutableSetOf()
+                manualKeys.mapNotNull { byKey[it] }.take(countToShow)
+            }
         } else {
             // Modalità AI: usage tracker
             val tracker = SpeedApp.instance.usageTracker

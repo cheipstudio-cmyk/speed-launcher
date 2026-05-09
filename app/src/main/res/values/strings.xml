@@ -283,4 +283,5 @@ Vuoi scaricarla?</string>
     <string name="rec_edit_title">Raccomandate</string>
     <string name="rec_edit_pick_apps">Scegli le app manuali...</string>
     <string name="rec_edit_pick_title">Seleziona app raccomandate</string>
+    <string name="rec_reorder_title">Riordina raccomandate</string>
 </resources>

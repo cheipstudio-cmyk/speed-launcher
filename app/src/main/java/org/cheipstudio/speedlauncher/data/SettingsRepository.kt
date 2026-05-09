@@ -70,6 +70,10 @@ class SettingsRepository(context: Context) {
     val recommendedManualApps = MutableLiveData(
         prefs.getStringSet(KEY_REC_MANUAL_APPS, emptySet())?.toMutableSet() ?: mutableSetOf()
     )
+    /** v132: lista ordinata delle app raccomandate manuali (preserva ordine drag) */
+    val recommendedManualOrder = MutableLiveData(
+        prefs.getString(KEY_REC_MANUAL_ORDER, "")?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+    )
 
     /** v85: drawer abilitato. Se false, tutte le app vengono auto-popolate in home (stile iOS). */
     val drawerEnabled = MutableLiveData(prefs.getBoolean(KEY_DRAWER_ENABLED, true))
@@ -215,6 +219,21 @@ class SettingsRepository(context: Context) {
     fun setRecommendedManualApps(keys: Set<String>) {
         prefs.edit().putStringSet(KEY_REC_MANUAL_APPS, keys).commit()
         recommendedManualApps.postValue(keys.toMutableSet())
+        // v132: aggiorna l'ordine: tieni quelli ancora presenti, aggiungi i nuovi alla fine
+        val currentOrder = recommendedManualOrder.value ?: emptyList()
+        val filtered = currentOrder.filter { it in keys }
+        val newOnes = keys.filter { it !in filtered }
+        val finalOrder = filtered + newOnes
+        prefs.edit().putString(KEY_REC_MANUAL_ORDER, finalOrder.joinToString(",")).commit()
+        recommendedManualOrder.postValue(finalOrder)
+    }
+    
+    /** v132: setta direttamente l'ordine (drag/drop) — sincronizza anche il Set */
+    fun setRecommendedManualOrder(orderedKeys: List<String>) {
+        prefs.edit().putString(KEY_REC_MANUAL_ORDER, orderedKeys.joinToString(",")).commit()
+        recommendedManualOrder.postValue(orderedKeys)
+        prefs.edit().putStringSet(KEY_REC_MANUAL_APPS, orderedKeys.toSet()).commit()
+        recommendedManualApps.postValue(orderedKeys.toMutableSet())
     }
 
     fun setDrawerEnabled(enabled: Boolean) {
@@ -379,6 +398,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_ICON_PACK = "icon_pack_package"
         private const val KEY_REC_MODE = "recommended_mode"
         private const val KEY_REC_MANUAL_APPS = "recommended_manual_apps"
+        private const val KEY_REC_MANUAL_ORDER = "recommended_manual_order"
 
         const val REC_MODE_AI = "ai"
         const val REC_MODE_MANUAL = "manual"

@@ -35,6 +35,30 @@ import org.cheipstudio.speedlauncher.data.SettingsRepository
  * - Niente glitch tastiera (focus solo a tap)
  */
 object FolderSheet {
+    /** v132: ref al dialog corrente per chiusura/riapertura programmatica dopo modifica */
+    private var currentDialog: android.app.Dialog? = null
+    private var currentReopenInfo: Triple<Context, HomeItem, FolderCallbacks>? = null
+    
+    /** v132: callbacks come dataclass per riapertura */
+    data class FolderCallbacks(
+        val onLaunch: (AppInfo) -> Unit,
+        val onRename: (String) -> Unit,
+        val onRemoveFromFolder: (AppInfo) -> Unit,
+        val onDeleteFolder: () -> Unit
+    )
+    
+    /** v132: chiude la cartella attuale e la riapre con la versione aggiornata del folder. */
+    fun reopen(folderUpdated: HomeItem) {
+        val info = currentReopenInfo ?: return
+        val (ctx, _, callbacks) = info
+        try { currentDialog?.dismiss() } catch (_: Throwable) {}
+        currentDialog = null
+        currentReopenInfo = null
+        // Riapri con il folder aggiornato dopo un piccolo delay (per animation dismiss)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            show(ctx, folderUpdated, callbacks.onLaunch, callbacks.onRename, callbacks.onRemoveFromFolder, callbacks.onDeleteFolder)
+        }, 100)
+    }
 
     fun show(
         context: Context,
@@ -142,46 +166,13 @@ object FolderSheet {
         }
         card.addView(grid)
 
-        // Chip "Elimina cartella" stile Pixel
-        val deleteChip = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = 100 * density
-                setColor(deleteChipBg)
-            }
-            setPadding((20 * density).toInt(), (12 * density).toInt(),
-                (24 * density).toInt(), (12 * density).toInt())
-            isClickable = true; isFocusable = true
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.topMargin = (24 * density).toInt()
-            layoutParams = lp
-        }
-        val trashIcon = ImageView(context).apply {
-            setImageResource(R.drawable.ic_trash)
-            setColorFilter(textColor)
-            val s = (18 * density).toInt()
-            layoutParams = LinearLayout.LayoutParams(s, s).apply {
-                marginEnd = (10 * density).toInt()
-            }
-        }
-        val trashLabel = TextView(context).apply {
-            text = context.getString(R.string.folder_delete)
-            setTextColor(textColor)
-            textSize = 14f
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-        }
-        deleteChip.addView(trashIcon)
-        deleteChip.addView(trashLabel)
-        card.addView(deleteChip)
+        // v132: chip "Elimina cartella" rimosso da dentro la cartella.
+        // Si elimina dal long press della cartella in home → menu
 
         rootContainer.addView(card)
 
+        // v132: salvo info per riapertura programmatica
+        currentReopenInfo = Triple(context, folder, FolderCallbacks(onLaunch, onRename, onRemoveFromFolder, onDeleteFolder))
         val dialog = Dialog(context, android.R.style.Theme_Translucent_NoTitleBar).apply {
             window?.let { w ->
                 w.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -269,23 +260,18 @@ object FolderSheet {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
                 try { decor.setRenderEffect(null) } catch (_: Throwable) {}
             }
+            // v132: azzera ref se questo dialog era quello corrente
+            if (currentDialog === dialog) {
+                currentDialog = null
+                currentReopenInfo = null
+            }
         }
 
+        currentDialog = dialog
         rootContainer.setOnClickListener { closeFolder() }
         card.setOnClickListener { /* swallow */ }
 
-        deleteChip.setOnClickListener {
-            com.google.android.material.dialog.MaterialAlertDialogBuilder(
-                context, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-            )
-                .setTitle(R.string.folder_delete_confirm_title)
-                .setMessage(R.string.folder_delete_confirm_msg)
-                .setPositiveButton(R.string.folder_delete) { _, _ ->
-                    onDeleteFolder(); closeFolder()
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
+        // v132: deleteChip listener rimosso (chip eliminato dalla UI)
         // v49+v54: animazione di entrata fluida (scale + fade) + blur progressivo
         // I valori iniziali sono già settati PRIMA del show() per evitare il flash
         dialog.setOnShowListener {

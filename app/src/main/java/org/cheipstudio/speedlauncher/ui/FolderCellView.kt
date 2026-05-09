@@ -38,16 +38,28 @@ class FolderCellView(context: Context) : LinearLayout(context) {
         private set
 
     var onOpen: ((HomeItem) -> Unit)? = null
+    /** v132: long press sulla cartella in home → menu rinomina/elimina */
+    var onLongPress: ((HomeItem) -> Unit)? = null
     var dragOriginId: String = ""
 
     private val handler = Handler(Looper.getMainLooper())
     private val moveSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
     private var downX = 0f; private var downY = 0f
-    private var pressing = false; private var dragFired = false; private var moved = false
+    private var pressing = false; private var dragFired = false; private var moved = false; private var longPressFired = false
 
     private val DRAG_THRESHOLD = 500L
+    private val LONGPRESS_THRESHOLD = 350L  // v132: leggermente prima del drag
+    private val longPressRunnable = Runnable {
+        if (pressing && !dragFired && !moved) {
+            longPressFired = true
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            val f = folder ?: return@Runnable
+            onLongPress?.invoke(f)
+        }
+    }
     private val dragRunnable = Runnable {
-        if (pressing && !dragFired && dragOriginId.isNotEmpty()) {
+        // v132: drag parte solo se long press non ha già aperto menu
+        if (pressing && !dragFired && !longPressFired && dragOriginId.isNotEmpty()) {
             dragFired = true
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             val f = folder ?: return@Runnable
@@ -121,7 +133,8 @@ class FolderCellView(context: Context) : LinearLayout(context) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x; downY = event.y
-                pressing = true; moved = false; dragFired = false
+                pressing = true; moved = false; dragFired = false; longPressFired = false
+                handler.postDelayed(longPressRunnable, LONGPRESS_THRESHOLD)
                 handler.postDelayed(dragRunnable, DRAG_THRESHOLD)
                 return true
             }
@@ -129,19 +142,22 @@ class FolderCellView(context: Context) : LinearLayout(context) {
                 val dx = abs(event.x - downX); val dy = abs(event.y - downY)
                 if (!moved && (dx > moveSlop || dy > moveSlop)) {
                     moved = true
+                    handler.removeCallbacks(longPressRunnable)
                     handler.removeCallbacks(dragRunnable)
                 }
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 pressing = false
+                handler.removeCallbacks(longPressRunnable)
                 handler.removeCallbacks(dragRunnable)
-                if (moved || dragFired) return true
+                if (moved || dragFired || longPressFired) return true
                 onOpen?.invoke(f)
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
                 pressing = false
+                handler.removeCallbacks(longPressRunnable)
                 handler.removeCallbacks(dragRunnable)
                 return true
             }

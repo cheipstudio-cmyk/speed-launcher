@@ -943,21 +943,19 @@ class SettingsActivity : AppCompatActivity() {
                 if (isChecked) selected.add(key) else selected.remove(key)
             }
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                if (selected.size == countNeeded) {
-                    settings.setRecommendedManualApps(selected)
-                    Toast.makeText(this, getString(R.string.rec_mode_pick_apps_title, countNeeded), Toast.LENGTH_SHORT).show()
+                settings.setRecommendedManualApps(selected)
+                if (selected.isEmpty()) {
+                    Toast.makeText(this, R.string.rec_mode_no_apps_selected, Toast.LENGTH_LONG).show()
                 } else {
-                    // Salvo comunque ma avviso
-                    settings.setRecommendedManualApps(selected)
-                    if (selected.isEmpty()) {
-                        Toast.makeText(this, R.string.rec_mode_no_apps_selected, Toast.LENGTH_LONG).show()
-                    } else {
+                    if (selected.size != countNeeded) {
                         Toast.makeText(
                             this,
                             getString(R.string.rec_mode_pick_apps_too_few, countNeeded),
                             Toast.LENGTH_LONG
                         ).show()
                     }
+                    // v132: dopo selezione apri dialog di riordinamento
+                    showRecommendedReorderDialog()
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)
@@ -1211,4 +1209,113 @@ class SettingsActivity : AppCompatActivity() {
         ) { settings.setRecommendedCount(it) }
     }
 
+
+    /** v132: dialog per riordinare le app raccomandate manuali con frecce su/giù */
+    private fun showRecommendedReorderDialog() {
+        val apps = SpeedApp.instance.appRepository.apps.value ?: return
+        val byKey = apps.associateBy { it.key }
+        // Lista ordinata corrente
+        var ordered = (settings.recommendedManualOrder.value ?: emptyList()).toMutableList()
+        if (ordered.isEmpty()) {
+            ordered = (settings.recommendedManualApps.value ?: emptySet()).toMutableList()
+        }
+        if (ordered.size <= 1) return  // niente da riordinare
+        
+        val density = resources.displayMetrics.density
+        val container = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val pad = (8 * density).toInt()
+            setPadding(pad, pad, pad, pad)
+        }
+        
+        // Funzione per ricostruire la lista visiva
+        fun rebuildList() {
+            container.removeAllViews()
+            for (i in ordered.indices) {
+                val key = ordered[i]
+                val app = byKey[key] ?: continue
+                val row = android.widget.LinearLayout(this).apply {
+                    orientation = android.widget.LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                    setPadding((8 * density).toInt(), (12 * density).toInt(), (8 * density).toInt(), (12 * density).toInt())
+                }
+                
+                // Icona
+                val icon = android.widget.ImageView(this).apply {
+                    setImageDrawable(app.icon)
+                    val s = (32 * density).toInt()
+                    layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply {
+                        marginEnd = (12 * density).toInt()
+                    }
+                }
+                row.addView(icon)
+                
+                // Label (espandibile)
+                val label = android.widget.TextView(this).apply {
+                    text = app.label
+                    textSize = 16f
+                    val lp = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    layoutParams = lp
+                }
+                row.addView(label)
+                
+                // Bottone su
+                val upBtn = android.widget.ImageButton(this).apply {
+                    setImageResource(android.R.drawable.arrow_up_float)
+                    setBackgroundResource(android.R.color.transparent)
+                    val s = (40 * density).toInt()
+                    layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
+                    isEnabled = i > 0
+                    alpha = if (i > 0) 1f else 0.3f
+                }
+                upBtn.setOnClickListener {
+                    if (i > 0) {
+                        val tmp = ordered[i]
+                        ordered[i] = ordered[i - 1]
+                        ordered[i - 1] = tmp
+                        rebuildList()
+                    }
+                }
+                row.addView(upBtn)
+                
+                // Bottone giù
+                val downBtn = android.widget.ImageButton(this).apply {
+                    setImageResource(android.R.drawable.arrow_down_float)
+                    setBackgroundResource(android.R.color.transparent)
+                    val s = (40 * density).toInt()
+                    layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
+                    isEnabled = i < ordered.size - 1
+                    alpha = if (i < ordered.size - 1) 1f else 0.3f
+                }
+                downBtn.setOnClickListener {
+                    if (i < ordered.size - 1) {
+                        val tmp = ordered[i]
+                        ordered[i] = ordered[i + 1]
+                        ordered[i + 1] = tmp
+                        rebuildList()
+                    }
+                }
+                row.addView(downBtn)
+                
+                container.addView(row)
+            }
+        }
+        rebuildList()
+        
+        val scroll = android.widget.ScrollView(this).apply {
+            addView(container)
+        }
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(getString(R.string.rec_reorder_title))
+            .setView(scroll)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                settings.setRecommendedManualOrder(ordered)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
 }

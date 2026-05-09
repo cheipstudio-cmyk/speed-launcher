@@ -30,6 +30,8 @@ class IconGridView @JvmOverloads constructor(
     var onMemoryCleanerTap: ((android.view.View) -> Unit)? = null
     var onAppLongPress: ((AppInfo, View) -> Unit)? = null
     var onFolderOpen: ((HomeItem) -> Unit)? = null
+    /** v132: long press cartella → menu rinomina/elimina */
+    var onFolderLongPress: ((HomeItem) -> Unit)? = null
     var pageIndex: Int = 0
 
     private val store = HomeLayoutStore(context)
@@ -252,8 +254,15 @@ class IconGridView @JvmOverloads constructor(
     fun isFull(): Boolean = pinnedItems.all { it != null }
     fun isEmpty(): Boolean = pinnedItems.all { it == null }
 
-    fun getItems(): List<HomeItem> = pinnedItems.filterNotNull().mapIndexed { i, item ->
-        item.copy(cellX = i % cols, cellY = i / cols, page = pageIndex)
+    /** v132: PRESERVA POSIZIONI ORIGINALI! Prima `mapIndexed` compattava tutto in alto.
+     *  Ora ogni item mantiene cellX/cellY in base allo slot che occupa nella griglia. */
+    fun getItems(): List<HomeItem> {
+        val result = mutableListOf<HomeItem>()
+        for (idx in pinnedItems.indices) {
+            val item = pinnedItems[idx] ?: continue
+            result.add(item.copy(cellX = idx % cols, cellY = idx / cols, page = pageIndex))
+        }
+        return result
     }
 
     /**
@@ -306,9 +315,12 @@ class IconGridView @JvmOverloads constructor(
             targetItem.type == HomeItem.TYPE_FOLDER && sourceItem.type == HomeItem.TYPE_APP -> {
                 if (sameCell) return
                 if (!targetItem.folderApps.contains(sourceItem.key)) {
-                    pinnedItems[targetIdx] = targetItem.copy(
+                    val updated = targetItem.copy(
                         folderApps = targetItem.folderApps + sourceItem.key
                     )
+                    pinnedItems[targetIdx] = updated
+                    // v132: se la cartella è aperta, riaprila per refreshare le icone
+                    try { FolderSheet.reopen(updated) } catch (_: Throwable) {}
                 }
                 if (isCrossGrid) {
                     fromGrid?.removeAt(fromIdx)
@@ -411,6 +423,7 @@ class IconGridView @JvmOverloads constructor(
                     bind(item)
                     dragOriginId = "grid${pageIndex}:$i"
                     onOpen = { f -> onFolderOpen?.invoke(f) }
+                    onLongPress = { f -> onFolderLongPress?.invoke(f) }
                 }
                 // v59: tool memory cleaner
                 item.type == HomeItem.TYPE_TOOL && item.key == HomeItem.TOOL_MEMORY_CLEANER -> {

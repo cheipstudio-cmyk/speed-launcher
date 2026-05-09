@@ -75,6 +75,10 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         SpeedApp.instance.appRepository.apps.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         SpeedApp.instance.settingsRepository.aiLauncherMode.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         SpeedApp.instance.settingsRepository.recommendedMode.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
+        // v132: refresh icone drawer quando cambia forma
+        SpeedApp.instance.settingsRepository.iconShape.observe(viewLifecycleOwner) {
+            try { (_binding?.recycler?.adapter as? AppListAdapter)?.notifyDataSetChanged() } catch (_: Throwable) {}
+        }
         SpeedApp.instance.settingsRepository.recommendedManualApps.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         SpeedApp.instance.settingsRepository.recommendedCount.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         // v62: optimization recycler — fixed size + no overdraw

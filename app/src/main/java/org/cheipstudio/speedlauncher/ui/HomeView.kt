@@ -124,6 +124,16 @@ class HomeView @JvmOverloads constructor(
             // Aggiorno barra quando cambia drawer
             try { applySearchBarVisibility() } catch (_: Throwable) {}
         }
+        
+        // v132: observer iconShape — refresh completo tutte le icone home + dock raccomandate
+        SpeedApp.instance.settingsRepository.iconShape.observeForever {
+            try {
+                val allApps = SpeedApp.instance.appRepository.apps.value ?: return@observeForever
+                pages.forEach { grid -> grid.refresh(allApps) }
+                binding.recommendedRow.refresh(if (binding.recommendedRow.visibility == android.view.View.VISIBLE) "home" else "drawer")
+                binding.recommendedRowBottom.refresh("home")
+            } catch (_: Throwable) {}
+        }
 
         // v88: wire auto-add per nuove app installate
         SpeedApp.instance.appRepository.onNewPackageInstalled = { appKey ->
@@ -333,6 +343,8 @@ class HomeView @JvmOverloads constructor(
             onAppLaunch = { app, view -> SpeedApp.instance.appRepository.launch(app, view) }
             onAppLongPress = { app, _ -> onAppMenuRequest?.invoke(app) }
             onFolderOpen = { folder -> openFolder(folder) }
+            // v132: long press cartella → menu rinomina/elimina
+            onFolderLongPress = { folder -> showFolderMenu(folder) }
             // v59: tap su button razzo memory cleaner → pulisce + snackbar
             onMemoryCleanerTap = { _ ->
                 onMemoryCleanerRequest?.invoke()
@@ -458,9 +470,16 @@ class HomeView @JvmOverloads constructor(
             folder = folder,
             onLaunch = { app -> SpeedApp.instance.appRepository.launch(app, this) },
             onRename = { newName ->
+                var updated: HomeItem? = null
                 pages.forEach { grid ->
-                    grid.updateFolder(folder.key) { f -> f.copy(name = newName) }
+                    grid.updateFolder(folder.key) { f -> 
+                        val u = f.copy(name = newName)
+                        if (updated == null) updated = u
+                        u
+                    }
                 }
+                // v132: riapri cartella per evitare icone glitchate
+                updated?.let { FolderSheet.reopen(it) }
             },
             onRemoveFromFolder = { app ->
                 pages.forEach { grid ->
@@ -657,12 +676,13 @@ class HomeView @JvmOverloads constructor(
         try { binding.recommendedRowBottom.refreshNotificationBadges() } catch (_: Throwable) {}
     }
 
-    /** v63: applica visibilità della barra di ricerca secondo il toggle.
-     *  v114: anche nascosta se drawer è disabilitato (la barra apre il drawer). */
+    /** v63+v132: applica visibilità della barra di ricerca.
+     *  Legge direttamente SharedPreferences per evitare race con LiveData.value. */
     fun applySearchBarVisibility() {
-        val s = SpeedApp.instance.settingsRepository
-        val drawerOn = s.drawerEnabled.value != false
-        val show = drawerOn && s.showSearchBar.value != false
+        val prefs = context.getSharedPreferences("speed_settings", android.content.Context.MODE_PRIVATE)
+        val drawerOn = prefs.getBoolean("drawer_enabled", true)
+        val showBar = prefs.getBoolean("show_searchbar", true)
+        val show = drawerOn && showBar
         binding.searchBar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
@@ -807,4 +827,96 @@ class HomeView @JvmOverloads constructor(
         }
     }
 
+
+    /** v132: menu Rinomina/Elimina al long press di una cartella in home */
+    private fun showFolderMenu(folder: HomeItem) {
+        val ctx = context
+        val items = arrayOf(
+            ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_rename_title),
+            ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_delete_confirm_title)
+        )
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            ctx,
+            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(folder.name ?: "")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showFolderRenameDialog(folder)
+                    1 -> showFolderDeleteDialog(folder)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showFolderRenameDialog(folder: HomeItem) {
+        val ctx = context
+        val density = ctx.resources.displayMetrics.density
+        val container = android.widget.FrameLayout(ctx).apply {
+            val pad = (24 * density).toInt()
+            setPadding(pad, (8 * density).toInt(), pad, 0)
+        }
+        val input = com.google.android.material.textfield.TextInputEditText(ctx).apply {
+            setText(folder.name ?: "")
+            setSelection((folder.name ?: "").length)
+            setSingleLine(true)
+            textSize = 18f
+            hint = ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_name_hint)
+        }
+        val til = com.google.android.material.textfield.TextInputLayout(
+            ctx, null,
+            com.google.android.material.R.attr.textInputOutlinedStyle
+        ).apply {
+            setBoxCornerRadii(20f * density, 20f * density, 20f * density, 20f * density)
+            addView(input)
+        }
+        container.addView(til)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            ctx, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(org.cheipstudio.speedlauncher.R.string.folder_rename_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val newName = input.text?.toString()?.takeIf { it.isNotBlank() } ?: return@setPositiveButton
+                pages.forEach { grid ->
+                    grid.updateFolder(folder.key) { f -> f.copy(name = newName) }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+        input.requestFocus()
+    }
+
+    private fun showFolderDeleteDialog(folder: HomeItem) {
+        val ctx = context
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            ctx, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
+            .setTitle(org.cheipstudio.speedlauncher.R.string.folder_delete_confirm_title)
+            .setMessage(org.cheipstudio.speedlauncher.R.string.folder_delete_confirm_msg)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                deleteFolder(folder)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** v132: elimina cartella e ripin le app contenute */
+    private fun deleteFolder(folder: HomeItem) {
+        val keysToReturn = folder.folderApps.toList()
+        // Rimuovo la cartella
+        pages.forEach { grid ->
+            grid.updateFolder(folder.key) { _ -> null }
+        }
+        // Ripin le app
+        val allApps = SpeedApp.instance.appRepository.apps.value ?: return
+        for (key in keysToReturn) {
+            val app = allApps.find { it.key == key } ?: continue
+            if (pages.none { it.isPinned(app) }) {
+                pinApp(app)
+            }
+        }
+    }
 }
