@@ -207,10 +207,28 @@ class RssActivity : AppCompatActivity() {
                 Regex("""charset=([^;\s]+)""", RegexOption.IGNORE_CASE).find(ct)?.groupValues?.get(1)
             } ?: "UTF-8"
             
+            // v182: skip BOM e whitespace iniziali (alcuni feed hanno UTF-8 BOM EF BB BF)
+            var startOffset = 0
+            if (bodyBytes.size >= 3 && 
+                bodyBytes[0] == 0xEF.toByte() && 
+                bodyBytes[1] == 0xBB.toByte() && 
+                bodyBytes[2] == 0xBF.toByte()) {
+                startOffset = 3
+            }
+            // Skip leading whitespace
+            while (startOffset < bodyBytes.size && 
+                   (bodyBytes[startOffset] == ' '.code.toByte() ||
+                    bodyBytes[startOffset] == '\n'.code.toByte() ||
+                    bodyBytes[startOffset] == '\r'.code.toByte() ||
+                    bodyBytes[startOffset] == '\t'.code.toByte())) {
+                startOffset++
+            }
+            android.util.Log.d("RssActivity", "$url first bytes: ${String(bodyBytes, startOffset, minOf(80, bodyBytes.size - startOffset))}")
+            
             // Parse con XmlPullParser nativo Android (più affidabile)
             val parser = android.util.Xml.newPullParser()
             parser.setFeature(org.xmlpull.v1.XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-            parser.setInput(java.io.ByteArrayInputStream(bodyBytes), charset)
+            parser.setInput(java.io.ByteArrayInputStream(bodyBytes, startOffset, bodyBytes.size - startOffset), charset)
             
             var sourceTitle = ""
             var inItem = false

@@ -116,4 +116,15 @@
 
     </LinearLayout>
 
+    <!-- v183: indicatore swipe RSS (sottile chevron lato sinistro) -->
+    <View
+        android:id="@+id/rssEdgeIndicator"
+        android:layout_width="3dp"
+        android:layout_height="80dp"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="2dp"
+        android:background="@drawable/bg_rss_edge_indicator"
+        android:visibility="gone"
+        android:alpha="0.5" />
+
 </merge>

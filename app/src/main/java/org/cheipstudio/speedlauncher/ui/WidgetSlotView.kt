@@ -52,7 +52,7 @@ class WidgetSlotView @JvmOverloads constructor(
     private val holdRunnable = Runnable {
         if (currentWidgetView != null) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            WidgetRemoveSheet.show(context) { removeWidget() }
+            showResizeSheet()
         }
     }
 
@@ -85,14 +85,12 @@ class WidgetSlotView @JvmOverloads constructor(
         placeholder.addView(text)
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
+        // v182: long-press su slot vuoto = picker; su widget montato = holdRunnable in dispatchTouchEvent
         setOnLongClickListener {
             if (currentWidgetView == null) {
                 showCustomPicker()
-            } else {
-                // v181: long press su widget montato → resize sheet
-                showResizeSheet()
-            }
-            true
+                true
+            } else false
         }
         isLongClickable = true
     }

@@ -77,6 +77,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
+        binding.toolbar.setNavigationOnClickListener { finish() }
         
         // Trovo CollapsingToolbarLayout (parent diretto del toolbar)
         val ctl = binding.toolbar.parent as? com.google.android.material.appbar.CollapsingToolbarLayout

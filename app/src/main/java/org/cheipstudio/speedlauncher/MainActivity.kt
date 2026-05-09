@@ -225,18 +225,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // v162: animazione entrata home Pixel-style — staggered (sfondo zoom-out, contenuti fade-up)
+        // v183: animazione entrata home Material Expressive — fade + scale dolce
         try {
             val homeContent = binding.homeView
-            // Step 1: zoom-out totale rapido (stile recents Pixel)
             homeContent.alpha = 0f
-            homeContent.scaleX = 1.10f
-            homeContent.scaleY = 1.10f
+            homeContent.scaleX = 1.05f
+            homeContent.scaleY = 1.05f
             homeContent.animate()
                 .alpha(1f)
                 .scaleX(1f)
                 .scaleY(1f)
-                .setDuration(280)
+                .setDuration(260)
                 .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                 .start()
         } catch (_: Throwable) {}

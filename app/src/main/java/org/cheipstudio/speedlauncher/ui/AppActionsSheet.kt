@@ -65,12 +65,28 @@ class AppActionsSheet : BottomSheetDialogFragment() {
 
         view.findViewById<View>(R.id.actionUninstall).setOnClickListener {
             try {
-                val intent = Intent(Intent.ACTION_DELETE).apply {
+                // v183: ACTION_DELETE deprecato API 29+, uso UNINSTALL_PACKAGE
+                @Suppress("DEPRECATION")
+                val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE).apply {
                     data = Uri.parse("package:${a.packageName}")
+                    putExtra(Intent.EXTRA_RETURN_RESULT, false)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-                startActivity(intent)
-            } catch (_: Throwable) {}
+                if (intent.resolveActivity(requireContext().packageManager) != null) {
+                    startActivity(intent)
+                } else {
+                    // Fallback: ACTION_DELETE (più compatibile)
+                    val fallback = Intent(Intent.ACTION_DELETE).apply {
+                        data = Uri.parse("package:${a.packageName}")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(fallback)
+                }
+            } catch (t: Throwable) {
+                android.widget.Toast.makeText(requireContext(),
+                    "Impossibile disinstallare: ${t.message?.take(60)}",
+                    android.widget.Toast.LENGTH_SHORT).show()
+            }
             dismissAllowingStateLoss()
         }
     }

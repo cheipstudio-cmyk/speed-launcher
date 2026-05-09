@@ -1,89 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    android:gravity="center_vertical"
-    android:background="#33000000">
+    android:padding="6dp">
 
     <LinearLayout
-        android:id="@+id/timeBlock"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/widget_speed_time_bg"
+        android:padding="14dp"
         android:gravity="center">
 
-        <TextView
-            android:id="@+id/timeText"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/timeBlock"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:text="--:--" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/widget_block_clickable">
 
-        <TextView
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/timeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02"
+                android:text="--:--" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="9sp"
+                android:textColor="#B3FFFFFF"
+                android:text="@string/widget_time_label"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dateBlock"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="9sp"
-            android:textColor="#CCFFFFFF"
-            android:text="@string/widget_time_label" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/widget_block_clickable">
+
+            <TextView
+                android:id="@+id/dateDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:text="--" />
+
+            <TextView
+                android:id="@+id/dateMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="9sp"
+                android:textColor="#B3FFFFFF"
+                android:text="--"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/batteryBlock"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/widget_block_clickable">
+
+            <TextView
+                android:id="@+id/batteryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:text="--%" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="9sp"
+                android:textColor="#B3FFFFFF"
+                android:text="@string/widget_battery_label"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/dateBlock"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/dateDay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:text="--" />
-
-        <TextView
-            android:id="@+id/dateMonth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="9sp"
-            android:textColor="#CCFFFFFF"
-            android:text="--" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/batteryBlock"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/batteryText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:text="--%" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="9sp"
-            android:textColor="#CCFFFFFF"
-            android:text="@string/widget_battery_label" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>

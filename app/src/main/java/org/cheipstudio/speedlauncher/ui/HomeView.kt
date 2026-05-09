@@ -242,7 +242,13 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
         (context as? androidx.lifecycle.LifecycleOwner)?.let { lo ->
             SpeedApp.instance.settingsRepository.searchMode.observe(lo) { updateSearchBarText() }
+            SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) {
+                binding.rssEdgeIndicator.visibility = if (it == true) View.VISIBLE else View.GONE
+            }
         }
+        // v183: stato iniziale edge indicator
+        binding.rssEdgeIndicator.visibility = 
+            if (settings.rssPanelEnabled.value == true) View.VISIBLE else View.GONE
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
