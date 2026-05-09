@@ -328,7 +328,7 @@ Vuoi scaricarla?</string>
     <string name="settings_idx_gestures">Gesti</string>
     <string name="settings_idx_gestures_sub">Swipe down notifiche, doppio tap</string>
     <string name="settings_idx_language">Lingua</string>
-    <string name="settings_idx_language_sub">Lingua dell&#39;app</string>
+    <string name="settings_idx_language_sub">Lingua dell\'app</string>
     <string name="settings_idx_backup">Backup e aggiornamenti</string>
     <string name="settings_idx_backup_sub">Esporta, importa, controlla aggiornamenti</string>
     <string name="settings_idx_advanced">Tutte le impostazioni</string>
@@ -344,13 +344,4 @@ Vuoi scaricarla?</string>
     <string name="settings_show_folder_labels_sub">Mostra il nome sotto ogni icona dentro le cartelle</string>
     <string name="settings_show_dock_labels">Etichette dock raccomandate</string>
     <string name="settings_show_dock_labels_sub">Mostra il nome sotto le icone della dock</string>
-    <string name="info_section_about">Informazioni</string>
-    <string name="info_section_license">Licenza</string>
-    <string name="info_section_links">Collegamenti</string>
-    <string name="info_version">Versione</string>
-    <string name="info_build">Informazioni build</string>
-    <string name="info_license_title">Licenza proprietaria</string>
-    <string name="info_license_sub">© 2025 Cheip Studio. Tutti i diritti riservati.</string>
-    <string name="info_link_github">GitHub</string>
-    <string name="info_link_github_sub">github.com/cheipstudio-cmyk/speed-launcher</string>
 </resources>

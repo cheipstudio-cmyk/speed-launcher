@@ -344,13 +344,4 @@ Download now?</string>
     <string name="settings_show_folder_labels_sub">Show name below each icon in folders</string>
     <string name="settings_show_dock_labels">Dock recommended labels</string>
     <string name="settings_show_dock_labels_sub">Show name below dock icons</string>
-    <string name="info_section_about">Information</string>
-    <string name="info_section_license">License</string>
-    <string name="info_section_links">Links</string>
-    <string name="info_version">Version</string>
-    <string name="info_build">Build info</string>
-    <string name="info_license_title">Proprietary license</string>
-    <string name="info_license_sub">© 2025 Cheip Studio. All rights reserved.</string>
-    <string name="info_link_github">GitHub</string>
-    <string name="info_link_github_sub">github.com/cheipstudio-cmyk/speed-launcher</string>
 </resources>
