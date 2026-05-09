@@ -313,8 +313,8 @@ Vuoi scaricarla?</string>
     <string name="settings_blur_drawer_sub">Sfoca la home dietro al drawer</string>
     <string name="settings_blur_folder">Sfocatura cartelle aperte</string>
     <string name="settings_blur_folder_sub">Sfoca lo sfondo dietro le cartelle</string>
-    <string name="settings_rss_panel">Pannello RSS swipe sinistra</string>
-    <string name="settings_rss_panel_sub">Apri lettore RSS scorrendo a destra dal bordo sinistro</string>
+    <string name="settings_rss_panel">Mostra bottone feed RSS</string>
+    <string name="settings_rss_panel_sub">Bottone laterale per aprire il lettore RSS</string>
     <string name="settings_telegram_label">Gruppo Telegram</string>
     <string name="settings_telegram_sub">Unisciti alla community Speed Launcher</string>
     <string name="settings_idx_appearance">Aspetto</string>
