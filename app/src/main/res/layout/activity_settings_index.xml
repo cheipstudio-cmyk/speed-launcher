@@ -36,8 +36,11 @@
             android:paddingHorizontal="12dp"
             android:paddingVertical="8dp">
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAspetto" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAspetto" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pink">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
                     </FrameLayout>
@@ -49,8 +52,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxHome" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxHome" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightgreen">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_home_outline" />
                     </FrameLayout>
@@ -62,8 +68,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxDrawer" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxDrawer" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
                     </FrameLayout>
@@ -75,8 +84,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxSearch" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxSearch" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_yellow">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
                     </FrameLayout>
@@ -88,8 +100,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxGestures" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxGestures" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_gesture" />
                     </FrameLayout>
@@ -101,8 +116,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxLanguage" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxLanguage" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_translate">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_translate" />
                     </FrameLayout>
@@ -114,8 +132,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxBackup" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxBackup" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_refresh">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_refresh" />
                     </FrameLayout>
@@ -127,8 +148,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAdvanced" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAdvanced" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_grey">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_tune" />
                     </FrameLayout>
@@ -140,8 +164,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxInfo" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxInfo" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_info">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_info_outline" />
                     </FrameLayout>

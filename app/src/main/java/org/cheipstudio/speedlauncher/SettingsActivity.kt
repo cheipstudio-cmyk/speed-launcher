@@ -1553,4 +1553,9 @@ override fun onResume() {
         val expected = 18f * resources.displayMetrics.scaledDensity
         return tv.textSize in (expected * 0.9f)..(expected * 1.1f)
     }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.slide_out_right)
+    }
 }

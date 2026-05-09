@@ -407,6 +407,7 @@ class MainActivity : AppCompatActivity() {
         homeMenuSheet = HomeMenuSheet().also {
             it.onSettings = {
                 startActivity(Intent(this, SettingsIndexActivity::class.java))
+                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out)
             }
             it.onSorted = {
                 recreate()

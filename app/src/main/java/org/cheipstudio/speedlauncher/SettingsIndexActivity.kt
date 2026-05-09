@@ -47,4 +47,9 @@ class SettingsIndexActivity : AppCompatActivity() {
         theme.resolveAttribute(attr, tv, true)
         return tv.data
     }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.slide_out_right)
+    }
 }

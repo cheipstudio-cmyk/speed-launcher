@@ -343,4 +343,9 @@ class RecommendedPickerActivity : AppCompatActivity() {
     class AvailableVH(
         v: View, val icon: ImageView, val label: TextView, val addBtn: ImageView
     ) : RecyclerView.ViewHolder(v)
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.slide_out_right)
+    }
 }
