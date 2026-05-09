@@ -317,38 +317,55 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Volatile private var drawerOpenInFlight = false
+    
     private fun openDrawer() {
-        // v59+v132: gestione robusta drawer
-        // Check più rigoroso: se è davvero VISIBILE blocca, altrimenti cleanup e procedi
+        // v178: gestione robusta - lock atomico per evitare doppia apertura
+        if (drawerOpenInFlight) return
+        if (supportFragmentManager.isStateSaved) return  // post-onSaveInstanceState
+        
+        // Check se già aperto/in apertura
         val existing = drawerSheet
-        if (existing != null && existing.isVisible && existing.isResumed) return
+        if (existing != null && existing.isAdded) return
+        
+        drawerOpenInFlight = true
         cleanupOldDrawer()
-        // Se dopo cleanup c'è ancora un fragment "drawer", aspetto un tick prima di crearne uno nuovo
-        if (supportFragmentManager.findFragmentByTag("drawer") != null) {
-            android.os.Handler(android.os.Looper.getMainLooper()).post {
+        
+        // Pulizia + apertura sempre via post (fragment transactions safe)
+        binding.homeView.post {
+            try {
                 cleanupOldDrawer()
                 doShowDrawer()
+            } finally {
+                drawerOpenInFlight = false
             }
-            return
         }
-        doShowDrawer()
     }
     
     private fun doShowDrawer() {
+        if (supportFragmentManager.isStateSaved) {
+            drawerSheet = null
+            return
+        }
         try {
+            // Doppio check post-cleanup
+            if (supportFragmentManager.findFragmentByTag("drawer") != null) {
+                cleanupOldDrawer()
+            }
             val sheet = AppDrawerSheet()
             sheet.onAppLongPress = { app -> openAppActions(app) }
             sheet.onDismissCallback = { 
                 drawerSheet = null
-                // v135: rimuovo blur con animazione per coerenza con cartelle
                 animateHomeBlur(false)
             }
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
-            // v135: blur animato (no più scatto: 0 → 24 in 200ms)
             animateHomeBlur(true)
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            android.util.Log.e("MainActivity", "doShowDrawer failed", t)
             drawerSheet = null
+            // Reset blur in caso era stato applicato
+            animateHomeBlur(false)
         }
     }
     

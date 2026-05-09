@@ -78,6 +78,8 @@ class RssActivity : AppCompatActivity() {
         val toolbar = MaterialToolbar(this).apply {
             title = getString(R.string.rss_title)
             setBackgroundColor(0)
+            navigationIcon = androidx.core.content.ContextCompat.getDrawable(this@RssActivity, R.drawable.ic_arrow_back)
+            setNavigationOnClickListener { finish() }
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -133,22 +135,59 @@ class RssActivity : AppCompatActivity() {
         setContentView(outer)
         loadFeeds()
         
-        // v172: swipe destra→sinistra chiude — più tollerante
-        val gd = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
-            override fun onFling(
-                e1: android.view.MotionEvent?, e2: android.view.MotionEvent,
-                vx: Float, vy: Float
-            ): Boolean {
-                if (vx < -180f && kotlin.math.abs(vx) > kotlin.math.abs(vy) * 0.8f) {
-                    finish()
-                    return true
-                }
-                return false
+        // v178: drag-to-close — l'utente trascina la card verso sinistra, segue il dito
+        var startX = 0f
+        var dragging = false
+        var screenW = 1
+        outer.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                screenW = outer.width.coerceAtLeast(1)
+                outer.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
-        outer.setOnTouchListener { _, ev -> 
-            gd.onTouchEvent(ev)
-            false
+        outer.setOnTouchListener { _, ev ->
+            when (ev.action) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    startX = ev.rawX
+                    dragging = false
+                    false
+                }
+                android.view.MotionEvent.ACTION_MOVE -> {
+                    val dx = ev.rawX - startX
+                    if (!dragging && dx < -30f) {
+                        dragging = true
+                    }
+                    if (dragging && dx < 0) {
+                        card.translationX = dx
+                        card.alpha = (1f + dx / screenW).coerceIn(0.4f, 1f)
+                    }
+                    dragging
+                }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                    if (dragging) {
+                        val dx = ev.rawX - startX
+                        if (dx < -screenW * 0.3f) {
+                            // Animazione completamento + finish
+                            card.animate()
+                                .translationX(-screenW.toFloat())
+                                .alpha(0f)
+                                .setDuration(160)
+                                .withEndAction { finish() }
+                                .start()
+                        } else {
+                            // Annulla, torna in posizione
+                            card.animate()
+                                .translationX(0f)
+                                .alpha(1f)
+                                .setDuration(180)
+                                .start()
+                        }
+                        dragging = false
+                        true
+                    } else false
+                }
+                else -> false
+            }
         }
     }
 
@@ -166,15 +205,20 @@ class RssActivity : AppCompatActivity() {
         thread {
             val all = mutableListOf<Article>()
             android.util.Log.d("RssActivity", "Loading ${feeds.size} feeds: $feeds")
+            val errors = mutableListOf<String>()
             for (feed in feeds) {
                 try {
                     val result = fetchFeed(feed)
                     android.util.Log.d("RssActivity", "Feed $feed → ${result.size} articles")
+                    if (result.isEmpty()) errors.add("$feed: 0 articoli")
                     all.addAll(result)
                 } catch (t: Throwable) {
                     android.util.Log.e("RssActivity", "Feed $feed failed", t)
+                    errors.add("$feed: ${t.message?.take(60)}")
                 }
             }
+            // Se tutti i feed sono falliti, mostro errori in toast
+            val errorSummary = if (all.isEmpty() && errors.isNotEmpty()) errors.first().take(120) else null
             all.sortByDescending { it.pubDateMs }
             android.util.Log.d("RssActivity", "Total articles: ${all.size}")
 
@@ -185,7 +229,8 @@ class RssActivity : AppCompatActivity() {
                 listView.adapter?.notifyDataSetChanged()
                 if (items.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
-                    Toast.makeText(this@RssActivity, "Nessun articolo. Controlla i log per dettagli.", Toast.LENGTH_LONG).show()
+                    val msg = errorSummary ?: "Nessun articolo trovato"
+                    Toast.makeText(this@RssActivity, msg, Toast.LENGTH_LONG).show()
                 }
             }
         }
