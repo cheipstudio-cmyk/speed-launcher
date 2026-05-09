@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.AppInfo
 import org.cheipstudio.speedlauncher.databinding.SheetAppDrawerBinding
@@ -287,7 +288,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         }
         
         // 3. Telefono se la query è solo numeri
-        if (query.matches(Regex("^[+\d\s().-]{4,}$"))) {
+        if (query.matches(Regex("""^[+\d\s().\-]{4,}$"""))) {
             addAction(ctx.getString(R.string.search_action_call, query), android.R.drawable.ic_menu_call) {
                 try {
                     val u = android.net.Uri.parse("tel:${android.net.Uri.encode(query)}")
