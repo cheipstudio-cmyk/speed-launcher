@@ -231,8 +231,26 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         } catch (_: Throwable) {}
     }
 
+    private var hasBeenPaused = false
+    
+    override fun onPause() {
+        super.onPause()
+        hasBeenPaused = true
+    }
+    
     override fun onResume() {
         super.onResume()
+        // v213: animazione entrata home SOLO se torno da app esterna (no al primo open, no al rotate, no al focus)
+        val shouldAnimate = hasBeenPaused
+        hasBeenPaused = false
+        if (!shouldAnimate) {
+            // Garantisco visibilità  
+            try {
+                binding.homeView.alpha = 1f
+                binding.homeView.scaleX = 1f
+                binding.homeView.scaleY = 1f
+            } catch (_: Throwable) {}
+        }
         // v211: animazione entrata home — solo se NON in landscape (causava schermo nero al rotate)
         try {
             val isLandscape = resources.configuration.orientation ==
@@ -242,7 +260,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             homeContent.alpha = 1f
             homeContent.scaleX = 1f
             homeContent.scaleY = 1f
-            if (!isLandscape) {
+            if (!isLandscape && shouldAnimate) {
                 homeContent.alpha = 0f
                 homeContent.scaleX = 1.04f
                 homeContent.scaleY = 1.04f
@@ -254,7 +272,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     .start()
             }
             
-            if (!isLandscape) {
+            if (!isLandscape && shouldAnimate) {
             // Rimbalzo widget - spring effect
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.widgetSlot)

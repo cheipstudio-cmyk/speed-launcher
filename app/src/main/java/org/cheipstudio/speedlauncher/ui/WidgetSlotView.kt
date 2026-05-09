@@ -190,20 +190,24 @@ class WidgetSlotView @JvmOverloads constructor(
         removeAllViews()
         addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
-        // notifica widget di adattarsi
+        // v212: notifica widget di adattarsi (post per garantire width != 0)
         if (info != null && currentWidgetId != -1) {
-            try {
-                val mgr = AppWidgetManager.getInstance(context)
-                val widthDp = (width / density).toInt().coerceAtLeast(1)
-                val heightDp = (targetH / density).toInt().coerceAtLeast(1)
-                val opts = Bundle().apply {
-                    putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
-                    putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
-                    putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
-                    putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
-                }
-                mgr.updateAppWidgetOptions(currentWidgetId, opts)
-            } catch (_: Throwable) {}
+            post {
+                try {
+                    val mgr = AppWidgetManager.getInstance(context)
+                    // Width fallback: se width=0, usa screen width
+                    val effectiveWidth = if (width > 0) width else context.resources.displayMetrics.widthPixels
+                    val widthDp = (effectiveWidth / density).toInt().coerceAtLeast(40)
+                    val heightDp = (targetH / density).toInt().coerceAtLeast(40)
+                    val opts = Bundle().apply {
+                        putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
+                        putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
+                        putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
+                        putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
+                    }
+                    mgr.updateAppWidgetOptions(currentWidgetId, opts)
+                } catch (_: Throwable) {}
+            }
         }
     }
 

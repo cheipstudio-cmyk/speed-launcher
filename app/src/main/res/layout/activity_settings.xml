@@ -375,7 +375,7 @@
                 android:foreground="?attr/selectableItemBackground">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_red">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_bell" />
                     </FrameLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
@@ -422,7 +422,7 @@
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_magenta">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_bell" />
                     </FrameLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
