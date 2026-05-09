@@ -47,24 +47,28 @@ class FolderCellView(context: Context) : LinearLayout(context) {
     private var downX = 0f; private var downY = 0f
     private var pressing = false; private var dragFired = false; private var moved = false; private var longPressFired = false
 
-    private val DRAG_THRESHOLD = 500L
-    private val LONGPRESS_THRESHOLD = 350L  // v132: leggermente prima del drag
-    private val longPressRunnable = Runnable {
-        if (pressing && !dragFired && !moved) {
-            longPressFired = true
+    // v132: stessa logica di AppCell — arm a 500ms, menu a 1500ms
+    private val ARM_DELAY = 500L
+    private val MENU_DELAY = 1500L
+    private val dragSlop = android.view.ViewConfiguration.get(context).scaledTouchSlop / 2
+    private var armed = false
+    
+    private val armRunnable = Runnable {
+        if (pressing && !longPressFired && !dragFired) {
+            armed = true
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            val f = folder ?: return@Runnable
-            onLongPress?.invoke(f)
+            // pulse leggero
+            scaleX = 0.92f; scaleY = 0.92f
+            animate().scaleX(1f).scaleY(1f).setDuration(150).start()
         }
     }
-    private val dragRunnable = Runnable {
-        // v132: drag parte solo se long press non ha già aperto menu
-        if (pressing && !dragFired && !longPressFired && dragOriginId.isNotEmpty()) {
-            dragFired = true
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+    
+    private val menuRunnable = Runnable {
+        if (pressing && armed && !longPressFired && !dragFired) {
+            longPressFired = true
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val f = folder ?: return@Runnable
-            val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${f.key}")
-            startDragAndDrop(data, View.DragShadowBuilder(this), f.key, 0)
+            onLongPress?.invoke(f)
         }
     }
 
@@ -133,32 +137,42 @@ class FolderCellView(context: Context) : LinearLayout(context) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x; downY = event.y
-                pressing = true; moved = false; dragFired = false; longPressFired = false
-                handler.postDelayed(longPressRunnable, LONGPRESS_THRESHOLD)
-                handler.postDelayed(dragRunnable, DRAG_THRESHOLD)
+                pressing = true; moved = false; dragFired = false; longPressFired = false; armed = false
+                handler.postDelayed(armRunnable, ARM_DELAY)
+                handler.postDelayed(menuRunnable, MENU_DELAY)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(event.x - downX); val dy = abs(event.y - downY)
-                if (!moved && (dx > moveSlop || dy > moveSlop)) {
+                // Se armed e si muove → drag immediato
+                if (armed && !dragFired && !longPressFired && (dx > dragSlop || dy > dragSlop) && dragOriginId.isNotEmpty()) {
+                    dragFired = true
+                    handler.removeCallbacks(armRunnable)
+                    handler.removeCallbacks(menuRunnable)
+                    val data = ClipData.newPlainText("speedDrag", "$dragOriginId|${f.key}")
+                    startDragAndDrop(data, View.DragShadowBuilder(this), f.key, 0)
+                    return true
+                }
+                // Se NON armed e si muove troppo → cancella tutto (era uno scroll)
+                if (!armed && !moved && (dx > moveSlop || dy > moveSlop)) {
                     moved = true
-                    handler.removeCallbacks(longPressRunnable)
-                    handler.removeCallbacks(dragRunnable)
+                    handler.removeCallbacks(armRunnable)
+                    handler.removeCallbacks(menuRunnable)
                 }
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 pressing = false
-                handler.removeCallbacks(longPressRunnable)
-                handler.removeCallbacks(dragRunnable)
+                handler.removeCallbacks(armRunnable)
+                handler.removeCallbacks(menuRunnable)
                 if (moved || dragFired || longPressFired) return true
                 onOpen?.invoke(f)
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
                 pressing = false
-                handler.removeCallbacks(longPressRunnable)
-                handler.removeCallbacks(dragRunnable)
+                handler.removeCallbacks(armRunnable)
+                handler.removeCallbacks(menuRunnable)
                 return true
             }
         }

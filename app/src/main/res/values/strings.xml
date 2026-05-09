@@ -237,7 +237,7 @@ Si userà solo per questa funzione.</string>
     <string name="memory_cleaned">Memoria pulita</string>
     <string name="memory_cleaned_with_amount">Memoria pulita: %1$d MB liberati</string>
     <string name="settings_show_searchbar">Mostra barra ricerca</string>
-    <string name="settings_show_searchbar_sub">Visualizza la barra di ricerca in cima alla home</string>
+    <string name="settings_show_searchbar_sub">Visualizza la barra di ricerca in fondo alla home</string>
     <string name="anim_fast">Veloce</string>
     <string name="settings_icon_pack">Icon pack (sperimentale)</string>
     <string name="icon_pack_none">Nessuno (icone di sistema)</string>

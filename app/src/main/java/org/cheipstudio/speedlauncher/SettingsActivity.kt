@@ -641,16 +641,13 @@ class SettingsActivity : AppCompatActivity() {
             // v116: logica semplificata e diagnostica
             // Se le app sono già caricate, popola subito.
             if (current != null && current.size > 5) {
-                val before = store.load().size
                 org.cheipstudio.speedlauncher.tools.HomeAutoPopulator.populate(store, cols, rows)
-                val after = store.load().size
-                Toast.makeText(this, "App aggiunte: ${after - before} (totale: $after)", Toast.LENGTH_LONG).show()
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                     forceRestartApp()
-                }, 1200)
+                }, 800)
             } else {
-                // App non caricate. Forzo reload sincrono e aspetto.
-                Toast.makeText(this, "Caricamento app in corso...", Toast.LENGTH_SHORT).show()
+                // v134: niente toast spam, solo restart
+
                 Thread {
                     // Forza reload sincrono delle app (lo carico io qui)
                     val launcherApps = getSystemService(android.content.Context.LAUNCHER_APPS_SERVICE) as android.content.pm.LauncherApps
@@ -665,17 +662,14 @@ class SettingsActivity : AppCompatActivity() {
                     
                     runOnUiThread {
                         if (keys.isEmpty()) {
-                            Toast.makeText(this, "Errore: nessuna app trovata", Toast.LENGTH_LONG).show()
                             forceRestartApp()
                             return@runOnUiThread
                         }
-                        
                         // Popolo manualmente con queste chiavi
                         populateWithKeys(store, keys, cols, rows)
-                        Toast.makeText(this, "App aggiunte: ${keys.size}", Toast.LENGTH_LONG).show()
                         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                             forceRestartApp()
-                        }, 1200)
+                        }, 800)
                     }
                 }.start()
             }

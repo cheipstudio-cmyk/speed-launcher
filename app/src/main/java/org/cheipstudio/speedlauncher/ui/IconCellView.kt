@@ -95,6 +95,8 @@ class IconCellView(context: Context) : LinearLayout(context) {
         gravity = Gravity.CENTER
         val pad = (4 * resources.displayMetrics.density).toInt()
         setPadding(pad, pad, pad, pad)
+        // v134: hardware layer durante animazioni (scale, alpha, drag)
+        setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
 
         // v34: icone più piccole in landscape per più colonne sullo schermo
         val isLandscape = resources.configuration.orientation ==

@@ -165,10 +165,8 @@ class MainActivity : AppCompatActivity() {
     private fun applyWallpaperBlur() {
         val radius = SpeedApp.instance.settingsRepository.wallpaperBlur.value ?: 0
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
-
-        // ImageView wallpaper blur: lo creo una sola volta come primo child del binding.root (FrameLayout)
+        
         val rootChild = binding.root as? android.view.ViewGroup ?: return
-
         var blurView = rootChild.findViewById<android.widget.ImageView>(R.id.wallpaperBlurView)
         if (blurView == null) {
             blurView = android.widget.ImageView(this).apply {
@@ -179,18 +177,42 @@ class MainActivity : AppCompatActivity() {
                     android.widget.FrameLayout.LayoutParams.MATCH_PARENT
                 )
             }
-            rootChild.addView(blurView, 0)  // come PRIMO child = sotto tutto
+            rootChild.addView(blurView, 0)
         }
 
         if (radius == 0) {
-            // Niente blur: rimuovo la visualizzazione del wallpaper catturato
             try { blurView.setRenderEffect(null) } catch (_: Throwable) {}
             blurView.visibility = android.view.View.GONE
+            // v132: rimuovi anche window blur se attivo
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    window.attributes = window.attributes.apply {
+                        blurBehindRadius = 0
+                        flags = flags and android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND.inv()
+                    }
+                }
+            } catch (_: Throwable) {}
             return
         }
 
+        // v132: uso WINDOW BLUR (no permission richiesta) come metodo primario
+        // Questo blur si applica al backdrop sotto la window — niente wallpaper drawable necessario
         try {
-            // Catturo il wallpaper di sistema
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                val r = radius.coerceIn(1, 150)
+                window.setBackgroundBlurRadius(r)
+                window.attributes = window.attributes.apply {
+                    blurBehindRadius = r
+                    flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+                }
+                // Setto anche il window background a un colore semitrasparente
+                // per far vedere il blur "attraverso"
+                window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x66000000.toInt()))
+            }
+        } catch (_: Throwable) {}
+
+        // Fallback wallpaper drawable (se permesso)
+        try {
             val wm = android.app.WallpaperManager.getInstance(this)
             val drawable = try { wm.drawable } catch (_: Throwable) { null }
             if (drawable != null) {
@@ -272,6 +294,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** v133: se NON sono il default launcher e l'utente fa gesto home, mi chiudo
+     *  (comportamento app normale invece che launcher). */
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        try {
+            val intent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+                addCategory(android.content.Intent.CATEGORY_HOME)
+            }
+            val resolveInfo = packageManager.resolveActivity(
+                intent,
+                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+            )
+            val isDefaultLauncher = resolveInfo?.activityInfo?.packageName == packageName
+            if (!isDefaultLauncher) {
+                // Non sono il default → mi comporto come app normale, esco dalla recents
+                finish()
+            }
+        } catch (_: Throwable) {}
+    }
+    
     override fun onPause() {
         super.onPause()
         widgetHostController.stopListening()
@@ -310,9 +352,26 @@ class MainActivity : AppCompatActivity() {
         try {
             val sheet = AppDrawerSheet()
             sheet.onAppLongPress = { app -> openAppActions(app) }
-            sheet.onDismissCallback = { drawerSheet = null }
+            sheet.onDismissCallback = { 
+                drawerSheet = null
+                // v134: rimuovo blur dalla home quando drawer si chiude
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                        binding.homeView.setRenderEffect(null)
+                    }
+                } catch (_: Throwable) {}
+            }
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
+            // v134: blur leggero sulla home quando il drawer è aperto
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    binding.homeView.setRenderEffect(
+                        android.graphics.RenderEffect.createBlurEffect(20f, 20f,
+                            android.graphics.Shader.TileMode.CLAMP)
+                    )
+                }
+            } catch (_: Throwable) {}
         } catch (_: Throwable) {
             drawerSheet = null
         }

@@ -482,23 +482,36 @@ class HomeView @JvmOverloads constructor(
                 updated?.let { FolderSheet.reopen(it) }
             },
             onRemoveFromFolder = { app ->
+                var updated: HomeItem? = null
+                var folderRemoved = false
                 pages.forEach { grid ->
                     grid.updateFolder(folder.key) { f ->
                         val newApps = f.folderApps - app.key
                         when {
-                            newApps.isEmpty() -> null
-                            newApps.size == 1 -> HomeItem(
-                                key = newApps[0], page = f.page,
-                                cellX = f.cellX, cellY = f.cellY,
-                                type = HomeItem.TYPE_APP
-                            )
-                            else -> f.copy(folderApps = newApps)
+                            newApps.isEmpty() -> { folderRemoved = true; null }
+                            newApps.size == 1 -> {
+                                folderRemoved = true
+                                HomeItem(
+                                    key = newApps[0], page = f.page,
+                                    cellX = f.cellX, cellY = f.cellY,
+                                    type = HomeItem.TYPE_APP
+                                )
+                            }
+                            else -> {
+                                val u = f.copy(folderApps = newApps)
+                                if (updated == null) updated = u
+                                u
+                            }
                         }
                     }
                 }
                 val appInfo = SpeedApp.instance.appRepository.apps.value?.find { it.key == app.key }
                 if (appInfo != null && pages.none { it.isPinned(appInfo) }) {
                     pinApp(appInfo)
+                }
+                // v132: riapri cartella per refreshare icone (no più glitch dopo rimozione)
+                if (!folderRemoved) {
+                    updated?.let { FolderSheet.reopen(it) }
                 }
             },
             onDeleteFolder = {
@@ -828,26 +841,84 @@ class HomeView @JvmOverloads constructor(
     }
 
 
-    /** v132: menu Rinomina/Elimina al long press di una cartella in home */
+    /** v132: menu Rinomina/Elimina al long press di una cartella in home.
+     *  Design BottomSheet stile AppActionsSheet per consistenza. */
     private fun showFolderMenu(folder: HomeItem) {
         val ctx = context
-        val items = arrayOf(
-            ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_rename_title),
-            ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_delete_confirm_title)
-        )
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(
-            ctx,
-            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-        )
-            .setTitle(folder.name ?: "")
-            .setItems(items) { _, which ->
-                when (which) {
-                    0 -> showFolderRenameDialog(folder)
-                    1 -> showFolderDeleteDialog(folder)
-                }
+        val density = ctx.resources.displayMetrics.density
+        
+        val sheet = com.google.android.material.bottomsheet.BottomSheetDialog(ctx)
+        val container = android.widget.LinearLayout(ctx).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding((24 * density).toInt(), (16 * density).toInt(), (24 * density).toInt(), (24 * density).toInt())
+        }
+        
+        // Drag handle
+        val handle = android.view.View(ctx).apply {
+            background = ctx.getDrawable(org.cheipstudio.speedlauncher.R.drawable.bg_drag_handle)
+            val lp = android.widget.LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
+            lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
+            lp.bottomMargin = (16 * density).toInt()
+            layoutParams = lp
+        }
+        container.addView(handle)
+        
+        // Titolo (nome cartella)
+        val title = android.widget.TextView(ctx).apply {
+            text = folder.name ?: ""
+            textSize = 18f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = (16 * density).toInt()
+            layoutParams = lp
+        }
+        container.addView(title)
+        
+        // Item: Rinomina
+        val renameItem = buildSheetItem(ctx, ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_rename_title), android.R.drawable.ic_menu_edit) {
+            sheet.dismiss()
+            showFolderRenameDialog(folder)
+        }
+        container.addView(renameItem)
+        
+        // Item: Elimina
+        val deleteItem = buildSheetItem(ctx, ctx.getString(org.cheipstudio.speedlauncher.R.string.folder_delete_confirm_title), android.R.drawable.ic_menu_delete) {
+            sheet.dismiss()
+            showFolderDeleteDialog(folder)
+        }
+        container.addView(deleteItem)
+        
+        sheet.setContentView(container)
+        sheet.show()
+    }
+    
+    private fun buildSheetItem(ctx: Context, label: String, iconRes: Int, onClick: () -> Unit): View {
+        val density = ctx.resources.displayMetrics.density
+        val row = android.widget.LinearLayout(ctx).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            isClickable = true; isFocusable = true
+            setBackgroundResource(android.R.drawable.list_selector_background)
+            setPadding((16 * density).toInt(), (16 * density).toInt(), (16 * density).toInt(), (16 * density).toInt())
+        }
+        val icon = android.widget.ImageView(ctx).apply {
+            setImageResource(iconRes)
+            val s = (24 * density).toInt()
+            layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply {
+                marginEnd = (16 * density).toInt()
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        }
+        row.addView(icon)
+        val txt = android.widget.TextView(ctx).apply {
+            text = label
+            textSize = 16f
+        }
+        row.addView(txt)
+        row.setOnClickListener { onClick() }
+        return row
     }
 
     private fun showFolderRenameDialog(folder: HomeItem) {
