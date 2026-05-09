@@ -354,27 +354,41 @@ class MainActivity : AppCompatActivity() {
             sheet.onAppLongPress = { app -> openAppActions(app) }
             sheet.onDismissCallback = { 
                 drawerSheet = null
-                // v134: rimuovo blur dalla home quando drawer si chiude
-                try {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                        binding.homeView.setRenderEffect(null)
-                    }
-                } catch (_: Throwable) {}
+                // v135: rimuovo blur con animazione per coerenza con cartelle
+                animateHomeBlur(false)
             }
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
-            // v134: blur leggero sulla home quando il drawer è aperto
-            try {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                    binding.homeView.setRenderEffect(
-                        android.graphics.RenderEffect.createBlurEffect(20f, 20f,
-                            android.graphics.Shader.TileMode.CLAMP)
-                    )
-                }
-            } catch (_: Throwable) {}
+            // v135: blur animato (no più scatto: 0 → 24 in 200ms)
+            animateHomeBlur(true)
         } catch (_: Throwable) {
             drawerSheet = null
         }
+    }
+    
+    /** v135: blur animato sulla home (apertura/chiusura drawer) — stesso stile cartelle */
+    private fun animateHomeBlur(open: Boolean) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
+        val home = binding.homeView
+        val from = if (open) 0f else 24f
+        val to = if (open) 24f else 0f
+        val anim = android.animation.ValueAnimator.ofFloat(from, to)
+        anim.duration = if (open) 220 else 180
+        anim.interpolator = android.view.animation.DecelerateInterpolator()
+        anim.addUpdateListener { v ->
+            try {
+                val r = v.animatedValue as Float
+                if (r > 0.5f) {
+                    home.setRenderEffect(
+                        android.graphics.RenderEffect.createBlurEffect(r, r,
+                            android.graphics.Shader.TileMode.CLAMP)
+                    )
+                } else {
+                    home.setRenderEffect(null)
+                }
+            } catch (_: Throwable) {}
+        }
+        anim.start()
     }
 
     private fun openDrawerWithSearch() {

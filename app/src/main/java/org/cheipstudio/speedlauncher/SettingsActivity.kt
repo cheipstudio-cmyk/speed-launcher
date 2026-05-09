@@ -67,11 +67,11 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // v19: forza full-screen senza wallpaper sotto
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.statusBarColor = resolveAttr(com.google.android.material.R.attr.colorSurface)
-        window.navigationBarColor = resolveAttr(com.google.android.material.R.attr.colorSurface)
+        // v135: mostra wallpaper sotto (per applicare blur effetto Pixel)
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -905,11 +905,10 @@ class SettingsActivity : AppCompatActivity() {
 
     /** v84: dialog multi-select per scegliere le app raccomandate manuali */
     private fun showRecommendedManualPicker() {
-        val apps = org.cheipstudio.speedlauncher.SpeedApp.instance.appRepository.apps.value
+        val apps = SpeedApp.instance.appRepository.apps.value
+            ?.filter { it.packageName != packageName }
             ?: emptyList()
         if (apps.isEmpty()) {
-            // v86: se appRepository non ha ancora caricato (race condition),
-            // ritento dopo 300ms invece che mostrare lista vuota.
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 showRecommendedManualPicker()
             }, 300)
@@ -919,44 +918,260 @@ class SettingsActivity : AppCompatActivity() {
         val available = apps.filter { !hidden.contains(it.key) }
             .sortedBy { it.label.lowercase() }
         val countNeeded = settings.recommendedCount.value ?: 5
-        val current = settings.recommendedManualApps.value ?: mutableSetOf()
-
-        val labels = available.map { it.label }.toTypedArray()
-        val checked = BooleanArray(available.size) { i -> current.contains(available[i].key) }
-        val selected = current.toMutableSet()
-
-        // v86: niente setMessage — su alcune versioni Material il messaggio
-        // mangia la lista. Metto il count nel titolo direttamente.
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(
-            this,
-            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-        )
-            .setTitle(getString(R.string.rec_mode_pick_apps_title, countNeeded))
-            .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
-                val key = available[which].key
-                if (isChecked) selected.add(key) else selected.remove(key)
-            }
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                settings.setRecommendedManualApps(selected)
-                if (selected.isEmpty()) {
-                    Toast.makeText(this, R.string.rec_mode_no_apps_selected, Toast.LENGTH_LONG).show()
-                } else {
-                    if (selected.size != countNeeded) {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.rec_mode_pick_apps_too_few, countNeeded),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    // v132: dopo selezione apri dialog di riordinamento
-                    showRecommendedReorderDialog()
+        
+        // Stato corrente: lista ordinata
+        val ordered = (settings.recommendedManualOrder.value ?: emptyList()).toMutableList()
+        // Aggiungo le selezionate non ancora ordinate (compat) 
+        val currentSet = settings.recommendedManualApps.value ?: emptySet()
+        for (k in currentSet) if (k !in ordered) ordered.add(k)
+        // Pulisco quelle non più disponibili
+        ordered.retainAll { k -> available.any { it.key == k } }
+        
+        val byKey = available.associateBy { it.key }
+        val density = resources.displayMetrics.density
+        
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        val rootScroll = android.widget.ScrollView(this)
+        val container = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding((20 * density).toInt(), (8 * density).toInt(), (20 * density).toInt(), (24 * density).toInt())
+        }
+        rootScroll.addView(container)
+        
+        // Drag handle
+        val handle = android.view.View(this).apply {
+            background = getDrawable(R.drawable.bg_drag_handle)
+            val lp = android.widget.LinearLayout.LayoutParams(
+                (40 * density).toInt(), (4 * density).toInt()
+            )
+            lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
+            lp.bottomMargin = (12 * density).toInt()
+            layoutParams = lp
+        }
+        container.addView(handle)
+        
+        // Titolo
+        val title = android.widget.TextView(this).apply {
+            text = getString(R.string.rec_mode_pick_apps_title, countNeeded)
+            textSize = 18f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = (8 * density).toInt()
+            layoutParams = lp
+        }
+        container.addView(title)
+        
+        // Subtitle
+        val subtitle = android.widget.TextView(this).apply {
+            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+            textSize = 13f
+            text = "Tap per aggiungere/rimuovere. Frecce per riordinare."
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = (16 * density).toInt()
+            layoutParams = lp
+        }
+        container.addView(subtitle)
+        
+        // Lista
+        val listContainer = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+        }
+        container.addView(listContainer)
+        
+        fun rebuild() {
+            listContainer.removeAllViews()
+            
+            // SEZIONE 1: selezionate in ordine
+            if (ordered.isNotEmpty()) {
+                val sectionLabel = android.widget.TextView(this).apply {
+                    text = "Selezionate (${ordered.size}/$countNeeded)"
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    textSize = 14f
+                    setTextColor(resolveAttr(com.google.android.material.R.attr.colorPrimary))
+                    val lp = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.topMargin = (12 * density).toInt()
+                    lp.bottomMargin = (8 * density).toInt()
+                    layoutParams = lp
+                }
+                listContainer.addView(sectionLabel)
+                
+                for (i in ordered.indices) {
+                    val key = ordered[i]
+                    val app = byKey[key] ?: continue
+                    val row = buildPickerRow(app.label, app.icon, true, i, ordered.size, density,
+                        onToggle = {
+                            ordered.removeAt(i)
+                            rebuild()
+                        },
+                        onUp = {
+                            if (i > 0) {
+                                val tmp = ordered[i]; ordered[i] = ordered[i-1]; ordered[i-1] = tmp
+                                rebuild()
+                            }
+                        },
+                        onDown = {
+                            if (i < ordered.size - 1) {
+                                val tmp = ordered[i]; ordered[i] = ordered[i+1]; ordered[i+1] = tmp
+                                rebuild()
+                            }
+                        }
+                    )
+                    listContainer.addView(row)
                 }
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            
+            // SEZIONE 2: disponibili
+            val notSelected = available.filter { it.key !in ordered }
+            if (notSelected.isNotEmpty()) {
+                val sectionLabel = android.widget.TextView(this).apply {
+                    text = "Aggiungi"
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    textSize = 14f
+                    setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+                    val lp = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.topMargin = (20 * density).toInt()
+                    lp.bottomMargin = (8 * density).toInt()
+                    layoutParams = lp
+                }
+                listContainer.addView(sectionLabel)
+                
+                for (app in notSelected) {
+                    val row = buildPickerRow(app.label, app.icon, false, 0, 0, density,
+                        onToggle = {
+                            ordered.add(app.key)
+                            rebuild()
+                        },
+                        onUp = {}, onDown = {}
+                    )
+                    listContainer.addView(row)
+                }
+            }
+        }
+        rebuild()
+        
+        // Save button
+        val saveBtn = com.google.android.material.button.MaterialButton(this).apply {
+            text = getString(android.R.string.ok)
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.topMargin = (20 * density).toInt()
+            layoutParams = lp
+        }
+        saveBtn.setOnClickListener {
+            settings.setRecommendedManualOrder(ordered)
+            dialog.dismiss()
+        }
+        container.addView(saveBtn)
+        
+        dialog.setContentView(rootScroll)
+        dialog.show()
     }
-
-    /** v71: abilita/disabilita visivamente le card che dipendono dalla searchbar */
+    
+    /** v135: row del picker — icona + label + (rimuovi/aggiungi) + frecce ordinamento */
+    private fun buildPickerRow(
+        label: String,
+        icon: android.graphics.drawable.Drawable?,
+        isSelected: Boolean,
+        index: Int,
+        total: Int,
+        density: Float,
+        onToggle: () -> Unit,
+        onUp: () -> Unit,
+        onDown: () -> Unit
+    ): android.view.View {
+        val row = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            isClickable = true; isFocusable = true
+            setBackgroundResource(android.R.drawable.list_selector_background)
+            setPadding((4 * density).toInt(), (10 * density).toInt(), (4 * density).toInt(), (10 * density).toInt())
+        }
+        
+        // Icon
+        val iconView = android.widget.ImageView(this).apply {
+            setImageDrawable(icon)
+            val s = (32 * density).toInt()
+            layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply {
+                marginEnd = (12 * density).toInt()
+            }
+        }
+        row.addView(iconView)
+        
+        // Label
+        val labelView = android.widget.TextView(this).apply {
+            text = label
+            textSize = 15f
+            val lp = android.widget.LinearLayout.LayoutParams(0, 
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            layoutParams = lp
+        }
+        row.addView(labelView)
+        
+        if (isSelected) {
+            // Frecce
+            val upBtn = android.widget.ImageButton(this).apply {
+                setImageResource(android.R.drawable.arrow_up_float)
+                setBackgroundResource(android.R.color.transparent)
+                val s = (36 * density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
+                isEnabled = index > 0
+                alpha = if (index > 0) 1f else 0.3f
+            }
+            upBtn.setOnClickListener { onUp() }
+            row.addView(upBtn)
+            
+            val downBtn = android.widget.ImageButton(this).apply {
+                setImageResource(android.R.drawable.arrow_down_float)
+                setBackgroundResource(android.R.color.transparent)
+                val s = (36 * density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
+                isEnabled = index < total - 1
+                alpha = if (index < total - 1) 1f else 0.3f
+            }
+            downBtn.setOnClickListener { onDown() }
+            row.addView(downBtn)
+            
+            // Rimuovi
+            val removeBtn = android.widget.ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                setBackgroundResource(android.R.color.transparent)
+                val s = (36 * density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
+            }
+            removeBtn.setOnClickListener { onToggle() }
+            row.addView(removeBtn)
+        } else {
+            // Aggiungi
+            val addBtn = android.widget.ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_input_add)
+                setBackgroundResource(android.R.color.transparent)
+                val s = (36 * density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
+            }
+            addBtn.setOnClickListener { onToggle() }
+            row.addView(addBtn)
+        }
+        
+        // Tap row toggles
+        row.setOnClickListener { onToggle() }
+        return row
+    }
+    
+/** v71: abilita/disabilita visivamente le card che dipendono dalla searchbar */
     private fun applySearchBarDependentEnabled(enabled: Boolean) {
         binding.itemSearchMode.isEnabled = enabled
         binding.itemSearchMode.alpha = if (enabled) 1.0f else 0.45f
@@ -1204,112 +1419,30 @@ class SettingsActivity : AppCompatActivity() {
     }
 
 
-    /** v132: dialog per riordinare le app raccomandate manuali con frecce su/giù */
-    private fun showRecommendedReorderDialog() {
-        val apps = SpeedApp.instance.appRepository.apps.value ?: return
-        val byKey = apps.associateBy { it.key }
-        // Lista ordinata corrente
-        var ordered = (settings.recommendedManualOrder.value ?: emptyList()).toMutableList()
-        if (ordered.isEmpty()) {
-            ordered = (settings.recommendedManualApps.value ?: emptySet()).toMutableList()
-        }
-        if (ordered.size <= 1) return  // niente da riordinare
-        
-        val density = resources.displayMetrics.density
-        val container = android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.VERTICAL
-            val pad = (8 * density).toInt()
-            setPadding(pad, pad, pad, pad)
-        }
-        
-        // Funzione per ricostruire la lista visiva
-        fun rebuildList() {
-            container.removeAllViews()
-            for (i in ordered.indices) {
-                val key = ordered[i]
-                val app = byKey[key] ?: continue
-                val row = android.widget.LinearLayout(this).apply {
-                    orientation = android.widget.LinearLayout.HORIZONTAL
-                    gravity = android.view.Gravity.CENTER_VERTICAL
-                    setPadding((8 * density).toInt(), (12 * density).toInt(), (8 * density).toInt(), (12 * density).toInt())
+override fun onResume() {
+        super.onResume()
+        applyWallpaperBlur()
+    }
+    
+    /** v135: blur dello sfondo settings (replica MainActivity) */
+    private fun applyWallpaperBlur() {
+        val radius = settings.wallpaperBlur.value ?: 0
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
+        try {
+            val r = radius.coerceIn(0, 100)
+            if (r == 0) {
+                window.attributes = window.attributes.apply {
+                    blurBehindRadius = 0
+                    flags = flags and android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND.inv()
                 }
-                
-                // Icona
-                val icon = android.widget.ImageView(this).apply {
-                    setImageDrawable(app.icon)
-                    val s = (32 * density).toInt()
-                    layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply {
-                        marginEnd = (12 * density).toInt()
-                    }
+            } else {
+                window.attributes = window.attributes.apply {
+                    blurBehindRadius = r
+                    flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
                 }
-                row.addView(icon)
-                
-                // Label (espandibile)
-                val label = android.widget.TextView(this).apply {
-                    text = app.label
-                    textSize = 16f
-                    val lp = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                    layoutParams = lp
-                }
-                row.addView(label)
-                
-                // Bottone su
-                val upBtn = android.widget.ImageButton(this).apply {
-                    setImageResource(android.R.drawable.arrow_up_float)
-                    setBackgroundResource(android.R.color.transparent)
-                    val s = (40 * density).toInt()
-                    layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
-                    isEnabled = i > 0
-                    alpha = if (i > 0) 1f else 0.3f
-                }
-                upBtn.setOnClickListener {
-                    if (i > 0) {
-                        val tmp = ordered[i]
-                        ordered[i] = ordered[i - 1]
-                        ordered[i - 1] = tmp
-                        rebuildList()
-                    }
-                }
-                row.addView(upBtn)
-                
-                // Bottone giù
-                val downBtn = android.widget.ImageButton(this).apply {
-                    setImageResource(android.R.drawable.arrow_down_float)
-                    setBackgroundResource(android.R.color.transparent)
-                    val s = (40 * density).toInt()
-                    layoutParams = android.widget.LinearLayout.LayoutParams(s, s)
-                    isEnabled = i < ordered.size - 1
-                    alpha = if (i < ordered.size - 1) 1f else 0.3f
-                }
-                downBtn.setOnClickListener {
-                    if (i < ordered.size - 1) {
-                        val tmp = ordered[i]
-                        ordered[i] = ordered[i + 1]
-                        ordered[i + 1] = tmp
-                        rebuildList()
-                    }
-                }
-                row.addView(downBtn)
-                
-                container.addView(row)
+                // Background semitrasparente per far vedere il blur dietro
+                window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0xCC000000.toInt()))
             }
-        }
-        rebuildList()
-        
-        val scroll = android.widget.ScrollView(this).apply {
-            addView(container)
-        }
-        
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(
-            this,
-            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
-        )
-            .setTitle(getString(R.string.rec_reorder_title))
-            .setView(scroll)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                settings.setRecommendedManualOrder(ordered)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        } catch (_: Throwable) {}
     }
 }
