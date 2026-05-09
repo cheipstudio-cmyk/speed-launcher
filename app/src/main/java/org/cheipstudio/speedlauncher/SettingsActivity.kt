@@ -84,6 +84,7 @@ class SettingsActivity : AppCompatActivity() {
             val titleRes = when (filterSection) {
                 "appearance" -> R.string.settings_idx_appearance
                 "home" -> R.string.settings_idx_home
+                "ai" -> R.string.settings_idx_ai
                 "drawer" -> R.string.settings_idx_drawer
                 "search" -> R.string.settings_idx_search
                 "gestures" -> R.string.settings_idx_gestures
@@ -1546,7 +1547,9 @@ override fun onResume() {
             )
             "home" -> setOf(
                 getString(R.string.settings_section_home_layout),
-                getString(R.string.settings_section_widget),
+                getString(R.string.settings_section_widget)
+            )
+            "ai" -> setOf(
                 getString(R.string.settings_section_ai)
             )
             "drawer" -> setOf(
@@ -1564,11 +1567,11 @@ override fun onResume() {
             )
             "backup" -> setOf(
                 getString(R.string.settings_section_backup),
-                getString(R.string.settings_section_advanced),
-                getString(R.string.settings_section_general)
+                getString(R.string.settings_section_advanced)
             )
             "info" -> setOf(
-                getString(R.string.settings_section_info)
+                getString(R.string.settings_section_info),
+                getString(R.string.settings_section_general)
             )
             else -> return
         }

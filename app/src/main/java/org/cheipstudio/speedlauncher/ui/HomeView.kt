@@ -99,11 +99,11 @@ class HomeView @JvmOverloads constructor(
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
-            // v140+v144: swipe destra dal bordo sinistro → pannello RSS
-            // velocità ridotta a 400 e edge zone aumentata a 80dp per più affidabilità
+            // v164: swipe da sinistra verso destra in qualunque punto della home → pannello RSS
+            // edge zone allargata a metà schermo, threshold ridotta
             if (settings.rssPanelEnabled.value == true &&
-                vx > 400f && abs(vx) > abs(vy) * 1.2f &&
-                e1 != null && e1.x < (resources.displayMetrics.density * 80)) {
+                vx > 250f && abs(vx) > abs(vy) * 1.0f &&
+                e1 != null && e1.x < (resources.displayMetrics.widthPixels / 2f)) {
                 if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 onSwipeRightFromLeftEdge?.invoke()
                 return true

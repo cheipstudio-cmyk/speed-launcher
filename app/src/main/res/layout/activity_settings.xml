@@ -211,6 +211,24 @@
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_memory_cleaner">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_rocket_launch" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_memory_cleaner" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_memory_cleaner_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchMemoryCleaner"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            
+            
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
                     </FrameLayout>
@@ -755,24 +773,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_memory_cleaner">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_rocket_launch" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_memory_cleaner" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_memory_cleaner_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchMemoryCleaner"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDefaultLauncher" style="@style/PixelCard">
+<com.google.android.material.card.MaterialCardView android:id="@+id/itemDefaultLauncher" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pixelblue">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_home_outline" />

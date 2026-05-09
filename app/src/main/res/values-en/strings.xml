@@ -346,4 +346,6 @@ Download now?</string>
     <string name="settings_show_dock_labels_sub">Show name below dock icons</string>
     <string name="widget_remove_subtitle">Widget will be removed from home</string>
     <string name="widget_remove_action">Remove widget</string>
+    <string name="settings_idx_ai">AI Launcher</string>
+    <string name="settings_idx_ai_sub">Recommended, manual mode, memory cleaner</string>
 </resources>

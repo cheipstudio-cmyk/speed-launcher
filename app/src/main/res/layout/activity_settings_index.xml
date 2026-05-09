@@ -7,20 +7,37 @@
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         app:elevation="0dp"
-        app:liftOnScroll="true">
+        app:liftOnScrollColor="?attr/colorSurface">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:expandedTitleMarginStart="28dp"
+            app:expandedTitleMarginBottom="20dp"
+            app:expandedTitleTextAppearance="@style/PixelExpandedTitle"
+            app:collapsedTitleTextAppearance="@style/PixelCollapsedTitle"
+            app:expandedTitleGravity="bottom|start"
+            app:collapsedTitleGravity="center"
+            app:titleCollapseMode="fade"
             app:title="@string/settings_title"
-            app:titleCentered="true"
-            app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="?attr/colorOnSurface" />
+            app:contentScrim="?attr/colorSurface"
+            android:background="@android:color/transparent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="?attr/colorOnSurface" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -35,6 +52,7 @@
             android:orientation="vertical"
             android:paddingTop="8dp"
             android:paddingBottom="40dp">
+
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxAspetto" style="@style/PixelCard"
                 android:clickable="true"
@@ -64,6 +82,22 @@
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_home" />
                         <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_home_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAi" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_coral">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_star_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_ai" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_ai_sub" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

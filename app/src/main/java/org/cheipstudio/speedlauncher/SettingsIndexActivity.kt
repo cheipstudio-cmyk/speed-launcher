@@ -26,6 +26,7 @@ class SettingsIndexActivity : AppCompatActivity() {
 
         binding.idxAspetto.setOnClickListener { openSection("appearance") }
         binding.idxHome.setOnClickListener { openSection("home") }
+        binding.idxAi.setOnClickListener { openSection("ai") }
         binding.idxDrawer.setOnClickListener { openSection("drawer") }
         binding.idxSearch.setOnClickListener { openSection("search") }
         binding.idxGestures.setOnClickListener { openSection("gestures") }

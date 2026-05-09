@@ -181,4 +181,16 @@
         <item name="android:colorBackground">@android:color/transparent</item>
     </style>
 
+
+    <style name="PixelExpandedTitle" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">36sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="PixelCollapsedTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
 </resources>
