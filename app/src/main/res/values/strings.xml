@@ -363,4 +363,5 @@ Vuoi scaricarla?</string>
     <string name="position_top">In alto</string>
     <string name="position_above_search">Sopra ricerca</string>
     <string name="position_below_search">Sotto ricerca</string>
+    <string name="rss_suggested">Feed suggeriti</string>
 </resources>

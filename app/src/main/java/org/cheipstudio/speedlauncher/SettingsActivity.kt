@@ -1513,6 +1513,48 @@ override fun onResume() {
             }
         }
         
+        // v195: bottone suggeriti
+        val suggestBtn = com.google.android.material.button.MaterialButton(
+            this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle
+        ).apply {
+            text = getString(R.string.rss_suggested)
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.topMargin = (8 * density).toInt()
+            layoutParams = lp
+        }
+        suggestBtn.setOnClickListener {
+            val suggested = listOf(
+                "BBC News" to "https://feeds.bbci.co.uk/news/rss.xml",
+                "BBC Mondo" to "https://feeds.bbci.co.uk/news/world/rss.xml",
+                "BBC Tecnologia" to "https://feeds.bbci.co.uk/news/technology/rss.xml",
+                "ANSA Top News" to "https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml",
+                "ANSA Cronaca" to "https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml",
+                "Repubblica Cronaca" to "https://www.repubblica.it/rss/cronaca/rss2.0.xml",
+                "Corriere Cronaca" to "https://xml2.corriereobjects.it/rss/cronache.xml",
+                "Il Post" to "https://www.ilpost.it/feed/",
+                "HDBlog" to "https://www.hdblog.it/feed/",
+                "DDay.it" to "https://www.dday.it/feed",
+                "The Verge" to "https://www.theverge.com/rss/index.xml",
+                "Hacker News" to "https://hnrss.org/frontpage"
+            )
+            val labels = suggested.map { it.first }.toTypedArray()
+            val checked = BooleanArray(suggested.size) { suggested[it].second in feeds }
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+            )
+                .setTitle(R.string.rss_suggested)
+                .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
+                    val url = suggested[which].second
+                    if (isChecked && url !in feeds) feeds.add(url)
+                    else if (!isChecked) feeds.remove(url)
+                }
+                .setPositiveButton(android.R.string.ok) { _, _ -> rebuildFeedList() }
+                .show()
+        }
+        
         val openBtn = com.google.android.material.button.MaterialButton(this).apply {
             text = getString(R.string.rss_open)
             val lp = android.widget.LinearLayout.LayoutParams(
@@ -1530,6 +1572,7 @@ override fun onResume() {
         container.addView(listContainer)
         container.addView(til)
         container.addView(addBtn)
+        container.addView(suggestBtn)
         container.addView(openBtn)
         
         val scroll = android.widget.ScrollView(this).apply { addView(container) }

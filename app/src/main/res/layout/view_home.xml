@@ -121,19 +121,18 @@
     <!-- v194: pillola laterale visibile per RSS feed -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/rssEdgeIndicator"
-        android:layout_width="40dp"
-        android:layout_height="56dp"
+        android:layout_width="36dp"
+        android:layout_height="80dp"
         android:layout_gravity="start|center_vertical"
         android:visibility="gone"
         android:clickable="true"
         android:focusable="true"
-        app:cardCornerRadius="0dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
         app:shapeAppearanceOverlay="@style/RssEdgeShape">
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_feed"
             app:tint="?attr/colorOnSurface" />

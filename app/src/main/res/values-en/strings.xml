@@ -363,4 +363,5 @@ Download now?</string>
     <string name="position_top">Top</string>
     <string name="position_above_search">Above search</string>
     <string name="position_below_search">Below search</string>
+    <string name="rss_suggested">Suggested feeds</string>
 </resources>
