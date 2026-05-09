@@ -233,11 +233,6 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
 
     private var hasBeenPaused = false
     
-    override fun onPause() {
-        super.onPause()
-        hasBeenPaused = true
-    }
-    
     override fun onResume() {
         super.onResume()
         // v213: animazione entrata home SOLO se torno da app esterna (no al primo open, no al rotate, no al focus)
@@ -400,6 +395,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     override fun onPause() {
         super.onPause()
         widgetHostController.stopListening()
+        hasBeenPaused = true
     }
 
     override fun onNewIntent(intent: Intent) {
