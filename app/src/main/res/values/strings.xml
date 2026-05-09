@@ -315,4 +315,6 @@ Vuoi scaricarla?</string>
     <string name="settings_blur_folder_sub">Sfoca lo sfondo dietro le cartelle</string>
     <string name="settings_rss_panel">Pannello RSS swipe sinistra</string>
     <string name="settings_rss_panel_sub">Apri lettore RSS scorrendo a destra dal bordo sinistro</string>
+    <string name="settings_telegram_label">Gruppo Telegram</string>
+    <string name="settings_telegram_sub">Unisciti alla community Speed Launcher</string>
 </resources>

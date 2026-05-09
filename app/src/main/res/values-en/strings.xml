@@ -315,4 +315,6 @@ Download now?</string>
     <string name="settings_blur_folder_sub">Blur background behind folders</string>
     <string name="settings_rss_panel">RSS swipe panel</string>
     <string name="settings_rss_panel_sub">Open RSS reader by swiping right from left edge</string>
+    <string name="settings_telegram_label">Telegram group</string>
+    <string name="settings_telegram_sub">Join the Speed Launcher community</string>
 </resources>

@@ -53,7 +53,7 @@ class RssActivity : AppCompatActivity() {
         }
 
         val toolbar = MaterialToolbar(this).apply {
-            setNavigationIcon(R.drawable.ic_back)
+            setNavigationIcon(R.drawable.ic_arrow_back)
             setNavigationOnClickListener { finish() }
             title = getString(R.string.rss_title)
             layoutParams = LinearLayout.LayoutParams(
@@ -109,7 +109,7 @@ class RssActivity : AppCompatActivity() {
     }
 
     private fun loadFeeds() {
-        val feeds = SpeedApp.instance.settingsRepository.rssFeeds.value ?: emptyList()
+        val feeds = SpeedApp.instance.settingsRepository.rssFeeds.value ?: emptyList<String>()
         if (feeds.isEmpty()) {
             progress.visibility = View.GONE
             emptyView.visibility = View.VISIBLE
@@ -208,8 +208,9 @@ class RssActivity : AppCompatActivity() {
         val onClick: (Article) -> Unit
     ) : RecyclerView.Adapter<RssAdapter.VH>() {
         class VH(v: View) : RecyclerView.ViewHolder(v) {
-            val title: TextView = (v as LinearLayout).getChildAt(0) as TextView
-            val source: TextView = v.getChildAt(1) as TextView
+            val ll = v as LinearLayout
+            val title: TextView = ll.getChildAt(0) as TextView
+            val source: TextView = ll.getChildAt(1) as TextView
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val ctx = parent.context

@@ -407,6 +407,18 @@ class SettingsActivity : AppCompatActivity() {
 
         // v80: check for update
         binding.itemCheckUpdate.setOnClickListener { handleCheckUpdate() }
+        
+        // v143: gruppo Telegram
+        binding.itemTelegram.setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/speed_launcher")).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            } catch (_: Throwable) {
+                Toast.makeText(this, "https://t.me/speed_launcher", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun resolveAttr(attr: Int): Int {
@@ -496,11 +508,6 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateDimLabel() {
         val v = settings.wallpaperDim.value ?: 0
         binding.wallpaperDimLabel.text = "$v%"
-    }
-
-    private fun updateBlurLabel() {
-        val v = settings.wallpaperBlur.value ?: 0
-        binding.wallpaperBlurLabel.text = if (v == 0) getString(android.R.string.no) else "${v}px"
     }
 
     /** v47: widget theme label + dialog */
@@ -1709,7 +1716,7 @@ override fun onResume() {
 
     /** v139: dialog gestione feed RSS */
     private fun updateRssFeedsLabel() {
-        val feeds = settings.rssFeeds.value ?: emptyList()
+        val feeds = settings.rssFeeds.value ?: emptyList<String>()
         binding.rssFeedsLabel.text = if (feeds.isEmpty()) {
             getString(R.string.rss_empty)
         } else {
@@ -1728,7 +1735,7 @@ override fun onResume() {
             setPadding(pad, pad, pad, pad)
         }
         
-        val feeds = (settings.rssFeeds.value ?: emptyList()).toMutableList()
+        val feeds = (settings.rssFeeds.value ?: emptyList<String>()).toMutableList()
         val listContainer = android.widget.LinearLayout(this).apply {
             orientation = android.widget.LinearLayout.VERTICAL
         }
