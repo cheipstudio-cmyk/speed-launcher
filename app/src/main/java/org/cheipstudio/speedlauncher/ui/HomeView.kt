@@ -587,9 +587,13 @@ class HomeView @JvmOverloads constructor(
             return
         }
         val density = resources.displayMetrics.density
+        // v199: in landscape lo schermo è basso, riduco widget height
+        val isLandscape = resources.configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
         
-        // Altezza in dp
-        val heightDp = settings.widgetHeight.value ?: 160
+        // Altezza in dp (in landscape scalo al 50% per non rubare spazio a pages/dock/search)
+        val savedHeight = settings.widgetHeight.value ?: 160
+        val heightDp = if (isLandscape) (savedHeight * 0.5).toInt().coerceAtLeast(80) else savedHeight
         val heightPx = (heightDp * density).toInt()
         
         // Larghezza percentuale

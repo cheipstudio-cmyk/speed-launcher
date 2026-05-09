@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- v199: dimensioni ridotte per landscape (schermo basso) -->
+    <dimen name="home_top_padding">12dp</dimen>
+    <dimen name="home_bottom_padding">8dp</dimen>
+    <dimen name="widget_slot_height">80dp</dimen>
+</resources>

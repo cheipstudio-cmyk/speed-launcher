@@ -150,27 +150,37 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     private fun applyDrawerLayout() {
         val layout = SpeedApp.instance.settingsRepository.drawerLayout.value
             ?: org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID4
+        // v198: in landscape aumenta colonne per usare lo spazio orizzontale
+        val isLandscape = resources.configuration.orientation == 
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val landscapeBoost = if (isLandscape) 2 else 0
         when (layout) {
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID3 -> {
                 adapter.listMode = false
-                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 3)
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 3 + landscapeBoost)
                 _binding?.alphaScrollBar?.visibility = View.GONE
             }
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID5 -> {
                 adapter.listMode = false
-                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 5)
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 5 + landscapeBoost)
                 _binding?.alphaScrollBar?.visibility = View.GONE
             }
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_LIST -> {
                 adapter.listMode = true
-                binding.recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
-                // v29: scrollbar A-Z visibile solo in lista
-                _binding?.alphaScrollBar?.visibility = View.VISIBLE
-                setupAlphaScrollbar()
+                if (isLandscape) {
+                    // v198: in landscape la lista verticale spreca spazio - uso griglia 6 colonne
+                    binding.recycler.layoutManager = GridLayoutManager(requireContext(), 6)
+                    adapter.listMode = false
+                    _binding?.alphaScrollBar?.visibility = View.GONE
+                } else {
+                    binding.recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+                    _binding?.alphaScrollBar?.visibility = View.VISIBLE
+                    setupAlphaScrollbar()
+                }
             }
             else -> {
                 adapter.listMode = false
-                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4)
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4 + landscapeBoost)
                 _binding?.alphaScrollBar?.visibility = View.GONE
             }
         }

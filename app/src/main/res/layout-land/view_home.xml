@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <!-- v38: dim overlay sotto tutti i contenuti, alpha controllato da wallpaperDim setting -->
+    <View
+        android:id="@+id/dimOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/home_top_padding"
+        android:paddingHorizontal="@dimen/home_horizontal_padding"
+        android:paddingBottom="@dimen/home_bottom_padding">
+
+        <org.cheipstudio.speedlauncher.ui.WidgetSlotView
+            android:id="@+id/widgetSlot"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/widget_slot_height"
+            android:layout_marginBottom="6dp" />
+
+        <!-- v30: AI Launcher Mode - Raccomandate -->
+        <org.cheipstudio.speedlauncher.ui.RecommendedView
+            android:id="@+id/recommendedRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp" />
+
+        <org.cheipstudio.speedlauncher.ui.PagedHomeContainer
+            android:id="@+id/pagedHome"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- v48: indicator con più spacing dal dock -->
+        <org.cheipstudio.speedlauncher.ui.PageIndicator
+            android:id="@+id/pageIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- v32: recommendate in basso (alternativa a quello in alto) -->
+        <org.cheipstudio.speedlauncher.ui.RecommendedView
+            android:id="@+id/recommendedRowBottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_swipe_handle" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/searchBar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="2dp"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="8dp">
+
+                <ImageView
+                    android:id="@+id/searchIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_search" />
+
+                <TextView
+                    android:id="@+id/searchBarHint"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:text="@string/search_apps"
+                    android:textSize="15sp"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+
+                <ImageView
+                    android:id="@+id/btnHomeMenu"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:padding="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_settings"
+                    android:contentDescription="@string/menu_settings" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+    <!-- v183: indicatore swipe RSS (sottile chevron lato sinistro) -->
+    <!-- v194: pillola laterale visibile per RSS feed -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/rssEdgeIndicator"
+        android:layout_width="36dp"
+        android:layout_height="80dp"
+        android:layout_gravity="start|center_vertical"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+        app:shapeAppearanceOverlay="@style/RssEdgeShape">
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_feed"
+            app:tint="?attr/colorOnSurface" />
+    </com.google.android.material.card.MaterialCardView>
+
+</merge>
