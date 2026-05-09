@@ -109,20 +109,22 @@ class AppRepository(private val context: Context) {
     }
 
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
-        // v160: prima del lancio, breve "push" dell'icona (scale 1 -> 0.85 -> 1.05 -> 1) per feedback visivo
+        // v200: push espressivo Material 3 — scale 1 → 0.80 → 1.06 → 1 con elastic overshoot
         if (sourceView != null && sourceView.width > 0) {
             try {
                 sourceView.animate().cancel()
+                // Squash veloce
                 sourceView.animate()
-                    .scaleX(0.85f).scaleY(0.85f)
-                    .setDuration(60)
-                    .setInterpolator(android.view.animation.AccelerateInterpolator(1.2f))
+                    .scaleX(0.80f).scaleY(0.80f)
+                    .setDuration(70)
+                    .setInterpolator(android.view.animation.PathInterpolator(0.4f, 0.0f, 1.0f, 0.4f))
                     .withEndAction {
                         try {
+                            // Elastic snap-back
                             sourceView.animate()
                                 .scaleX(1f).scaleY(1f)
-                                .setDuration(80)
-                                .setInterpolator(android.view.animation.OvershootInterpolator(2.5f))
+                                .setDuration(100)
+                                .setInterpolator(android.view.animation.OvershootInterpolator(3.0f))
                                 .start()
                             doLaunch(app, sourceView)
                         } catch (_: Throwable) {

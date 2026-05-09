@@ -225,19 +225,64 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // v183: animazione entrata home Material Expressive — fade + scale dolce
+        // v200: animazione entrata home Material Expressive — fade dolce
+        // + rimbalzo elastic widget e search bar
         try {
             val homeContent = binding.homeView
             homeContent.alpha = 0f
-            homeContent.scaleX = 1.05f
-            homeContent.scaleY = 1.05f
+            homeContent.scaleX = 1.04f
+            homeContent.scaleY = 1.04f
             homeContent.animate()
                 .alpha(1f)
                 .scaleX(1f)
                 .scaleY(1f)
-                .setDuration(260)
+                .setDuration(280)
                 .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                 .start()
+            
+            // Rimbalzo widget - spring effect
+            try {
+                val v = binding.homeView.findViewById<android.view.View>(R.id.widgetSlot)
+                v?.let {
+                    it.scaleX = 0.85f
+                    it.scaleY = 0.85f
+                    it.animate()
+                        .scaleX(1f).scaleY(1f)
+                        .setStartDelay(60)
+                        .setDuration(420)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(2.2f))
+                        .start()
+                }
+            } catch (_: Throwable) {}
+            
+            // Rimbalzo search bar - spring effect (translateY con bounce)
+            try {
+                val v = binding.homeView.findViewById<android.view.View>(R.id.searchBar)
+                v?.let {
+                    it.translationY = 60f
+                    it.alpha = 0f
+                    it.animate()
+                        .translationY(0f).alpha(1f)
+                        .setStartDelay(100)
+                        .setDuration(420)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(1.8f))
+                        .start()
+                }
+            } catch (_: Throwable) {}
+            
+            // Page indicator pop
+            try {
+                val v = binding.homeView.findViewById<android.view.View>(R.id.pageIndicator)
+                v?.let {
+                    it.scaleX = 0.5f; it.scaleY = 0.5f; it.alpha = 0f
+                    it.animate()
+                        .scaleX(1f).scaleY(1f).alpha(1f)
+                        .setStartDelay(140)
+                        .setDuration(360)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(2f))
+                        .start()
+                }
+            } catch (_: Throwable) {}
         } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()
@@ -356,10 +401,26 @@ class MainActivity : AppCompatActivity() {
             sheet.onDismissCallback = { 
                 drawerSheet = null
                 animateHomeBlur(false)
+                // v200: reset scale home al chiudere drawer
+                try {
+                    binding.homeView.animate()
+                        .scaleX(1f).scaleY(1f)
+                        .setDuration(320)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(1.4f))
+                        .start()
+                } catch (_: Throwable) {}
             }
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
             animateHomeBlur(true)
+            // v200: scale-down sottile della home all'apertura drawer  
+            try {
+                binding.homeView.animate()
+                    .scaleX(0.96f).scaleY(0.96f)
+                    .setDuration(280)
+                    .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
+                    .start()
+            } catch (_: Throwable) {}
         } catch (t: Throwable) {
             android.util.Log.e("MainActivity", "doShowDrawer failed", t)
             drawerSheet = null

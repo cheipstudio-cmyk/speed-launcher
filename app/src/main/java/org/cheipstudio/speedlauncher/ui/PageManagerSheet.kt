@@ -44,7 +44,7 @@ object PageManagerSheet {
             background = androidx.core.content.ContextCompat.getDrawable(
                 context, R.drawable.bg_drag_handle
             )
-            val lp = LinearLayout.LayoutParams((32 * density).toInt(), (4 * density).toInt())
+            val lp = LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
             lp.gravity = Gravity.CENTER_HORIZONTAL
             lp.bottomMargin = (16 * density).toInt()
             layoutParams = lp
@@ -54,7 +54,8 @@ object PageManagerSheet {
         root.addView(TextView(context).apply {
             text = context.getString(R.string.page_manager_title)
             textSize = 22f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            letterSpacing = -0.01f
             setTextColor(resolveAttrColor(context, com.google.android.material.R.attr.colorOnSurface))
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
@@ -114,14 +115,22 @@ object PageManagerSheet {
         }
         rebuildList()
 
-        // Bottone "Aggiungi pagina"
-        val addBtn = MaterialButton(
-            context, null, com.google.android.material.R.attr.materialButtonOutlinedStyle
-        ).apply {
+        // Bottone "Aggiungi pagina" Pixel-style filled tonal
+        val addBtn = MaterialButton(context).apply {
             text = context.getString(R.string.page_manager_add)
             icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_input_add)
             iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
-            cornerRadius = (24 * density).toInt()
+            cornerRadius = (32 * density).toInt()
+            setBackgroundColor(resolveAttrColor(context, com.google.android.material.R.attr.colorSecondaryContainer))
+            setTextColor(resolveAttrColor(context, com.google.android.material.R.attr.colorOnSecondaryContainer))
+            setIconTintResource(android.R.color.transparent)
+            iconTint = android.content.res.ColorStateList.valueOf(
+                resolveAttrColor(context, com.google.android.material.R.attr.colorOnSecondaryContainer)
+            )
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            textSize = 15f
+            val padV = (14 * density).toInt()
+            setPadding(padding, padV, padding, padV)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
@@ -147,7 +156,7 @@ object PageManagerSheet {
         onRemove: () -> Unit
     ): View {
         val row = MaterialCardView(context).apply {
-            radius = 24 * density
+            radius = 28 * density
             cardElevation = 0f
             setCardBackgroundColor(resolveAttrColor(context, com.google.android.material.R.attr.colorSurfaceContainerHigh))
             val lp = LinearLayout.LayoutParams(
@@ -163,20 +172,21 @@ object PageManagerSheet {
                        (8 * density).toInt(), (12 * density).toInt())
         }
 
-        // Numero pagina come "chip"
+        // Numero pagina come chip rotondo Material You
         val numberView = TextView(context).apply {
             text = (index + 1).toString()
-            textSize = 18f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(resolveAttrColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer))
+            textSize = 16f
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             gravity = Gravity.CENTER
-            background = makeChipBg(context, density,
-                resolveAttrColor(context, com.google.android.material.R.attr.colorPrimaryContainer)
-            )
-            val s = (40 * density).toInt()
-            val lp = LinearLayout.LayoutParams(s, s)
-            lp.marginEnd = (16 * density).toInt()
-            layoutParams = lp
+            setTextColor(resolveAttrColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(resolveAttrColor(context, com.google.android.material.R.attr.colorPrimaryContainer))
+            }
+            val sz = (40 * density).toInt()
+            layoutParams = LinearLayout.LayoutParams(sz, sz).apply {
+                marginEnd = (16 * density).toInt()
+            }
         }
         inner.addView(numberView)
 
