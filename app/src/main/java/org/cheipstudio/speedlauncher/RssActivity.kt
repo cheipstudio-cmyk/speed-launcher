@@ -359,8 +359,8 @@ class RssActivity : AppCompatActivity() {
         val items: List<Article>,
         val onClick: (Article) -> Unit
     ) : RecyclerView.Adapter<RssAdapter.VH>() {
-        class VH(v: View) : RecyclerView.ViewHolder(v) {
-            val ll = v as LinearLayout
+        class VH(v: View, val rowView: View = v) : RecyclerView.ViewHolder(v) {
+            val ll = rowView as LinearLayout
             val title: TextView = ll.getChildAt(0) as TextView
             val source: TextView = ll.getChildAt(1) as TextView
         }
