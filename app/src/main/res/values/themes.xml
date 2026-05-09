@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.SpeedLauncher" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="materialAlertDialogTheme">@style/PixelAlertDialog</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:windowShowWallpaper">true</item>
@@ -16,6 +17,8 @@
     </style>
 
     <style name="Theme.SpeedLauncher.Settings" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="materialAlertDialogTheme">@style/PixelAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/Theme.SpeedLauncher.BottomSheet</item>
         <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="android:navigationBarColor">?attr/colorSurface</item>
         <item name="android:windowAnimationStyle">@style/SpeedLauncherActivityAnim</item>
@@ -34,7 +37,7 @@
 
     <style name="Widget.SpeedLauncher.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
         <item name="shapeAppearance">@style/ShapeAppearance.SpeedLauncher.BottomSheet</item>
-        <item name="backgroundTint">?attr/colorSurface</item>
+        <item name="backgroundTint">?attr/colorSurfaceContainerHigh</item>
     </style>
 
     <style name="ShapeAppearance.SpeedLauncher.BottomSheet" parent="ShapeAppearance.Material3.LargeComponent">
@@ -63,5 +66,13 @@
         <item name="android:activityOpenExitAnimation">@anim/home_slide_out_partial</item>
         <item name="android:activityCloseEnterAnimation">@anim/home_slide_in_back</item>
         <item name="android:activityCloseExitAnimation">@anim/rss_slide_out_left_full</item>
+    </style>
+
+    <style name="PixelAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="dialogCornerRadius">28dp</item>
+        <item name="materialAlertDialogTitlePanelStyle">@style/PixelAlertDialogTitle</item>
+    </style>
+    
+    <style name="PixelAlertDialogTitle" parent="MaterialAlertDialog.Material3.Title.Panel">
     </style>
 </resources>

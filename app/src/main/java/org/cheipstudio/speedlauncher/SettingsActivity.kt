@@ -880,6 +880,7 @@ class SettingsActivity : AppCompatActivity() {
                 settings.setWidgetTheme(keys[which])
                 updateWidgetThemeLabel()
                 org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider.refreshAll(this)
+                org.cheipstudio.speedlauncher.widgets.SpeedTimeWidgetProvider.refreshAll(this)
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
@@ -1599,6 +1600,13 @@ override fun onResume() {
             }
             // PixelPageTitle ("Impostazioni" grande in alto) sempre nascosto in filter mode
             if (child is android.widget.TextView && isPixelPageTitle(child)) {
+                child.visibility = android.view.View.GONE
+                continue
+            }
+            // v186: card widget Position/Height/Width SEMPRE nascoste (gestite da long-press del widget)
+            if (child.id == R.id.itemWidgetPosition ||
+                child.id == R.id.itemWidgetHeight ||
+                child.id == R.id.itemWidgetWidth) {
                 child.visibility = android.view.View.GONE
                 continue
             }

@@ -7,8 +7,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.BatteryManager
-import android.os.SystemClock
 import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.provider.Settings
@@ -19,7 +19,8 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * v180: Widget Speed Time. TextView semplice, refresh via AlarmManager 1 min.
+ * v186: Widget Speed Time. TextView semplice, refresh via AlarmManager 1 min.
+ * Tema sincronizzato con Speed Stats (system/light/dark/transparent).
  */
 class SpeedTimeWidgetProvider : AppWidgetProvider() {
 
@@ -56,31 +57,84 @@ class SpeedTimeWidgetProvider : AppWidgetProvider() {
         private const val ACTION_TICK = "org.cheipstudio.speedlauncher.WIDGET_TIME_TICK"
         private const val REQ_CODE = 8421
         
+        // v186: tema sincronizzato col widget speed_stats
+        private const val PREFS_NAME = "speed_widget_prefs"
+        private const val KEY_THEME = "widget_theme"
+        private const val THEME_SYSTEM = "system"
+        private const val THEME_TRANSPARENT = "transparent"
+        private const val THEME_LIGHT = "light"
+        private const val THEME_DARK = "dark"
+        
+        fun refreshAll(context: Context) {
+            try {
+                val mgr = AppWidgetManager.getInstance(context)
+                val ids = mgr.getAppWidgetIds(ComponentName(context, SpeedTimeWidgetProvider::class.java))
+                for (id in ids) updateWidget(context, mgr, id)
+            } catch (_: Throwable) {}
+        }
+        
         fun updateWidget(context: Context, mgr: AppWidgetManager, id: Int) {
-            val views = RemoteViews(context.packageName, R.layout.widget_speed_time)
-            val now = Date()
+            // Theme detection
+            val theme = try {
+                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val raw = prefs.getString(KEY_THEME, THEME_TRANSPARENT)
+                if (raw.isNullOrBlank()) THEME_TRANSPARENT
+                else if (raw !in setOf(THEME_SYSTEM, THEME_TRANSPARENT, THEME_LIGHT, THEME_DARK)) THEME_TRANSPARENT
+                else raw
+            } catch (_: Throwable) { THEME_TRANSPARENT }
             
-            // Time
+            val isLight = when (theme) {
+                THEME_LIGHT -> true
+                THEME_DARK -> false
+                THEME_TRANSPARENT -> false
+                else -> {
+                    try {
+                        val nightMode = context.resources.configuration.uiMode and 
+                            Configuration.UI_MODE_NIGHT_MASK
+                        nightMode != Configuration.UI_MODE_NIGHT_YES
+                    } catch (_: Throwable) { false }
+                }
+            }
+            
+            // Layout selection
+            val layoutRes = if (isLight && theme != THEME_TRANSPARENT)
+                R.layout.widget_speed_time_light
+            else
+                R.layout.widget_speed_time
+            
+            val views = RemoteViews(context.packageName, layoutRes)
+            
+            // Background per tema
+            try {
+                val bgRes = when (theme) {
+                    THEME_TRANSPARENT -> R.drawable.widget_speed_time_bg_transparent
+                    THEME_LIGHT -> R.drawable.widget_speed_time_bg_light
+                    THEME_DARK -> R.drawable.widget_speed_time_bg
+                    else -> if (isLight) R.drawable.widget_speed_time_bg_light
+                            else R.drawable.widget_speed_time_bg
+                }
+                views.setInt(R.id.widgetRoot, "setBackgroundResource", bgRes)
+            } catch (_: Throwable) {}
+            
+            val now = Date()
             val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
             views.setTextViewText(R.id.timeText, timeFmt.format(now))
             
-            // Date
             val dayFmt = SimpleDateFormat("d", Locale.getDefault())
-            val monthFmt = SimpleDateFormat("MMM yyyy", Locale.getDefault())
+            val monthFmt = SimpleDateFormat("MMM", Locale.getDefault())
             views.setTextViewText(R.id.dateDay, dayFmt.format(now))
             views.setTextViewText(R.id.dateMonth, monthFmt.format(now).uppercase(Locale.getDefault()))
             
-            // Battery
             val pct = try {
                 val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
                 bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
             } catch (_: Throwable) { -1 }
             views.setTextViewText(R.id.batteryText, if (pct >= 0) "$pct%" else "--")
             
-            // Click intents (3 separate)
+            // Click intents
             try {
-                val timeIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                val timeIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply { 
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK 
                 }
                 views.setOnClickPendingIntent(R.id.timeBlock, PendingIntent.getActivity(
                     context, 1001, timeIntent,
@@ -127,7 +181,6 @@ class SpeedTimeWidgetProvider : AppWidgetProvider() {
                     context, REQ_CODE, intent,
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
-                // Allinea al prossimo cambio di minuto
                 val now = System.currentTimeMillis()
                 val nextMinute = ((now / 60_000L) + 1) * 60_000L
                 am.set(AlarmManager.RTC, nextMinute, pi)

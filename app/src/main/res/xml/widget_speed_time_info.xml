@@ -10,7 +10,9 @@
     android:maxResizeHeight="200dp"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/widget_speed_time"
+    android:previewLayout="@layout/widget_speed_time"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/widget_speed_time_description"
-    android:icon="@drawable/ic_launcher_widget" />
+    android:icon="@drawable/ic_launcher_widget"
+    android:previewImage="@drawable/ic_launcher_widget" />

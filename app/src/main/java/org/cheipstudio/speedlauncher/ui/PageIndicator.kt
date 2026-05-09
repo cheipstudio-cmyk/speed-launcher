@@ -39,8 +39,8 @@ class PageIndicator @JvmOverloads constructor(
     private fun rebuild() {
         removeAllViews()
         val small = (8 * density).toInt()
-        val active = (24 * density).toInt()
-        val margin = (4 * density).toInt()
+        val active = (28 * density).toInt()
+        val margin = (5 * density).toInt()
         
         for (i in 0 until pageCount) {
             val dot = View(context).apply {

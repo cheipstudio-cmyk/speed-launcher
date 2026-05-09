@@ -129,7 +129,7 @@ class RssActivity : AppCompatActivity() {
                     val result = fetchFeed(feed)
                     android.util.Log.d("RssActivity", "Feed $feed → ${result.size} articles")
                     if (result.isEmpty()) {
-                        errors.add("$feed: 0 articoli (vedi adb logcat -s RssActivity)")
+                        errors.add("$feed: 0 articoli")
                     }
                     all.addAll(result)
                 } catch (t: Throwable) {
@@ -223,7 +223,16 @@ class RssActivity : AppCompatActivity() {
                     bodyBytes[startOffset] == '\t'.code.toByte())) {
                 startOffset++
             }
-            android.util.Log.d("RssActivity", "$url first bytes: ${String(bodyBytes, startOffset, minOf(80, bodyBytes.size - startOffset))}")
+            val firstBytes = String(bodyBytes, startOffset, minOf(200, bodyBytes.size - startOffset)).take(200)
+            android.util.Log.d("RssActivity", "$url first bytes: $firstBytes")
+            
+            // v186: detect HTML (URL non-RSS)
+            val firstLower = firstBytes.lowercase().trim()
+            if (firstLower.startsWith("<!doctype html") || firstLower.startsWith("<html") || 
+                firstLower.startsWith("{")) {
+                android.util.Log.w("RssActivity", "$url returns HTML/JSON, not RSS")
+                throw java.io.IOException("URL non è un feed RSS valido (restituisce HTML)")
+            }
             
             // Parse con XmlPullParser nativo Android (più affidabile)
             val parser = android.util.Xml.newPullParser()
@@ -306,6 +315,12 @@ class RssActivity : AppCompatActivity() {
                 event = parser.next()
             }
             android.util.Log.d("RssActivity", "Parsed ${out.size} articles from $url")
+            // v186: se 0 articoli, log primi 200 char del body per debug
+            if (out.isEmpty()) {
+                val preview = String(bodyBytes, startOffset, 
+                    minOf(200, bodyBytes.size - startOffset))
+                android.util.Log.w("RssActivity", "Body preview (0 art): $preview")
+            }
 
         } catch (t: Throwable) {
             android.util.Log.e("RssActivity", "Fetch error for $currentUrl: ${t.message}", t)
@@ -352,6 +367,22 @@ class RssActivity : AppCompatActivity() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val ctx = parent.context
             val density = ctx.resources.displayMetrics.density
+            // v187: card material expressive 28dp con surfaceContainer
+            val card = com.google.android.material.card.MaterialCardView(ctx).apply {
+                radius = 28f * density
+                cardElevation = 0f
+                strokeWidth = 0
+                setCardBackgroundColor(resolveAttrInt(ctx, com.google.android.material.R.attr.colorSurfaceContainerHigh))
+                isClickable = true
+                isFocusable = true
+                useCompatPadding = false
+                val lp = android.view.ViewGroup.MarginLayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                lp.setMargins((12 * density).toInt(), (4 * density).toInt(), (12 * density).toInt(), (4 * density).toInt())
+                layoutParams = lp
+            }
             val row = LinearLayout(ctx).apply {
                 orientation = LinearLayout.VERTICAL
                 isClickable = true; isFocusable = true
@@ -360,7 +391,7 @@ class RssActivity : AppCompatActivity() {
                     context.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
                     setBackgroundResource(tvSel.resourceId)
                 }
-                val pad = (16 * density).toInt()
+                val pad = (18 * density).toInt()
                 setPadding(pad, pad, pad, pad)
             }
             val title = TextView(ctx).apply {
@@ -380,11 +411,12 @@ class RssActivity : AppCompatActivity() {
                 layoutParams = lp
             }
             row.addView(source)
-            row.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+            row.layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            return VH(row)
+            card.addView(row)
+            return VH(card, row)
         }
         override fun onBindViewHolder(holder: VH, position: Int) {
             val item = items[position]
