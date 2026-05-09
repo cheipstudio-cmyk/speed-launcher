@@ -47,8 +47,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp" />
 
         <!-- v32: recommendate in basso (alternativa a quello in alto) -->
         <org.cheipstudio.speedlauncher.ui.RecommendedView
@@ -58,11 +58,11 @@
             android:layout_marginTop="2dp" />
 
         <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
+            android:layout_width="32dp"
+            android:layout_height="3dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
             android:background="@drawable/bg_swipe_handle" />
 
         <com.google.android.material.card.MaterialCardView

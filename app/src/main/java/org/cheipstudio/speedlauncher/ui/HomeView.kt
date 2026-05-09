@@ -587,13 +587,19 @@ class HomeView @JvmOverloads constructor(
             return
         }
         val density = resources.displayMetrics.density
-        // v199: in landscape lo schermo è basso, riduco widget height
+        // v205: in landscape NASCONDO il widget, lo schermo è troppo basso per averlo + griglia + dock
         val isLandscape = resources.configuration.orientation ==
             android.content.res.Configuration.ORIENTATION_LANDSCAPE
         
-        // Altezza in dp (in landscape scalo aggressivo, max 100dp)
+        if (isLandscape) {
+            ws.visibility = android.view.View.GONE
+            return
+        } else {
+            ws.visibility = android.view.View.VISIBLE
+        }
+        
         val savedHeight = settings.widgetHeight.value ?: 160
-        val heightDp = if (isLandscape) (savedHeight * 0.4).toInt().coerceIn(70, 100) else savedHeight
+        val heightDp = savedHeight
         val heightPx = (heightDp * density).toInt()
         
         // Larghezza percentuale
@@ -787,7 +793,16 @@ class HomeView @JvmOverloads constructor(
             binding.recommendedRowBottom.visibility = android.view.View.GONE
             return
         }
-        if (pos == org.cheipstudio.speedlauncher.data.SettingsRepository.REC_POS_BOTTOM) {
+        // v204: in landscape forza posizione BOTTOM - schermo basso, rec top + dock bottom 
+        // ruberebbero tutto lo spazio alla grid
+        val isLandscape = resources.configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val effectivePos = if (isLandscape) {
+            org.cheipstudio.speedlauncher.data.SettingsRepository.REC_POS_BOTTOM
+        } else {
+            pos
+        }
+        if (effectivePos == org.cheipstudio.speedlauncher.data.SettingsRepository.REC_POS_BOTTOM) {
             binding.recommendedRow.visibility = android.view.View.GONE
             binding.recommendedRowBottom.visibility = android.view.View.VISIBLE
             binding.recommendedRowBottom.refresh("home")
