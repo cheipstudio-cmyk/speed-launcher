@@ -228,6 +228,12 @@ class WidgetSlotView @JvmOverloads constructor(
             layoutParams = lp
         }
         removeAllViews()
+        // v157: forza placeholder visibile dopo rimozione (era invisible nel parent)
+        placeholder.visibility = View.VISIBLE
+        // Stacca dal parent se per caso era ancora attached
+        (placeholder.parent as? android.view.ViewGroup)?.removeView(placeholder)
         addView(placeholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        requestLayout()
+        invalidate()
     }
 }

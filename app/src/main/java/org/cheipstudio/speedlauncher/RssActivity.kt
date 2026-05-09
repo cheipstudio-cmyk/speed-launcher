@@ -218,7 +218,11 @@ class RssActivity : AppCompatActivity() {
             val row = LinearLayout(ctx).apply {
                 orientation = LinearLayout.VERTICAL
                 isClickable = true; isFocusable = true
-                setBackgroundResource(android.R.drawable.list_selector_background)
+                run {
+                    val tvSel = android.util.TypedValue()
+                    context.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
+                    setBackgroundResource(tvSel.resourceId)
+                }
                 val pad = (16 * density).toInt()
                 setPadding(pad, pad, pad, pad)
             }

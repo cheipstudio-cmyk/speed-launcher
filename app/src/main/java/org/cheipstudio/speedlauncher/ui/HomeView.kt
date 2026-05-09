@@ -987,7 +987,11 @@ class HomeView @JvmOverloads constructor(
             orientation = android.widget.LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
             isClickable = true; isFocusable = true
-            setBackgroundResource(android.R.drawable.list_selector_background)
+            run {
+                    val tvSel = android.util.TypedValue()
+                    context.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
+                    setBackgroundResource(tvSel.resourceId)
+                }
             setPadding((16 * density).toInt(), (16 * density).toInt(), (16 * density).toInt(), (16 * density).toInt())
         }
         val icon = android.widget.ImageView(ctx).apply {

@@ -194,6 +194,24 @@
             <!-- ===== ASPETTO ICONE ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_ai" />
 
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_dock_labels" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_dock_labels_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowDockLabels"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
@@ -225,23 +243,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- v59: Pulitore memoria AI -->
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_memory_cleaner">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_rocket_launch" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_memory_cleaner" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_memory_cleaner_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchMemoryCleaner"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemRecommendedCount" style="@style/PixelCard">
+<com.google.android.material.card.MaterialCardView android:id="@+id/itemRecommendedCount" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_green">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
@@ -472,41 +474,8 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- v151: Toggle etichette nelle cartelle -->
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_folder_outline" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_folder_labels" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_folder_labels_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchShowFolderLabels"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- v151: Toggle etichette dock raccomandate -->
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightblue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_dock_labels" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_dock_labels_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchShowDockLabels"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerLayout" style="@style/PixelCard">
+<!-- v151: Toggle etichette dock raccomandate -->
+<com.google.android.material.card.MaterialCardView android:id="@+id/itemDrawerLayout" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
@@ -549,6 +518,23 @@
             <!-- ===== CARTELLE ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_folders" />
 
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_folder_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_folder_labels" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_folder_labels_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowFolderLabels"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemFolderBg" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_yellow">
@@ -677,23 +663,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- ===== WIDGET SPEED STATS (v47) ===== -->
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_screen_rotation" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_landscape" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_landscape_sub" />
-                    </LinearLayout>
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchLandscape"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_language" />
+<TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_language" />
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemLanguage" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
@@ -711,6 +681,40 @@
             <!-- ===== SFONDO (v51 ex Material Expressive) ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_general" />
 
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_screen_rotation" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_landscape" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_landscape_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchLandscape"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_memory_cleaner">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_rocket_launch" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_memory_cleaner" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_memory_cleaner_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchMemoryCleaner"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemDefaultLauncher" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pixelblue">

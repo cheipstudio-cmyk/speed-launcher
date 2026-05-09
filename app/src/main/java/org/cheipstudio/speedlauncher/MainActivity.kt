@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.onSwipeRightFromLeftEdge = {
             try {
                 startActivity(android.content.Intent(this, org.cheipstudio.speedlauncher.RssActivity::class.java))
-                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             } catch (_: Throwable) {}
         }
         binding.homeView.onSearchTap = { openDrawerWithSearch() }
@@ -407,7 +407,7 @@ class MainActivity : AppCompatActivity() {
         homeMenuSheet = HomeMenuSheet().also {
             it.onSettings = {
                 startActivity(Intent(this, SettingsIndexActivity::class.java))
-                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
             it.onSorted = {
                 recreate()

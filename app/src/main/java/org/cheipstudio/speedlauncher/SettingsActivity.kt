@@ -1526,15 +1526,40 @@ override fun onResume() {
     /** v151: nasconde tutto tranne la sezione richiesta. */
     private fun applySectionFilter(section: String) {
         val container = (binding.settingsScroll.getChildAt(0) as? android.view.ViewGroup) ?: return
-        val keepTitles = when (section) {
-            "appearance" -> setOf(getString(R.string.settings_section_appearance))
-            "home" -> setOf(getString(R.string.settings_section_home_layout))
-            "drawer" -> setOf(getString(R.string.settings_section_drawer))
-            "search" -> setOf(getString(R.string.settings_section_home_layout))
-            "gestures" -> setOf(getString(R.string.settings_section_gestures))
-            "language" -> setOf(getString(R.string.settings_section_language))
-            "backup" -> setOf(getString(R.string.settings_section_backup))
-            "info" -> setOf(getString(R.string.settings_section_info))
+        // v157: mappa robusta sezione -> titoli (può essere multi-titolo)
+        val keepTitles: Set<String> = when (section) {
+            "appearance" -> setOf(
+                getString(R.string.settings_section_appearance),
+                getString(R.string.settings_section_expressive),
+                getString(R.string.settings_section_themes),
+                getString(R.string.settings_section_folders)
+            )
+            "home" -> setOf(
+                getString(R.string.settings_section_home_layout),
+                getString(R.string.settings_section_widget),
+                getString(R.string.settings_section_ai)
+            )
+            "drawer" -> setOf(
+                getString(R.string.settings_section_drawer)
+            )
+            "search" -> setOf(
+                getString(R.string.settings_section_searchbar),
+                getString(R.string.settings_section_search)
+            )
+            "gestures" -> setOf(
+                getString(R.string.settings_section_gestures)
+            )
+            "language" -> setOf(
+                getString(R.string.settings_section_language)
+            )
+            "backup" -> setOf(
+                getString(R.string.settings_section_backup),
+                getString(R.string.settings_section_advanced),
+                getString(R.string.settings_section_general)
+            )
+            "info" -> setOf(
+                getString(R.string.settings_section_info)
+            )
             else -> return
         }
         var currentVisible = false
@@ -1545,8 +1570,19 @@ override fun onResume() {
                 child.visibility = if (currentVisible) android.view.View.VISIBLE else android.view.View.GONE
                 continue
             }
+            // Anche il PixelPageTitle ("Impostazioni" grande in alto) lo nascondo SEMPRE in filter mode
+            if (child is android.widget.TextView && isPixelPageTitle(child)) {
+                child.visibility = android.view.View.GONE
+                continue
+            }
             child.visibility = if (currentVisible) android.view.View.VISIBLE else android.view.View.GONE
         }
+    }
+    
+    private fun isPixelPageTitle(tv: android.widget.TextView): Boolean {
+        // PixelPageTitle ha textSize 36sp
+        val expected = 36f * resources.displayMetrics.scaledDensity
+        return tv.textSize in (expected * 0.85f)..(expected * 1.15f)
     }
     
     private fun isPixelSectionTitle(tv: android.widget.TextView): Boolean {
@@ -1556,6 +1592,6 @@ override fun onResume() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.slide_out_right)
+        overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
     }
 }

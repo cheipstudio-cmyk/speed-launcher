@@ -285,7 +285,11 @@ class RecommendedPickerActivity : AppCompatActivity() {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
                 isClickable = true; isFocusable = true
-                setBackgroundResource(android.R.drawable.list_selector_background)
+                run {
+                    val tvSel = android.util.TypedValue()
+                    context.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
+                    setBackgroundResource(tvSel.resourceId)
+                }
                 setPadding((16 * density).toInt(), (12 * density).toInt(), (16 * density).toInt(), (12 * density).toInt())
                 layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             }
@@ -346,6 +350,6 @@ class RecommendedPickerActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.slide_out_right)
+        overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
     }
 }

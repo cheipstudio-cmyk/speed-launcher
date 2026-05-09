@@ -236,7 +236,11 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 orientation = android.widget.LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
                 isClickable = true; isFocusable = true
-                setBackgroundResource(android.R.drawable.list_selector_background)
+                run {
+                    val tvSel = android.util.TypedValue()
+                    context.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
+                    setBackgroundResource(tvSel.resourceId)
+                }
                 setPadding((12 * density).toInt(), (12 * density).toInt(), (12 * density).toInt(), (12 * density).toInt())
             }
             val icon = android.widget.ImageView(ctx).apply {

@@ -77,17 +77,6 @@ object WidgetRemoveSheet {
         }
         container.addView(removeRow)
 
-        // Action: Annulla
-        val cancelRow = buildSheetRow(
-            context,
-            context.getString(android.R.string.cancel),
-            R.drawable.ic_arrow_back,
-            isDestructive = false
-        ) {
-            sheet.dismiss()
-        }
-        container.addView(cancelRow)
-
         sheet.setContentView(container)
         sheet.show()
     }
@@ -104,7 +93,9 @@ object WidgetRemoveSheet {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             isClickable = true; isFocusable = true
-            setBackgroundResource(android.R.drawable.list_selector_background)
+            val tv2 = android.util.TypedValue()
+            ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, tv2, true)
+            setBackgroundResource(tv2.resourceId)
             setPadding(
                 (16 * density).toInt(), (16 * density).toInt(),
                 (16 * density).toInt(), (16 * density).toInt()
