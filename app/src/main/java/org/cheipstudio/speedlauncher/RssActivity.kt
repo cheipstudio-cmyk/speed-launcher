@@ -23,6 +23,9 @@ import kotlin.concurrent.thread
  * li parsa, mostra una lista di articoli ordinati per data. Tap → apri browser.
  */
 class RssActivity : AppCompatActivity() {
+
+    private var lastDebugPreview: String = ""
+
     override fun finish() {
         super.finish()
         overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
@@ -123,6 +126,7 @@ class RssActivity : AppCompatActivity() {
         thread {
             val all = mutableListOf<Article>()
             android.util.Log.d("RssActivity", "Loading ${feeds.size} feeds: $feeds")
+            lastDebugPreview = ""
             val errors = mutableListOf<String>()
             for (feed in feeds) {
                 try {
@@ -150,10 +154,12 @@ class RssActivity : AppCompatActivity() {
                 if (items.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
                     val detail = if (errors.isNotEmpty()) "\n\n" + errors.joinToString("\n\n") else ""
-                    emptyView.text = getString(R.string.rss_empty) + detail
-                    emptyView.textSize = 13f
+                    val preview = if (lastDebugPreview.isNotEmpty()) "\n\n--- DEBUG ---\n" + lastDebugPreview else ""
+                    emptyView.text = getString(R.string.rss_empty) + detail + preview
+                    emptyView.textSize = 12f
                     emptyView.gravity = android.view.Gravity.START
                     emptyView.setPadding(48, 48, 48, 48)
+                    emptyView.setTextIsSelectable(true)
                 }
             }
         }
@@ -315,6 +321,11 @@ class RssActivity : AppCompatActivity() {
                 event = parser.next()
             }
             android.util.Log.d("RssActivity", "Parsed ${out.size} articles from $url")
+            // v194: preview pubblico per debug emptyView
+            if (lastDebugPreview.isEmpty()) {
+                lastDebugPreview = "$url\nHTTP ${finalConn.responseCode}, ${bodyBytes.size}b\n" +
+                    String(bodyBytes, startOffset, minOf(150, bodyBytes.size - startOffset)).take(150)
+            }
             
             // v189: fallback REGEX parsing se XmlPullParser non ha trovato nulla
             if (out.isEmpty() && bodyBytes.size > 100) {

@@ -224,4 +224,12 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:letterSpacing">0</item>
     </style>
+
+    <style name="RssEdgeShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeTopRight">20dp</item>
+        <item name="cornerSizeBottomRight">20dp</item>
+    </style>
 </resources>

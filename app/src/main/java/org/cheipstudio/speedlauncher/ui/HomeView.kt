@@ -246,22 +246,26 @@ class HomeView @JvmOverloads constructor(
                 binding.rssEdgeIndicator.visibility = if (it == true) View.VISIBLE else View.GONE
             }
         }
-        // v190: stato iniziale + animazione pulse + click trigger (no più swipe conflittuale)
+        // v194: pillola laterale RSS sempre visibile + click
         binding.rssEdgeIndicator.visibility = 
             if (settings.rssPanelEnabled.value == true) View.VISIBLE else View.GONE
-        binding.rssEdgeIndicator.alpha = 0.7f
+        binding.rssEdgeIndicator.alpha = 1f
         binding.rssEdgeIndicator.isClickable = true
         binding.rssEdgeIndicator.setOnClickListener {
             performHapticFeedbackLight()
+            // Push effect su tap
+            binding.rssEdgeIndicator.animate()
+                .scaleX(1.1f).scaleY(1.1f)
+                .setDuration(80)
+                .withEndAction {
+                    binding.rssEdgeIndicator.animate()
+                        .scaleX(1f).scaleY(1f)
+                        .setDuration(120)
+                        .start()
+                }
+                .start()
             onSwipeRightFromLeftEdge?.invoke()
         }
-        // Pulse subtle: alpha 0.4 ↔ 0.8 in loop
-        val pulse = android.animation.ObjectAnimator.ofFloat(binding.rssEdgeIndicator, "alpha", 0.4f, 0.8f).apply {
-            duration = 1400
-            repeatCount = android.animation.ValueAnimator.INFINITE
-            repeatMode = android.animation.ValueAnimator.REVERSE
-        }
-        pulse.start()
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }

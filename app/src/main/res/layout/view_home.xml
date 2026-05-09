@@ -118,19 +118,25 @@
     </LinearLayout>
 
     <!-- v183: indicatore swipe RSS (sottile chevron lato sinistro) -->
-    <FrameLayout
+    <!-- v194: pillola laterale visibile per RSS feed -->
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/rssEdgeIndicator"
-        android:layout_width="32dp"
-        android:layout_height="120dp"
+        android:layout_width="40dp"
+        android:layout_height="56dp"
         android:layout_gravity="start|center_vertical"
         android:visibility="gone"
         android:clickable="true"
-        android:focusable="true">
-        <View
-            android:layout_width="4dp"
-            android:layout_height="100dp"
-            android:layout_gravity="start|center_vertical"
-            android:background="@drawable/bg_rss_edge_indicator" />
-    </FrameLayout>
+        android:focusable="true"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+        app:shapeAppearanceOverlay="@style/RssEdgeShape">
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_feed"
+            app:tint="?attr/colorOnSurface" />
+    </com.google.android.material.card.MaterialCardView>
 
 </merge>
