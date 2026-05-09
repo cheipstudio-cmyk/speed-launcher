@@ -430,6 +430,7 @@ class SettingsRepository(context: Context) {
 
         const val MODE_APPS = "apps"
         const val MODE_GOOGLE = "google"
+        const val MODE_UNIVERSAL = "universal"
 
         const val STYLE_SYSTEM = "system"
         const val STYLE_TRANSPARENT = "transparent"

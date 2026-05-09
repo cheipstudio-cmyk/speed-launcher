@@ -99,11 +99,9 @@ class HomeView @JvmOverloads constructor(
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
-            // v164: swipe da sinistra verso destra in qualunque punto della home → pannello RSS
-            // edge zone allargata a metà schermo, threshold ridotta
+            // v168: swipe da sinistra verso destra in qualunque punto → pannello RSS
             if (settings.rssPanelEnabled.value == true &&
-                vx > 250f && abs(vx) > abs(vy) * 1.0f &&
-                e1 != null && e1.x < (resources.displayMetrics.widthPixels / 2f)) {
+                vx > 250f && abs(vx) > abs(vy) * 1.0f) {
                 if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 onSwipeRightFromLeftEdge?.invoke()
                 return true
@@ -702,6 +700,15 @@ class HomeView @JvmOverloads constructor(
                     tracking = false
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                     StatusBarHelper.expandNotifications(context)
+                    return true
+                }
+                // v168: swipe orizzontale da sinistra verso destra → RSS panel
+                val dxRel = ev.x - trackStartX
+                if (settings.rssPanelEnabled.value == true &&
+                    dxRel > swipeThreshold && abs(dxRel) > abs(dy) * 1.2f) {
+                    tracking = false
+                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
+                    onSwipeRightFromLeftEdge?.invoke()
                     return true
                 }
             }

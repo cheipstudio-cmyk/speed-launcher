@@ -308,6 +308,52 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
                 startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u))
             } catch (_: Throwable) {}
         }
+        
+        // v166: ricerca universale — aggiunge Contatti, File, Play Store
+        val mode = SpeedApp.instance.settingsRepository.searchMode.value
+        if (mode == org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_UNIVERSAL) {
+            // Cerca tra i contatti
+            addAction(ctx.getString(R.string.search_action_contacts, query), android.R.drawable.ic_menu_myplaces) {
+                try {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                        data = android.provider.ContactsContract.Contacts.CONTENT_URI
+                        putExtra(android.app.SearchManager.QUERY, query)
+                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(intent)
+                } catch (_: Throwable) {}
+            }
+            
+            // Cerca tra i file
+            addAction(ctx.getString(R.string.search_action_files, query), android.R.drawable.ic_menu_save) {
+                try {
+                    // Apre il file picker di sistema con pre-filtro nome
+                    val intent = android.content.Intent(android.content.Intent.ACTION_GET_CONTENT).apply {
+                        type = "*/*"
+                        addCategory(android.content.Intent.CATEGORY_OPENABLE)
+                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(android.content.Intent.createChooser(intent, ctx.getString(R.string.search_action_files, query)))
+                } catch (_: Throwable) {}
+            }
+            
+            // Cerca su Play Store
+            addAction(ctx.getString(R.string.search_action_playstore, query), android.R.drawable.stat_sys_download) {
+                try {
+                    val u = android.net.Uri.parse("market://search?q=${android.net.Uri.encode(query)}")
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, u).apply {
+                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    try {
+                        startActivity(intent)
+                    } catch (_: Throwable) {
+                        // Fallback web
+                        val u2 = android.net.Uri.parse("https://play.google.com/store/search?q=${android.net.Uri.encode(query)}")
+                        startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u2))
+                    }
+                } catch (_: Throwable) {}
+            }
+        }
     }
 
     private fun normalize(s: String): String {

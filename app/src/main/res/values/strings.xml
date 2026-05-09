@@ -348,4 +348,8 @@ Vuoi scaricarla?</string>
     <string name="widget_remove_action">Rimuovi widget</string>
     <string name="settings_idx_ai">AI Launcher</string>
     <string name="settings_idx_ai_sub">Raccomandate, modalità manuale, pulitore memoria</string>
+    <string name="settings_search_universal">Ricerca universale</string>
+    <string name="search_action_contacts">Cerca «%1$s» tra i contatti</string>
+    <string name="search_action_files">Cerca «%1$s» tra i file</string>
+    <string name="search_action_playstore">Cerca «%1$s» su Play Store</string>
 </resources>

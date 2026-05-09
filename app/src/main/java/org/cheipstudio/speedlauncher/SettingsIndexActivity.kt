@@ -22,6 +22,9 @@ class SettingsIndexActivity : AppCompatActivity() {
 
         binding = ActivitySettingsIndexBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         binding.idxAspetto.setOnClickListener { openSection("appearance") }

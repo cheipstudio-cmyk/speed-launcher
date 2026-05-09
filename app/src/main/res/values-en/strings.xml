@@ -348,4 +348,8 @@ Download now?</string>
     <string name="widget_remove_action">Remove widget</string>
     <string name="settings_idx_ai">AI Launcher</string>
     <string name="settings_idx_ai_sub">Recommended, manual mode, memory cleaner</string>
+    <string name="settings_search_universal">Universal search</string>
+    <string name="search_action_contacts">Search "%1$s" in contacts</string>
+    <string name="search_action_files">Search "%1$s" in files</string>
+    <string name="search_action_playstore">Search "%1$s" on Play Store</string>
 </resources>

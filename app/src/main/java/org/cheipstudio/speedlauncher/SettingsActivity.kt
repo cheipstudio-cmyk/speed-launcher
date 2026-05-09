@@ -923,6 +923,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.searchModeLabel.text = when (v) {
             SettingsRepository.MODE_APPS -> getString(R.string.settings_search_apps)
             SettingsRepository.MODE_GOOGLE -> getString(R.string.settings_search_google)
+            SettingsRepository.MODE_UNIVERSAL -> getString(R.string.settings_search_universal)
             else -> getString(R.string.settings_search_apps)
         }
     }
@@ -1182,11 +1183,13 @@ class SettingsActivity : AppCompatActivity() {
             R.string.settings_search_mode,
             arrayOf(
                 getString(R.string.settings_search_apps),
-                getString(R.string.settings_search_google)
+                getString(R.string.settings_search_google),
+                getString(R.string.settings_search_universal)
             ),
             arrayOf(
                 SettingsRepository.MODE_APPS,
-                SettingsRepository.MODE_GOOGLE
+                SettingsRepository.MODE_GOOGLE,
+                SettingsRepository.MODE_UNIVERSAL
             ),
             settings.searchMode.value ?: SettingsRepository.MODE_APPS
         ) { settings.setSearchMode(it) }
