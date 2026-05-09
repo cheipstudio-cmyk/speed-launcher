@@ -67,11 +67,11 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // v19: forza full-screen senza wallpaper sotto
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        // v135: mostra wallpaper sotto (per applicare blur effetto Pixel)
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
-        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+        window.statusBarColor = resolveAttr(com.google.android.material.R.attr.colorSurface)
+        window.navigationBarColor = resolveAttr(com.google.android.material.R.attr.colorSurface)
 
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -259,6 +259,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchAiMode.setOnCheckedChangeListener { _, on ->
             settings.setAiLauncherMode(on)
         }
+        // v136: oscura opzioni dipendenti quando raccomandate disattivate
+        settings.aiLauncherMode.observe(this) { enabled ->
+            applyRecommendedDependentEnabled(enabled == true)
+        }
+        applyRecommendedDependentEnabled(settings.aiLauncherMode.value == true)
         // v30: landscape allowed toggle
         binding.switchLandscape.isChecked = settings.landscapeAllowed.value == true
         binding.switchLandscape.setOnCheckedChangeListener { _, on ->
@@ -620,6 +625,11 @@ class SettingsActivity : AppCompatActivity() {
      */
     private fun applyDrawerDependentVisibility(drawerEnabled: Boolean) {
         binding.itemAutoGridReset.visibility = if (drawerEnabled) android.view.View.GONE else android.view.View.VISIBLE
+        // v136: oscura ricorsivamente opzioni dipendenti dal drawer
+        try {
+            setCardDependentEnabled(binding.itemDrawerLayout, drawerEnabled)
+            setCardDependentEnabled(binding.itemDrawerTheme, drawerEnabled)
+        } catch (_: Throwable) {}
     }
 
     /**
@@ -1047,14 +1057,21 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 listContainer.addView(sectionLabel)
                 
+                val canAddMore = ordered.size < countNeeded
                 for (app in notSelected) {
                     val row = buildPickerRow(app.label, app.icon, false, 0, 0, density,
                         onToggle = {
-                            ordered.add(app.key)
-                            rebuild()
+                            if (ordered.size < countNeeded) {
+                                ordered.add(app.key)
+                                rebuild()
+                            }
                         },
                         onUp = {}, onDown = {}
                     )
+                    if (!canAddMore) {
+                        row.alpha = 0.4f
+                        row.isClickable = false
+                    }
                     listContainer.addView(row)
                 }
             }
@@ -1171,21 +1188,39 @@ class SettingsActivity : AppCompatActivity() {
         return row
     }
     
-/** v71: abilita/disabilita visivamente le card che dipendono dalla searchbar */
+/** v71+v136: abilita/disabilita ricorsivamente card searchbar */
     private fun applySearchBarDependentEnabled(enabled: Boolean) {
-        binding.itemSearchMode.isEnabled = enabled
-        binding.itemSearchMode.alpha = if (enabled) 1.0f else 0.45f
-        binding.itemSearchTheme.isEnabled = enabled
-        binding.itemSearchTheme.alpha = if (enabled) 1.0f else 0.45f
+        setCardDependentEnabled(binding.itemSearchMode, enabled)
+        setCardDependentEnabled(binding.itemSearchTheme, enabled)
     }
 
-    /** v72: abilita/disabilita visivamente le card widget dipendenti dal toggle "Mostra widget" */
+    /** v136: helper per disabilitare ricorsivamente una view (card + tutti i child clickable) */
+    private fun setCardDependentEnabled(card: android.view.View, enabled: Boolean) {
+        card.isEnabled = enabled
+        card.alpha = if (enabled) 1.0f else 0.45f
+        // Disabilito children clickable (switch, button, ecc.)
+        if (card is android.view.ViewGroup) setChildrenEnabledRecursive(card, enabled)
+    }
+    
+    private fun setChildrenEnabledRecursive(group: android.view.ViewGroup, enabled: Boolean) {
+        for (i in 0 until group.childCount) {
+            val child = group.getChildAt(i)
+            child.isEnabled = enabled
+            if (child is android.view.ViewGroup) setChildrenEnabledRecursive(child, enabled)
+        }
+    }
+    
+    /** v136: oscura/illumina opzioni raccomandate (count, modalità, posizione) */
+    private fun applyRecommendedDependentEnabled(enabled: Boolean) {
+        setCardDependentEnabled(binding.itemRecommendedPosition, enabled)
+        setCardDependentEnabled(binding.itemRecommendedCount, enabled)
+        setCardDependentEnabled(binding.itemRecommendedMode, enabled)
+    }
+
+    /** v72+v136: abilita/disabilita ricorsivamente card widget */
     private fun applyWidgetDependentEnabled(enabled: Boolean) {
-        binding.itemWidgetTheme.isEnabled = enabled
-        binding.itemWidgetTheme.alpha = if (enabled) 1.0f else 0.45f
-        binding.itemWidgetAutoRefresh.isEnabled = enabled
-        binding.itemWidgetAutoRefresh.alpha = if (enabled) 1.0f else 0.45f
-        binding.switchWidgetAutoRefresh.isEnabled = enabled
+        setCardDependentEnabled(binding.itemWidgetTheme, enabled)
+        setCardDependentEnabled(binding.itemWidgetAutoRefresh, enabled)
     }
 
 

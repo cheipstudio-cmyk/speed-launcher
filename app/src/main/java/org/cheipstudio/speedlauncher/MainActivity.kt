@@ -166,69 +166,22 @@ class MainActivity : AppCompatActivity() {
         val radius = SpeedApp.instance.settingsRepository.wallpaperBlur.value ?: 0
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
         
-        val rootChild = binding.root as? android.view.ViewGroup ?: return
-        var blurView = rootChild.findViewById<android.widget.ImageView>(R.id.wallpaperBlurView)
-        if (blurView == null) {
-            blurView = android.widget.ImageView(this).apply {
-                id = R.id.wallpaperBlurView
-                scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
-                layoutParams = android.widget.FrameLayout.LayoutParams(
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            }
-            rootChild.addView(blurView, 0)
-        }
-
-        if (radius == 0) {
-            try { blurView.setRenderEffect(null) } catch (_: Throwable) {}
-            blurView.visibility = android.view.View.GONE
-            // v132: rimuovi anche window blur se attivo
-            try {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                    window.attributes = window.attributes.apply {
-                        blurBehindRadius = 0
-                        flags = flags and android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND.inv()
-                    }
-                }
-            } catch (_: Throwable) {}
-            return
-        }
-
-        // v132: uso WINDOW BLUR (no permission richiesta) come metodo primario
-        // Questo blur si applica al backdrop sotto la window — niente wallpaper drawable necessario
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (radius == 0) {
+                // Disattiva blur sul wallpaper
+                window.attributes = window.attributes.apply {
+                    blurBehindRadius = 0
+                    flags = flags and android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND.inv()
+                }
+            } else {
+                // FLAG_BLUR_BEHIND su windowShowWallpaper sfoca il wallpaper sotto
                 val r = radius.coerceIn(1, 150)
-                window.setBackgroundBlurRadius(r)
                 window.attributes = window.attributes.apply {
                     blurBehindRadius = r
                     flags = flags or android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
                 }
-                // Setto anche il window background a un colore semitrasparente
-                // per far vedere il blur "attraverso"
-                window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x66000000.toInt()))
             }
         } catch (_: Throwable) {}
-
-        // Fallback wallpaper drawable (se permesso)
-        try {
-            val wm = android.app.WallpaperManager.getInstance(this)
-            val drawable = try { wm.drawable } catch (_: Throwable) { null }
-            if (drawable != null) {
-                blurView.setImageDrawable(drawable)
-                blurView.visibility = android.view.View.VISIBLE
-                val r = radius.coerceIn(1, 100).toFloat()
-                blurView.setRenderEffect(
-                    android.graphics.RenderEffect.createBlurEffect(r, r,
-                        android.graphics.Shader.TileMode.CLAMP)
-                )
-            } else {
-                blurView.visibility = android.view.View.GONE
-            }
-        } catch (_: Throwable) {
-            blurView.visibility = android.view.View.GONE
-        }
     }
 
     private fun applyOrientationLock() {

@@ -173,4 +173,12 @@
         <item name="behavior_skipCollapsed">true</item>
         <item name="behavior_fitToContents">false</item>
     </style>
+
+    <!-- v135: theme home con windowShowWallpaper per blur funzionante -->
+    <style name="Theme.SpeedLauncher.Home" parent="Theme.SpeedLauncher">
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+    </style>
+
 </resources>
