@@ -129,8 +129,9 @@ object PageManagerSheet {
             )
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             textSize = 15f
+            val padH = (24 * density).toInt()
             val padV = (14 * density).toInt()
-            setPadding(padding, padV, padding, padV)
+            setPadding(padH, padV, padH, padV)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
