@@ -209,20 +209,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- v139: RSS Feeds -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemRssFeeds" style="@style/PixelCard">
-                <LinearLayout style="@style/PixelItemClickable">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_feed" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_rss_feeds" />
-                        <TextView android:id="@+id/rssFeedsLabel" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">

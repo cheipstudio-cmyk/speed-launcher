@@ -208,6 +208,16 @@ object FolderSheet {
         card.alpha = 0f
         card.scaleX = 0.85f
         card.scaleY = 0.85f
+        // v141: forzo pivot al CENTRO della card per animazione che parte dal centro,
+        // non dall'angolo (default su LinearLayout senza misure)
+        card.viewTreeObserver.addOnPreDrawListener(object : android.view.ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                card.pivotX = card.width / 2f
+                card.pivotY = card.height / 2f
+                card.viewTreeObserver.removeOnPreDrawListener(this)
+                return true
+            }
+        })
         rootContainer.alpha = 0f
 
         val decor = activity.window?.decorView
