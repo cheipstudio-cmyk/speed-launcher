@@ -276,6 +276,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
         val shape = s.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
         iconView.setImageDrawable(IconShaper.shape(app.icon, shape, context, app.packageName, app.componentName))
         labelView.text = app.label
+        // v139: toggle label home
+        labelView.visibility = if (s.showHomeLabels.value != false) View.VISIBLE else View.GONE
+        // v139: visibility label home
+        labelView.visibility = if (SpeedApp.instance.settingsRepository.showHomeLabels.value != false)
+            android.view.View.VISIBLE else android.view.View.GONE
         packageName = app.packageName
         dotPaint.color = s.dotColor.value ?: SettingsRepository.DOT_DEFAULT
         // v40: sincronizza lastNotifCount al count attuale così la cella riciclata non triggera bounce random

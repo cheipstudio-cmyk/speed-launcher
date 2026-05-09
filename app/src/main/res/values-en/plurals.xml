@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="rss_feeds_count">
+        <item quantity="one">%d feed configured</item>
+        <item quantity="other">%d feeds configured</item>
+    </plurals>
+</resources>

@@ -40,6 +40,16 @@
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- v139: search actions globali (Google, contatti, ecc.) — visibili quando query non vuota -->
+    <LinearLayout
+        android:id="@+id/searchActionsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
     <!-- v117: dock raccomandate ORA SOTTO la search bar (richiesta utente) -->
     <org.cheipstudio.speedlauncher.ui.RecommendedView
         android:id="@+id/recommendedRow"

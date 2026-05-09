@@ -79,6 +79,10 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         SpeedApp.instance.settingsRepository.iconShape.observe(viewLifecycleOwner) {
             try { (_binding?.recycler?.adapter as? AppListAdapter)?.notifyDataSetChanged() } catch (_: Throwable) {}
         }
+        // v139: refresh quando toggle label drawer cambia
+        SpeedApp.instance.settingsRepository.showDrawerLabels.observe(viewLifecycleOwner) {
+            try { (_binding?.recycler?.adapter as? AppListAdapter)?.notifyDataSetChanged() } catch (_: Throwable) {}
+        }
         SpeedApp.instance.settingsRepository.recommendedManualApps.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         SpeedApp.instance.settingsRepository.recommendedCount.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         // v62: optimization recycler — fixed size + no overdraw
@@ -203,10 +207,101 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         val filtered = if (normalized.isBlank()) visible
         else visible.filter { normalize(it.label).contains(normalized) }
         adapter.submitList(filtered) {
-            // v29: dopo che la lista è aggiornata, refresh della scrollbar
             if (_binding?.alphaScrollBar?.visibility == View.VISIBLE) {
                 setupAlphaScrollbar()
             }
+        }
+        // v139: ricerca globale — mostra actions web/contatti/maps quando query non blank
+        updateSearchActions(q)
+    }
+    
+    /** v139: popola la barra "ricerca globale" con shortcut web, maps, telefono */
+    private fun updateSearchActions(q: String) {
+        val container = _binding?.searchActionsContainer ?: return
+        val ctx = container.context
+        val query = q.trim()
+        if (query.isBlank()) {
+            container.visibility = View.GONE
+            container.removeAllViews()
+            return
+        }
+        container.removeAllViews()
+        container.visibility = View.VISIBLE
+        val density = ctx.resources.displayMetrics.density
+        
+        // Helper per creare action row (icona + label)
+        fun addAction(label: String, iconRes: Int, onClick: () -> Unit) {
+            val row = android.widget.LinearLayout(ctx).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                isClickable = true; isFocusable = true
+                setBackgroundResource(android.R.drawable.list_selector_background)
+                setPadding((12 * density).toInt(), (12 * density).toInt(), (12 * density).toInt(), (12 * density).toInt())
+            }
+            val icon = android.widget.ImageView(ctx).apply {
+                setImageResource(iconRes)
+                val s = (24 * density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply {
+                    marginEnd = (16 * density).toInt()
+                }
+                setColorFilter(android.graphics.Color.WHITE)
+            }
+            row.addView(icon)
+            val txt = android.widget.TextView(ctx).apply {
+                text = label
+                textSize = 15f
+                setTextColor(android.graphics.Color.WHITE)
+            }
+            row.addView(txt)
+            row.setOnClickListener {
+                onClick()
+                dismissAllowingStateLoss()
+            }
+            container.addView(row)
+        }
+        
+        // 1. Cerca su Google
+        addAction(ctx.getString(R.string.search_action_google, query), android.R.drawable.ic_menu_search) {
+            try {
+                val intent = android.content.Intent(android.content.Intent.ACTION_WEB_SEARCH).apply {
+                    putExtra(android.app.SearchManager.QUERY, query)
+                }
+                startActivity(intent)
+            } catch (_: Throwable) {
+                // Fallback: browser
+                try {
+                    val u = android.net.Uri.parse("https://www.google.com/search?q=${android.net.Uri.encode(query)}")
+                    startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u))
+                } catch (_: Throwable) {}
+            }
+        }
+        
+        // 2. Cerca su Maps (se la query suona come una location > 2 char)
+        if (query.length > 2) {
+            addAction(ctx.getString(R.string.search_action_maps, query), android.R.drawable.ic_menu_mylocation) {
+                try {
+                    val u = android.net.Uri.parse("geo:0,0?q=${android.net.Uri.encode(query)}")
+                    startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u))
+                } catch (_: Throwable) {}
+            }
+        }
+        
+        // 3. Telefono se la query è solo numeri
+        if (query.matches(Regex("^[+\d\s().-]{4,}$"))) {
+            addAction(ctx.getString(R.string.search_action_call, query), android.R.drawable.ic_menu_call) {
+                try {
+                    val u = android.net.Uri.parse("tel:${android.net.Uri.encode(query)}")
+                    startActivity(android.content.Intent(android.content.Intent.ACTION_DIAL, u))
+                } catch (_: Throwable) {}
+            }
+        }
+        
+        // 4. YouTube search
+        addAction(ctx.getString(R.string.search_action_youtube, query), android.R.drawable.ic_menu_camera) {
+            try {
+                val u = android.net.Uri.parse("https://www.youtube.com/results?search_query=${android.net.Uri.encode(query)}")
+                startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, u))
+            } catch (_: Throwable) {}
         }
     }
 

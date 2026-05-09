@@ -55,6 +55,7 @@ class AppListAdapter(
                 ?: SettingsRepository.SHAPE_ORIGINAL
             binding.icon.setImageDrawable(IconShaper.shape(app.icon, shape, binding.root.context, app.packageName, app.componentName))
             binding.label.text = app.label
+            binding.label.visibility = if (org.cheipstudio.speedlauncher.SpeedApp.instance.settingsRepository.showDrawerLabels.value != false) android.view.View.VISIBLE else android.view.View.GONE
             binding.label.setTextColor(drawerTextColor(binding.root.context))
             binding.root.setOnClickListener {
                 Anim.pressFeedback(binding.icon)
@@ -75,6 +76,7 @@ class AppListAdapter(
                 ?: SettingsRepository.SHAPE_ORIGINAL
             icon.setImageDrawable(IconShaper.shape(app.icon, shape, itemView.context, app.packageName, app.componentName))
             label.text = app.label
+            label.visibility = if (org.cheipstudio.speedlauncher.SpeedApp.instance.settingsRepository.showDrawerLabels.value != false) android.view.View.VISIBLE else android.view.View.GONE
             label.setTextColor(drawerTextColor(itemView.context))
             itemView.setOnClickListener {
                 Anim.pressFeedback(icon)

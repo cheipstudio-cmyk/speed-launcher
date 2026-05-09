@@ -82,13 +82,31 @@ class MainActivity : AppCompatActivity() {
         SpeedApp.instance.settingsRepository.showSearchBar.observe(this) {
             binding.homeView.applySearchBarVisibility()
         }
-        // v114: osservo toggle "drawer abilitato" per aggiornare barra
+        
+        // v138: observers per riconfigurare widget al cambio settings
+        SpeedApp.instance.settingsRepository.widgetPosition.observe(this) {
+            binding.homeView.applyWidgetConfig()
+        }
+        SpeedApp.instance.settingsRepository.widgetHeight.observe(this) {
+            binding.homeView.applyWidgetConfig()
+        }
+        SpeedApp.instance.settingsRepository.widgetWidthPercent.observe(this) {
+            binding.homeView.applyWidgetConfig()
+        }
+// v114: osservo toggle "drawer abilitato" per aggiornare barra
         SpeedApp.instance.settingsRepository.drawerEnabled.observe(this) {
             binding.homeView.applySearchBarVisibility()
         }
         SpeedApp.instance.appRepository.apps.observe(this) { binding.homeView.refreshApps(it) }
 
         binding.homeView.onSwipeUp = { openDrawer() }
+        // v140: swipe destra dal bordo sinistro → pannello RSS
+        binding.homeView.onSwipeRightFromLeftEdge = {
+            try {
+                startActivity(android.content.Intent(this, org.cheipstudio.speedlauncher.RssActivity::class.java))
+                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out)
+            } catch (_: Throwable) {}
+        }
         binding.homeView.onSearchTap = { openDrawerWithSearch() }
         binding.homeView.onHomeLongPress = { openHomeMenu() }
         binding.homeView.onAppMenuRequest = { app -> openAppActions(app) }
@@ -322,6 +340,8 @@ class MainActivity : AppCompatActivity() {
     /** v135: blur animato sulla home (apertura/chiusura drawer) — stesso stile cartelle */
     private fun animateHomeBlur(open: Boolean) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
+        // v140: rispetta toggle sfocatura drawer
+        if (open && SpeedApp.instance.settingsRepository.blurDrawer.value != true) return
         val home = binding.homeView
         val from = if (open) 0f else 24f
         val to = if (open) 24f else 0f

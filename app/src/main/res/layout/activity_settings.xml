@@ -99,8 +99,130 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v138: Posizione widget -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetPosition" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_position" />
+                        <TextView android:id="@+id/widgetPositionLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v138: Altezza widget -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetHeight" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_height" />
+                        <TextView android:id="@+id/widgetHeightLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v138: Larghezza widget -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetWidth" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_width" />
+                        <TextView android:id="@+id/widgetWidthLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v140: Pannello RSS swipe sx -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_feed" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_rss_panel" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_rss_panel_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchRssPanel"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v139: RSS feeds -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemRssFeeds" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_feed" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_rss_feeds" />
+                        <TextView android:id="@+id/rssFeedsLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ===== ASPETTO ICONE ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_ai" />
+
+            <!-- v139: Toggle etichette home -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_home_labels" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_home_labels_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowHomeLabels"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v139: Toggle etichette drawer -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_drawer_labels" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_drawer_labels_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowDrawerLabels"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v139: RSS Feeds -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemRssFeeds" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_feed" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_rss_feeds" />
+                        <TextView android:id="@+id/rssFeedsLabel" style="@style/PixelItemSubtitle" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
 
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
@@ -218,6 +340,40 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v140: blur drawer toggle -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_parallax">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_motion" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_blur_drawer" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_blur_drawer_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchBlurDrawer"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- v140: blur folder toggle -->
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_parallax">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_motion" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_blur_folder" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_blur_folder_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchBlurFolder"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_magenta">
@@ -304,31 +460,6 @@
                         android:valueFrom="0"
                         android:valueTo="100"
                         android:stepSize="5" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:paddingVertical="6dp">
-                    <LinearLayout style="@style/PixelItem">
-                        <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_parallax">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_motion" />
-                    </FrameLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:orientation="vertical">
-                            <TextView style="@style/PixelItemTitle" android:text="@string/settings_wallpaper_blur" />
-                            <TextView android:id="@+id/wallpaperBlurLabel" style="@style/PixelItemSubtitle" />
-                        </LinearLayout>
-                    </LinearLayout>
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/wallpaperBlurSlider"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:layout_marginBottom="8dp"
-                        android:valueFrom="0"
-                        android:valueTo="50"
-                        android:stepSize="2" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

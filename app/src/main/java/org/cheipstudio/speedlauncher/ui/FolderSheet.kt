@@ -289,8 +289,9 @@ object FolderSheet {
                 .setDuration(260)
                 .setInterpolator(android.view.animation.OvershootInterpolator(1.1f))
                 .start()
-            // v49: blur che cresce da 0 a 40 in 220ms, sincronizzato con l'entrata
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
+            // v49+v140: blur in solo se toggle on
+            val blurOn = SpeedApp.instance.settingsRepository.blurFolder.value != false
+            if (blurOn && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && decor != null) {
                 val anim = android.animation.ValueAnimator.ofFloat(0f, 40f).apply {
                     duration = 220
                     interpolator = android.view.animation.DecelerateInterpolator()

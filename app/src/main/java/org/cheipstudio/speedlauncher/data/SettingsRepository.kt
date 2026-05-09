@@ -16,6 +16,42 @@ class SettingsRepository(context: Context) {
     val gridCols = MutableLiveData(prefs.getInt(KEY_COLS, defaultCols))
     val gridRows = MutableLiveData(prefs.getInt(KEY_ROWS, defaultRows))
     val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, false))
+    /** v138: posizione widget — top, middle, bottom */
+    val widgetPosition = MutableLiveData(prefs.getString(KEY_WIDGET_POSITION, "top") ?: "top")
+    /** v138: altezza widget in dp (60-320) */
+    val widgetHeight = MutableLiveData(prefs.getInt(KEY_WIDGET_HEIGHT, 160))
+    /** v138: larghezza widget percentuale (50, 75, 100) */
+    val widgetWidthPercent = MutableLiveData(prefs.getInt(KEY_WIDGET_WIDTH_PERCENT, 100))
+    /** v139: mostra etichette icone in home (default true) */
+    val showHomeLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_HOME_LABELS, true))
+    /** v139: mostra etichette icone nel drawer (default true) */
+    val showDrawerLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_DRAWER_LABELS, true))
+    /** v139: lista feed RSS (URL CSV-separated) */
+    val rssFeeds = MutableLiveData(
+        prefs.getString(KEY_RSS_FEEDS, "")?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+    )
+    /** v140: sfocatura quando drawer è aperto (dietro la home) */
+    val blurDrawer = MutableLiveData(prefs.getBoolean(KEY_BLUR_DRAWER, true))
+    /** v140: sfocatura quando cartella è aperta (dietro il modal) */
+    val blurFolder = MutableLiveData(prefs.getBoolean(KEY_BLUR_FOLDER, true))
+    /** v140: pannello RSS attivabile con swipe da sinistra (stile Google Now) */
+    val rssPanelEnabled = MutableLiveData(prefs.getBoolean(KEY_RSS_PANEL, false))
+    /** v139: mostra/nascondi label icone in home */
+    val showHomeLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_HOME_LABELS, true))
+    /** v139: mostra/nascondi label icone in drawer */
+    val showDrawerLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_DRAWER_LABELS, true))
+    /** v139: lista feed RSS (URL CSV-separated) */
+    val rssFeeds = MutableLiveData(
+        prefs.getString(KEY_RSS_FEEDS, "")?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+    )
+    /** v140: sfocatura quando drawer è aperto (dietro la home) */
+    val blurDrawer = MutableLiveData(prefs.getBoolean(KEY_BLUR_DRAWER, true))
+    /** v140: sfocatura quando cartella è aperta (dietro il modal) */
+    val blurFolder = MutableLiveData(prefs.getBoolean(KEY_BLUR_FOLDER, true))
+    /** v140: pannello RSS attivabile con swipe da sinistra (stile Google Now) */
+    val rssPanelEnabled = MutableLiveData(prefs.getBoolean(KEY_RSS_PANEL, false))
+    /** v139: lista feed RSS — uno URL per riga */
+    val rssFeeds = MutableLiveData(prefs.getString(KEY_RSS_FEEDS, "")?.split("\n")?.filter { it.isNotBlank() } ?: emptyList())
     /** v63: mostra barra di ricerca in home (default true) */
     val showSearchBar = MutableLiveData(prefs.getBoolean(KEY_SHOW_SEARCHBAR, true))
     val hapticEnabled = MutableLiveData(prefs.getBoolean(KEY_HAPTIC, true))
@@ -105,6 +141,80 @@ class SettingsRepository(context: Context) {
     fun setShowWidgetSlot(show: Boolean) {
         prefs.edit().putBoolean(KEY_SHOW_WIDGETS, show).apply(); showWidgetSlot.postValue(show)
     }
+    fun setWidgetPosition(pos: String) {
+        prefs.edit().putString(KEY_WIDGET_POSITION, pos).apply()
+        widgetPosition.postValue(pos)
+    }
+    fun setWidgetHeight(dp: Int) {
+        prefs.edit().putInt(KEY_WIDGET_HEIGHT, dp).apply()
+        widgetHeight.postValue(dp)
+    }
+    fun setWidgetWidthPercent(pct: Int) {
+        prefs.edit().putInt(KEY_WIDGET_WIDTH_PERCENT, pct).apply()
+        widgetWidthPercent.postValue(pct)
+    }
+
+    fun setShowHomeLabels(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_HOME_LABELS, on).apply()
+        showHomeLabels.postValue(on)
+    }
+    fun setShowDrawerLabels(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_DRAWER_LABELS, on).apply()
+        showDrawerLabels.postValue(on)
+    }
+
+    fun setRssFeeds(feeds: List<String>) {
+        prefs.edit().putString(KEY_RSS_FEEDS, feeds.joinToString(",")).apply()
+        rssFeeds.postValue(feeds)
+    }
+
+    fun setBlurDrawer(on: Boolean) {
+        prefs.edit().putBoolean(KEY_BLUR_DRAWER, on).apply()
+        blurDrawer.postValue(on)
+    }
+    fun setBlurFolder(on: Boolean) {
+        prefs.edit().putBoolean(KEY_BLUR_FOLDER, on).apply()
+        blurFolder.postValue(on)
+    }
+
+    fun setRssPanelEnabled(on: Boolean) {
+        prefs.edit().putBoolean(KEY_RSS_PANEL, on).apply()
+        rssPanelEnabled.postValue(on)
+    }
+
+    fun setShowHomeLabels(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_HOME_LABELS, on).apply()
+        showHomeLabels.postValue(on)
+    }
+    fun setShowDrawerLabels(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_DRAWER_LABELS, on).apply()
+        showDrawerLabels.postValue(on)
+    }
+
+    fun setRssFeeds(feeds: List<String>) {
+        prefs.edit().putString(KEY_RSS_FEEDS, feeds.joinToString(",")).apply()
+        rssFeeds.postValue(feeds)
+    }
+
+    fun setBlurDrawer(on: Boolean) {
+        prefs.edit().putBoolean(KEY_BLUR_DRAWER, on).apply()
+        blurDrawer.postValue(on)
+    }
+    fun setBlurFolder(on: Boolean) {
+        prefs.edit().putBoolean(KEY_BLUR_FOLDER, on).apply()
+        blurFolder.postValue(on)
+    }
+
+    fun setRssPanelEnabled(on: Boolean) {
+        prefs.edit().putBoolean(KEY_RSS_PANEL, on).apply()
+        rssPanelEnabled.postValue(on)
+    }
+
+    fun setRssFeeds(feeds: List<String>) {
+        prefs.edit().putString(KEY_RSS_FEEDS, feeds.joinToString("\n")).apply()
+        rssFeeds.postValue(feeds)
+    }
+
     fun setHapticEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_HAPTIC, enabled).apply(); hapticEnabled.postValue(enabled)
     }
@@ -330,6 +440,25 @@ class SettingsRepository(context: Context) {
         private const val KEY_COLS = "grid_cols"
         private const val KEY_ROWS = "grid_rows"
         private const val KEY_SHOW_WIDGETS = "show_widgets"
+        private const val KEY_WIDGET_POSITION = "widget_position"
+        private const val KEY_WIDGET_HEIGHT = "widget_height"
+        private const val KEY_WIDGET_WIDTH_PERCENT = "widget_width_percent"
+        private const val KEY_SHOW_HOME_LABELS = "show_home_labels"
+        private const val KEY_SHOW_DRAWER_LABELS = "show_drawer_labels"
+        private const val KEY_RSS_FEEDS = "rss_feeds"
+        private const val KEY_BLUR_DRAWER = "blur_drawer"
+        private const val KEY_BLUR_FOLDER = "blur_folder"
+        private const val KEY_RSS_PANEL = "rss_panel_enabled"
+        private const val KEY_SHOW_HOME_LABELS = "show_home_labels"
+        private const val KEY_SHOW_DRAWER_LABELS = "show_drawer_labels"
+        private const val KEY_RSS_FEEDS = "rss_feeds"
+        private const val KEY_BLUR_DRAWER = "blur_drawer"
+        private const val KEY_BLUR_FOLDER = "blur_folder"
+        private const val KEY_RSS_PANEL = "rss_panel_enabled"
+        private const val KEY_RSS_FEEDS = "rss_feeds"
+        private const val KEY_BLUR_DRAWER = "blur_drawer"
+        private const val KEY_BLUR_FOLDER = "blur_folder"
+        private const val KEY_RSS_PANEL = "rss_panel_enabled"
         private const val KEY_SHOW_SEARCHBAR = "show_searchbar"
         private const val KEY_HAPTIC = "haptic_enabled"
         private const val KEY_TUTORIAL_SEEN = "tutorial_seen"

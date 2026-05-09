@@ -70,6 +70,9 @@ class HomeView @JvmOverloads constructor(
     // v18: threshold più reattivo (45dp invece di 60dp)
     private val swipeThreshold = resources.displayMetrics.density * 22f  // v46: più sensibile
 
+    /** v140: callback per swipe destra dal bordo sinistro → apri pannello RSS */
+    var onSwipeRightFromLeftEdge: (() -> Unit)? = null
+    
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
             // v120: NON consumo onDown se drawer è disabilitato e nessun gesto verticale è abilitato
@@ -94,6 +97,14 @@ class HomeView @JvmOverloads constructor(
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
                 if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 StatusBarHelper.expandNotifications(context)
+                return true
+            }
+            // v140: swipe destra dal bordo sinistro → pannello RSS
+            if (settings.rssPanelEnabled.value == true &&
+                vx > 800f && abs(vx) > abs(vy) * 1.5f &&
+                e1 != null && e1.x < (resources.displayMetrics.density * 50)) {
+                if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
+                onSwipeRightFromLeftEdge?.invoke()
                 return true
             }
             return false
@@ -132,6 +143,13 @@ class HomeView @JvmOverloads constructor(
                 pages.forEach { grid -> grid.refresh(allApps) }
                 binding.recommendedRow.refresh(if (binding.recommendedRow.visibility == android.view.View.VISIBLE) "home" else "drawer")
                 binding.recommendedRowBottom.refresh("home")
+            } catch (_: Throwable) {}
+        }
+        // v139: observer showHomeLabels — refresh icone home
+        SpeedApp.instance.settingsRepository.showHomeLabels.observeForever {
+            try {
+                val allApps = SpeedApp.instance.appRepository.apps.value ?: return@observeForever
+                pages.forEach { grid -> grid.refresh(allApps) }
             } catch (_: Throwable) {}
         }
 
@@ -523,6 +541,7 @@ class HomeView @JvmOverloads constructor(
 
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
+        applyWidgetConfig()
         // v113: barra ricerca nascosta se drawer disabilitato (anche se showSearchBar è true)
         // perché senza drawer la barra non ha funzione (apre il drawer che non esiste)
         val drawerOn = settings.drawerEnabled.value != false
@@ -531,6 +550,66 @@ class HomeView @JvmOverloads constructor(
         updateSearchBarText()
         applySearchBarStyle()
         applyAnimationStyle()
+    }
+
+
+    /** v138: applica posizione/altezza/larghezza widget secondo le settings */
+    fun applyWidgetConfig() {
+        val ws = binding.widgetSlot
+        val parent = ws.parent as? android.widget.LinearLayout ?: return
+        val density = resources.displayMetrics.density
+        
+        // Altezza
+        val heightDp = settings.widgetHeight.value ?: 160
+        val heightPx = (heightDp * density).toInt()
+        
+        // Larghezza percentuale
+        val widthPct = settings.widgetWidthPercent.value ?: 100
+        
+        val lp = ws.layoutParams as? android.widget.LinearLayout.LayoutParams
+            ?: android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heightPx)
+        lp.height = heightPx
+        if (widthPct >= 100) {
+            lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+        } else {
+            // Larghezza percentuale: calcolo ad ogni layout pass
+            lp.width = (parent.width * widthPct / 100).coerceAtLeast(0)
+            if (lp.width <= 0) {
+                // parent non ancora misurato, uso match_parent come fallback iniziale
+                lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+                ws.post {
+                    val lp2 = ws.layoutParams as android.widget.LinearLayout.LayoutParams
+                    lp2.width = (parent.width * widthPct / 100).coerceAtLeast(1)
+                    ws.layoutParams = lp2
+                }
+            }
+        }
+        // Centro orizzontalmente la widget se non full width
+        lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
+        ws.layoutParams = lp
+        
+        // Posizione: sposta la widgetSlot all'interno del parent LinearLayout
+        // Top: index 0, Middle: index dopo searchBar+recommended, Bottom: prima di searchBar finale
+        val pos = settings.widgetPosition.value ?: "top"
+        val currentIdx = parent.indexOfChild(ws)
+        val targetIdx = when (pos) {
+            "bottom" -> {
+                // L'ultimo prima delle voci finali. Cerco l'indice della searchBar (in fondo) e metto prima.
+                val searchIdx = parent.indexOfChild(binding.searchBar)
+                if (searchIdx >= 0) searchIdx else parent.childCount - 1
+            }
+            "middle" -> {
+                // Subito sopra il pageIndicator
+                val pgIdx = parent.indexOfChild(binding.pageIndicator)
+                if (pgIdx >= 0) pgIdx else 1
+            }
+            else -> 0  // top
+        }
+        if (currentIdx != targetIdx && currentIdx >= 0 && targetIdx >= 0 && targetIdx <= parent.childCount) {
+            parent.removeView(ws)
+            val safeIdx = targetIdx.coerceAtMost(parent.childCount)
+            parent.addView(ws, safeIdx)
+        }
     }
 
     fun reapplySettings() {
