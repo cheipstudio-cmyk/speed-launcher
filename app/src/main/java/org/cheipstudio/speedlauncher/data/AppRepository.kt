@@ -114,15 +114,15 @@ class AppRepository(private val context: Context) {
             try {
                 sourceView.animate().cancel()
                 sourceView.animate()
-                    .scaleX(0.88f).scaleY(0.88f)
-                    .setDuration(70)
+                    .scaleX(0.92f).scaleY(0.92f)
+                    .setDuration(50)
                     .setInterpolator(android.view.animation.AccelerateInterpolator())
                     .withEndAction {
                         try {
                             sourceView.animate()
                                 .scaleX(1f).scaleY(1f)
-                                .setDuration(90)
-                                .setInterpolator(android.view.animation.OvershootInterpolator(2.5f))
+                                .setDuration(60)
+                                .setInterpolator(android.view.animation.OvershootInterpolator(1.8f))
                                 .start()
                             doLaunch(app, sourceView)
                         } catch (_: Throwable) {

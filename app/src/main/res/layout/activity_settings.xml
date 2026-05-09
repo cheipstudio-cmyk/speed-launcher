@@ -108,7 +108,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <LinearLayout style="@style/PixelItemClickable">
+                <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
                     </FrameLayout>
@@ -125,7 +125,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <LinearLayout style="@style/PixelItemClickable">
+                <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
                     </FrameLayout>
@@ -142,7 +142,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <LinearLayout style="@style/PixelItemClickable">
+                <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
                     </FrameLayout>
@@ -176,7 +176,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <LinearLayout style="@style/PixelItemClickable">
+                <LinearLayout style="@style/PixelItem">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_orange">
                         <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_feed" />
                     </FrameLayout>
