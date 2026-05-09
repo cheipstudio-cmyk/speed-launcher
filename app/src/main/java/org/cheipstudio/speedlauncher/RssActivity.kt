@@ -106,6 +106,24 @@ class RssActivity : AppCompatActivity() {
 
         setContentView(root)
         loadFeeds()
+        
+        // v169: swipe destra→sinistra chiude (opposto del gesto di apertura)
+        val gd = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
+            override fun onFling(
+                e1: android.view.MotionEvent?, e2: android.view.MotionEvent,
+                vx: Float, vy: Float
+            ): Boolean {
+                if (vx < -250f && kotlin.math.abs(vx) > kotlin.math.abs(vy) * 1.0f) {
+                    finish()
+                    return true
+                }
+                return false
+            }
+        })
+        root.setOnTouchListener { _, ev -> 
+            gd.onTouchEvent(ev)
+            false  // non consumare, lascia che la list scorra normalmente
+        }
     }
 
     private fun loadFeeds() {
@@ -140,13 +158,35 @@ class RssActivity : AppCompatActivity() {
     private fun fetchFeed(url: String): List<Article> {
         val out = mutableListOf<Article>()
         try {
-            val conn = URL(url).openConnection().apply {
-                connectTimeout = 8000
-                readTimeout = 8000
+            // v169: User-Agent realistico + redirect manuale http<->https (Java non li segue cross-protocol)
+            var currentUrl = if (url.startsWith("http://") || url.startsWith("https://")) url else "https://$url"
+            var conn: java.net.HttpURLConnection? = null
+            var redirects = 0
+            while (redirects < 5) {
+                val u = URL(currentUrl)
+                conn = (u.openConnection() as java.net.HttpURLConnection).apply {
+                    connectTimeout = 10000
+                    readTimeout = 10000
+                    instanceFollowRedirects = false
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) SpeedLauncher/1.0")
+                    setRequestProperty("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml, */*")
+                }
+                val code = conn.responseCode
+                if (code in 300..399) {
+                    val loc = conn.getHeaderField("Location") ?: break
+                    currentUrl = if (loc.startsWith("http")) loc 
+                                 else URL(URL(currentUrl), loc).toString()
+                    conn.disconnect()
+                    redirects++
+                    continue
+                }
+                break
             }
+            val finalConn = conn ?: return out
             val factory = DocumentBuilderFactory.newInstance()
+            factory.isNamespaceAware = false
             val builder = factory.newDocumentBuilder()
-            val doc = conn.getInputStream().use { builder.parse(it) }
+            val doc = finalConn.inputStream.use { builder.parse(it) }
             doc.documentElement.normalize()
 
             // Source name (channel/title)

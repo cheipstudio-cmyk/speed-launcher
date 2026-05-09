@@ -23,9 +23,7 @@ class SettingsIndexActivity : AppCompatActivity() {
         binding = ActivitySettingsIndexBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        binding.toolbar.setNavigationOnClickListener { finish() }
 
         binding.idxAspetto.setOnClickListener { openSection("appearance") }
         binding.idxHome.setOnClickListener { openSection("home") }
@@ -35,7 +33,6 @@ class SettingsIndexActivity : AppCompatActivity() {
         binding.idxGestures.setOnClickListener { openSection("gestures") }
         binding.idxLanguage.setOnClickListener { openSection("language") }
         binding.idxBackup.setOnClickListener { openSection("backup") }
-        binding.idxAdvanced.setOnClickListener { openSection("") }
         binding.idxInfo.setOnClickListener { openSection("info") }
     }
 

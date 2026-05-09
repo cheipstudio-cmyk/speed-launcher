@@ -16,17 +16,19 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="180dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:expandedTitleMarginStart="28dp"
-            app:expandedTitleMarginBottom="20dp"
+            app:expandedTitleMarginEnd="28dp"
+            app:expandedTitleMarginBottom="24dp"
             app:expandedTitleTextAppearance="@style/PixelExpandedTitle"
             app:collapsedTitleTextAppearance="@style/PixelCollapsedTitle"
             app:expandedTitleGravity="bottom|start"
-            app:collapsedTitleGravity="center"
+            app:collapsedTitleGravity="start|center_vertical"
             app:titleCollapseMode="fade"
             app:title="@string/settings_title"
             app:contentScrim="?attr/colorSurface"
+            app:statusBarScrim="?attr/colorSurface"
             android:background="@android:color/transparent">
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -34,8 +36,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/ic_arrow_back"
-                app:navigationIconTint="?attr/colorOnSurface" />
+                app:contentInsetStart="28dp"
+                app:contentInsetStartWithNavigation="28dp" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -181,23 +183,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAdvanced" style="@style/PixelCard"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_grey">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_tune" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_advanced" />
-                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_advanced_sub" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxInfo" style="@style/PixelCard"
                 android:clickable="true"
                 android:focusable="true"

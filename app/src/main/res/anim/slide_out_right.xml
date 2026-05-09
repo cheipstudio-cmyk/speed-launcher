@@ -2,6 +2,6 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:interpolator="@android:interpolator/fast_out_linear_in"
     android:shareInterpolator="true">
-    <translate android:fromXDelta="0" android:toXDelta="50%p" android:duration="200" />
-    <alpha android:fromAlpha="1" android:toAlpha="0" android:duration="200" />
+    <translate android:fromXDelta="0" android:toXDelta="20%p" android:duration="140" />
+    <alpha android:fromAlpha="1" android:toAlpha="0" android:duration="140" />
 </set>
