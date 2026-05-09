@@ -223,14 +223,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initOrientation() {
+        lastOrientation = resources.configuration.orientation
+    }
+    
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
-        // v206: con configChanges nel manifest, l'activity non si ricrea
-        // → riapplico tutto manualmente per landscape ↔ portrait
-        try {
-            binding.homeView.reapplySettings()
-        } catch (_: Throwable) {}
+        // v208: per landscape ↔ portrait è più sicuro recreate() che reapply al volo
+        // (i layout-land/values-land vengono caricati correttamente solo con recreate)
+        val newOrient = newConfig.orientation
+        if (newOrient != lastOrientation) {
+            lastOrientation = newOrient
+            recreate()
+        }
     }
+    
+    private var lastOrientation: Int = 
+        android.content.res.Configuration.ORIENTATION_UNDEFINED
 
     override fun onResume() {
         super.onResume()

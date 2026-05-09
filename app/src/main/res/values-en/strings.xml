@@ -364,4 +364,6 @@ Download now?</string>
     <string name="position_above_search">Above search</string>
     <string name="position_below_search">Below search</string>
     <string name="rss_suggested">Suggested feeds</string>
+    <string name="settings_donate_label">Buy me a coffee</string>
+    <string name="settings_donate_sub">Support Speed Launcher development</string>
 </resources>

@@ -345,4 +345,6 @@ Télécharger maintenant ?</string>
     <string name="widget_width_50">50 %</string>
     <string name="widget_width_75">75 %</string>
     <string name="widget_width_full">Plein écran</string>
+    <string name="settings_donate_label">Offrez-moi un café</string>
+    <string name="settings_donate_sub">Soutenez le développement de Speed Launcher</string>
 </resources>

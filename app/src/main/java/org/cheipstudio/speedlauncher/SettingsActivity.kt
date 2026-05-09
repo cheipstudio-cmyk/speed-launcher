@@ -478,6 +478,18 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "https://t.me/speed_launcher", Toast.LENGTH_LONG).show()
             }
         }
+        
+        // v208: Buy me a coffee donation
+        binding.itemDonate.setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/m12opyjwty")).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            } catch (_: Throwable) {
+                Toast.makeText(this, "https://buymeacoffee.com/m12opyjwty", Toast.LENGTH_LONG).show()
+            }
+        }
     
         ensureCardsClickable()
     }

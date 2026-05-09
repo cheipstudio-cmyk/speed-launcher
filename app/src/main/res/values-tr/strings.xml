@@ -345,4 +345,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="widget_width_50">%50</string>
     <string name="widget_width_75">%75</string>
     <string name="widget_width_full">Tam ekran</string>
+    <string name="settings_donate_label">Bir kahve ısmarla</string>
+    <string name="settings_donate_sub">Speed Launcher geliştirmeyi destekle</string>
 </resources>

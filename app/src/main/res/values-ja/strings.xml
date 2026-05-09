@@ -345,4 +345,6 @@
     <string name="widget_width_50">50%</string>
     <string name="widget_width_75">75%</string>
     <string name="widget_width_full">全画面</string>
+    <string name="settings_donate_label">コーヒーをおごる</string>
+    <string name="settings_donate_sub">Speed Launcherの開発を支援</string>
 </resources>

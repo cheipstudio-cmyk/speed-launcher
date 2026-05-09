@@ -130,6 +130,14 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             applyFilter(binding.searchInput.text?.toString().orEmpty())
         }
 
+        // v208: hint dinamico in base modalità ricerca
+        val mode = SpeedApp.instance.settingsRepository.searchMode.value
+        binding.searchInput.hint = if (mode == 
+            org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_UNIVERSAL) {
+            getString(R.string.search_universal)
+        } else {
+            getString(R.string.search_apps)
+        }
         binding.searchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {

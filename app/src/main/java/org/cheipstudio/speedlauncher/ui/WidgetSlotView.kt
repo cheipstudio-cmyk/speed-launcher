@@ -142,6 +142,7 @@ class WidgetSlotView @JvmOverloads constructor(
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
         val canBind = controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+        android.util.Log.d("SpeedLauncher", "Widget bind: provider=${info.provider}, canBind=$canBind, hasConfig=${info.configure != null}")
         if (!canBind) {
             val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)

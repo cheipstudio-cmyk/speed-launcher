@@ -364,4 +364,6 @@ Vuoi scaricarla?</string>
     <string name="position_above_search">Sopra ricerca</string>
     <string name="position_below_search">Sotto ricerca</string>
     <string name="rss_suggested">Feed suggeriti</string>
+    <string name="settings_donate_label">Offrimi un caffè</string>
+    <string name="settings_donate_sub">Sostieni lo sviluppo di Speed Launcher</string>
 </resources>

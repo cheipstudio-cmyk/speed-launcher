@@ -345,4 +345,6 @@ Se usará solo para esta función.</string>
     <string name="widget_width_50">50%</string>
     <string name="widget_width_75">75%</string>
     <string name="widget_width_full">Pantalla completa</string>
+    <string name="settings_donate_label">Invítame un café</string>
+    <string name="settings_donate_sub">Apoya el desarrollo de Speed Launcher</string>
 </resources>

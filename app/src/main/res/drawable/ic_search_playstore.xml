@@ -4,16 +4,20 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+    <!-- Quadrante sinistro-basso (verde) -->
     <path
         android:fillColor="#34A853"
-        android:pathData="M3.609,1.814L13.792,12 3.609,22.186a0.996,0.996 0,0 1,-0.61 -0.92V2.734a1,1 0,0 1,0.61 -0.92z"/>
-    <path
-        android:fillColor="#FBBC05"
-        android:pathData="M16.81,15.02l-2.71,-2.71 2.71,-2.71 3.79,2.16c1.69,0.95 1.69,2.43 0,3.39l-3.79,1.87z"/>
-    <path
-        android:fillColor="#EA4335"
-        android:pathData="M14.099,12.31L3.609,22.79c0.391,0.176 0.881,0.146 1.342,-0.117l11.967,-6.797 -2.819,-3.566z"/>
+        android:pathData="M3.5,20.5 L13.7,11.7 L17.2,15.2 L5.8,21.8 C5.0,22.2 4.0,22.0 3.5,21.0 L3.5,20.5 Z"/>
+    <!-- Quadrante sinistro-alto (blu) -->
     <path
         android:fillColor="#4285F4"
-        android:pathData="M14.099,11.69L4.951,1.327C4.49,1.064 4,1.034 3.609,1.21l10.49,10.48z"/>
+        android:pathData="M3.5,3.5 C3.5,2.5 4.0,1.8 4.7,1.7 L13.7,10.7 L13.7,11.7 L3.5,20.5 L3.5,3.5 Z"/>
+    <!-- Triangolo destro-alto (giallo) -->
+    <path
+        android:fillColor="#FBBC05"
+        android:pathData="M20.5,11.0 L17.2,9.2 L13.7,10.7 L13.7,12.3 L17.2,15.2 L20.5,13.0 C21.5,12.5 21.5,11.5 20.5,11.0 Z"/>
+    <!-- Triangolo destro-basso (rosso) -->
+    <path
+        android:fillColor="#EA4335"
+        android:pathData="M4.7,1.7 C4.9,1.6 5.2,1.6 5.5,1.8 L17.2,9.2 L13.7,10.7 L4.7,1.7 Z"/>
 </vector>
