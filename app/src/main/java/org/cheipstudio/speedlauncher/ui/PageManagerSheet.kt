@@ -96,8 +96,11 @@ object PageManagerSheet {
             val count = getPageCount()
             for (i in 0 until count) {
                 pagesContainer.addView(buildPageRow(context, density, i, getPageIconCount(i), count > 1) {
-                    // confirm before remove
-                    MaterialAlertDialogBuilder(context)
+                    // confirm before remove via dialog Material 3 themed
+                    MaterialAlertDialogBuilder(
+                        context,
+                        com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+                    )
                         .setTitle(R.string.page_manager_confirm_remove_title)
                         .setMessage(context.getString(R.string.page_manager_confirm_remove_msg, i + 1))
                         .setPositiveButton(R.string.page_manager_remove) { _, _ ->
@@ -116,7 +119,7 @@ object PageManagerSheet {
             context, null, com.google.android.material.R.attr.materialButtonOutlinedStyle
         ).apply {
             text = context.getString(R.string.page_manager_add)
-            icon = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_widget)
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_input_add)
             iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
             cornerRadius = (24 * density).toInt()
             val lp = LinearLayout.LayoutParams(
@@ -144,9 +147,9 @@ object PageManagerSheet {
         onRemove: () -> Unit
     ): View {
         val row = MaterialCardView(context).apply {
-            radius = 20 * density
+            radius = 24 * density
             cardElevation = 0f
-            setCardBackgroundColor(resolveAttrColor(context, com.google.android.material.R.attr.colorSurfaceContainer))
+            setCardBackgroundColor(resolveAttrColor(context, com.google.android.material.R.attr.colorSurfaceContainerHigh))
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )

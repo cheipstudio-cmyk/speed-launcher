@@ -225,6 +225,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // v144: animazione di entrata "fresh" quando si torna alla home
+        try {
+            val homeContent = binding.homeView
+            homeContent.alpha = 0.4f
+            homeContent.translationY = 20f * resources.displayMetrics.density
+            homeContent.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(280)
+                .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+                .start()
+        } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()
         // v30: ri-applica orientation se è cambiata

@@ -1,126 +1,146 @@
 package org.cheipstudio.speedlauncher.ui
 
 import android.content.Context
-import android.graphics.Color
+import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import org.cheipstudio.speedlauncher.R
 
 /**
- * v19: design moderno coerente, niente più rosa.
- * Card scura con icona warning, titolo+desc, due bottoni (annulla outline / rimuovi solid grigio).
+ * v144: BottomSheet per confermare rimozione widget — stesso stile di FolderSheet menu / AppActionsSheet
  */
 object WidgetRemoveSheet {
 
-    fun show(context: Context, onConfirm: () -> Unit) {
+    fun show(context: Context, onConfirmRemove: () -> Unit) {
         val density = context.resources.displayMetrics.density
+        val sheet = BottomSheetDialog(context)
+
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            background = ContextCompat.getDrawable(context, R.drawable.bg_modal_sheet)
             setPadding(
-                (28 * density).toInt(), (12 * density).toInt(),
-                (28 * density).toInt(), (28 * density).toInt()
+                (24 * density).toInt(), (16 * density).toInt(),
+                (24 * density).toInt(), (24 * density).toInt()
             )
         }
 
-        // handle
+        // Drag handle
         val handle = View(context).apply {
-            background = ContextCompat.getDrawable(context, R.drawable.bg_drag_handle)
+            background = context.getDrawable(R.drawable.bg_drag_handle)
             val lp = LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
             lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.bottomMargin = (24 * density).toInt()
+            lp.bottomMargin = (16 * density).toInt()
             layoutParams = lp
         }
         container.addView(handle)
 
-        // icona
-        val icon = ImageView(context).apply {
-            setImageResource(R.drawable.ic_widgets)
-            setColorFilter(resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant))
-            layoutParams = LinearLayout.LayoutParams((48 * density).toInt(), (48 * density).toInt()).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                bottomMargin = (16 * density).toInt()
-            }
-        }
-        container.addView(icon)
-
+        // Title
         val title = TextView(context).apply {
             text = context.getString(R.string.widget_remove_title)
-            textSize = 22f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
-            gravity = Gravity.CENTER
-            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            textSize = 18f
+            setTypeface(typeface, Typeface.BOLD)
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
             lp.bottomMargin = (8 * density).toInt()
             layoutParams = lp
         }
         container.addView(title)
 
-        val msg = TextView(context).apply {
-            text = context.getString(R.string.widget_remove_message)
+        // Subtitle
+        val subtitle = TextView(context).apply {
+            text = context.getString(R.string.widget_remove_subtitle)
             textSize = 14f
-            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurfaceVariant))
-            gravity = Gravity.CENTER
-            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            lp.bottomMargin = (28 * density).toInt()
-            val hpad = (8 * density).toInt()
-            setPadding(hpad, 0, hpad, 0)
+            setTextColor(resolveAttrInt(context, com.google.android.material.R.attr.colorOnSurfaceVariant))
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = (16 * density).toInt()
             layoutParams = lp
         }
-        container.addView(msg)
+        container.addView(subtitle)
 
-        val btnRow = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        // Action: Rimuovi
+        val removeRow = buildSheetRow(
+            context,
+            context.getString(R.string.widget_remove_action),
+            R.drawable.ic_delete_forever,
+            isDestructive = true
+        ) {
+            sheet.dismiss()
+            onConfirmRemove()
         }
+        container.addView(removeRow)
 
-        val cancelBtn = TextView(context).apply {
-            text = context.getString(android.R.string.cancel)
-            textSize = 15f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnSurface))
-            gravity = Gravity.CENTER
-            background = ContextCompat.getDrawable(context, R.drawable.bg_modal_btn_outline)
-            setPadding(0, (14 * density).toInt(), 0, (14 * density).toInt())
-            isClickable = true; isFocusable = true
-            val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            lp.marginEnd = (8 * density).toInt()
-            layoutParams = lp
+        // Action: Annulla
+        val cancelRow = buildSheetRow(
+            context,
+            context.getString(android.R.string.cancel),
+            R.drawable.ic_arrow_back,
+            isDestructive = false
+        ) {
+            sheet.dismiss()
         }
+        container.addView(cancelRow)
 
-        val removeBtn = TextView(context).apply {
-            text = context.getString(R.string.widget_remove_confirm)
-            textSize = 15f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(resolveAttr(context, com.google.android.material.R.attr.colorOnPrimary))
-            gravity = Gravity.CENTER
-            background = ContextCompat.getDrawable(context, R.drawable.bg_modal_btn_solid)
-            setPadding(0, (14 * density).toInt(), 0, (14 * density).toInt())
-            isClickable = true; isFocusable = true
-            val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            lp.marginStart = (8 * density).toInt()
-            layoutParams = lp
-        }
-
-        btnRow.addView(cancelBtn); btnRow.addView(removeBtn)
-        container.addView(btnRow)
-
-        val dialog = BottomSheetDialog(context)
-        dialog.setContentView(container)
-        cancelBtn.setOnClickListener { dialog.dismiss() }
-        removeBtn.setOnClickListener { onConfirm(); dialog.dismiss() }
-        dialog.show()
+        sheet.setContentView(container)
+        sheet.show()
     }
 
-    private fun resolveAttr(context: Context, attr: Int): Int {
+    private fun buildSheetRow(
+        ctx: Context,
+        label: String,
+        iconRes: Int,
+        isDestructive: Boolean,
+        onClick: () -> Unit
+    ): View {
+        val density = ctx.resources.displayMetrics.density
+        val row = LinearLayout(ctx).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            isClickable = true; isFocusable = true
+            setBackgroundResource(android.R.drawable.list_selector_background)
+            setPadding(
+                (16 * density).toInt(), (16 * density).toInt(),
+                (16 * density).toInt(), (16 * density).toInt()
+            )
+        }
+        val icon = ImageView(ctx).apply {
+            setImageResource(iconRes)
+            val s = (24 * density).toInt()
+            layoutParams = LinearLayout.LayoutParams(s, s).apply {
+                marginEnd = (16 * density).toInt()
+            }
+            if (isDestructive) {
+                setColorFilter(android.graphics.Color.parseColor("#E53935"))
+            } else {
+                setColorFilter(resolveAttrInt(ctx, com.google.android.material.R.attr.colorOnSurface))
+            }
+        }
+        row.addView(icon)
+        val txt = TextView(ctx).apply {
+            text = label
+            textSize = 16f
+            if (isDestructive) {
+                setTextColor(android.graphics.Color.parseColor("#E53935"))
+                setTypeface(typeface, Typeface.BOLD)
+            } else {
+                setTextColor(resolveAttrInt(ctx, com.google.android.material.R.attr.colorOnSurface))
+            }
+        }
+        row.addView(txt)
+        row.setOnClickListener { onClick() }
+        return row
+    }
+
+    private fun resolveAttrInt(ctx: Context, attr: Int): Int {
         val tv = android.util.TypedValue()
-        context.theme.resolveAttribute(attr, tv, true)
+        ctx.theme.resolveAttribute(attr, tv, true)
         return tv.data
     }
 }

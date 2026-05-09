@@ -75,11 +75,11 @@ class HomeView @JvmOverloads constructor(
     
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
-            // v120: NON consumo onDown se drawer è disabilitato e nessun gesto verticale è abilitato
-            // (evita glitch e refresh inutili della home quando l'utente fa swipe a vuoto)
+            // v120+v144: consumo onDown se almeno un gesto è attivo (drawer / swipeDown / RSS panel)
             val drawerOn = settings.drawerEnabled.value != false
             val swipeDownOn = settings.swipeDownNotifications.value == true
-            return drawerOn || swipeDownOn
+            val rssPanelOn = settings.rssPanelEnabled.value == true
+            return drawerOn || swipeDownOn || rssPanelOn
         }
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             // v77: dedup vibrazione — usa flag swipeFireVibrated, una sola vibrazione per gesto.
@@ -99,10 +99,11 @@ class HomeView @JvmOverloads constructor(
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
-            // v140: swipe destra dal bordo sinistro → pannello RSS
+            // v140+v144: swipe destra dal bordo sinistro → pannello RSS
+            // velocità ridotta a 400 e edge zone aumentata a 80dp per più affidabilità
             if (settings.rssPanelEnabled.value == true &&
-                vx > 800f && abs(vx) > abs(vy) * 1.5f &&
-                e1 != null && e1.x < (resources.displayMetrics.density * 50)) {
+                vx > 400f && abs(vx) > abs(vy) * 1.2f &&
+                e1 != null && e1.x < (resources.displayMetrics.density * 80)) {
                 if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 onSwipeRightFromLeftEdge?.invoke()
                 return true
@@ -556,58 +557,64 @@ class HomeView @JvmOverloads constructor(
     /** v138: applica posizione/altezza/larghezza widget secondo le settings */
     fun applyWidgetConfig() {
         val ws = binding.widgetSlot
-        val parent = ws.parent as? android.widget.LinearLayout ?: return
+        val parent = ws.parent as? android.widget.LinearLayout ?: run {
+            // v144: parent non ancora attaccato, riprova al prossimo frame
+            ws.post { applyWidgetConfig() }
+            return
+        }
         val density = resources.displayMetrics.density
         
-        // Altezza
+        // Altezza in dp
         val heightDp = settings.widgetHeight.value ?: 160
         val heightPx = (heightDp * density).toInt()
         
         // Larghezza percentuale
         val widthPct = settings.widgetWidthPercent.value ?: 100
         
-        val lp = ws.layoutParams as? android.widget.LinearLayout.LayoutParams
-            ?: android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heightPx)
-        lp.height = heightPx
-        if (widthPct >= 100) {
-            lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+        // Crea/aggiorna LayoutParams
+        val existing = ws.layoutParams
+        val lp = if (existing is android.widget.LinearLayout.LayoutParams) {
+            existing
         } else {
-            // Larghezza percentuale: calcolo ad ogni layout pass
-            lp.width = (parent.width * widthPct / 100).coerceAtLeast(0)
-            if (lp.width <= 0) {
-                // parent non ancora misurato, uso match_parent come fallback iniziale
-                lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
-                ws.post {
-                    val lp2 = ws.layoutParams as android.widget.LinearLayout.LayoutParams
-                    lp2.width = (parent.width * widthPct / 100).coerceAtLeast(1)
-                    ws.layoutParams = lp2
-                }
+            android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heightPx
+            )
+        }
+        lp.height = heightPx
+        lp.width = if (widthPct >= 100) {
+            android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+        } else {
+            val w = parent.width
+            if (w > 0) (w * widthPct / 100).coerceAtLeast(1)
+            else android.widget.LinearLayout.LayoutParams.MATCH_PARENT.also {
+                // Riprova al prossimo frame quando parent ha dimensioni
+                ws.post { applyWidgetConfig() }
             }
         }
-        // Centro orizzontalmente la widget se non full width
         lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
         ws.layoutParams = lp
+        ws.requestLayout()
+        parent.requestLayout()
         
-        // Posizione: sposta la widgetSlot all'interno del parent LinearLayout
-        // Top: index 0, Middle: index dopo searchBar+recommended, Bottom: prima di searchBar finale
+        // Posizione: sposta widgetSlot dentro il parent
         val pos = settings.widgetPosition.value ?: "top"
         val currentIdx = parent.indexOfChild(ws)
+        if (currentIdx < 0) return
+        
         val targetIdx = when (pos) {
             "bottom" -> {
-                // L'ultimo prima delle voci finali. Cerco l'indice della searchBar (in fondo) e metto prima.
                 val searchIdx = parent.indexOfChild(binding.searchBar)
-                if (searchIdx >= 0) searchIdx else parent.childCount - 1
+                if (searchIdx >= 0) (searchIdx - 1).coerceAtLeast(0) else parent.childCount - 1
             }
             "middle" -> {
-                // Subito sopra il pageIndicator
                 val pgIdx = parent.indexOfChild(binding.pageIndicator)
                 if (pgIdx >= 0) pgIdx else 1
             }
-            else -> 0  // top
+            else -> 0
         }
-        if (currentIdx != targetIdx && currentIdx >= 0 && targetIdx >= 0 && targetIdx <= parent.childCount) {
+        if (currentIdx != targetIdx) {
             parent.removeView(ws)
-            val safeIdx = targetIdx.coerceAtMost(parent.childCount)
+            val safeIdx = targetIdx.coerceIn(0, parent.childCount)
             parent.addView(ws, safeIdx)
         }
     }
