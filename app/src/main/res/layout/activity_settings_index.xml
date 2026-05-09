@@ -16,11 +16,11 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="130dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:expandedTitleMarginStart="28dp"
             app:expandedTitleMarginEnd="28dp"
-            app:expandedTitleMarginBottom="20dp"
+            app:expandedTitleMarginBottom="14dp"
             app:maxLines="1"
             app:expandedTitleTextAppearance="@style/PixelExpandedTitle"
             app:collapsedTitleTextAppearance="@style/PixelCollapsedTitle"

@@ -246,9 +246,17 @@ class HomeView @JvmOverloads constructor(
                 binding.rssEdgeIndicator.visibility = if (it == true) View.VISIBLE else View.GONE
             }
         }
-        // v183: stato iniziale edge indicator
+        // v185: stato iniziale + animazione pulse
         binding.rssEdgeIndicator.visibility = 
             if (settings.rssPanelEnabled.value == true) View.VISIBLE else View.GONE
+        binding.rssEdgeIndicator.alpha = 0.7f
+        // Pulse subtle: alpha 0.4 ↔ 0.8 in loop
+        val pulse = android.animation.ObjectAnimator.ofFloat(binding.rssEdgeIndicator, "alpha", 0.4f, 0.8f).apply {
+            duration = 1400
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.REVERSE
+        }
+        pulse.start()
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
@@ -715,10 +723,10 @@ class HomeView @JvmOverloads constructor(
                     StatusBarHelper.expandNotifications(context)
                     return true
                 }
-                // v168: swipe orizzontale da sinistra verso destra → RSS panel
+                // v185: swipe orizzontale da sinistra verso destra → RSS panel
                 val dxRel = ev.x - trackStartX
                 if (settings.rssPanelEnabled.value == true &&
-                    dxRel > swipeThreshold && abs(dxRel) > abs(dy) * 1.2f) {
+                    dxRel > swipeThreshold * 0.7f && abs(dxRel) > abs(dy) * 1.0f) {
                     tracking = false
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                     onSwipeRightFromLeftEdge?.invoke()

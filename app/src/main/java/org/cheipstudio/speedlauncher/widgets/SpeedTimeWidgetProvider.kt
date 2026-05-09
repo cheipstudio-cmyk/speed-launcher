@@ -75,7 +75,7 @@ class SpeedTimeWidgetProvider : AppWidgetProvider() {
                 val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
                 bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
             } catch (_: Throwable) { -1 }
-            views.setTextViewText(R.id.batteryText, if (pct >= 0) "$pct%" else "--%")
+            views.setTextViewText(R.id.batteryText, if (pct >= 0) "$pct%" else "--")
             
             // Click intents (3 separate)
             try {

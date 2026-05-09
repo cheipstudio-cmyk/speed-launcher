@@ -230,29 +230,35 @@ class RssActivity : AppCompatActivity() {
             parser.setFeature(org.xmlpull.v1.XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
             parser.setInput(java.io.ByteArrayInputStream(bodyBytes, startOffset, bodyBytes.size - startOffset), charset)
             
+            // v185: helper per normalizzare nome tag (rimuovo namespace prefix)
+            fun normTag(name: String?): String {
+                if (name == null) return ""
+                val colon = name.indexOf(':')
+                return (if (colon >= 0) name.substring(colon + 1) else name).lowercase()
+            }
+            
             var sourceTitle = ""
             var inItem = false
             var inEntry = false
             var inChannel = false
-            var depth = 0
             var currentTitle = ""
             var currentLink = ""
             var currentPubDate = ""
-            var linkHref = ""  // per <link href="..."/> Atom
-            var currentTag: String? = null
+            var linkHref = ""
+            var currentTag: String = ""
             
             var event = parser.eventType
             while (event != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
                 when (event) {
                     org.xmlpull.v1.XmlPullParser.START_TAG -> {
-                        val tag = parser.name
+                        val tag = normTag(parser.name)
                         currentTag = tag
                         when (tag) {
                             "item" -> { inItem = true; currentTitle = ""; currentLink = ""; currentPubDate = ""; linkHref = "" }
                             "entry" -> { inEntry = true; currentTitle = ""; currentLink = ""; currentPubDate = ""; linkHref = "" }
                             "channel", "feed" -> inChannel = true
                             "link" -> {
-                                // Atom: <link href="..." rel="alternate"/>
+                                // Atom: <link href="..." rel="alternate"/> (anche con prefix)
                                 if (inItem || inEntry) {
                                     val rel = parser.getAttributeValue(null, "rel")
                                     if (rel == null || rel == "alternate") {
@@ -281,7 +287,7 @@ class RssActivity : AppCompatActivity() {
                         }
                     }
                     org.xmlpull.v1.XmlPullParser.END_TAG -> {
-                        val tag = parser.name
+                        val tag = normTag(parser.name)
                         when (tag) {
                             "item", "entry" -> {
                                 val titleTrim = currentTitle.trim()
@@ -294,7 +300,7 @@ class RssActivity : AppCompatActivity() {
                                 inItem = false; inEntry = false
                             }
                         }
-                        currentTag = null
+                        currentTag = ""
                     }
                 }
                 event = parser.next()
