@@ -406,7 +406,7 @@ class MainActivity : AppCompatActivity() {
         if (homeMenuSheet?.isAdded == true) return
         homeMenuSheet = HomeMenuSheet().also {
             it.onSettings = {
-                startActivity(Intent(this, SettingsActivity::class.java))
+                startActivity(Intent(this, SettingsIndexActivity::class.java))
             }
             it.onSorted = {
                 recreate()

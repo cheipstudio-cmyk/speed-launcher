@@ -67,6 +67,12 @@
             android:exported="false" />
 
         <activity
+            android:name=".SettingsIndexActivity"
+            android:label="@string/settings_title"
+            android:theme="@style/Theme.SpeedLauncher"
+            android:exported="false" />
+
+        <activity
             android:name=".HiddenAppsActivity"
             android:label="@string/hidden_apps_title"
             android:theme="@style/Theme.SpeedLauncher"
@@ -75,6 +81,12 @@
         <activity
             android:name=".RssActivity"
             android:label="@string/rss_title"
+            android:theme="@style/Theme.SpeedLauncher"
+            android:exported="false" />
+
+        <activity
+            android:name=".RecommendedPickerActivity"
+            android:label="@string/rec_picker_title"
             android:theme="@style/Theme.SpeedLauncher"
             android:exported="false" />
 

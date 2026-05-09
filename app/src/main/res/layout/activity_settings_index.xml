@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="0dp"
+        app:liftOnScroll="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/settings_title"
+            app:titleCentered="true"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="?attr/colorOnSurface" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
+
+            <!-- Aspetto -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAspetto" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pink">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_appearance" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_appearance_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Schermata Home -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxHome" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightgreen">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_home_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_home" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_home_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Drawer -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxDrawer" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_apps_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_drawer" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_drawer_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ricerca -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxSearch" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_yellow">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_search_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_search" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_search_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Gesti -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxGestures" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_gesture" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_gestures" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_gestures_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Lingua e regione -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxLanguage" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_translate">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_translate" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_language" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_language_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Backup e ripristino -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxBackup" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_refresh">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_refresh" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_backup" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_backup_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Tutte le impostazioni (avanzate) -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxAdvanced" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_grey">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_tune" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_advanced" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_advanced_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Informazioni -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxInfo" style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_info">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_info_outline" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_info" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_info_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

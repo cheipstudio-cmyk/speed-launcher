@@ -123,15 +123,18 @@ object FolderSheet {
             layoutParams = lp
         }
 
-        // v32: TextView + dialog di rename separato. Zero glitch tastiera.
+        // v32+v146: TextView Pixel-style — più grande, regular, allineato a sinistra
         val nameLabel = TextView(context).apply {
             text = folder.name
-            textSize = 20f
+            textSize = 24f
             setTextColor(textColor)
             setSingleLine(true)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.CENTER
+            setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.NORMAL))
+            gravity = Gravity.START
             background = null
+            // padding leggero per non incollare al bordo
+            val pad = (4 * density).toInt()
+            setPadding(pad, 0, pad, 0)
             isClickable = true
             isFocusable = true
             val pad = (8 * density).toInt()
