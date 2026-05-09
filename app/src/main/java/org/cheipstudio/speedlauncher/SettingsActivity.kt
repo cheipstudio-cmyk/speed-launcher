@@ -82,6 +82,25 @@ class SettingsActivity : AppCompatActivity() {
         if (!scrollTo.isNullOrEmpty()) {
             binding.settingsScroll.post { scrollToSection(scrollTo) }
         }
+        
+        // v147: filter mode — mostra solo una sezione, nasconde il resto
+        val filterSection = intent.getStringExtra("filterSection")
+        if (!filterSection.isNullOrEmpty()) {
+            binding.settingsScroll.post { applySectionFilter(filterSection) }
+            // Cambia titolo toolbar
+            val titleRes = when (filterSection) {
+                "appearance" -> R.string.settings_idx_appearance
+                "home" -> R.string.settings_idx_home
+                "drawer" -> R.string.settings_idx_drawer
+                "search" -> R.string.settings_idx_search
+                "gestures" -> R.string.settings_idx_gestures
+                "language" -> R.string.settings_idx_language
+                "backup" -> R.string.settings_idx_backup
+                "info" -> R.string.settings_idx_info
+                else -> R.string.settings_title
+            }
+            binding.toolbar.setTitle(titleRes)
+        }
         // v140: rimossa opzione blur sfondo, reset a 0 per migrare da versioni precedenti
         if ((settings.wallpaperBlur.value ?: 0) != 0) settings.setWallpaperBlur(0)
 
@@ -1524,4 +1543,66 @@ override fun onResume() {
     
     private fun findViewByString(@Suppress("UNUSED_PARAMETER") hint: String): android.view.View? = null
     
+
+    /** v147: nasconde tutto tranne la sezione richiesta. Le sezioni sono delimitate dai TextView
+     *  con style PixelSectionTitle (intestazioni). */
+    private fun applySectionFilter(section: String) {
+        val container = (binding.settingsScroll.getChildAt(0) as? android.view.ViewGroup) ?: return
+        // Mappa sezione → titoli da mostrare (texts dei TextView intestazione)
+        val keepTitles = when (section) {
+            "appearance" -> setOf(
+                getString(R.string.settings_section_appearance)
+            )
+            "home" -> setOf(
+                getString(R.string.settings_section_home_layout)
+            )
+            "drawer" -> setOf(
+                getString(R.string.settings_section_drawer)
+            )
+            "search" -> setOf(
+                // La barra ricerca non ha sezione propria → fallback: sezione layout home
+                getString(R.string.settings_section_home_layout)
+            )
+            "gestures" -> setOf(
+                getString(R.string.settings_section_gestures)
+            )
+            "language" -> setOf(
+                getString(R.string.settings_section_language)
+            )
+            "backup" -> setOf(
+                getString(R.string.settings_section_backup)
+            )
+            "info" -> setOf(
+                getString(R.string.settings_section_info)
+            )
+            else -> return
+        }
+        
+        // Scorro i figli del container, mantengo solo le sezioni richieste
+        var currentSectionVisible = false
+        for (i in 0 until container.childCount) {
+            val child = container.getChildAt(i)
+            // È un titolo sezione?
+            if (child is android.widget.TextView && child.text != null) {
+                val text = child.text.toString()
+                // Verifico se è una sezione (anche se non perfetto, basta che sia uno dei nostri titoli)
+                val isSectionTitle = isPixelSectionTitle(child)
+                if (isSectionTitle) {
+                    currentSectionVisible = keepTitles.contains(text)
+                    child.visibility = if (currentSectionVisible) android.view.View.VISIBLE else android.view.View.GONE
+                    continue
+                }
+            }
+            // Item normale: visibile se la sezione corrente è visibile
+            child.visibility = if (currentSectionVisible) android.view.View.VISIBLE else android.view.View.GONE
+        }
+    }
+    
+    private fun isPixelSectionTitle(tv: android.widget.TextView): Boolean {
+        // I titoli hanno textSize 18sp e textColor primary
+        return try {
+            tv.textSize >= 18f * resources.displayMetrics.scaledDensity * 0.9f &&
+                tv.textSize <= 18f * resources.displayMetrics.scaledDensity * 1.1f
+        } catch (_: Throwable) { false }
+    }
 }

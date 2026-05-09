@@ -335,7 +335,7 @@ Vuoi scaricarla?</string>
     <string name="settings_idx_gestures">Gesti</string>
     <string name="settings_idx_gestures_sub">Swipe down notifiche, doppio tap</string>
     <string name="settings_idx_language">Lingua</string>
-    <string name="settings_idx_language_sub">Lingua dell'app</string>
+    <string name="settings_idx_language_sub">Lingua dell\'app</string>
     <string name="settings_idx_backup">Backup e aggiornamenti</string>
     <string name="settings_idx_backup_sub">Esporta, importa, controlla aggiornamenti</string>
     <string name="settings_idx_advanced">Tutte le impostazioni</string>

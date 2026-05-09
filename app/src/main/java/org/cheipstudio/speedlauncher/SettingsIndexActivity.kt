@@ -40,7 +40,7 @@ class SettingsIndexActivity : AppCompatActivity() {
 
     private fun openSection(section: String) {
         val intent = Intent(this, SettingsActivity::class.java)
-        if (section.isNotEmpty()) intent.putExtra("scrollTo", section)
+        if (section.isNotEmpty()) intent.putExtra("filterSection", section)
         startActivity(intent)
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out)
     }

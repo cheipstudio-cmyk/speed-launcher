@@ -132,9 +132,6 @@ object FolderSheet {
             setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.NORMAL))
             gravity = Gravity.START
             background = null
-            // padding leggero per non incollare al bordo
-            val pad = (4 * density).toInt()
-            setPadding(pad, 0, pad, 0)
             isClickable = true
             isFocusable = true
             val pad = (8 * density).toInt()
