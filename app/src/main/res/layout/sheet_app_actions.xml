@@ -16,7 +16,6 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/bg_drag_handle" />
 
-    <!-- App header: icona grande + nome -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,7 +43,6 @@
             android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <!-- Card raggruppata Pixel-style -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +50,7 @@
         app:cardCornerRadius="28dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
-        
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,6 +83,33 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/actionPin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="64dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_star_outline"
+                    app:tint="?attr/colorOnSurface" />
+                <TextView
+                    android:id="@+id/pinLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:text="@string/action_pin"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/actionHide"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -101,7 +126,7 @@
                     android:src="@drawable/ic_visibility_off"
                     app:tint="?attr/colorOnSurface" />
                 <TextView
-                    android:id="@+id/actionHideLabel"
+                    android:id="@+id/hideLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
