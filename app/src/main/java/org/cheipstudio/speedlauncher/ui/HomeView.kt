@@ -246,10 +246,15 @@ class HomeView @JvmOverloads constructor(
                 binding.rssEdgeIndicator.visibility = if (it == true) View.VISIBLE else View.GONE
             }
         }
-        // v185: stato iniziale + animazione pulse
+        // v190: stato iniziale + animazione pulse + click trigger (no più swipe conflittuale)
         binding.rssEdgeIndicator.visibility = 
             if (settings.rssPanelEnabled.value == true) View.VISIBLE else View.GONE
         binding.rssEdgeIndicator.alpha = 0.7f
+        binding.rssEdgeIndicator.isClickable = true
+        binding.rssEdgeIndicator.setOnClickListener {
+            performHapticFeedbackLight()
+            onSwipeRightFromLeftEdge?.invoke()
+        }
         // Pulse subtle: alpha 0.4 ↔ 0.8 in loop
         val pulse = android.animation.ObjectAnimator.ofFloat(binding.rssEdgeIndicator, "alpha", 0.4f, 0.8f).apply {
             duration = 1400
@@ -721,15 +726,6 @@ class HomeView @JvmOverloads constructor(
                     tracking = false
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                     StatusBarHelper.expandNotifications(context)
-                    return true
-                }
-                // v185: swipe orizzontale da sinistra verso destra → RSS panel
-                val dxRel = ev.x - trackStartX
-                if (settings.rssPanelEnabled.value == true &&
-                    dxRel > swipeThreshold * 0.7f && abs(dxRel) > abs(dy) * 1.0f) {
-                    tracking = false
-                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
-                    onSwipeRightFromLeftEdge?.invoke()
                     return true
                 }
             }

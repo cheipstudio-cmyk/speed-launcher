@@ -3,6 +3,10 @@
 
     <style name="Theme.SpeedLauncher" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="materialAlertDialogTheme">@style/PixelAlertDialog</item>
+        <item name="textAppearanceTitleLarge">@style/PixelTitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/PixelTitleMedium</item>
+        <item name="textAppearanceBodyLarge">@style/PixelBodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/PixelBodyMedium</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:windowShowWallpaper">true</item>

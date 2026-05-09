@@ -315,7 +315,33 @@ class RssActivity : AppCompatActivity() {
                 event = parser.next()
             }
             android.util.Log.d("RssActivity", "Parsed ${out.size} articles from $url")
-            // v186: se 0 articoli, log primi 200 char del body per debug
+            
+            // v189: fallback REGEX parsing se XmlPullParser non ha trovato nulla
+            if (out.isEmpty() && bodyBytes.size > 100) {
+                try {
+                    val bodyStr = String(bodyBytes, startOffset, bodyBytes.size - startOffset, charset(charset))
+                    val itemRe = Regex("<(?:item|entry)\\b[^>]*>([\\s\\S]*?)</(?:item|entry)>", RegexOption.IGNORE_CASE)
+                    val titleRe = Regex("<title[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</title>", RegexOption.IGNORE_CASE)
+                    val linkRe = Regex("<link[^>]*?href=[\"']([^\"']+)[\"'][^>]*/?>|<link[^>]*>([\\s\\S]*?)</link>", RegexOption.IGNORE_CASE)
+                    val pubRe = Regex("<(?:pubDate|published|updated)[^>]*>([\\s\\S]*?)</(?:pubDate|published|updated)>", RegexOption.IGNORE_CASE)
+                    
+                    for (m in itemRe.findAll(bodyStr)) {
+                        val itemBody = m.groupValues[1]
+                        val title = titleRe.find(itemBody)?.groupValues?.get(1)?.trim()?.replace(Regex("<[^>]+>"), "") ?: ""
+                        val linkM = linkRe.find(itemBody)
+                        val link = (linkM?.groupValues?.get(1)?.takeIf { it.isNotBlank() } 
+                                   ?: linkM?.groupValues?.get(2))?.trim() ?: ""
+                        val pubDate = pubRe.find(itemBody)?.groupValues?.get(1)?.trim() ?: ""
+                        if (title.isNotBlank() && link.isNotBlank()) {
+                            out.add(Article(title, link, url.take(40), parsePubDate(pubDate)))
+                        }
+                    }
+                    android.util.Log.d("RssActivity", "Regex fallback found ${out.size} articles")
+                } catch (t: Throwable) {
+                    android.util.Log.e("RssActivity", "Regex fallback failed", t)
+                }
+            }
+            
             if (out.isEmpty()) {
                 val preview = String(bodyBytes, startOffset, 
                     minOf(200, bodyBytes.size - startOffset))

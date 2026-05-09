@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.card.MaterialCardView
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 
 /**
- * v181: BottomSheet per ridimensionare/spostare il widget. Long press su widget montato → questa.
+ * v190: BottomSheet Pixel Material Expressive per ridimensionare/spostare il widget.
  */
 class WidgetResizeSheet : BottomSheetDialogFragment() {
 
@@ -31,54 +31,94 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
         val root = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(
-                (16 * density).toInt(), (12 * density).toInt(),
-                (16 * density).toInt(), (16 * density).toInt()
+                (16 * density).toInt(), (8 * density).toInt(),
+                (16 * density).toInt(), (24 * density).toInt()
             )
         }
+        
+        // Drag handle
+        root.addView(View(ctx).apply {
+            background = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.bg_drag_handle)
+            val lp = LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
+            lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
+            lp.bottomMargin = (16 * density).toInt()
+            layoutParams = lp
+        })
 
         // Title
         root.addView(TextView(ctx).apply {
             text = getString(R.string.widget_resize_title)
-            textSize = 18f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setPadding(0, 0, 0, (16 * density).toInt())
+            textSize = 22f
+            setTextColor(resolveColor(com.google.android.material.R.attr.colorOnSurface))
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            letterSpacing = -0.01f
+            setPadding((8 * density).toInt(), 0, 0, (20 * density).toInt())
         })
 
-        // SEZIONE: Posizione
+        // Sezione Posizione
         addSection(root, getString(R.string.settings_widget_position), density)
-        addRow(root, getString(R.string.position_top), density) {
-            settings.setWidgetPosition("top"); onChanged?.invoke(); dismissAllowingStateLoss()
-        }
-        addRow(root, getString(R.string.position_above_search), density) {
-            settings.setWidgetPosition("above_search"); onChanged?.invoke(); dismissAllowingStateLoss()
-        }
-        addRow(root, getString(R.string.position_below_search), density) {
-            settings.setWidgetPosition("below_search"); onChanged?.invoke(); dismissAllowingStateLoss()
+        addCard(root, density,
+            listOf(
+                getString(R.string.widget_pos_top) to "top",
+                getString(R.string.widget_pos_middle) to "middle",
+                getString(R.string.widget_pos_bottom) to "bottom"
+            )) { value ->
+            settings.setWidgetPosition(value); onChanged?.invoke(); dismissAllowingStateLoss()
         }
 
-        // SEZIONE: Altezza
+        // Sezione Altezza
         addSection(root, getString(R.string.settings_widget_height), density)
-        for ((label, value) in listOf("Piccolo (100dp)" to 100, "Medio (170dp)" to 170, "Grande (240dp)" to 240, "Extra (300dp)" to 300)) {
-            addRow(root, label, density) {
-                settings.setWidgetHeight(value); onChanged?.invoke(); dismissAllowingStateLoss()
-            }
+        addCard(root, density,
+            listOf(
+                "Piccolo" to "100",
+                "Medio" to "170",
+                "Grande" to "240",
+                "Extra" to "300"
+            )) { value ->
+            settings.setWidgetHeight(value.toInt()); onChanged?.invoke(); dismissAllowingStateLoss()
         }
 
-        // SEZIONE: Larghezza
+        // Sezione Larghezza
         addSection(root, getString(R.string.settings_widget_width), density)
-        for ((label, value) in listOf("50%" to 50, "75%" to 75, "100%" to 100)) {
-            addRow(root, label, density) {
-                settings.setWidgetWidthPercent(value); onChanged?.invoke(); dismissAllowingStateLoss()
-            }
+        addCard(root, density,
+            listOf("50%" to "50", "75%" to "75", "100%" to "100")) { value ->
+            settings.setWidgetWidthPercent(value.toInt()); onChanged?.invoke(); dismissAllowingStateLoss()
         }
 
-        // SEZIONE: Rimuovi
+        // Rimuovi (card distinta in rosso)
         addSection(root, "", density)
-        addRow(root, getString(R.string.widget_remove_action), density, isDestructive = true) {
-            onRemove?.invoke(); dismissAllowingStateLoss()
+        val removeCard = MaterialCardView(ctx).apply {
+            radius = 28f * density
+            cardElevation = 0f
+            strokeWidth = 0
+            setCardBackgroundColor(resolveColor(com.google.android.material.R.attr.colorErrorContainer))
+            isClickable = true
+            isFocusable = true
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.topMargin = (4 * density).toInt()
+            layoutParams = lp
         }
+        val removeText = TextView(ctx).apply {
+            text = getString(R.string.widget_remove_action)
+            textSize = 16f
+            setTextColor(resolveColor(com.google.android.material.R.attr.colorOnErrorContainer))
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            gravity = android.view.Gravity.CENTER
+            setPadding(
+                (24 * density).toInt(), (18 * density).toInt(),
+                (24 * density).toInt(), (18 * density).toInt()
+            )
+            val tvSel = android.util.TypedValue()
+            ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
+            setBackgroundResource(tvSel.resourceId)
+        }
+        removeCard.addView(removeText)
+        removeCard.setOnClickListener { onRemove?.invoke(); dismissAllowingStateLoss() }
+        root.addView(removeCard)
 
-        // Wrap in scroll
         val scroll = androidx.core.widget.NestedScrollView(ctx).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -89,43 +129,67 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
         return scroll
     }
 
+    private fun resolveColor(attr: Int): Int {
+        val tv = android.util.TypedValue()
+        requireContext().theme.resolveAttribute(attr, tv, true)
+        return tv.data
+    }
+
     private fun addSection(parent: LinearLayout, label: String, density: Float) {
         if (label.isNotBlank()) {
             parent.addView(TextView(parent.context).apply {
                 text = label
                 textSize = 13f
-                setTextColor(android.graphics.Color.parseColor("#888888"))
-                setPadding(0, (12 * density).toInt(), 0, (4 * density).toInt())
+                setTextColor(resolveColor(com.google.android.material.R.attr.colorPrimary))
+                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
                 isAllCaps = true
+                letterSpacing = 0.08f
+                setPadding(
+                    (12 * density).toInt(), (16 * density).toInt(),
+                    (12 * density).toInt(), (8 * density).toInt()
+                )
             })
         } else {
-            // Spacer
             parent.addView(View(parent.context).apply {
                 layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, (8 * density).toInt()
+                    LinearLayout.LayoutParams.MATCH_PARENT, (12 * density).toInt()
                 )
             })
         }
     }
 
-    private fun addRow(parent: LinearLayout, label: String, density: Float, isDestructive: Boolean = false, onClick: () -> Unit) {
+    private fun addCard(parent: LinearLayout, density: Float, items: List<Pair<String, String>>, onClick: (String) -> Unit) {
         val ctx = parent.context
-        val tv = TextView(ctx).apply {
-            text = label
-            textSize = 16f
-            setPadding(
-                (8 * density).toInt(), (14 * density).toInt(),
-                (8 * density).toInt(), (14 * density).toInt()
+        val card = MaterialCardView(ctx).apply {
+            radius = 28f * density
+            cardElevation = 0f
+            strokeWidth = 0
+            setCardBackgroundColor(resolveColor(com.google.android.material.R.attr.colorSurfaceContainerHigh))
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            if (isDestructive) {
-                setTextColor(android.graphics.Color.parseColor("#E53935"))
-            }
-            val tv2 = android.util.TypedValue()
-            ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, tv2, true)
-            setBackgroundResource(tv2.resourceId)
-            isClickable = true
-            setOnClickListener { onClick() }
+            layoutParams = lp
         }
-        parent.addView(tv)
+        val ll = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
+        for ((label, value) in items) {
+            val tv = TextView(ctx).apply {
+                text = label
+                textSize = 16f
+                setTextColor(resolveColor(com.google.android.material.R.attr.colorOnSurface))
+                setPadding(
+                    (24 * density).toInt(), (16 * density).toInt(),
+                    (24 * density).toInt(), (16 * density).toInt()
+                )
+                val tvSel = android.util.TypedValue()
+                ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
+                setBackgroundResource(tvSel.resourceId)
+                isClickable = true
+                setOnClickListener { onClick(value) }
+            }
+            ll.addView(tv)
+        }
+        card.addView(ll)
+        parent.addView(card)
     }
 }

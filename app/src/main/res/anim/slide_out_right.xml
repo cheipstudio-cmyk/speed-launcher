@@ -2,13 +2,13 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false">
     <translate
+        android:interpolator="@interpolator/m3_emphasized_accelerate"
         android:fromXDelta="0"
-        android:toXDelta="15%p"
-        android:duration="200"
-        android:interpolator="@android:interpolator/accelerate_quint" />
+        android:toXDelta="100%p"
+        android:duration="350" />
     <alpha
+        android:interpolator="@interpolator/m3_emphasized_accelerate"
         android:fromAlpha="1"
         android:toAlpha="0"
-        android:duration="180"
-        android:interpolator="@android:interpolator/accelerate_quint" />
+        android:duration="280" />
 </set>

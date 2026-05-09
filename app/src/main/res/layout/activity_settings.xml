@@ -19,7 +19,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:expandedTitleMarginStart="28dp"
             app:expandedTitleMarginEnd="28dp"
-            app:expandedTitleMarginBottom="14dp"
+            app:expandedTitleMarginBottom="24dp"
             app:maxLines="1"
             app:expandedTitleTextAppearance="@style/PixelExpandedTitle"
             app:collapsedTitleTextAppearance="@style/PixelCollapsedTitle"
