@@ -174,13 +174,9 @@ class HomeView @JvmOverloads constructor(
 
         // v32: setup callback per entrambe le RecommendedView (top + bottom)
         val onRecClick: (org.cheipstudio.speedlauncher.data.AppInfo) -> Unit = { app ->
+            // v160: usa AppRepository.launch per beneficiare dell'animazione di apertura Pixel-style
             try {
-                val launchIntent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-                if (launchIntent != null) {
-                    launchIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(launchIntent)
-                }
-                SpeedApp.instance.usageTracker.recordLaunch(app.key)
+                SpeedApp.instance.appRepository.launch(app, binding.recommendedRow)
             } catch (_: Throwable) {}
             postDelayed({ refreshRecommended() }, 500)
         }

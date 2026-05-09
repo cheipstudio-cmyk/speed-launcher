@@ -225,16 +225,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // v144: animazione di entrata "fresh" quando si torna alla home
+        // v160: animazione di entrata Pixel-style: zoom-out + fade dolce
         try {
             val homeContent = binding.homeView
-            homeContent.alpha = 0.4f
-            homeContent.translationY = 20f * resources.displayMetrics.density
+            homeContent.alpha = 0f
+            homeContent.scaleX = 1.06f
+            homeContent.scaleY = 1.06f
             homeContent.animate()
                 .alpha(1f)
-                .translationY(0f)
-                .setDuration(280)
-                .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(220)
+                .setInterpolator(android.view.animation.PathInterpolator(0.0f, 0.0f, 0.2f, 1.0f))
                 .start()
         } catch (_: Throwable) {}
         widgetHostController.startListening()

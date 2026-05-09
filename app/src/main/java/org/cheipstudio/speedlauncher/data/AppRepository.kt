@@ -109,6 +109,34 @@ class AppRepository(private val context: Context) {
     }
 
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
+        // v160: prima del lancio, breve "push" dell'icona (scale 1 -> 0.85 -> 1.05 -> 1) per feedback visivo
+        if (sourceView != null && sourceView.width > 0) {
+            try {
+                sourceView.animate().cancel()
+                sourceView.animate()
+                    .scaleX(0.88f).scaleY(0.88f)
+                    .setDuration(70)
+                    .setInterpolator(android.view.animation.AccelerateInterpolator())
+                    .withEndAction {
+                        try {
+                            sourceView.animate()
+                                .scaleX(1f).scaleY(1f)
+                                .setDuration(90)
+                                .setInterpolator(android.view.animation.OvershootInterpolator(2.5f))
+                                .start()
+                            doLaunch(app, sourceView)
+                        } catch (_: Throwable) {
+                            doLaunch(app, sourceView)
+                        }
+                    }
+                    .start()
+                return
+            } catch (_: Throwable) {}
+        }
+        doLaunch(app, sourceView)
+    }
+    
+    private fun doLaunch(app: AppInfo, sourceView: android.view.View?) {
         val component = android.content.ComponentName(app.packageName, app.componentName)
         val (sourceBounds, options) = buildLaunchAnimation(sourceView)
         try {
