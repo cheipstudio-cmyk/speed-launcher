@@ -357,4 +357,6 @@ Download now?</string>
     <string name="widget_time_label">Time</string>
     <string name="widget_battery_label">Battery</string>
     <string name="search_universal">Search anywhere</string>
+    <string name="settings_idx_system">System</string>
+    <string name="settings_idx_system_sub">Default launcher, notification access, landscape mode</string>
 </resources>

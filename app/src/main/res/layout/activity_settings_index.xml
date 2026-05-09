@@ -184,6 +184,22 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/idxSystem" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem" android:paddingVertical="20dp">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_grey">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_tune" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_idx_system" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_idx_system_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxInfo" style="@style/PixelCard"
                 android:clickable="true"
                 android:focusable="true"

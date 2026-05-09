@@ -33,6 +33,7 @@ class SettingsIndexActivity : AppCompatActivity() {
         binding.idxGestures.setOnClickListener { openSection("gestures") }
         binding.idxLanguage.setOnClickListener { openSection("language") }
         binding.idxBackup.setOnClickListener { openSection("backup") }
+        binding.idxSystem.setOnClickListener { openSection("system") }
         binding.idxInfo.setOnClickListener { openSection("info") }
     }
 

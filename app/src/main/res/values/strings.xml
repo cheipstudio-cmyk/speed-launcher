@@ -357,4 +357,6 @@ Vuoi scaricarla?</string>
     <string name="widget_time_label">Ora</string>
     <string name="widget_battery_label">Batteria</string>
     <string name="search_universal">Cerca ovunque</string>
+    <string name="settings_idx_system">Sistema</string>
+    <string name="settings_idx_system_sub">Launcher predefinito, accesso notifiche, modalità orizzontale</string>
 </resources>

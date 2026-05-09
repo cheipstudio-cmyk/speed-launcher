@@ -25,7 +25,7 @@ import kotlin.concurrent.thread
 class RssActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.home_slide_in_back, R.anim.rss_slide_out_left_full)
+        overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
     }
 
 
@@ -41,43 +41,17 @@ class RssActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         val density = resources.displayMetrics.density
 
-        // v172: Outer container trasparente (mostra wallpaper sotto)
-        val outer = android.widget.FrameLayout(this).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            setBackgroundColor(0)  // trasparente
-        }
-        
-        // Card grande full-width con corner top arrotondati
-        val card = com.google.android.material.card.MaterialCardView(this).apply {
-            radius = (28 * density)
-            cardElevation = (4 * density)
-            setCardBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSurface))
-            val lp = android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            // Margine top per status bar + padding laterale
-            lp.topMargin = (32 * density).toInt()
-            lp.leftMargin = (12 * density).toInt()
-            lp.rightMargin = (12 * density).toInt()
-            lp.bottomMargin = (12 * density).toInt()
-            layoutParams = lp
-        }
-        
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSurface))
         }
 
         val toolbar = MaterialToolbar(this).apply {
             title = getString(R.string.rss_title)
-            setBackgroundColor(0)
             navigationIcon = androidx.core.content.ContextCompat.getDrawable(this@RssActivity, R.drawable.ic_arrow_back)
             setNavigationOnClickListener { finish() }
             layoutParams = LinearLayout.LayoutParams(
@@ -130,66 +104,10 @@ class RssActivity : AppCompatActivity() {
         }
         root.addView(listView)
         
-        card.addView(root)
-        outer.addView(card)
-        setContentView(outer)
+        setContentView(root)
         loadFeeds()
-        
-        // v178: drag-to-close — l'utente trascina la card verso sinistra, segue il dito
-        var startX = 0f
-        var dragging = false
-        var screenW = 1
-        outer.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                screenW = outer.width.coerceAtLeast(1)
-                outer.viewTreeObserver.removeOnGlobalLayoutListener(this)
-            }
-        })
-        outer.setOnTouchListener { _, ev ->
-            when (ev.action) {
-                android.view.MotionEvent.ACTION_DOWN -> {
-                    startX = ev.rawX
-                    dragging = false
-                    false
-                }
-                android.view.MotionEvent.ACTION_MOVE -> {
-                    val dx = ev.rawX - startX
-                    if (!dragging && dx < -30f) {
-                        dragging = true
-                    }
-                    if (dragging && dx < 0) {
-                        card.translationX = dx
-                        card.alpha = (1f + dx / screenW).coerceIn(0.4f, 1f)
-                    }
-                    dragging
-                }
-                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                    if (dragging) {
-                        val dx = ev.rawX - startX
-                        if (dx < -screenW * 0.3f) {
-                            // Animazione completamento + finish
-                            card.animate()
-                                .translationX(-screenW.toFloat())
-                                .alpha(0f)
-                                .setDuration(160)
-                                .withEndAction { finish() }
-                                .start()
-                        } else {
-                            // Annulla, torna in posizione
-                            card.animate()
-                                .translationX(0f)
-                                .alpha(1f)
-                                .setDuration(180)
-                                .start()
-                        }
-                        dragging = false
-                        true
-                    } else false
-                }
-                else -> false
-            }
-        }
     }
+
 
 
     private fun loadFeeds() {

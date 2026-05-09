@@ -241,13 +241,11 @@ class HomeView @JvmOverloads constructor(
         repeat(initialPageCount) { idx -> addPageAt(idx) }
         updatePageIndicator()
         (context as? androidx.lifecycle.LifecycleOwner)?.let { lo ->
-            SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) { updatePageIndicator() }
             SpeedApp.instance.settingsRepository.searchMode.observe(lo) { updateSearchBarText() }
         }
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
-        binding.pageIndicator.onRssTap = { onSwipeRightFromLeftEdge?.invoke() }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
@@ -441,8 +439,7 @@ class HomeView @JvmOverloads constructor(
 
     private fun updatePageIndicator() {
         binding.pageIndicator.setPages(pages.size, binding.pagedHome.currentPage.coerceAtMost(pages.size - 1))
-        binding.pageIndicator.setShowRssIndicator(settings.rssPanelEnabled.value == true)
-        binding.pageIndicator.visibility = if (pages.size > 1 || settings.rssPanelEnabled.value == true) View.VISIBLE else View.INVISIBLE
+        binding.pageIndicator.visibility = if (pages.size > 1) View.VISIBLE else View.INVISIBLE
     }
 
     private fun maybeCreateNextPage() {

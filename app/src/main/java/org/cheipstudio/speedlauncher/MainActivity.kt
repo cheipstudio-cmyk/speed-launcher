@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         binding.homeView.onSwipeRightFromLeftEdge = {
             try {
                 startActivity(android.content.Intent(this, org.cheipstudio.speedlauncher.RssActivity::class.java))
-                overridePendingTransition(R.anim.rss_slide_in_right_full, R.anim.home_slide_out_partial)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             } catch (_: Throwable) {}
         }
         binding.homeView.onSearchTap = { openDrawerWithSearch() }

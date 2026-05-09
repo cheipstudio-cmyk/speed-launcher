@@ -75,7 +75,11 @@ class SettingsActivity : AppCompatActivity() {
 
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        
+        // Trovo CollapsingToolbarLayout (parent diretto del toolbar)
+        val ctl = binding.toolbar.parent as? com.google.android.material.appbar.CollapsingToolbarLayout
         
         // v151: filter mode dall'index categorie
         val filterSection = intent.getStringExtra("filterSection")
@@ -91,9 +95,12 @@ class SettingsActivity : AppCompatActivity() {
                 "language" -> R.string.settings_idx_language
                 "backup" -> R.string.settings_idx_backup
                 "info" -> R.string.settings_idx_info
+                "system" -> R.string.settings_idx_system
                 else -> R.string.settings_title
             }
-            binding.toolbar.setTitle(titleRes)
+            ctl?.title = getString(titleRes)
+        } else {
+            ctl?.title = getString(R.string.settings_title)
         }
         // v140: rimossa opzione blur sfondo, reset a 0 per migrare da versioni precedenti
         if ((settings.wallpaperBlur.value ?: 0) != 0) settings.setWallpaperBlur(0)
@@ -1573,7 +1580,9 @@ override fun onResume() {
                 getString(R.string.settings_section_advanced)
             )
             "info" -> setOf(
-                getString(R.string.settings_section_info),
+                getString(R.string.settings_section_info)
+            )
+            "system" -> setOf(
                 getString(R.string.settings_section_general)
             )
             else -> return
