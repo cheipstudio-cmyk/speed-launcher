@@ -342,4 +342,7 @@ Vuoi scaricarla?</string>
     <string name="settings_idx_advanced_sub">Vista completa di ogni opzione</string>
     <string name="settings_idx_info">Informazioni</string>
     <string name="settings_idx_info_sub">Versione, contatti, Telegram</string>
+    <string name="action_pin_home">Aggiungi alla home</string>
+    <string name="action_unpin_home">Rimuovi dalla home</string>
+    <string name="action_app_info">Informazioni app</string>
 </resources>
