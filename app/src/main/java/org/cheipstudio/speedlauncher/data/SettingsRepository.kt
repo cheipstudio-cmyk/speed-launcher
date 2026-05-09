@@ -26,6 +26,10 @@ class SettingsRepository(context: Context) {
     val showHomeLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_HOME_LABELS, true))
     /** v139: mostra etichette icone nel drawer (default true) */
     val showDrawerLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_DRAWER_LABELS, true))
+    /** v151: mostra etichette icone dentro le cartelle (default true) */
+    val showFolderLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_FOLDER_LABELS, true))
+    /** v151: mostra etichette icone nella dock raccomandate (default true) */
+    val showDockLabels = MutableLiveData(prefs.getBoolean(KEY_SHOW_DOCK_LABELS, true))
     /** v139: lista feed RSS (URL CSV-separated) */
     val rssFeeds = MutableLiveData(
         prefs.getString(KEY_RSS_FEEDS, "")?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
@@ -385,6 +389,17 @@ class SettingsRepository(context: Context) {
                 f.delete()
             } catch (_: Throwable) {}
         }
+    }
+
+    
+    fun setShowFolderLabels(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_FOLDER_LABELS, on).apply()
+        showFolderLabels.postValue(on)
+    }
+    
+    fun setShowDockLabels(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_DOCK_LABELS, on).apply()
+        showDockLabels.postValue(on)
     }
 
     companion object {

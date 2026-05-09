@@ -239,6 +239,9 @@ class RecommendedView @JvmOverloads constructor(
             val tlp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             tlp.topMargin = (4 * density).toInt()
             layoutParams = tlp
+            // v151: rispetta toggle "etichette dock raccomandate"
+            visibility = if (SpeedApp.instance.settingsRepository.showDockLabels.value != false)
+                android.view.View.VISIBLE else android.view.View.GONE
         }
         cell.addView(label)
 

@@ -77,17 +77,10 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.toolbar.setNavigationOnClickListener { finish() }
         
-        // v146: scrollTo dalla nuova SettingsIndexActivity
-        val scrollTo = intent.getStringExtra("scrollTo")
-        if (!scrollTo.isNullOrEmpty()) {
-            binding.settingsScroll.post { scrollToSection(scrollTo) }
-        }
-        
-        // v147: filter mode — mostra solo una sezione, nasconde il resto
+        // v151: filter mode dall'index categorie
         val filterSection = intent.getStringExtra("filterSection")
         if (!filterSection.isNullOrEmpty()) {
             binding.settingsScroll.post { applySectionFilter(filterSection) }
-            // Cambia titolo toolbar
             val titleRes = when (filterSection) {
                 "appearance" -> R.string.settings_idx_appearance
                 "home" -> R.string.settings_idx_home
@@ -185,6 +178,18 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchShowDrawerLabels.isChecked = settings.showDrawerLabels.value != false
         binding.switchShowDrawerLabels.setOnCheckedChangeListener { _, on ->
             settings.setShowDrawerLabels(on)
+        }
+        
+        // v151: toggle etichette cartelle
+        binding.switchShowFolderLabels.isChecked = settings.showFolderLabels.value != false
+        binding.switchShowFolderLabels.setOnCheckedChangeListener { _, on ->
+            settings.setShowFolderLabels(on)
+        }
+        
+        // v151: toggle etichette dock
+        binding.switchShowDockLabels.isChecked = settings.showDockLabels.value != false
+        binding.switchShowDockLabels.setOnCheckedChangeListener { _, on ->
+            settings.setShowDockLabels(on)
         }
 
         // v140: toggle sfocatura drawer
@@ -985,10 +990,9 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
-    /** v145: Activity dedicata con drag&drop nativo (ItemTouchHelper) — niente più frecce confuse */
+    /** v151: Activity dedicata con drag&drop nativo */
     private fun showRecommendedManualPicker() {
-        val intent = android.content.Intent(this, RecommendedPickerActivity::class.java)
-        startActivity(intent)
+        startActivity(android.content.Intent(this, RecommendedPickerActivity::class.java))
     }
     
 /** v71+v136: abilita/disabilita ricorsivamente card searchbar */
@@ -1517,92 +1521,5 @@ override fun onResume() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-    /** v146: scrolla a una sezione precisa in base alla key dall'index. */
-    private fun scrollToSection(key: String) {
-        val target: android.view.View? = when (key) {
-            "appearance" -> binding.itemIconShape
-            "home" -> binding.itemGridSize
-            "drawer" -> binding.itemDrawerEnabled
-            "search" -> binding.switchShowSearchbar
-            "gestures" -> findViewByString("ic_gesture")
-            "language" -> findViewByString("translate")
-            "backup" -> binding.itemCheckUpdate
-            "info" -> binding.itemContact
-            else -> null
-        }
-        if (target != null) {
-            try {
-                val location = IntArray(2)
-                target.getLocationInWindow(location)
-                binding.settingsScroll.smoothScrollTo(0, target.top.coerceAtLeast(0))
-            } catch (_: Throwable) {}
-        }
-    }
-    
-    private fun findViewByString(@Suppress("UNUSED_PARAMETER") hint: String): android.view.View? = null
-    
-
-    /** v147: nasconde tutto tranne la sezione richiesta. Le sezioni sono delimitate dai TextView
-     *  con style PixelSectionTitle (intestazioni). */
-    private fun applySectionFilter(section: String) {
-        val container = (binding.settingsScroll.getChildAt(0) as? android.view.ViewGroup) ?: return
-        // Mappa sezione → titoli da mostrare (texts dei TextView intestazione)
-        val keepTitles = when (section) {
-            "appearance" -> setOf(
-                getString(R.string.settings_section_appearance)
-            )
-            "home" -> setOf(
-                getString(R.string.settings_section_home_layout)
-            )
-            "drawer" -> setOf(
-                getString(R.string.settings_section_drawer)
-            )
-            "search" -> setOf(
-                // La barra ricerca non ha sezione propria → fallback: sezione layout home
-                getString(R.string.settings_section_home_layout)
-            )
-            "gestures" -> setOf(
-                getString(R.string.settings_section_gestures)
-            )
-            "language" -> setOf(
-                getString(R.string.settings_section_language)
-            )
-            "backup" -> setOf(
-                getString(R.string.settings_section_backup)
-            )
-            "info" -> setOf(
-                getString(R.string.settings_section_info)
-            )
-            else -> return
-        }
-        
-        // Scorro i figli del container, mantengo solo le sezioni richieste
-        var currentSectionVisible = false
-        for (i in 0 until container.childCount) {
-            val child = container.getChildAt(i)
-            // È un titolo sezione?
-            if (child is android.widget.TextView && child.text != null) {
-                val text = child.text.toString()
-                // Verifico se è una sezione (anche se non perfetto, basta che sia uno dei nostri titoli)
-                val isSectionTitle = isPixelSectionTitle(child)
-                if (isSectionTitle) {
-                    currentSectionVisible = keepTitles.contains(text)
-                    child.visibility = if (currentSectionVisible) android.view.View.VISIBLE else android.view.View.GONE
-                    continue
-                }
-            }
-            // Item normale: visibile se la sezione corrente è visibile
-            child.visibility = if (currentSectionVisible) android.view.View.VISIBLE else android.view.View.GONE
-        }
-    }
-    
-    private fun isPixelSectionTitle(tv: android.widget.TextView): Boolean {
-        // I titoli hanno textSize 18sp e textColor primary
-        return try {
-            tv.textSize >= 18f * resources.displayMetrics.scaledDensity * 0.9f &&
-                tv.textSize <= 18f * resources.displayMetrics.scaledDensity * 1.1f
-        } catch (_: Throwable) { false }
     }
 }

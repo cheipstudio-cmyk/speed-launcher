@@ -7,11 +7,8 @@ import androidx.core.view.WindowCompat
 import org.cheipstudio.speedlauncher.databinding.ActivitySettingsIndexBinding
 
 /**
- * v146: schermata principale settings, stile Niagara/Pixel.
- * Mostra solo categorie cliccabili. Ogni voce apre la SettingsActivity (full)
- * con un EXTRA "scrollTo" per scrollare alla sezione corrispondente.
- *
- * "Tutte le impostazioni" porta in cima alla settings vecchia.
+ * v151: schermata principale Settings stile Niagara/Pixel.
+ * Mostra solo categorie. Ogni voce apre SettingsActivity con extra "filterSection".
  */
 class SettingsIndexActivity : AppCompatActivity() {
 

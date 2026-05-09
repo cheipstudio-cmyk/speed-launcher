@@ -123,7 +123,7 @@ object FolderSheet {
             layoutParams = lp
         }
 
-        // v32+v146: TextView Pixel-style — più grande, regular, allineato a sinistra
+        // v32: TextView + dialog di rename separato. Zero glitch tastiera.
         val nameLabel = TextView(context).apply {
             text = folder.name
             textSize = 24f
@@ -493,6 +493,9 @@ object FolderSheet {
             val tlp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             tlp.topMargin = (6 * density).toInt()
             layoutParams = tlp
+            // v151: rispetta toggle "etichette nelle cartelle"
+            visibility = if (SpeedApp.instance.settingsRepository.showFolderLabels.value != false)
+                android.view.View.VISIBLE else android.view.View.GONE
         }
         cell.addView(label)
 

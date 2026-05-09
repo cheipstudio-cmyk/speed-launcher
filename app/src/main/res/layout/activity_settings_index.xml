@@ -36,7 +36,6 @@
             android:paddingHorizontal="12dp"
             android:paddingVertical="8dp">
 
-            <!-- Aspetto -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxAspetto" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_pink">
@@ -50,7 +49,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Schermata Home -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxHome" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_lightgreen">
@@ -64,7 +62,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Drawer -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxDrawer" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_blue">
@@ -78,7 +75,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ricerca -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxSearch" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_yellow">
@@ -92,7 +88,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Gesti -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxGestures" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_indigo">
@@ -106,7 +101,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Lingua e regione -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxLanguage" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_translate">
@@ -120,7 +114,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Backup e ripristino -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxBackup" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_refresh">
@@ -134,7 +127,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Tutte le impostazioni (avanzate) -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxAdvanced" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_grey">
@@ -148,7 +140,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Informazioni -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/idxInfo" style="@style/PixelCard">
                 <LinearLayout style="@style/PixelItemClickable" android:paddingVertical="20dp">
                     <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_info">
@@ -162,9 +153,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="32dp" />
+            <View android:layout_width="match_parent" android:layout_height="32dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
