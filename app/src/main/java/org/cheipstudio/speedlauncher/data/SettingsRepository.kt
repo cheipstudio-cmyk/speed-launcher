@@ -204,13 +204,13 @@ class SettingsRepository(context: Context) {
         prefs.edit().putString(KEY_BADGE_MODE, mode).apply(); notificationBadgeMode.postValue(mode)
     }
     fun hideApp(appKey: String) {
-        val current = hiddenApps.value ?: mutableSetOf()
+        val current = (hiddenApps.value ?: mutableSetOf()).toMutableSet()
         current.add(appKey)
         prefs.edit().putStringSet(KEY_HIDDEN_APPS, current).apply()
         hiddenApps.postValue(current)
     }
     fun unhideApp(appKey: String) {
-        val current = hiddenApps.value ?: mutableSetOf()
+        val current = (hiddenApps.value ?: mutableSetOf()).toMutableSet()
         current.remove(appKey)
         prefs.edit().putStringSet(KEY_HIDDEN_APPS, current).apply()
         hiddenApps.postValue(current)

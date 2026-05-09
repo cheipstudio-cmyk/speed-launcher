@@ -240,12 +240,10 @@ class HomeView @JvmOverloads constructor(
         val initialPageCount = (maxPageInData + 1).coerceAtLeast(1)
         repeat(initialPageCount) { idx -> addPageAt(idx) }
         updatePageIndicator()
-        SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(
-            (context as androidx.lifecycle.LifecycleOwner)
-        ) { updatePageIndicator() }
-        SpeedApp.instance.settingsRepository.searchMode.observe(
-            (context as androidx.lifecycle.LifecycleOwner)
-        ) { updateSearchBarText() }
+        (context as? androidx.lifecycle.LifecycleOwner)?.let { lo ->
+            SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) { updatePageIndicator() }
+            SpeedApp.instance.settingsRepository.searchMode.observe(lo) { updateSearchBarText() }
+        }
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
@@ -726,6 +724,7 @@ class HomeView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 tracking = false
+                swipeFireVibrated = false  // v177: reset flag così il prossimo gesto può sparare
                 gestureDetector.onTouchEvent(ev)
                 swipeVelocityTracker?.recycle()
                 swipeVelocityTracker = null

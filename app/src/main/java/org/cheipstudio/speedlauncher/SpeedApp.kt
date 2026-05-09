@@ -1,6 +1,7 @@
 package org.cheipstudio.speedlauncher
 
 import android.app.Application
+import android.content.Context
 import com.google.android.material.color.DynamicColors
 import org.cheipstudio.speedlauncher.data.AppRepository
 import org.cheipstudio.speedlauncher.data.AppUsageTracker
@@ -27,6 +28,21 @@ class SpeedApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // v175: log crash globale (utile per investigare crash a freddo dopo reset)
+        Thread.setDefaultUncaughtExceptionHandler { thread, ex ->
+            try {
+                android.util.Log.e("SpeedApp", "FATAL on ${thread.name}", ex)
+                val sw = java.io.StringWriter()
+                ex.printStackTrace(java.io.PrintWriter(sw))
+                getSharedPreferences("speed_crash", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("last_crash", sw.toString().take(8000))
+                    .putLong("last_crash_time", System.currentTimeMillis())
+                    .commit()
+            } catch (_: Throwable) {}
+            // Chiamo il default handler dopo
+            try { android.os.Process.killProcess(android.os.Process.myPid()) } catch (_: Throwable) {}
+        }
         instance = this
         // v113: Material You — accent color del sistema applicato a tutte le activities
         DynamicColors.applyToActivitiesIfAvailable(this)

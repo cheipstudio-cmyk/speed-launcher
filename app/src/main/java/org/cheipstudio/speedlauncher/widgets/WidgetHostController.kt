@@ -23,7 +23,7 @@ class WidgetHostController(private val activity: Activity) {
     var pendingBindWidget: AppWidgetProviderInfo? = null
     var pendingBindAppWidgetId: Int = -1
 
-    fun start() { host.startListening() }
+    fun start() { try { host.startListening() } catch (_: Throwable) {} }
 
     /**
      * v74: restore widget dopo update app.

@@ -125,6 +125,10 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             allApps = apps
             applyFilter(binding.searchInput.text?.toString().orEmpty())
         }
+        // v177: refresh drawer quando un'app viene nascosta/mostrata
+        SpeedApp.instance.settingsRepository.hiddenApps.observe(viewLifecycleOwner) {
+            applyFilter(binding.searchInput.text?.toString().orEmpty())
+        }
 
         binding.searchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

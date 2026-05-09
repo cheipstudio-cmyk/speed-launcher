@@ -231,7 +231,7 @@ class RssActivity : AppCompatActivity() {
             parser.setFeature(org.xmlpull.v1.XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
             // Usa charset del Content-Type quando disponibile, altrimenti UTF-8
             val charset = finalConn.contentType?.let { ct ->
-                Regex("charset=([^;\s]+)", RegexOption.IGNORE_CASE).find(ct)?.groupValues?.get(1)
+                Regex("""charset=([^;\s]+)""", RegexOption.IGNORE_CASE).find(ct)?.groupValues?.get(1)
             } ?: "UTF-8"
             parser.setInput(finalConn.inputStream, charset)
             

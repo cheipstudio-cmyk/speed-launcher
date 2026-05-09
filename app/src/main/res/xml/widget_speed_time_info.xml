@@ -12,5 +12,5 @@
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/widget_speed_time_description"
-    android:icon="@mipmap/ic_launcher"
-    android:previewImage="@mipmap/ic_launcher" />
+    android:icon="@drawable/ic_launcher_widget"
+    android:previewImage="@drawable/ic_launcher_widget" />
