@@ -223,23 +223,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initOrientation() {
-        lastOrientation = resources.configuration.orientation
-    }
-    
-    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
-        // v208: per landscape ↔ portrait è più sicuro recreate() che reapply al volo
-        // (i layout-land/values-land vengono caricati correttamente solo con recreate)
-        val newOrient = newConfig.orientation
-        if (newOrient != lastOrientation) {
-            lastOrientation = newOrient
-            recreate()
-        }
+        // v209: NON ricreo (causava schermo nero), riapplico solo i settings  
+        try {
+            binding.homeView.reapplySettings()
+        } catch (_: Throwable) {}
     }
-    
-    private var lastOrientation: Int = 
-        android.content.res.Configuration.ORIENTATION_UNDEFINED
 
     override fun onResume() {
         super.onResume()

@@ -142,7 +142,12 @@ class WidgetSlotView @JvmOverloads constructor(
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
         val canBind = controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
-        android.util.Log.d("SpeedLauncher", "Widget bind: provider=${info.provider}, canBind=$canBind, hasConfig=${info.configure != null}")
+        // v209: toast diagnostico per debug widget
+        try {
+            android.widget.Toast.makeText(context, 
+                "Widget: canBind=$canBind, config=${info.configure != null}", 
+                android.widget.Toast.LENGTH_LONG).show()
+        } catch (_: Throwable) {}
         if (!canBind) {
             val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
