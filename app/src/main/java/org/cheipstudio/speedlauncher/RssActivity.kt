@@ -108,6 +108,13 @@ class RssActivity : AppCompatActivity() {
         root.addView(listView)
         
         setContentView(root)
+        // v203: fade-in immediato decorView per apertura percepita più veloce
+        try {
+            val dv = window.decorView
+            dv.alpha = 0f
+            dv.animate().alpha(1f).setDuration(180)
+                .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
+        } catch (_: Throwable) {}
         loadFeeds()
     }
 

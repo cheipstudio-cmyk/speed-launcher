@@ -116,14 +116,14 @@ class AppRepository(private val context: Context) {
                 // Squash veloce
                 sourceView.animate()
                     .scaleX(0.80f).scaleY(0.80f)
-                    .setDuration(70)
+                    .setDuration(60)
                     .setInterpolator(android.view.animation.PathInterpolator(0.4f, 0.0f, 1.0f, 0.4f))
                     .withEndAction {
                         try {
                             // Elastic snap-back
                             sourceView.animate()
                                 .scaleX(1f).scaleY(1f)
-                                .setDuration(100)
+                                .setDuration(90)
                                 .setInterpolator(android.view.animation.OvershootInterpolator(3.0f))
                                 .start()
                             doLaunch(app, sourceView)

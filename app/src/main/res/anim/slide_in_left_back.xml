@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false">
+    <!-- v203: entrata back: home torna da sinistra -->
     <translate
         android:interpolator="@interpolator/m3_emphasized_decelerate"
         android:fromXDelta="-30%p"
@@ -9,5 +10,5 @@
     <alpha
         android:fromAlpha="0"
         android:toAlpha="1"
-        android:duration="350" />
+        android:duration="450" />
 </set>

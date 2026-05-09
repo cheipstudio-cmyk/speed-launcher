@@ -227,9 +227,6 @@
 
     <style name="RssEdgeShape">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeTopLeft">0dp</item>
-        <item name="cornerSizeBottomLeft">0dp</item>
-        <item name="cornerSizeTopRight">40dp</item>
-        <item name="cornerSizeBottomRight">40dp</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>

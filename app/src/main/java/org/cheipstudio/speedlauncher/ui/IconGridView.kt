@@ -52,17 +52,15 @@ class IconGridView @JvmOverloads constructor(
         val savedCols = settings.gridCols.value ?: 4
         val savedRows = settings.gridRows.value ?: 4
         if (isLandscape) {
-            // v198: in landscape usa più colonne per riempire la larghezza dello schermo
-            // Aspect ratio dello schermo determina cols ottimali
+            // v202: in landscape lo schermo è basso, MAX 2 righe + più colonne
             val dm = context.resources.displayMetrics
             val ratio = dm.widthPixels.toFloat() / dm.heightPixels.toFloat().coerceAtLeast(1f)
-            val targetCols = when {
-                ratio >= 2.1f -> savedCols + 3  // ultrawide / foldable
-                ratio >= 1.7f -> savedCols + 2  // 16:9 standard
-                else -> savedCols + 1
-            }.coerceIn(savedRows, 8)
-            cols = targetCols
-            rows = savedRows.coerceAtMost(savedCols)
+            cols = when {
+                ratio >= 2.1f -> 8
+                ratio >= 1.7f -> 7
+                else -> 6
+            }
+            rows = 2  // FORZO 2 righe, no più: lo spazio è poco
         } else {
             cols = savedCols
             rows = savedRows

@@ -34,6 +34,13 @@ class HiddenAppsActivity : AppCompatActivity() {
         window.statusBarColor = tv.data
         window.navigationBarColor = tv.data
         setContentView(R.layout.activity_hidden_apps)
+        // v203: fade-in immediato decorView per apertura percepita più veloce
+        try {
+            val dv = window.decorView
+            dv.alpha = 0f
+            dv.animate().alpha(1f).setDuration(180)
+                .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
+        } catch (_: Throwable) {}
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener { finish() }
@@ -84,4 +91,10 @@ class HiddenAppsActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
+    }
+
 }

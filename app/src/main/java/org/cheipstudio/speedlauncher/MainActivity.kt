@@ -283,6 +283,25 @@ class MainActivity : AppCompatActivity() {
                         .start()
                 }
             } catch (_: Throwable) {}
+            
+            // v202: Dock raccomandate (top + bottom) - rimbalzo dal basso
+            for (id in intArrayOf(R.id.recommendedRow, R.id.recommendedRowBottom)) {
+                try {
+                    val v = binding.homeView.findViewById<android.view.View>(id)
+                    v?.let {
+                        if (it.visibility == android.view.View.VISIBLE) {
+                            it.translationY = 50f
+                            it.alpha = 0f
+                            it.animate()
+                                .translationY(0f).alpha(1f)
+                                .setStartDelay(180)
+                                .setDuration(440)
+                                .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
+                                .start()
+                        }
+                    }
+                } catch (_: Throwable) {}
+            }
         } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()

@@ -79,13 +79,25 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         binding.toolbar.setNavigationOnClickListener { finish() }
         
+        // v203: fade-in immediato del content per percezione di apertura veloce
+        binding.root.alpha = 0f
+        binding.root.animate()
+            .alpha(1f)
+            .setDuration(180)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
+        
         // Trovo CollapsingToolbarLayout (parent diretto del toolbar)
         val ctl = binding.toolbar.parent as? com.google.android.material.appbar.CollapsingToolbarLayout
         
         // v151: filter mode dall'index categorie
         val filterSection = intent.getStringExtra("filterSection")
         if (!filterSection.isNullOrEmpty()) {
-            binding.settingsScroll.post { applySectionFilter(filterSection) }
+            binding.settingsScroll.post { 
+                applySectionFilter(filterSection)
+                // v202: animazione entry stagger sugli elementi visibili
+                animateSettingsEntry()
+            }
             val titleRes = when (filterSection) {
                 "appearance" -> R.string.settings_idx_appearance
                 "home" -> R.string.settings_idx_home
@@ -1590,6 +1602,27 @@ override fun onResume() {
     }
 
     /** v151: nasconde tutto tranne la sezione richiesta. */
+    private fun animateSettingsEntry() {
+        try {
+            val container = (binding.settingsScroll.getChildAt(0) as? android.view.ViewGroup) ?: return
+            var idx = 0
+            for (i in 0 until container.childCount) {
+                val v = container.getChildAt(i)
+                if (v.visibility != android.view.View.VISIBLE) continue
+                v.alpha = 0f
+                v.translationY = 30f
+                v.animate()
+                    .alpha(1f).translationY(0f)
+                    .setStartDelay(40L + idx * 30L)
+                    .setDuration(380)
+                    .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
+                    .start()
+                idx++
+                if (idx > 12) break  // limite per non sovraccaricare
+            }
+        } catch (_: Throwable) {}
+    }
+    
     private fun applySectionFilter(section: String) {
         val container = (binding.settingsScroll.getChildAt(0) as? android.view.ViewGroup) ?: return
         // v157: mappa robusta sezione -> titoli (può essere multi-titolo)

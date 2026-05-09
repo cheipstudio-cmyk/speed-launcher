@@ -22,19 +22,47 @@ class SettingsIndexActivity : AppCompatActivity() {
 
         binding = ActivitySettingsIndexBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // v203: fade-in immediato per percezione di apertura veloce
+        binding.root.alpha = 0f
+        binding.root.animate()
+            .alpha(1f)
+            .setDuration(180)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        binding.idxAspetto.setOnClickListener { openSection("appearance") }
-        binding.idxHome.setOnClickListener { openSection("home") }
-        binding.idxAi.setOnClickListener { openSection("ai") }
-        binding.idxDrawer.setOnClickListener { openSection("drawer") }
-        binding.idxSearch.setOnClickListener { openSection("search") }
-        binding.idxGestures.setOnClickListener { openSection("gestures") }
-        binding.idxLanguage.setOnClickListener { openSection("language") }
-        binding.idxBackup.setOnClickListener { openSection("backup") }
-        binding.idxSystem.setOnClickListener { openSection("system") }
-        binding.idxInfo.setOnClickListener { openSection("info") }
+        // v202: tap effect istantaneo + apertura sezione
+        bindCardTap(binding.idxAspetto) { openSection("appearance") }
+        bindCardTap(binding.idxHome) { openSection("home") }
+        bindCardTap(binding.idxAi) { openSection("ai") }
+        bindCardTap(binding.idxDrawer) { openSection("drawer") }
+        bindCardTap(binding.idxSearch) { openSection("search") }
+        bindCardTap(binding.idxGestures) { openSection("gestures") }
+        bindCardTap(binding.idxLanguage) { openSection("language") }
+        bindCardTap(binding.idxBackup) { openSection("backup") }
+        bindCardTap(binding.idxSystem) { openSection("system") }
+        bindCardTap(binding.idxInfo) { openSection("info") }
+    }
+    
+    private fun bindCardTap(card: android.view.View, action: () -> Unit) {
+        card.setOnClickListener {
+            // Push effect: scale 1 → 0.96 → 1 mentre starta l\'activity
+            card.animate().cancel()
+            card.animate()
+                .scaleX(0.96f).scaleY(0.96f)
+                .setDuration(60)
+                .setInterpolator(android.view.animation.PathInterpolator(0.4f, 0f, 1f, 0.4f))
+                .withEndAction {
+                    card.animate()
+                        .scaleX(1f).scaleY(1f)
+                        .setDuration(120)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(2.5f))
+                        .start()
+                    action()
+                }
+                .start()
+        }
     }
 
     private fun openSection(section: String) {
