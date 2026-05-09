@@ -88,7 +88,7 @@
         <activity
             android:name=".RssActivity"
             android:label="@string/rss_title"
-            android:theme="@style/Theme.SpeedLauncher.Settings"
+            android:theme="@style/Theme.SpeedLauncher.Rss"
             android:exported="false" />
 
         <service
@@ -155,6 +155,24 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
         </provider>
+
+    
+        <receiver
+            android:name=".widgets.SpeedTimeWidgetProvider"
+            android:label="@string/widget_speed_time_label"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.TIME_TICK" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_speed_time_info" />
+        </receiver>
 
     </application>
 

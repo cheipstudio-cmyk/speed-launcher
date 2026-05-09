@@ -352,4 +352,9 @@ Vuoi scaricarla?</string>
     <string name="search_action_contacts">Cerca «%1$s» tra i contatti</string>
     <string name="search_action_files">Cerca «%1$s» tra i file</string>
     <string name="search_action_playstore">Cerca «%1$s» su Play Store</string>
+    <string name="widget_speed_time_label">Speed Time</string>
+    <string name="widget_speed_time_description">Ora, data e batteria</string>
+    <string name="widget_time_label">Ora</string>
+    <string name="widget_battery_label">Batteria</string>
+    <string name="search_universal">Cerca ovunque</string>
 </resources>

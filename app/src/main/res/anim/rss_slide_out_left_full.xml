@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@android:interpolator/fast_out_linear_in"
-    android:shareInterpolator="true">
-    <translate android:fromXDelta="0" android:toXDelta="-100%p" android:duration="220" />
-    <alpha android:fromAlpha="1" android:toAlpha="0.6" android:duration="220" />
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromXDelta="0" android:toXDelta="-100%p"
+        android:duration="240"
+        android:interpolator="@android:interpolator/accelerate_decelerate" />
 </set>

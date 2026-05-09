@@ -41,17 +41,43 @@ class RssActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         val density = resources.displayMetrics.density
 
+        // v172: Outer container trasparente (mostra wallpaper sotto)
+        val outer = android.widget.FrameLayout(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            setBackgroundColor(0)  // trasparente
+        }
+        
+        // Card grande full-width con corner top arrotondati
+        val card = com.google.android.material.card.MaterialCardView(this).apply {
+            radius = (28 * density)
+            cardElevation = (4 * density)
+            setCardBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSurface))
+            val lp = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            // Margine top per status bar + padding laterale
+            lp.topMargin = (32 * density).toInt()
+            lp.leftMargin = (12 * density).toInt()
+            lp.rightMargin = (12 * density).toInt()
+            lp.bottomMargin = (12 * density).toInt()
+            layoutParams = lp
+        }
+        
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSurface))
         }
 
         val toolbar = MaterialToolbar(this).apply {
             title = getString(R.string.rss_title)
+            setBackgroundColor(0)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -90,6 +116,8 @@ class RssActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
             )
             layoutParams = lp
+            clipToPadding = false
+            setPadding(0, (4 * density).toInt(), 0, (16 * density).toInt())
         }
         listView.adapter = RssAdapter(items) { article ->
             try {
@@ -99,28 +127,31 @@ class RssActivity : AppCompatActivity() {
             }
         }
         root.addView(listView)
-
-        setContentView(root)
+        
+        card.addView(root)
+        outer.addView(card)
+        setContentView(outer)
         loadFeeds()
         
-        // v169: swipe destra→sinistra chiude (opposto del gesto di apertura)
+        // v172: swipe destra→sinistra chiude — più tollerante
         val gd = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
             override fun onFling(
                 e1: android.view.MotionEvent?, e2: android.view.MotionEvent,
                 vx: Float, vy: Float
             ): Boolean {
-                if (vx < -250f && kotlin.math.abs(vx) > kotlin.math.abs(vy) * 1.0f) {
+                if (vx < -180f && kotlin.math.abs(vx) > kotlin.math.abs(vy) * 0.8f) {
                     finish()
                     return true
                 }
                 return false
             }
         })
-        root.setOnTouchListener { _, ev -> 
+        outer.setOnTouchListener { _, ev -> 
             gd.onTouchEvent(ev)
-            false  // non consumare, lascia che la list scorra normalmente
+            false
         }
     }
+
 
     private fun loadFeeds() {
         val feeds = SpeedApp.instance.settingsRepository.rssFeeds.value ?: emptyList<String>()
@@ -134,19 +165,28 @@ class RssActivity : AppCompatActivity() {
 
         thread {
             val all = mutableListOf<Article>()
+            android.util.Log.d("RssActivity", "Loading ${feeds.size} feeds: $feeds")
             for (feed in feeds) {
                 try {
-                    all.addAll(fetchFeed(feed))
-                } catch (_: Throwable) { /* skip feed errore */ }
+                    val result = fetchFeed(feed)
+                    android.util.Log.d("RssActivity", "Feed $feed → ${result.size} articles")
+                    all.addAll(result)
+                } catch (t: Throwable) {
+                    android.util.Log.e("RssActivity", "Feed $feed failed", t)
+                }
             }
             all.sortByDescending { it.pubDateMs }
+            android.util.Log.d("RssActivity", "Total articles: ${all.size}")
 
             runOnUiThread {
                 progress.visibility = View.GONE
                 items.clear()
                 items.addAll(all.take(50))
                 listView.adapter?.notifyDataSetChanged()
-                if (items.isEmpty()) emptyView.visibility = View.VISIBLE
+                if (items.isEmpty()) {
+                    emptyView.visibility = View.VISIBLE
+                    Toast.makeText(this@RssActivity, "Nessun articolo. Controlla i log per dettagli.", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -186,11 +226,14 @@ class RssActivity : AppCompatActivity() {
                 return out
             }
             
-            // Parse con XmlPullParser
-            val factory = org.xmlpull.v1.XmlPullParserFactory.newInstance()
-            factory.isNamespaceAware = false
-            val parser = factory.newPullParser()
-            parser.setInput(finalConn.inputStream, null)
+            // Parse con XmlPullParser nativo Android (più affidabile)
+            val parser = android.util.Xml.newPullParser()
+            parser.setFeature(org.xmlpull.v1.XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
+            // Usa charset del Content-Type quando disponibile, altrimenti UTF-8
+            val charset = finalConn.contentType?.let { ct ->
+                Regex("charset=([^;\s]+)", RegexOption.IGNORE_CASE).find(ct)?.groupValues?.get(1)
+            } ?: "UTF-8"
+            parser.setInput(finalConn.inputStream, charset)
             
             var sourceTitle = ""
             var inItem = false
@@ -225,19 +268,19 @@ class RssActivity : AppCompatActivity() {
                             }
                         }
                     }
-                    org.xmlpull.v1.XmlPullParser.TEXT -> {
-                        val text = parser.text?.trim() ?: ""
-                        if (text.isNotBlank()) {
+                    org.xmlpull.v1.XmlPullParser.TEXT, org.xmlpull.v1.XmlPullParser.CDSECT -> {
+                        val text = parser.text ?: ""
+                        if (text.isNotEmpty()) {
                             when (currentTag) {
                                 "title" -> {
-                                    if (inItem || inEntry) currentTitle = text
-                                    else if (inChannel && sourceTitle.isEmpty()) sourceTitle = text
+                                    if (inItem || inEntry) currentTitle += text
+                                    else if (inChannel && sourceTitle.isEmpty()) sourceTitle += text
                                 }
                                 "link" -> {
-                                    if ((inItem || inEntry) && currentLink.isEmpty()) currentLink = text
+                                    if ((inItem || inEntry)) currentLink += text
                                 }
                                 "pubDate", "published", "updated", "dc:date" -> {
-                                    if (inItem || inEntry) currentPubDate = text
+                                    if (inItem || inEntry) currentPubDate += text
                                 }
                             }
                         }
@@ -246,11 +289,12 @@ class RssActivity : AppCompatActivity() {
                         val tag = parser.name
                         when (tag) {
                             "item", "entry" -> {
-                                val finalLink = currentLink.takeIf { it.isNotBlank() } ?: linkHref
-                                if (currentTitle.isNotBlank() && finalLink.isNotBlank()) {
-                                    val ms = parsePubDate(currentPubDate)
-                                    val src = sourceTitle.ifBlank { url }.take(40)
-                                    out.add(Article(currentTitle, finalLink, src, ms))
+                                val titleTrim = currentTitle.trim()
+                                val linkTrim = currentLink.trim().takeIf { it.isNotBlank() } ?: linkHref.trim()
+                                if (titleTrim.isNotBlank() && linkTrim.isNotBlank()) {
+                                    val ms = parsePubDate(currentPubDate.trim())
+                                    val src = sourceTitle.trim().ifBlank { url }.take(40)
+                                    out.add(Article(titleTrim, linkTrim, src, ms))
                                 }
                                 inItem = false; inEntry = false
                             }

@@ -44,4 +44,24 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
+
+    <style name="Theme.SpeedLauncher.Rss" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
+        <item name="android:windowAnimationStyle">@style/SpeedLauncherRssAnim</item>
+    </style>
+    
+    <style name="SpeedLauncherRssAnim" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/rss_slide_in_right_full</item>
+        <item name="android:activityOpenExitAnimation">@anim/home_slide_out_partial</item>
+        <item name="android:activityCloseEnterAnimation">@anim/home_slide_in_back</item>
+        <item name="android:activityCloseExitAnimation">@anim/rss_slide_out_left_full</item>
+    </style>
 </resources>

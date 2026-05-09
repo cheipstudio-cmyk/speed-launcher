@@ -240,9 +240,16 @@ class HomeView @JvmOverloads constructor(
         val initialPageCount = (maxPageInData + 1).coerceAtLeast(1)
         repeat(initialPageCount) { idx -> addPageAt(idx) }
         updatePageIndicator()
+        SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(
+            (context as androidx.lifecycle.LifecycleOwner)
+        ) { updatePageIndicator() }
+        SpeedApp.instance.settingsRepository.searchMode.observe(
+            (context as androidx.lifecycle.LifecycleOwner)
+        ) { updateSearchBarText() }
 
         binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
+        binding.pageIndicator.onRssTap = { onSwipeRightFromLeftEdge?.invoke() }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
@@ -322,10 +329,14 @@ class HomeView @JvmOverloads constructor(
     }
 
     private fun updateSearchBarText() {
-        val text = if (settings.searchMode.value == SettingsRepository.MODE_GOOGLE)
-            context.getString(org.cheipstudio.speedlauncher.R.string.search_web)
-        else
-            context.getString(org.cheipstudio.speedlauncher.R.string.search_apps)
+        val text = when (settings.searchMode.value) {
+            SettingsRepository.MODE_GOOGLE ->
+                context.getString(org.cheipstudio.speedlauncher.R.string.search_web)
+            SettingsRepository.MODE_UNIVERSAL ->
+                context.getString(org.cheipstudio.speedlauncher.R.string.search_universal)
+            else ->
+                context.getString(org.cheipstudio.speedlauncher.R.string.search_apps)
+        }
         binding.searchBarHint.text = text
     }
 
@@ -432,7 +443,8 @@ class HomeView @JvmOverloads constructor(
 
     private fun updatePageIndicator() {
         binding.pageIndicator.setPages(pages.size, binding.pagedHome.currentPage.coerceAtMost(pages.size - 1))
-        binding.pageIndicator.visibility = if (pages.size > 1) View.VISIBLE else View.INVISIBLE
+        binding.pageIndicator.setShowRssIndicator(settings.rssPanelEnabled.value == true)
+        binding.pageIndicator.visibility = if (pages.size > 1 || settings.rssPanelEnabled.value == true) View.VISIBLE else View.INVISIBLE
     }
 
     private fun maybeCreateNextPage() {

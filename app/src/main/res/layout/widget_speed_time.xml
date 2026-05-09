@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:background="#33000000">
+
+    <LinearLayout
+        android:id="@+id/timeBlock"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="6dp"
+        android:background="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:fontFamily="sans-serif"
+            android:text="--:--" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="#CCFFFFFF"
+            android:text="@string/widget_time_label"
+            android:textAllCaps="true"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:background="#44FFFFFF" />
+
+    <LinearLayout
+        android:id="@+id/dateBlock"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="6dp"
+        android:background="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:text="--" />
+
+        <TextView
+            android:id="@+id/dateMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="#CCFFFFFF"
+            android:text="--"
+            android:textAllCaps="true"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:background="#44FFFFFF" />
+
+    <LinearLayout
+        android:id="@+id/batteryBlock"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="6dp"
+        android:background="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/batteryText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:text="--%" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="#CCFFFFFF"
+            android:text="@string/widget_battery_label"
+            android:textAllCaps="true"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+</LinearLayout>
