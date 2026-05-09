@@ -344,4 +344,6 @@ Download now?</string>
     <string name="settings_show_folder_labels_sub">Show name below each icon in folders</string>
     <string name="settings_show_dock_labels">Dock recommended labels</string>
     <string name="settings_show_dock_labels_sub">Show name below dock icons</string>
+    <string name="widget_remove_subtitle">Widget will be removed from home</string>
+    <string name="widget_remove_action">Remove widget</string>
 </resources>

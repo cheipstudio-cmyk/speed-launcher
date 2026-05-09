@@ -1522,4 +1522,35 @@ override fun onResume() {
             .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
+
+    /** v151: nasconde tutto tranne la sezione richiesta. */
+    private fun applySectionFilter(section: String) {
+        val container = (binding.settingsScroll.getChildAt(0) as? android.view.ViewGroup) ?: return
+        val keepTitles = when (section) {
+            "appearance" -> setOf(getString(R.string.settings_section_appearance))
+            "home" -> setOf(getString(R.string.settings_section_home_layout))
+            "drawer" -> setOf(getString(R.string.settings_section_drawer))
+            "search" -> setOf(getString(R.string.settings_section_home_layout))
+            "gestures" -> setOf(getString(R.string.settings_section_gestures))
+            "language" -> setOf(getString(R.string.settings_section_language))
+            "backup" -> setOf(getString(R.string.settings_section_backup))
+            "info" -> setOf(getString(R.string.settings_section_info))
+            else -> return
+        }
+        var currentVisible = false
+        for (i in 0 until container.childCount) {
+            val child = container.getChildAt(i)
+            if (child is android.widget.TextView && isPixelSectionTitle(child)) {
+                currentVisible = keepTitles.contains(child.text?.toString())
+                child.visibility = if (currentVisible) android.view.View.VISIBLE else android.view.View.GONE
+                continue
+            }
+            child.visibility = if (currentVisible) android.view.View.VISIBLE else android.view.View.GONE
+        }
+    }
+    
+    private fun isPixelSectionTitle(tv: android.widget.TextView): Boolean {
+        val expected = 18f * resources.displayMetrics.scaledDensity
+        return tv.textSize in (expected * 0.9f)..(expected * 1.1f)
+    }
 }

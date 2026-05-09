@@ -403,6 +403,8 @@ class SettingsRepository(context: Context) {
     }
 
     companion object {
+        private const val KEY_SHOW_FOLDER_LABELS = "show_folder_labels"
+        private const val KEY_SHOW_DOCK_LABELS = "show_dock_labels"
         private const val KEY_COLS = "grid_cols"
         private const val KEY_ROWS = "grid_rows"
         private const val KEY_SHOW_WIDGETS = "show_widgets"

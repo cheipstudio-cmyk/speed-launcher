@@ -344,4 +344,6 @@ Vuoi scaricarla?</string>
     <string name="settings_show_folder_labels_sub">Mostra il nome sotto ogni icona dentro le cartelle</string>
     <string name="settings_show_dock_labels">Etichette dock raccomandate</string>
     <string name="settings_show_dock_labels_sub">Mostra il nome sotto le icone della dock</string>
+    <string name="widget_remove_subtitle">Il widget verrà rimosso dalla home</string>
+    <string name="widget_remove_action">Rimuovi widget</string>
 </resources>
