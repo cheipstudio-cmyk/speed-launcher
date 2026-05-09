@@ -15,9 +15,7 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
-import org.w3c.dom.Element
 import java.net.URL
-import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.concurrent.thread
 
 /**
@@ -27,7 +25,7 @@ import kotlin.concurrent.thread
 class RssActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.slide_out_right)
+        overridePendingTransition(R.anim.home_slide_in_back, R.anim.rss_slide_out_left_full)
     }
 
 
@@ -53,8 +51,6 @@ class RssActivity : AppCompatActivity() {
         }
 
         val toolbar = MaterialToolbar(this).apply {
-            setNavigationIcon(R.drawable.ic_arrow_back)
-            setNavigationOnClickListener { finish() }
             title = getString(R.string.rss_title)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -157,10 +153,10 @@ class RssActivity : AppCompatActivity() {
 
     private fun fetchFeed(url: String): List<Article> {
         val out = mutableListOf<Article>()
+        var currentUrl = if (url.startsWith("http://") || url.startsWith("https://")) url else "https://$url"
+        var conn: java.net.HttpURLConnection? = null
         try {
-            // v169: User-Agent realistico + redirect manuale http<->https (Java non li segue cross-protocol)
-            var currentUrl = if (url.startsWith("http://") || url.startsWith("https://")) url else "https://$url"
-            var conn: java.net.HttpURLConnection? = null
+            // v171: redirect manuale + XmlPullParser (più tollerante di DocumentBuilder)
             var redirects = 0
             while (redirects < 5) {
                 val u = URL(currentUrl)
@@ -168,10 +164,12 @@ class RssActivity : AppCompatActivity() {
                     connectTimeout = 10000
                     readTimeout = 10000
                     instanceFollowRedirects = false
-                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) SpeedLauncher/1.0")
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
                     setRequestProperty("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml, */*")
+                    setRequestProperty("Accept-Encoding", "identity")
                 }
                 val code = conn.responseCode
+                android.util.Log.d("RssActivity", "Fetch $currentUrl → $code")
                 if (code in 300..399) {
                     val loc = conn.getHeaderField("Location") ?: break
                     currentUrl = if (loc.startsWith("http")) loc 
@@ -183,38 +181,92 @@ class RssActivity : AppCompatActivity() {
                 break
             }
             val finalConn = conn ?: return out
-            val factory = DocumentBuilderFactory.newInstance()
-            factory.isNamespaceAware = false
-            val builder = factory.newDocumentBuilder()
-            val doc = finalConn.inputStream.use { builder.parse(it) }
-            doc.documentElement.normalize()
-
-            // Source name (channel/title)
-            val source = try {
-                val ch = doc.getElementsByTagName("channel").item(0) as? Element
-                (ch?.getElementsByTagName("title")?.item(0)?.textContent ?: url).take(40)
-            } catch (_: Throwable) { url }
-
-            // RSS 2.0: <item>; Atom: <entry>
-            val items = doc.getElementsByTagName("item")
-            val entries = doc.getElementsByTagName("entry")
-            val nodes = if (items.length > 0) items else entries
-            for (i in 0 until nodes.length) {
-                val el = nodes.item(i) as? Element ?: continue
-                val title = el.getElementsByTagName("title").item(0)?.textContent?.trim() ?: continue
-                val link = run {
-                    // RSS: <link>http</link>; Atom: <link href="...">
-                    val linkNode = el.getElementsByTagName("link").item(0) as? Element ?: return@run ""
-                    linkNode.getAttribute("href").takeIf { it.isNotBlank() } ?: linkNode.textContent?.trim() ?: ""
-                }
-                if (link.isBlank()) continue
-                val pubDate = el.getElementsByTagName("pubDate").item(0)?.textContent
-                    ?: el.getElementsByTagName("published").item(0)?.textContent
-                    ?: el.getElementsByTagName("updated").item(0)?.textContent ?: ""
-                val ms = parsePubDate(pubDate)
-                out.add(Article(title, link, source, ms))
+            if (finalConn.responseCode !in 200..299) {
+                android.util.Log.w("RssActivity", "HTTP error: ${finalConn.responseCode}")
+                return out
             }
-        } catch (_: Throwable) {}
+            
+            // Parse con XmlPullParser
+            val factory = org.xmlpull.v1.XmlPullParserFactory.newInstance()
+            factory.isNamespaceAware = false
+            val parser = factory.newPullParser()
+            parser.setInput(finalConn.inputStream, null)
+            
+            var sourceTitle = ""
+            var inItem = false
+            var inEntry = false
+            var inChannel = false
+            var depth = 0
+            var currentTitle = ""
+            var currentLink = ""
+            var currentPubDate = ""
+            var linkHref = ""  // per <link href="..."/> Atom
+            var currentTag: String? = null
+            
+            var event = parser.eventType
+            while (event != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
+                when (event) {
+                    org.xmlpull.v1.XmlPullParser.START_TAG -> {
+                        val tag = parser.name
+                        currentTag = tag
+                        when (tag) {
+                            "item" -> { inItem = true; currentTitle = ""; currentLink = ""; currentPubDate = ""; linkHref = "" }
+                            "entry" -> { inEntry = true; currentTitle = ""; currentLink = ""; currentPubDate = ""; linkHref = "" }
+                            "channel", "feed" -> inChannel = true
+                            "link" -> {
+                                // Atom: <link href="..." rel="alternate"/>
+                                if (inItem || inEntry) {
+                                    val rel = parser.getAttributeValue(null, "rel")
+                                    if (rel == null || rel == "alternate") {
+                                        val href = parser.getAttributeValue(null, "href")
+                                        if (!href.isNullOrBlank()) linkHref = href
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    org.xmlpull.v1.XmlPullParser.TEXT -> {
+                        val text = parser.text?.trim() ?: ""
+                        if (text.isNotBlank()) {
+                            when (currentTag) {
+                                "title" -> {
+                                    if (inItem || inEntry) currentTitle = text
+                                    else if (inChannel && sourceTitle.isEmpty()) sourceTitle = text
+                                }
+                                "link" -> {
+                                    if ((inItem || inEntry) && currentLink.isEmpty()) currentLink = text
+                                }
+                                "pubDate", "published", "updated", "dc:date" -> {
+                                    if (inItem || inEntry) currentPubDate = text
+                                }
+                            }
+                        }
+                    }
+                    org.xmlpull.v1.XmlPullParser.END_TAG -> {
+                        val tag = parser.name
+                        when (tag) {
+                            "item", "entry" -> {
+                                val finalLink = currentLink.takeIf { it.isNotBlank() } ?: linkHref
+                                if (currentTitle.isNotBlank() && finalLink.isNotBlank()) {
+                                    val ms = parsePubDate(currentPubDate)
+                                    val src = sourceTitle.ifBlank { url }.take(40)
+                                    out.add(Article(currentTitle, finalLink, src, ms))
+                                }
+                                inItem = false; inEntry = false
+                            }
+                        }
+                        currentTag = null
+                    }
+                }
+                event = parser.next()
+            }
+            android.util.Log.d("RssActivity", "Parsed ${out.size} articles from $url")
+
+        } catch (t: Throwable) {
+            android.util.Log.e("RssActivity", "Fetch error for $currentUrl: ${t.message}", t)
+        } finally {
+            try { conn?.disconnect() } catch (_: Throwable) {}
+        }
         return out
     }
 
