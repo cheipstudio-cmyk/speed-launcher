@@ -783,6 +783,8 @@ class HomeView @JvmOverloads constructor(
     
     
     // v261: RSS overlay - sliding panel da sinistra
+    private val rssOverlay: FrameLayout by lazy { findViewById(org.cheipstudio.speedlauncher.R.id.rssOverlay) }
+    
     private var rssPanelView: RssPanelView? = null
     var isRssOverlayOpen: Boolean = false
         private set
@@ -792,8 +794,8 @@ class HomeView @JvmOverloads constructor(
             if (rssPanelView == null) {
                 val v = RssPanelView(context)
                 rssPanelView = v
-                binding.rssOverlay.removeAllViews()
-                binding.rssOverlay.addView(v, FrameLayout.LayoutParams(
+                rssOverlay.removeAllViews()
+                rssOverlay.addView(v, FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 ))
@@ -803,8 +805,8 @@ class HomeView @JvmOverloads constructor(
             // Setting OFF: chiudi overlay se aperto e rimuovi
             if (isRssOverlayOpen) closeRssOverlay()
             rssPanelView = null
-            binding.rssOverlay.removeAllViews()
-            binding.rssOverlay.visibility = View.GONE
+            rssOverlay.removeAllViews()
+            rssOverlay.visibility = View.GONE
         }
         updatePageIndicator()
     }
@@ -814,9 +816,9 @@ class HomeView @JvmOverloads constructor(
         if (isRssOverlayOpen) return
         if (rssPanelView == null) return
         isRssOverlayOpen = true
-        binding.rssOverlay.visibility = View.VISIBLE
-        binding.rssOverlay.translationX = -width.toFloat()
-        binding.rssOverlay.animate()
+        rssOverlay.visibility = View.VISIBLE
+        rssOverlay.translationX = -width.toFloat()
+        rssOverlay.animate()
             .translationX(0f)
             .setDuration(280L)
             .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
@@ -828,11 +830,11 @@ class HomeView @JvmOverloads constructor(
     fun closeRssOverlay() {
         if (!isRssOverlayOpen) return
         isRssOverlayOpen = false
-        binding.rssOverlay.animate()
+        rssOverlay.animate()
             .translationX(-width.toFloat())
             .setDuration(280L)
             .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-            .withEndAction { binding.rssOverlay.visibility = View.GONE }
+            .withEndAction { rssOverlay.visibility = View.GONE }
             .start()
         updatePageIndicator()
     }
