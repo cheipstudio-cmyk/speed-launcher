@@ -909,10 +909,16 @@ class HomeView @JvmOverloads constructor(
             }
             // 2) icona app o cartella nella grid
             if (isTouchOnIconOrFolder(ev)) return true
-            // 3) v278: dock (recommendedRow top o bottom) o searchBar
+            // 3) v278: dock + searchBar + drawerHandle
             if (isTouchInView(ev, binding.recommendedRow, myLoc)) return true
             if (isTouchInView(ev, binding.recommendedRowBottom, myLoc)) return true
             if (isTouchInView(ev, binding.searchBar, myLoc)) return true
+            if (isTouchInView(ev, binding.drawerHandle, myLoc)) return true
+            // 4) v281: zona drawer trigger - parte bassa schermo (gli ultimi 120dp dalla bottom)
+            // Tipicamente l'utente swippa su per drawer da qui
+            val density = resources.displayMetrics.density
+            val drawerZoneTop = height - (120 * density).toInt()
+            if (ev.y > drawerZoneTop) return true
             false
         } catch (_: Throwable) { false }
     }
@@ -1007,8 +1013,8 @@ class HomeView @JvmOverloads constructor(
                     homeGestureCancelled = isTouchOnMountedWidget(ev)
                     homeLongPressHandler.removeCallbacks(homeLongPressRunnable)
                     if (!homeGestureCancelled) {
-                        // v280: delay 600ms - più stabile (cancel ha tempo di scattare su swipe lenti)
-                        homeLongPressHandler.postDelayed(homeLongPressRunnable, 600L)
+                        // v281: delay 500ms (standard Android long press)
+                        homeLongPressHandler.postDelayed(homeLongPressRunnable, 500L)
                     }
                 }
                 MotionEvent.ACTION_MOVE -> {

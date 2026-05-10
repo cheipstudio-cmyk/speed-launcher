@@ -89,6 +89,21 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             updateItem(store, item.copy(spanX = widthOptions[idx].first))
         }
 
+        // v281: Altezza spanY (1=Piccolo, 2=Medio, 3=Grande, 4=Pieno)
+        val heightOptions = listOf(
+            1 to getString(R.string.widget_size_small),
+            2 to getString(R.string.widget_size_medium),
+            3 to getString(R.string.widget_size_large),
+            4 to getString(R.string.widget_size_full)
+        )
+        addSegmentedSection(
+            root, d, getString(R.string.settings_widget_height),
+            heightOptions.map { it.second },
+            heightOptions.indexOfFirst { it.first == item.spanY }.coerceAtLeast(0)
+        ) { idx ->
+            updateItem(store, item.copy(spanY = heightOptions[idx].first))
+        }
+
         // v246: Tema (visibile solo per Speed Stats widget)
         try {
             val mgr = android.appwidget.AppWidgetManager.getInstance(ctx)

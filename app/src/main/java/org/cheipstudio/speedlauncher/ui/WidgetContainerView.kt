@@ -227,9 +227,10 @@ class WidgetContainerView @JvmOverloads constructor(
         for (item in items) {
             val view = mountedViews[item.uuid] ?: continue
             val lp = view.layoutParams as? FrameLayout.LayoutParams ?: continue
-            // v279: forzo spanY = GRID_ROWS (altezza piena sempre)
+            // v281: spanY rispetta item (personalizzabile), container mantiene altezza fissa
+            // → griglia icone non si sposta tra pagine
             lp.width = cellW * item.spanX
-            lp.height = cellH * WidgetItem.GRID_ROWS
+            lp.height = cellH * item.spanY.coerceAtLeast(1)
             lp.leftMargin = (width - lp.width) / 2
             lp.topMargin = 0
             view.layoutParams = lp
@@ -242,7 +243,7 @@ class WidgetContainerView @JvmOverloads constructor(
             val cellW = width / WidgetItem.GRID_COLS
             val cellH = height / WidgetItem.GRID_ROWS
             val widthDp = ((cellW * item.spanX) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
-            val heightDp = ((cellH * WidgetItem.GRID_ROWS) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
+            val heightDp = ((cellH * item.spanY) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
             val opts = Bundle().apply {
                 putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
                 putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)

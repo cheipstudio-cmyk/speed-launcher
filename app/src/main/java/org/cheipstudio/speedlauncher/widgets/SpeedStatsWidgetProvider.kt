@@ -97,28 +97,25 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
 
         val views = RemoteViews(context.packageName, layoutRes)
         
-        // v277: detect altezza widget per nascondere elementi su altezze piccole
-        val isCompact = try {
+        // v281: adattamento progressivo altezza widget - mai tagliato
+        val widgetMinH = try {
             val options = manager.getAppWidgetOptions(id)
-            val minH = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
-            minH in 1..110  // < 110dp = compact (nasconde progress+subtitle)
-        } catch (_: Throwable) { false }
-        if (isCompact) {
-            // Nascondo progress bars + subtitles per stare in altezza ridotta
-            views.setViewVisibility(R.id.ramProgress, android.view.View.GONE)
-            views.setViewVisibility(R.id.storProgress, android.view.View.GONE)
-            views.setViewVisibility(R.id.batProgress, android.view.View.GONE)
-            views.setViewVisibility(R.id.ramSubtitle, android.view.View.GONE)
-            views.setViewVisibility(R.id.storSubtitle, android.view.View.GONE)
-            views.setViewVisibility(R.id.batSubtitle, android.view.View.GONE)
-        } else {
-            views.setViewVisibility(R.id.ramProgress, android.view.View.VISIBLE)
-            views.setViewVisibility(R.id.storProgress, android.view.View.VISIBLE)
-            views.setViewVisibility(R.id.batProgress, android.view.View.VISIBLE)
-            views.setViewVisibility(R.id.ramSubtitle, android.view.View.VISIBLE)
-            views.setViewVisibility(R.id.storSubtitle, android.view.View.VISIBLE)
-            views.setViewVisibility(R.id.batSubtitle, android.view.View.VISIBLE)
-        }
+            options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
+        } catch (_: Throwable) { 0 }
+        // Soglie:
+        // < 80dp: solo icona + valore (subtitle, progress nascosti)
+        // 80-120dp: + subtitle visibile, progress nascosti  
+        // >= 120dp: tutto visibile
+        val veryCompact = widgetMinH in 1..79
+        val mediumCompact = widgetMinH in 80..119
+        val progressVisible = if (veryCompact || mediumCompact) android.view.View.GONE else android.view.View.VISIBLE
+        val subtitleVisible = if (veryCompact) android.view.View.GONE else android.view.View.VISIBLE
+        views.setViewVisibility(R.id.ramProgress, progressVisible)
+        views.setViewVisibility(R.id.storProgress, progressVisible)
+        views.setViewVisibility(R.id.batProgress, progressVisible)
+        views.setViewVisibility(R.id.ramSubtitle, subtitleVisible)
+        views.setViewVisibility(R.id.storSubtitle, subtitleVisible)
+        views.setViewVisibility(R.id.batSubtitle, subtitleVisible)
 
         // Background
         try {
