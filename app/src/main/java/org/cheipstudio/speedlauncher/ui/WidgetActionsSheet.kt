@@ -118,41 +118,6 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             updateItem(store, item.copy(verticalPos = posOptions[idx].first))
         }
 
-        // Sposta pagina
-        root.addView(makeHeader(ctx, d, getString(R.string.widget_move_label)))
-        val moveRow = LinearLayout(ctx).apply {
-            orientation = LinearLayout.HORIZONTAL
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.leftMargin = (16 * d).toInt()
-            lp.rightMargin = (16 * d).toInt()
-            layoutParams = lp
-        }
-        val prevBtn = makeOutlinedButton(ctx, d, getString(R.string.widget_move_prev)) {
-            if (item.pageIndex > 0) {
-                store.removeWidget(item.pageIndex, item.uuid)
-                store.addWidget(item.copy(pageIndex = item.pageIndex - 1))
-                onChanged?.invoke()
-                dismiss()
-            }
-        }
-        val nextBtn = makeOutlinedButton(ctx, d, getString(R.string.widget_move_next)) {
-            store.removeWidget(item.pageIndex, item.uuid)
-            store.addWidget(item.copy(pageIndex = item.pageIndex + 1))
-            onChanged?.invoke()
-            dismiss()
-        }
-        (prevBtn.layoutParams as LinearLayout.LayoutParams).apply {
-            width = 0; weight = 1f; marginEnd = (8 * d).toInt()
-        }
-        (nextBtn.layoutParams as LinearLayout.LayoutParams).apply {
-            width = 0; weight = 1f
-        }
-        moveRow.addView(prevBtn)
-        moveRow.addView(nextBtn)
-        root.addView(moveRow)
-
         // v246: Tema (visibile solo per Speed Stats widget)
         try {
             val mgr = android.appwidget.AppWidgetManager.getInstance(ctx)

@@ -56,11 +56,17 @@ class AppActionsSheet : BottomSheetDialogFragment() {
         // v24: Hide / Show toggle
         val settings = SpeedApp.instance.settingsRepository
         val hideLabel = view.findViewById<TextView>(R.id.hideLabel)
+        val actionHide = view.findViewById<View>(R.id.actionHide)
         val isHidden = settings.isAppHidden(a.key)
-        hideLabel.text = getString(if (isHidden) R.string.action_unhide else R.string.action_hide)
-        view.findViewById<View>(R.id.actionHide).setOnClickListener {
-            if (isHidden) settings.unhideApp(a.key) else settings.hideApp(a.key)
-            dismissAllowingStateLoss()
+        // v252: nascondi voce "Rimuovi dal drawer" se drawer è disattivato (non ha senso)
+        if (settings.drawerEnabled.value == false) {
+            actionHide.visibility = View.GONE
+        } else {
+            hideLabel.text = getString(if (isHidden) R.string.action_unhide else R.string.action_hide)
+            actionHide.setOnClickListener {
+                if (isHidden) settings.unhideApp(a.key) else settings.hideApp(a.key)
+                dismissAllowingStateLoss()
+            }
         }
 
         view.findViewById<View>(R.id.actionUninstall).setOnClickListener {

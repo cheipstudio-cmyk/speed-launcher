@@ -128,21 +128,21 @@ class MainActivity : AppCompatActivity() {
             } catch (_: Throwable) {}
         }
         binding.homeView.onSearchTap = {
-            // v251: search tap intelligente
+            // v252: search tap intelligente
             val settings = SpeedApp.instance.settingsRepository
             val drawerOn = settings.drawerEnabled.value != false
             val mode = settings.searchMode.value
             val isApps = mode == org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_APPS
-            // Se drawer è OFF E modalità è solo APP → non apre niente
             if (!drawerOn && isApps) {
+                // Drawer off + modalità "App" → nessun drawer da aprire
                 android.widget.Toast.makeText(
                     this,
                     getString(R.string.search_drawer_off_apps_only),
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
-                return@onSearchTap
+            } else {
+                openDrawerWithSearch()
             }
-            openDrawerWithSearch()
         }
         binding.homeView.onHomeLongPress = { openHomeMenu() }
         binding.homeView.onAppMenuRequest = { app -> openAppActions(app) }
