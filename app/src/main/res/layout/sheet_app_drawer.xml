@@ -41,14 +41,24 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- v139: search actions globali (Google, contatti, ecc.) — visibili quando query non vuota -->
-    <LinearLayout
-        android:id="@+id/searchActionsContainer"
+    <!-- v248: wrappato in ScrollView con maxHeight per non rubare spazio al recycler app -->
+    <ScrollView
+        android:id="@+id/searchActionsScroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:maxHeight="240dp"
         android:layout_marginHorizontal="12dp"
         android:layout_marginTop="8dp"
-        android:visibility="gone" />
+        android:fillViewport="false"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:visibility="gone">
+        <LinearLayout
+            android:id="@+id/searchActionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 
     <!-- v117: dock raccomandate ORA SOTTO la search bar (richiesta utente) -->
     <org.cheipstudio.speedlauncher.ui.RecommendedView

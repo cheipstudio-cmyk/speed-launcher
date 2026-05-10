@@ -37,24 +37,10 @@ class MainActivity : AppCompatActivity() {
     }
     private fun shouldRunAnim(): Boolean = animMul() > 0f
 
-    private fun logEvent(event: String) {
-        try {
-            val dir = getExternalFilesDir(null)
-            if (dir != null) {
-                val f = java.io.File(dir, "events.txt")
-                val ori = if (resources.configuration.orientation == 
-                    android.content.res.Configuration.ORIENTATION_LANDSCAPE) "L" else "P"
-                f.appendText("${System.currentTimeMillis()} $ori $event\n")
-                if (f.length() > 50000) {
-                    f.writeText(f.readText().takeLast(20000))
-                }
-            }
-        } catch (_: Throwable) {}
-    }
     
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        logEvent("onCreate")
+
         // v81: disabilita snapshot della Activity per evitare ghost dopo multitasking close
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             try {
@@ -141,7 +127,23 @@ class MainActivity : AppCompatActivity() {
             }
             } catch (_: Throwable) {}
         }
-        binding.homeView.onSearchTap = { openDrawerWithSearch() }
+        binding.homeView.onSearchTap = {
+            // v251: search tap intelligente
+            val settings = SpeedApp.instance.settingsRepository
+            val drawerOn = settings.drawerEnabled.value != false
+            val mode = settings.searchMode.value
+            val isApps = mode == org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_APPS
+            // Se drawer è OFF E modalità è solo APP → non apre niente
+            if (!drawerOn && isApps) {
+                android.widget.Toast.makeText(
+                    this,
+                    getString(R.string.search_drawer_off_apps_only),
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return@onSearchTap
+            }
+            openDrawerWithSearch()
+        }
         binding.homeView.onHomeLongPress = { openHomeMenu() }
         binding.homeView.onAppMenuRequest = { app -> openAppActions(app) }
         // v59: tap pulitore memoria → pulisce + snackbar
@@ -270,7 +272,9 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     
     override fun onResume() {
         super.onResume()
-        logEvent("onResume orient=${resources.configuration.orientation}")
+        // v250: ritorno alla home → skip RSS leading page
+        try { binding.homeView.snapToFirstHomePage() } catch (_: Throwable) {}
+
         // v218: forza visibilità in landscape (fix schermo nero)
         try {
             val isLand = resources.configuration.orientation == 
@@ -299,7 +303,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 binding.homeView.requestLayout()
             }
         } catch (e: Throwable) {
-            logEvent("onResume reset ERR: ${e.message}")
+
         }
         // v215: animazione entrata home SOLO se in pausa per >800ms (esclude tap widget, focus events)
         val pauseDuration = if (pauseTimestamp > 0) System.currentTimeMillis() - pauseTimestamp else 0
@@ -356,10 +360,10 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.searchBar)
                 v?.let {
+                    // v247: niente alpha=0 → non c'è frame vuoto
                     it.translationY = 60f
-                    it.alpha = 0f
                     it.animate()
-                        .translationY(0f).alpha(1f)
+                        .translationY(0f)
                         .setStartDelay(90)
                         .setDuration((420 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(1.8f))
@@ -371,9 +375,9 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.pageIndicator)
                 v?.let {
-                    it.scaleX = 0.5f; it.scaleY = 0.5f; it.alpha = 0f
+                    it.scaleX = 0.5f; it.scaleY = 0.5f
                     it.animate()
-                        .scaleX(1f).scaleY(1f).alpha(1f)
+                        .scaleX(1f).scaleY(1f)
                         .setStartDelay(220)
                         .setDuration((360 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(2f))
@@ -391,11 +395,10 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                         if (pageView != null) {
                             for (i in 0 until pageView.childCount) {
                                 val icon = pageView.getChildAt(i)
-                                icon.alpha = 0f
                                 icon.scaleX = 0.6f
                                 icon.scaleY = 0.6f
                                 icon.animate()
-                                    .alpha(1f).scaleX(1f).scaleY(1f)
+                                    .scaleX(1f).scaleY(1f)
                                     .setStartDelay((120 + i * 15).toLong())
                                     .setDuration((360 * animMul()).toLong())
                                     .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
@@ -413,9 +416,8 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     v?.let {
                         if (it.visibility == android.view.View.VISIBLE) {
                             it.translationY = 50f
-                            it.alpha = 0f
                             it.animate()
-                                .translationY(0f).alpha(1f)
+                                .translationY(0f)
                                 .setStartDelay(180)
                                 .setDuration((440 * animMul()).toLong())
                                 .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
@@ -488,7 +490,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     
     override fun onPause() {
         super.onPause()
-        logEvent("onPause")
+
         widgetHostController.stopListening()
         pauseTimestamp = System.currentTimeMillis()
     }

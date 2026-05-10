@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="wallpaperBlurView" type="id" />
+    <item name="rssArticleImage" type="id" />
+    <item name="rssArticleTitle" type="id" />
+    <item name="rssArticleSource" type="id" />
+    <item name="rssArticleDate" type="id" />
 </resources>

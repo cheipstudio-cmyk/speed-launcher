@@ -223,11 +223,15 @@ class WidgetContainerView @JvmOverloads constructor(
             val lp = view.layoutParams as? FrameLayout.LayoutParams ?: continue
             lp.width = cellW * item.spanX
             lp.height = cellH * item.spanY
-            lp.leftMargin = cellW * item.cellX
-            lp.topMargin = cellH * item.cellY
+            // v247: centra orizzontalmente sempre, ignorando cellX
+            lp.leftMargin = (width - lp.width) / 2
+            // v247: posizione verticale in base a verticalPos
+            lp.topMargin = when (item.verticalPos) {
+                WidgetItem.POS_MIDDLE -> (height - lp.height) / 2
+                WidgetItem.POS_BOTTOM -> height - lp.height
+                else -> 0  // POS_TOP
+            }
             view.layoutParams = lp
-            // v244: aggiorna size opts del widget con dimensioni reali (era impostato a 40dp 
-            // se width era 0 al mount initial)
             updateWidgetOptions(item, view)
         }
     }

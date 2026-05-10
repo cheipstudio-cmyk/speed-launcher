@@ -252,8 +252,10 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
         (context as? androidx.lifecycle.LifecycleOwner)?.let { lo ->
             SpeedApp.instance.settingsRepository.searchMode.observe(lo) { updateSearchBarText() }
-            SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) {
-                binding.rssEdgeIndicator.visibility = if (it == true) View.VISIBLE else View.GONE
+            SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) { enabled ->
+                // v250: bottone laterale rimosso, RSS è leading page
+                binding.rssEdgeIndicator.visibility = View.GONE
+                applyRssPanelState(enabled == true)
             }
             // v227: observers dock per refresh real-time
             SpeedApp.instance.settingsRepository.recommendedPosition.observe(lo) { refreshRecommended() }
@@ -271,9 +273,12 @@ class HomeView @JvmOverloads constructor(
                 applyWidgetConfig()
             }
         }
+        // v250: applico stato RSS leading page se setting attivo
+        applyRssPanelState(SpeedApp.instance.settingsRepository.rssPanelEnabled.value == true)
+        
         // v194: pillola laterale RSS sempre visibile + click
-        binding.rssEdgeIndicator.visibility = 
-            if (settings.rssPanelEnabled.value == true) View.VISIBLE else View.GONE
+        // v250: bottone laterale RSS rimosso (sostituito da leading page swipe)
+        binding.rssEdgeIndicator.visibility = View.GONE
         binding.rssEdgeIndicator.alpha = 1f
         binding.rssEdgeIndicator.isClickable = true
         binding.rssEdgeIndicator.setOnClickListener {
@@ -294,10 +299,20 @@ class HomeView @JvmOverloads constructor(
 
         binding.pagedHome.onPageChanged = { idx -> 
             updatePageIndicator()
-            // v240: aggiorna widget container per mostrare i widget della nuova pagina
-            try { binding.widgetSlot.pageIndex = idx } catch (_: Throwable) {}
+            // v250: il widgetSlot indicizza per home page logica (esclusa leading RSS)
+            val logical = binding.pagedHome.logicalPage
+            if (logical >= 0) {
+                try { binding.widgetSlot.pageIndex = logical } catch (_: Throwable) {}
+            }
         }
-        binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
+        // v250: pageIndicator.onPageTap riceve logical home index → conversione raw
+        binding.pageIndicator.onPageTap = { idx -> 
+            binding.pagedHome.snapToHomePage(idx, true)
+        }
+        // v250: tap dot RSS → vai alla leading page
+        binding.pageIndicator.onLeadingTap = {
+            binding.pagedHome.snapToPage(0, true)  // raw 0 = leading
+        }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
@@ -399,12 +414,11 @@ class HomeView @JvmOverloads constructor(
                     context.startActivity(intent)
                 } catch (_: Throwable) {
                     // v85: solo se drawer abilitato apre fallback
-                    if (settings.drawerEnabled.value != false) onSearchTap?.invoke()
+                    onSearchTap?.invoke()  // v251: sempre invoca, MainActivity decide cosa aprire
                 }
             }
             else -> {
-                // v85: solo se drawer abilitato apre il drawer
-                if (settings.drawerEnabled.value != false) onSearchTap?.invoke()
+                onSearchTap?.invoke()  // v251: MainActivity decide
             }
         }
     }
@@ -490,8 +504,19 @@ class HomeView @JvmOverloads constructor(
     }
 
     private fun updatePageIndicator() {
-        binding.pageIndicator.setPages(pages.size, binding.pagedHome.currentPage.coerceAtMost(pages.size - 1))
-        binding.pageIndicator.visibility = if (pages.size > 1) View.VISIBLE else View.INVISIBLE
+        // v250: indicatore con dot RSS leading se attivo
+        val hasLeading = binding.pagedHome.hasLeadingPage
+        val logical = binding.pagedHome.logicalPage  // -1 se siamo su RSS
+        val leadingActive = logical < 0
+        val homeIdx = if (leadingActive) 0 else logical
+        binding.pageIndicator.setPages(
+            count = pages.size,
+            current = homeIdx.coerceAtMost(pages.size - 1).coerceAtLeast(0),
+            hasLeading = hasLeading,
+            leadingActive = leadingActive
+        )
+        // visibile se ci sono multiple pagine OPPURE se c'è il leading dot
+        binding.pageIndicator.visibility = if (pages.size > 1 || hasLeading) View.VISIBLE else View.INVISIBLE
     }
 
     private fun maybeCreateNextPage() {
@@ -596,11 +621,8 @@ class HomeView @JvmOverloads constructor(
     private fun applySettings() {
         binding.widgetSlot.visibility = if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE
         applyWidgetConfig()
-        // v113: barra ricerca nascosta se drawer disabilitato (anche se showSearchBar è true)
-        // perché senza drawer la barra non ha funzione (apre il drawer che non esiste)
-        val drawerOn = settings.drawerEnabled.value != false
-        val searchBarVisible = drawerOn && settings.showSearchBar.value != false
-        binding.searchBar.visibility = if (searchBarVisible) View.VISIBLE else View.GONE
+        // v251: search bar visibile indipendentemente da drawer (con tap intelligente)
+        binding.searchBar.visibility = if (settings.showSearchBar.value != false) View.VISIBLE else View.GONE
         updateSearchBarText()
         applySearchBarStyle()
         applyAnimationStyle()
@@ -754,6 +776,32 @@ class HomeView @JvmOverloads constructor(
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
+    // v250: leading page RSS
+    private var rssPanelView: RssPanelView? = null
+    
+    private fun applyRssPanelState(enabled: Boolean) {
+        if (enabled) {
+            if (rssPanelView == null) {
+                val v = RssPanelView(context)
+                rssPanelView = v
+                binding.pagedHome.addLeadingPage(v)
+                v.reload()
+                updatePageIndicator()
+            }
+        } else {
+            rssPanelView?.let {
+                binding.pagedHome.removeLeadingPage()
+                rssPanelView = null
+            }
+            updatePageIndicator()
+        }
+    }
+    
+    /** v250: chiamata da MainActivity onResume per tornare alla home page (fuori da RSS) */
+    fun snapToFirstHomePage() {
+        binding.pagedHome.snapToHomePage(0, animate = false)
+    }
+    
     fun attachWidgetHost(host: WidgetHostController) { 
         binding.widgetSlot.setHostController(host)
         // v244: long press su area vuota del container widget → apre menu home
@@ -873,9 +921,8 @@ class HomeView @JvmOverloads constructor(
 
     /** v27: chiamato da MainActivity quando si preme home dalla home */
     fun snapToFirstPage() {
-        if (binding.pagedHome.currentPage > 0) {
-            binding.pagedHome.snapToPage(0, animate = true)
-        }
+        // v250: vai alla prima pagina home logica (skipping RSS leading page)
+        binding.pagedHome.snapToHomePage(0, animate = true)
         // v226: playWelcomeAnim disabilitato — MainActivity onResume gestisce tutto in modo orchestrato
         // playWelcomeAnim()
     }

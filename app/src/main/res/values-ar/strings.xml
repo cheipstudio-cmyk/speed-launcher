@@ -315,8 +315,8 @@
     <string name="settings_idx_system_sub">المشغل الافتراضي، الوصول للإشعارات، الوضع الأفقي</string>
     <string name="settings_rss_feeds">تغذيات RSS</string>
     <string name="settings_rss_feeds_sub">إدارة تغذيات الأخبار</string>
-    <string name="settings_rss_panel">إظهار زر تغذية RSS</string>
-    <string name="settings_rss_panel_sub">زر جانبي لفتح قارئ RSS</string>
+    <string name="settings_rss_panel">افتح RSS بالتمرير</string>
+    <string name="settings_rss_panel_sub">اسحب من اليسار إلى اليمين في الصفحة الرئيسية لفتح خلاصة RSS</string>
     <string name="settings_search_universal">البحث الشامل</string>
     <string name="settings_show_dock_labels">تسميات شريط التطبيقات الموصى بها</string>
     <string name="settings_show_dock_labels_sub">إظهار الاسم تحت أيقونات الشريط</string>
@@ -365,4 +365,11 @@
     <string name="widget_size_large">كبير</string>
     <string name="widget_size_full">ممتلئ</string>
     <string name="widget_theme_label">سمة الأداة</string>
+    <string name="widget_position_label">موضع الأداة</string>
+    <string name="rss_refresh">تحديث</string>
+    <string name="rss_filter_all">الكل</string>
+    <string name="rss_no_feeds_configured">لا توجد خلاصات مضبوطة. أضف خلاصات في الإعدادات.</string>
+    <string name="settings_rss_swipe_label">افتح RSS بالتمرير</string>
+    <string name="settings_rss_swipe_sub">اسحب من اليسار إلى اليمين في الشاشة الرئيسية لفتح خلاصة RSS</string>
+    <string name="search_drawer_off_apps_only">الدرج معطل: غيّر وضع البحث للبحث على الويب</string>
 </resources>

@@ -16,12 +16,16 @@ data class WidgetItem(
     val cellX: Int = 0,         // posizione X nella griglia widget (0..cols-1)
     val cellY: Int = 0,         // posizione Y nella griglia widget (0..rows-1)
     val spanX: Int = 4,         // celle occupate orizzontalmente (default tutta riga)
-    val spanY: Int = 2          // celle occupate verticalmente (default 2 righe)
+    val spanY: Int = 2,         // celle occupate verticalmente (default 2 righe)
+    val verticalPos: String = POS_TOP  // v247: posizione verticale nel container
 ) {
     companion object {
         // Griglia widget: 4 colonne, 4 righe (approx 1/3 della home in altezza)
         const val GRID_COLS = 4
         const val GRID_ROWS = 4
         const val MIN_SPAN = 1
+        const val POS_TOP = "top"
+        const val POS_MIDDLE = "middle"
+        const val POS_BOTTOM = "bottom"
     }
 }

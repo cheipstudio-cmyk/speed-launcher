@@ -315,8 +315,8 @@ Se usará solo para esta función.</string>
     <string name="settings_idx_system_sub">Launcher predeterminado, acceso a notificaciones, modo horizontal</string>
     <string name="settings_rss_feeds">Feeds RSS</string>
     <string name="settings_rss_feeds_sub">Gestionar feeds de noticias</string>
-    <string name="settings_rss_panel">Mostrar botón feed RSS</string>
-    <string name="settings_rss_panel_sub">Botón lateral para abrir el lector RSS</string>
+    <string name="settings_rss_panel">Abrir RSS con deslizar</string>
+    <string name="settings_rss_panel_sub">Desliza de izquierda a derecha en la home abre el feed RSS</string>
     <string name="settings_search_universal">Búsqueda universal</string>
     <string name="settings_show_dock_labels">Etiquetas dock recomendadas</string>
     <string name="settings_show_dock_labels_sub">Muestra el nombre bajo los iconos del dock</string>
@@ -365,4 +365,11 @@ Se usará solo para esta función.</string>
     <string name="widget_size_large">Grande</string>
     <string name="widget_size_full">Completo</string>
     <string name="widget_theme_label">Tema del widget</string>
+    <string name="widget_position_label">Posicion del widget</string>
+    <string name="rss_refresh">Actualizar</string>
+    <string name="rss_filter_all">Todos</string>
+    <string name="rss_no_feeds_configured">Sin feeds configurados. Anade en Ajustes.</string>
+    <string name="settings_rss_swipe_label">Abrir RSS con deslizar</string>
+    <string name="settings_rss_swipe_sub">Desliza de izquierda a derecha en la home para abrir el feed RSS</string>
+    <string name="search_drawer_off_apps_only">Drawer desactivado: cambia el modo de busqueda para buscar en la web</string>
 </resources>

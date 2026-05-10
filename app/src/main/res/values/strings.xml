@@ -313,8 +313,8 @@ Vuoi scaricarla?</string>
     <string name="settings_blur_drawer_sub">Sfoca la home dietro al drawer</string>
     <string name="settings_blur_folder">Sfocatura cartelle aperte</string>
     <string name="settings_blur_folder_sub">Sfoca lo sfondo dietro le cartelle</string>
-    <string name="settings_rss_panel">Mostra bottone feed RSS</string>
-    <string name="settings_rss_panel_sub">Bottone laterale per aprire il lettore RSS</string>
+    <string name="settings_rss_panel">Apri RSS con swipe</string>
+    <string name="settings_rss_panel_sub">Swipe da sinistra a destra nella home apre il feed RSS</string>
     <string name="settings_telegram_label">Gruppo Telegram</string>
     <string name="settings_telegram_sub">Unisciti alla community Speed Launcher</string>
     <string name="settings_idx_appearance">Aspetto</string>
@@ -384,4 +384,11 @@ Vuoi scaricarla?</string>
     <string name="widget_size_large">Grande</string>
     <string name="widget_size_full">Pieno</string>
     <string name="widget_theme_label">Tema widget</string>
+    <string name="widget_position_label">Posizione widget</string>
+    <string name="rss_refresh">Aggiorna</string>
+    <string name="rss_filter_all">Tutti</string>
+    <string name="rss_no_feeds_configured">Nessun feed configurato. Aggiungi feed in Impostazioni.</string>
+    <string name="settings_rss_swipe_label">Apri RSS con swipe</string>
+    <string name="settings_rss_swipe_sub">Swipe da sinistra a destra nella home apre il feed RSS</string>
+    <string name="search_drawer_off_apps_only">Drawer disattivato: cambia modalità ricerca per cercare sul web</string>
 </resources>

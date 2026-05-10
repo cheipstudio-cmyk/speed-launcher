@@ -32,7 +32,8 @@ class WidgetStore(context: Context) {
                     cellX = obj.optInt("cellX", 0),
                     cellY = obj.optInt("cellY", 0),
                     spanX = obj.optInt("spanX", 4),
-                    spanY = obj.optInt("spanY", 2)
+                    spanY = obj.optInt("spanY", 2),
+                    verticalPos = obj.optString("verticalPos", WidgetItem.POS_TOP)
                 ))
             }
             out
@@ -53,6 +54,7 @@ class WidgetStore(context: Context) {
             obj.put("cellY", w.cellY)
             obj.put("spanX", w.spanX)
             obj.put("spanY", w.spanY)
+            obj.put("verticalPos", w.verticalPos)
             arr.put(obj)
         }
         prefs.edit().putString("page_$pageIndex", arr.toString()).apply()

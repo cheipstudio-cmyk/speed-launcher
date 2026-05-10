@@ -315,8 +315,8 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_idx_system_sub">Varsayılan başlatıcı, bildirim erişimi, yatay mod</string>
     <string name="settings_rss_feeds">RSS akışları</string>
     <string name="settings_rss_feeds_sub">Haber akışlarını yönet</string>
-    <string name="settings_rss_panel">RSS akış düğmesini göster</string>
-    <string name="settings_rss_panel_sub">RSS okuyucuyu açmak için yan düğme</string>
+    <string name="settings_rss_panel">Kaydirmayla RSS ac</string>
+    <string name="settings_rss_panel_sub">Ana ekranda soldan saga kaydirma RSS akisini acar</string>
     <string name="settings_search_universal">Evrensel arama</string>
     <string name="settings_show_dock_labels">Önerilen dock etiketleri</string>
     <string name="settings_show_dock_labels_sub">Dock simgelerinin altında adı göster</string>
@@ -365,4 +365,11 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="widget_size_large">Buyuk</string>
     <string name="widget_size_full">Tam</string>
     <string name="widget_theme_label">Widget temasi</string>
+    <string name="widget_position_label">Widget konumu</string>
+    <string name="rss_refresh">Yenile</string>
+    <string name="rss_filter_all">Tumu</string>
+    <string name="rss_no_feeds_configured">Yapilandirilmis akis yok. Ayarlardan ekleyin.</string>
+    <string name="settings_rss_swipe_label">Kaydirmayla RSS ac</string>
+    <string name="settings_rss_swipe_sub">Ana ekranda soldan saga kaydirma RSS akisini acar</string>
+    <string name="search_drawer_off_apps_only">Drawer kapali: webde aramak icin arama modunu degistirin</string>
 </resources>

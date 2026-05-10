@@ -18,6 +18,9 @@ class PageIndicator @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
     var onPageTap: ((Int) -> Unit)? = null
+    var onLeadingTap: (() -> Unit)? = null  // v250: tap su dot speciale RSS
+    private var hasLeading = false
+    private var leadingActive = false  // se true, il dot RSS è quello pieno
     var onRssTap: (() -> Unit)? = null
 
     private var pageCount = 0
@@ -29,10 +32,13 @@ class PageIndicator @JvmOverloads constructor(
         gravity = Gravity.CENTER
     }
 
-    fun setPages(count: Int, current: Int) {
-        if (count == pageCount && current == currentIdx) return
+    fun setPages(count: Int, current: Int, hasLeading: Boolean = false, leadingActive: Boolean = false) {
+        if (count == pageCount && current == currentIdx && 
+            hasLeading == this.hasLeading && leadingActive == this.leadingActive) return
         pageCount = count
         currentIdx = current
+        this.hasLeading = hasLeading
+        this.leadingActive = leadingActive
         rebuild()
     }
 
@@ -42,14 +48,31 @@ class PageIndicator @JvmOverloads constructor(
         val active = (28 * density).toInt()
         val margin = (5 * density).toInt()
         
+        // v250: dot leading per RSS (pre-page) - shape circolare per distinguerlo
+        if (hasLeading) {
+            val leadingDot = View(context).apply {
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL  // circolare invece che rectangle
+                    setColor(if (leadingActive) Color.WHITE else Color.parseColor("#66FFFFFF"))
+                }
+                layoutParams = LayoutParams(small, small).apply {
+                    leftMargin = margin; rightMargin = margin + (4 * density).toInt()
+                }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { onLeadingTap?.invoke() }
+            }
+            addView(leadingDot)
+        }
+        
         for (i in 0 until pageCount) {
             val dot = View(context).apply {
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 4 * density
-                    setColor(if (i == currentIdx) Color.WHITE else Color.parseColor("#66FFFFFF"))
+                    setColor(if (i == currentIdx && !leadingActive) Color.WHITE else Color.parseColor("#66FFFFFF"))
                 }
-                layoutParams = LayoutParams(if (i == currentIdx) active else small, small).apply {
+                layoutParams = LayoutParams(if (i == currentIdx && !leadingActive) active else small, small).apply {
                     leftMargin = margin; rightMargin = margin
                 }
                 isClickable = true

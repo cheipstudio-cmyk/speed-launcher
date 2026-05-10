@@ -43,6 +43,14 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // v251: se drawer off, nascondi lista app + dock + alphabar (resta solo barra ricerca + chip universali)
+        val drawerEnabled = SpeedApp.instance.settingsRepository.drawerEnabled.value != false
+        if (!drawerEnabled) {
+            binding.recycler.visibility = View.GONE
+            _binding?.alphaScrollBar?.visibility = View.GONE
+            _binding?.recommendedRow?.visibility = View.GONE
+        }
+
         adapter = AppListAdapter(
             onClick = { app, source ->
                 SpeedApp.instance.appRepository.launch(app, source)
@@ -241,22 +249,23 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
     /** v139: popola la barra "ricerca globale" con shortcut web, maps, telefono */
     private fun updateSearchActions(q: String) {
         val container = _binding?.searchActionsContainer ?: return
+        val scroll = _binding?.searchActionsScroll
         val ctx = container.context
         val query = q.trim()
         // v228: action chip SOLO in modalità Universale - se mode = "app" o "web" non ne mostro
         val mode = SpeedApp.instance.settingsRepository.searchMode.value
         if (mode != org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_UNIVERSAL) {
-            container.visibility = View.GONE
+            scroll?.visibility = View.GONE
             container.removeAllViews()
             return
         }
         if (query.isBlank()) {
-            container.visibility = View.GONE
+            scroll?.visibility = View.GONE
             container.removeAllViews()
             return
         }
         container.removeAllViews()
-        container.visibility = View.VISIBLE
+        scroll?.visibility = View.VISIBLE
         val density = ctx.resources.displayMetrics.density
         
         // Helper per creare action row (icona + label)

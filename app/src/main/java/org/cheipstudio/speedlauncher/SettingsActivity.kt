@@ -487,15 +487,7 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "https://buymeacoffee.com/m12opyjwty", Toast.LENGTH_LONG).show()
             }
         }
-        
-        // v224: Log diagnostico
-        binding.itemDiagnostic.setOnClickListener {
-            try {
-                val intent = Intent(this, DiagnosticLogActivity::class.java)
-                startActivity(intent)
-            } catch (_: Throwable) {}
-        }
-    
+
         ensureCardsClickable()
     }
 

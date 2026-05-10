@@ -315,8 +315,8 @@ Télécharger maintenant ?</string>
     <string name="settings_idx_system_sub">Launcher par défaut, accès aux notifications, mode paysage</string>
     <string name="settings_rss_feeds">Flux RSS</string>
     <string name="settings_rss_feeds_sub">Gérer les flux d\'actualités</string>
-    <string name="settings_rss_panel">Afficher le bouton flux RSS</string>
-    <string name="settings_rss_panel_sub">Bouton latéral pour ouvrir le lecteur RSS</string>
+    <string name="settings_rss_panel">Ouvrir RSS avec swipe</string>
+    <string name="settings_rss_panel_sub">Glisser de gauche a droite sur la home ouvre le flux RSS</string>
     <string name="settings_search_universal">Recherche universelle</string>
     <string name="settings_show_dock_labels">Étiquettes dock recommandées</string>
     <string name="settings_show_dock_labels_sub">Affiche le nom sous les icônes du dock</string>
@@ -365,4 +365,11 @@ Télécharger maintenant ?</string>
     <string name="widget_size_large">Grand</string>
     <string name="widget_size_full">Plein</string>
     <string name="widget_theme_label">Theme widget</string>
+    <string name="widget_position_label">Position widget</string>
+    <string name="rss_refresh">Actualiser</string>
+    <string name="rss_filter_all">Tous</string>
+    <string name="rss_no_feeds_configured">Aucun flux configure. Ajoutez dans Parametres.</string>
+    <string name="settings_rss_swipe_label">Ouvrir RSS avec swipe</string>
+    <string name="settings_rss_swipe_sub">Glisser de gauche a droite sur home ouvre le flux RSS</string>
+    <string name="search_drawer_off_apps_only">Drawer desactive: changez de mode de recherche pour le web</string>
 </resources>

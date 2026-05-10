@@ -32,6 +32,14 @@ class PagedHomeContainer @JvmOverloads constructor(
         private set
     val pageCount: Int get() = container.childCount
     var onPageChanged: ((Int) -> Unit)? = null
+    
+    // v250: leading page (RSS) prima della home page 0
+    private var leadingView: android.view.View? = null
+    val hasLeadingPage: Boolean get() = leadingView != null
+    val leadingOffset: Int get() = if (hasLeadingPage) 1 else 0
+    /** index logico (home page 0 = 0). Negativo se siamo sulla leading page (RSS). */
+    val logicalPage: Int get() = currentPage - leadingOffset
+    val homePageCount: Int get() = container.childCount - leadingOffset
 
     private val tracker = VelocityTracker.obtain()
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -50,6 +58,31 @@ class PagedHomeContainer @JvmOverloads constructor(
         // ogni pagina = 1 fattore di peso, ma con larghezza container = pageCount * width
         container.addView(view, lp)
         post { adjustChildWidths() }
+    }
+    
+    /** v250: aggiunge una pagina speciale prima della pagina 0 (es. RSS). */
+    fun addLeadingPage(view: android.view.View) {
+        if (leadingView != null) removeLeadingPage()
+        leadingView = view
+        val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT)
+        container.addView(view, 0, lp)
+        post {
+            adjustChildWidths()
+            // dopo aggiunta scroll-to-skip leading page (rimaniamo su home 0)
+            scrollTo(width, 0)
+            currentPage = 1
+        }
+    }
+    
+    fun removeLeadingPage() {
+        val v = leadingView ?: return
+        leadingView = null
+        container.removeView(v)
+        post {
+            adjustChildWidths()
+            scrollTo(0, 0)
+            currentPage = 0
+        }
     }
 
     fun removePage(idx: Int) {
@@ -81,6 +114,11 @@ class PagedHomeContainer @JvmOverloads constructor(
             currentPage = target
             onPageChanged?.invoke(target)
         }
+    }
+    
+    /** v250: snap a una home page (ignora leading). idx=0 è la prima home reale. */
+    fun snapToHomePage(idx: Int, animate: Boolean = true) {
+        snapToPage(idx + leadingOffset, animate)
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {

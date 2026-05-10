@@ -57,31 +57,41 @@ class RecommendedView @JvmOverloads constructor(
                 dockLongPressDownY = ev.y
                 dockLongPressFired = false
                 dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
-                // 700ms - se l'utente lascia prima, l'app riceve il tap normale
-                dockLongPressHandler.postDelayed(dockLongPressRunnable, 700)
+                dockLongPressHandler.removeCallbacks(dockLongPressArm)
+                // v251: warm-up 100ms prima di armare il timer.
+                // Se in 100ms il dito si è già mosso, il timer NON parte → nessun rischio
+                // di trigger durante swipe rapido.
+                dockLongPressHandler.postDelayed(dockLongPressArm, 100)
             }
             android.view.MotionEvent.ACTION_MOVE -> {
                 val dx = kotlin.math.abs(ev.x - dockLongPressDownX)
                 val dyRaw = ev.y - dockLongPressDownY  // negativo = swipe up
                 val dy = kotlin.math.abs(dyRaw)
-                // v241: swipe up (dy negativo) cancella IMMEDIATAMENTE - apre drawer non dock menu
-                val touchSlop = android.view.ViewConfiguration.get(context).scaledTouchSlop
-                if (dyRaw < -touchSlop && dy > dx) {
+                // v251: cancellazione MOLTO aggressiva per swipe up (anche solo 3px)
+                if (dyRaw < -3 && dy > dx / 2) {
+                    dockLongPressHandler.removeCallbacks(dockLongPressArm)
                     dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
                 } else if (dx > dockLongPressSlop || dy > dockLongPressSlop) {
+                    dockLongPressHandler.removeCallbacks(dockLongPressArm)
                     dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
                 }
             }
             android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                dockLongPressHandler.removeCallbacks(dockLongPressArm)
                 dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
             }
         }
-        // Se long press si è avverato, intercetto e annullo i child
         if (dockLongPressFired) {
             dockLongPressFired = false
             return true
         }
         return super.onInterceptTouchEvent(ev)
+    }
+    
+    // v251: Armatura del timer - posta il vero timer 600ms (700-100 warm-up = 600)
+    // dopo che il dito è stato fermo per 100ms
+    private val dockLongPressArm = Runnable {
+        dockLongPressHandler.postDelayed(dockLongPressRunnable, 600)
     }
     
     init {

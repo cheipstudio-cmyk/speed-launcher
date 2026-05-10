@@ -313,8 +313,8 @@ Download now?</string>
     <string name="settings_blur_drawer_sub">Blur the home behind the drawer</string>
     <string name="settings_blur_folder">Blur folder background</string>
     <string name="settings_blur_folder_sub">Blur background behind folders</string>
-    <string name="settings_rss_panel">Show RSS feed button</string>
-    <string name="settings_rss_panel_sub">Side button to open the RSS reader</string>
+    <string name="settings_rss_panel">Open RSS with swipe</string>
+    <string name="settings_rss_panel_sub">Swipe left-to-right on home opens the RSS feed</string>
     <string name="settings_telegram_label">Telegram group</string>
     <string name="settings_telegram_sub">Join the Speed Launcher community</string>
     <string name="settings_idx_appearance">Appearance</string>
@@ -384,4 +384,11 @@ Download now?</string>
     <string name="widget_size_large">Large</string>
     <string name="widget_size_full">Full</string>
     <string name="widget_theme_label">Widget theme</string>
+    <string name="widget_position_label">Widget position</string>
+    <string name="rss_refresh">Refresh</string>
+    <string name="rss_filter_all">All</string>
+    <string name="rss_no_feeds_configured">No feeds configured. Add feeds in Settings.</string>
+    <string name="settings_rss_swipe_label">Open RSS with swipe</string>
+    <string name="settings_rss_swipe_sub">Swipe left to right on home opens the RSS feed</string>
+    <string name="search_drawer_off_apps_only">Drawer is off: change search mode to search the web</string>
 </resources>

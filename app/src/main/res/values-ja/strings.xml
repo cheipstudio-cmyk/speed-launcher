@@ -315,8 +315,8 @@
     <string name="settings_idx_system_sub">デフォルトランチャー、通知アクセス、横向きモード</string>
     <string name="settings_rss_feeds">RSSフィード</string>
     <string name="settings_rss_feeds_sub">ニュースフィードを管理</string>
-    <string name="settings_rss_panel">RSSフィードボタンを表示</string>
-    <string name="settings_rss_panel_sub">RSSリーダーを開くサイドボタン</string>
+    <string name="settings_rss_panel">スワイプでRSSを開く</string>
+    <string name="settings_rss_panel_sub">ホーム画面で左から右にスワイプするとRSSフィードが開きます</string>
     <string name="settings_search_universal">ユニバーサル検索</string>
     <string name="settings_show_dock_labels">おすすめドックラベル</string>
     <string name="settings_show_dock_labels_sub">ドックアイコンの下に名前を表示</string>
@@ -365,4 +365,11 @@
     <string name="widget_size_large">大</string>
     <string name="widget_size_full">満</string>
     <string name="widget_theme_label">ウィジェットのテーマ</string>
+    <string name="widget_position_label">ウィジェットの位置</string>
+    <string name="rss_refresh">更新</string>
+    <string name="rss_filter_all">すべて</string>
+    <string name="rss_no_feeds_configured">フィードが設定されていません。設定から追加してください。</string>
+    <string name="settings_rss_swipe_label">スワイプでRSSを開く</string>
+    <string name="settings_rss_swipe_sub">ホームで左から右にスワイプするとRSSフィードが開きます</string>
+    <string name="search_drawer_off_apps_only">ドロワーがオフです。Webを検索するには検索モードを変更してください</string>
 </resources>

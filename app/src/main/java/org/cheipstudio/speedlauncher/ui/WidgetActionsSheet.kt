@@ -104,6 +104,20 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             updateItem(store, item.copy(spanY = heightOptions[idx].first))
         }
 
+        // v247: Posizione verticale
+        val posOptions = listOf(
+            WidgetItem.POS_TOP to getString(R.string.widget_pos_top),
+            WidgetItem.POS_MIDDLE to getString(R.string.widget_pos_middle),
+            WidgetItem.POS_BOTTOM to getString(R.string.widget_pos_bottom)
+        )
+        addSegmentedSection(
+            root, d, getString(R.string.widget_position_label),
+            posOptions.map { it.second },
+            posOptions.indexOfFirst { it.first == item.verticalPos }.coerceAtLeast(0)
+        ) { idx ->
+            updateItem(store, item.copy(verticalPos = posOptions[idx].first))
+        }
+
         // Sposta pagina
         root.addView(makeHeader(ctx, d, getString(R.string.widget_move_label)))
         val moveRow = LinearLayout(ctx).apply {
@@ -176,8 +190,9 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
         val removeBtn = MaterialButton(ctx).apply {
             text = getString(R.string.widget_remove_action)
             cornerRadius = (32 * d).toInt()
-            setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorErrorContainer))
-            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnErrorContainer))
+            // v247: rosso pieno per evidenziare azione distruttiva
+            setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorError))
+            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnError))
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             textSize = 15f
             isAllCaps = false
