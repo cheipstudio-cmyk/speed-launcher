@@ -1007,16 +1007,22 @@ class HomeView @JvmOverloads constructor(
                     homeGestureCancelled = isTouchOnMountedWidget(ev)
                     homeLongPressHandler.removeCallbacks(homeLongPressRunnable)
                     if (!homeGestureCancelled) {
-                        homeLongPressHandler.postDelayed(homeLongPressRunnable, 500L)
+                        // v280: delay 600ms - più stabile (cancel ha tempo di scattare su swipe lenti)
+                        homeLongPressHandler.postDelayed(homeLongPressRunnable, 600L)
                     }
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (!homeGestureCancelled) {
-                        val dx = kotlin.math.abs(ev.x - homeGestureStartX)
-                        val dy = kotlin.math.abs(ev.y - homeGestureStartY)
-                        // Threshold 20dp: tollero micro-tremori
-                        val cancelThreshold = 20 * resources.displayMetrics.density
-                        if (dx > cancelThreshold || dy > cancelThreshold) {
+                        val dxRaw = ev.x - homeGestureStartX
+                        val dyRaw = ev.y - homeGestureStartY
+                        val dx = kotlin.math.abs(dxRaw)
+                        val dy = kotlin.math.abs(dyRaw)
+                        val density = resources.displayMetrics.density
+                        // v280: cancel AGGRESSIVO su movimento verticale (swipe up/down) - 8dp basta
+                        // Per orizzontale resta tollerante (25dp) per coprire micro-scroll PagedHomeContainer
+                        val verticalCancel = dy > 8 * density && dy > dx * 1.5f
+                        val anyCancel = dx > 25 * density || dy > 25 * density
+                        if (verticalCancel || anyCancel) {
                             homeGestureCancelled = true
                             homeLongPressHandler.removeCallbacks(homeLongPressRunnable)
                         }
