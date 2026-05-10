@@ -22,7 +22,7 @@
         android:paddingHorizontal="@dimen/home_horizontal_padding"
         android:paddingBottom="@dimen/home_bottom_padding">
 
-        <org.cheipstudio.speedlauncher.ui.WidgetSlotView
+        <org.cheipstudio.speedlauncher.ui.WidgetContainerView
             android:id="@+id/widgetSlot"
             android:layout_width="match_parent"
             android:layout_height="@dimen/widget_slot_height"

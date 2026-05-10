@@ -372,4 +372,6 @@ Download now?</string>
     <string name="dock_settings_hint">To change mode (AI or Automatic) and set your recommended apps go to Settings.</string>
     <string name="menu_add_widget">Add widget</string>
     <string name="widget_personalize">Customize</string>
+    <string name="widget_actions_title">Widget</string>
+    <string name="widget_actions_hint">What do you want to do with this widget?</string>
 </resources>

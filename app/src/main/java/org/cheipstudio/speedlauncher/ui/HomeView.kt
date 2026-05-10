@@ -292,7 +292,11 @@ class HomeView @JvmOverloads constructor(
             onSwipeRightFromLeftEdge?.invoke()
         }
 
-        binding.pagedHome.onPageChanged = { _ -> updatePageIndicator() }
+        binding.pagedHome.onPageChanged = { idx -> 
+            updatePageIndicator()
+            // v240: aggiorna widget container per mostrare i widget della nuova pagina
+            try { binding.widgetSlot.pageIndex = idx } catch (_: Throwable) {}
+        }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
@@ -603,79 +607,32 @@ class HomeView @JvmOverloads constructor(
     }
 
 
-    /** v138: applica posizione/altezza/larghezza widget secondo le settings */
+    /** v240: container widget multi-widget. Altezza fissa basata su grid widget. */
     fun applyWidgetConfig() {
         val ws = binding.widgetSlot
         val parent = ws.parent as? android.widget.LinearLayout ?: run {
-            // v144: parent non ancora attaccato, riprova al prossimo frame
             ws.post { applyWidgetConfig() }
             return
         }
         val density = resources.displayMetrics.density
-        // v205: in landscape NASCONDO il widget, lo schermo è troppo basso per averlo + griglia + dock
+        // In landscape nascondo (schermo basso)
         val isLandscape = resources.configuration.orientation ==
             android.content.res.Configuration.ORIENTATION_LANDSCAPE
-        
         if (isLandscape) {
             ws.visibility = android.view.View.GONE
             return
-        } else {
-            ws.visibility = android.view.View.VISIBLE
         }
-        
-        val savedHeight = settings.widgetHeight.value ?: 160
-        val heightDp = savedHeight
-        val heightPx = (heightDp * density).toInt()
-        
-        // Larghezza percentuale
-        val widthPct = settings.widgetWidthPercent.value ?: 100
-        
-        // Crea/aggiorna LayoutParams
+        ws.visibility = android.view.View.VISIBLE
+        // Altezza fissa: 4 righe × 60dp = 240dp (= 4 celle widget verticali)
+        val heightPx = (240 * density).toInt()
         val existing = ws.layoutParams
-        val lp = if (existing is android.widget.LinearLayout.LayoutParams) {
-            existing
-        } else {
-            android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heightPx
-            )
-        }
+        val lp = if (existing is android.widget.LinearLayout.LayoutParams) existing
+                 else android.widget.LinearLayout.LayoutParams(
+                     android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heightPx
+                 )
         lp.height = heightPx
-        lp.width = if (widthPct >= 100) {
-            android.widget.LinearLayout.LayoutParams.MATCH_PARENT
-        } else {
-            val w = parent.width
-            if (w > 0) (w * widthPct / 100).coerceAtLeast(1)
-            else android.widget.LinearLayout.LayoutParams.MATCH_PARENT.also {
-                // Riprova al prossimo frame quando parent ha dimensioni
-                ws.post { applyWidgetConfig() }
-            }
-        }
-        lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
+        lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
         ws.layoutParams = lp
-        ws.requestLayout()
-        parent.requestLayout()
-        
-        // Posizione: sposta widgetSlot dentro il parent
-        val pos = settings.widgetPosition.value ?: "top"
-        val currentIdx = parent.indexOfChild(ws)
-        if (currentIdx < 0) return
-        
-        val targetIdx = when (pos) {
-            "bottom" -> {
-                val searchIdx = parent.indexOfChild(binding.searchBar)
-                if (searchIdx >= 0) (searchIdx - 1).coerceAtLeast(0) else parent.childCount - 1
-            }
-            "middle" -> {
-                val pgIdx = parent.indexOfChild(binding.pageIndicator)
-                if (pgIdx >= 0) pgIdx else 1
-            }
-            else -> 0
-        }
-        if (currentIdx != targetIdx) {
-            parent.removeView(ws)
-            val safeIdx = targetIdx.coerceIn(0, parent.childCount)
-            parent.addView(ws, safeIdx)
-        }
     }
 
     fun reapplySettings() {

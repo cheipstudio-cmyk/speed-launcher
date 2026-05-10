@@ -353,4 +353,6 @@ Télécharger maintenant ?</string>
     <string name="dock_settings_hint">Pour changer de mode (IA ou Auto) et configurer vos apps recommandees allez dans Parametres.</string>
     <string name="menu_add_widget">Ajouter widget</string>
     <string name="widget_personalize">Personnaliser</string>
+    <string name="widget_actions_title">Widget</string>
+    <string name="widget_actions_hint">Que voulez-vous faire avec ce widget?</string>
 </resources>

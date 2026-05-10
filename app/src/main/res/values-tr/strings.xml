@@ -353,4 +353,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="dock_settings_hint">Modu (AI / Otomatik) degistirmek ve onerilen uygulamalari ayarlamak icin Ayarlara gidin.</string>
     <string name="menu_add_widget">Widget ekle</string>
     <string name="widget_personalize">Ozellestir</string>
+    <string name="widget_actions_title">Widget</string>
+    <string name="widget_actions_hint">Bu widget ile ne yapmak istersiniz?</string>
 </resources>

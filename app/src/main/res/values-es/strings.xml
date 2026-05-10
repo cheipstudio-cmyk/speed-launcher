@@ -353,4 +353,6 @@ Se usará solo para esta función.</string>
     <string name="dock_settings_hint">Para cambiar el modo (IA o Automatico) y configurar tus apps recomendadas ve a Ajustes.</string>
     <string name="menu_add_widget">Agregar widget</string>
     <string name="widget_personalize">Personalizar</string>
+    <string name="widget_actions_title">Widget</string>
+    <string name="widget_actions_hint">¿Que quieres hacer con este widget?</string>
 </resources>

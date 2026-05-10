@@ -99,6 +99,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         widgetHostController = WidgetHostController(this).also { it.start() }
+        // v240: migrazione one-time dal vecchio sistema single-widget
+        try {
+            org.cheipstudio.speedlauncher.data.WidgetStore(this).migrateFromLegacyIfNeeded(this)
+        } catch (_: Throwable) {}
         binding.homeView.attachWidgetHost(widgetHostController)
 
         SpeedApp.instance.notificationCounter.counts.observe(this) { binding.homeView.refreshDots() }
@@ -180,13 +184,7 @@ class MainActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // v231: prima chiudi widget edit mode se attivo
-                try {
-                    if (binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).isInWidgetEditMode()) {
-                        binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).exitEditMode()
-                        return
-                    }
-                } catch (_: Throwable) {}
+                // v240: edit mode multi-widget gestito dal sheet, niente check qui
                 drawerSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
                 homeMenuSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
                 appActionsSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()

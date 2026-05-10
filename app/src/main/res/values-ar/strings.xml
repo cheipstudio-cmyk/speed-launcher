@@ -353,4 +353,6 @@
     <string name="dock_settings_hint">لتغيير الوضع (الذكاء الاصطناعي / تلقائي) وتعيين التطبيقات الموصى بها انتقل إلى الإعدادات.</string>
     <string name="menu_add_widget">إضافة أداة</string>
     <string name="widget_personalize">تخصيص</string>
+    <string name="widget_actions_title">الأداة</string>
+    <string name="widget_actions_hint">ماذا تريد أن تفعل مع هذه الأداة؟</string>
 </resources>

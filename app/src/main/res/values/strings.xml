@@ -372,4 +372,6 @@ Vuoi scaricarla?</string>
     <string name="dock_settings_hint">Per cambiare modalita (AI o Automatica) e impostare le tue app raccomandate vai in Impostazioni.</string>
     <string name="menu_add_widget">Aggiungi widget</string>
     <string name="widget_personalize">Personalizza</string>
+    <string name="widget_actions_title">Widget</string>
+    <string name="widget_actions_hint">Cosa vuoi fare con questo widget?</string>
 </resources>
