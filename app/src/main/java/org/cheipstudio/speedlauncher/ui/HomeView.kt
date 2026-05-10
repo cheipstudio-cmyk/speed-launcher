@@ -898,6 +898,21 @@ class HomeView @JvmOverloads constructor(
     private var edgeSwipeStartY = 0f
     private var edgeSwipeFired = false
     
+    /** v270: escludo edge sinistro dalla back gesture di sistema (Android 10+) */
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        updateGestureExclusion()
+    }
+    
+    private fun updateGestureExclusion() {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val rect = android.graphics.Rect(0, 0, edgeSize, height)
+                systemGestureExclusionRects = listOf(rect)
+            }
+        } catch (_: Throwable) {}
+    }
+    
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (settings.rssPanelEnabled.value == true) {
             when (ev.action) {
