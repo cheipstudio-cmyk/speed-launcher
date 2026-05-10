@@ -314,6 +314,9 @@ class WidgetContainerView @JvmOverloads constructor(
         return super.dispatchTouchEvent(ev)
     }
 
+    /** v276: pubblico per check esterno (HomeView decide se long press home o widget) */
+    fun isWidgetAt(localX: Float, localY: Float): Boolean = findWidgetAt(localX, localY) != null
+    
     private fun findWidgetAt(x: Float, y: Float): String? {
         val items = store.loadPage(pageIndex)
         for (item in items) {

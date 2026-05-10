@@ -868,7 +868,7 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
     }
     
-    /** v274: animazione swipe schermata - parallax + scale + alpha sulle pagine */
+    /** v276: animazione swipe schermata Pixel-style con easing accentuato */
     private fun applyPageParallax(fraction: Float) {
         val pageW = binding.pagedHome.width
         if (pageW <= 0) return
@@ -878,15 +878,68 @@ class HomeView @JvmOverloads constructor(
             val pageView = binding.pagedHome.getPageAt(i) ?: continue
             val natural = i * pageW
             val delta = natural - scrollX
-            // Distanza normalizzata della pagina dal centro corrente (0 = centro, 1 = un page intero di distanza)
-            val distNorm = (kotlin.math.abs(delta) / pageW).coerceIn(0f, 1f)
-            // Parallax + scale + fade visibili come Pixel/Motorola
-            pageView.translationX = delta * 0.20f
-            val scale = 1f - 0.06f * distNorm
+            val rawDist = (kotlin.math.abs(delta) / pageW).coerceIn(0f, 1f)
+            // Easing: accentua l'effetto vicino al centro (sqrt = cresce più rapidamente)
+            val distNorm = kotlin.math.sqrt(rawDist)
+            // Parallax 25% - leggero offset per profondità
+            pageView.translationX = delta * 0.25f
+            // Scale: 1 → 0.88 (più aggressivo per effetto visibile)
+            val scale = 1f - 0.12f * distNorm
             pageView.scaleX = scale
             pageView.scaleY = scale
-            pageView.alpha = 1f - 0.35f * distNorm
+            // Alpha: 1 → 0.4 (le pagine laterali sbiadiscono significativamente)
+            pageView.alpha = 1f - 0.6f * distNorm
+            // Pivot ai bordi opposti per dare sensazione di rotazione/profondità
+            pageView.pivotX = if (delta < 0) pageW.toFloat() else 0f
+            pageView.pivotY = pageView.height / 2f
         }
+    }
+    
+    private fun isTouchOnMountedWidget(ev: MotionEvent): Boolean {
+        return try {
+            // 1) widget montato
+            val ws = binding.widgetSlot
+            val wsLoc = IntArray(2); ws.getLocationOnScreen(wsLoc)
+            val myLoc = IntArray(2); getLocationOnScreen(myLoc)
+            val wsLeft = wsLoc[0] - myLoc[0]
+            val wsTop = wsLoc[1] - myLoc[1]
+            if (ev.x >= wsLeft && ev.x <= wsLeft + ws.width &&
+                ev.y >= wsTop && ev.y <= wsTop + ws.height) {
+                if (ws.isWidgetAt(ev.x - wsLeft, ev.y - wsTop)) return true
+            }
+            // 2) icona app o cartella nella grid
+            if (isTouchOnIconOrFolder(ev)) return true
+            false
+        } catch (_: Throwable) { false }
+    }
+    
+    /** v276: ritorna true se il touch è sopra un IconCellView o FolderCellView */
+    private fun isTouchOnIconOrFolder(ev: MotionEvent): Boolean {
+        return try {
+            val ph = binding.pagedHome
+            val phLoc = IntArray(2); ph.getLocationOnScreen(phLoc)
+            val myLoc = IntArray(2); getLocationOnScreen(myLoc)
+            val phLeft = phLoc[0] - myLoc[0]
+            val phTop = phLoc[1] - myLoc[1]
+            if (ev.x < phLeft || ev.x > phLeft + ph.width ||
+                ev.y < phTop || ev.y > phTop + ph.height) return false
+            // Itero le pagine, prendo la pagina corrente
+            val pageView = ph.getPageAt(ph.currentPage) as? android.view.ViewGroup ?: return false
+            val pageLoc = IntArray(2); pageView.getLocationOnScreen(pageLoc)
+            val pageLeft = pageLoc[0] - myLoc[0]
+            val pageTop = pageLoc[1] - myLoc[1]
+            for (i in 0 until pageView.childCount) {
+                val child = pageView.getChildAt(i) ?: continue
+                val cLeft = pageLeft + child.left
+                val cTop = pageTop + child.top
+                val cRight = cLeft + child.width
+                val cBottom = cTop + child.height
+                if (ev.x >= cLeft && ev.x <= cRight && ev.y >= cTop && ev.y <= cBottom) {
+                    return true
+                }
+            }
+            false
+        } catch (_: Throwable) { false }
     }
     
     fun snapToFirstHomePage() {
@@ -929,8 +982,12 @@ class HomeView @JvmOverloads constructor(
     }
     
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // v275: long press home funziona ovunque (anche su pagedHome vuoto)
-        try { homeGesture.onTouchEvent(ev) } catch (_: Throwable) {}
+        // v276: long press home ovunque TRANNE sopra un widget montato (lì gestisce WidgetContainerView)
+        try {
+            if (!isTouchOnMountedWidget(ev)) {
+                homeGesture.onTouchEvent(ev)
+            }
+        } catch (_: Throwable) {}
         if (settings.rssPanelEnabled.value == true) {
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {

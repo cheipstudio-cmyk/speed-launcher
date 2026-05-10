@@ -317,18 +317,27 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 binding.homeView.scaleY = 1f
             } catch (_: Throwable) {}
         }
-        // v273: NIENTE animazione manuale entry home
-        // L'animazione "app → home" è gestita nativamente dal sistema operativo (SystemUI).
-        // L'home resta visibile dietro l'app, non serve fade/scale.
-        // Reset proprietà per sicurezza
+        // v276: animazione ritorno home - soft zoom in senza fade (no flash)
         try {
+            val isLandscape = resources.configuration.orientation ==
+                android.content.res.Configuration.ORIENTATION_LANDSCAPE
             val homeContent = binding.homeView
             homeContent.animate().cancel()
             homeContent.translationX = 0f
             homeContent.translationY = 0f
+            homeContent.alpha = 1f
             homeContent.scaleX = 1f
             homeContent.scaleY = 1f
-            homeContent.alpha = 1f
+            if (!isLandscape && shouldAnimate) {
+                // Soft zoom da 1.04 a 1 (sembra "che si calma"): no fade, no jumping
+                homeContent.scaleX = 1.04f
+                homeContent.scaleY = 1.04f
+                homeContent.animate()
+                    .scaleX(1f).scaleY(1f)
+                    .setDuration((280 * animMul()).toLong())
+                    .setInterpolator(android.view.animation.DecelerateInterpolator(2.5f))
+                    .start()
+            }
         } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()
