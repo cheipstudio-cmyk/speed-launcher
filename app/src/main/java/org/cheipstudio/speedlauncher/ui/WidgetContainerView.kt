@@ -41,6 +41,9 @@ class WidgetContainerView @JvmOverloads constructor(
         }
 
     private val store = WidgetStore(context)
+    /** v271: callback per swipe orizzontale - HomeView lo gira al pagedHome */
+    var onHorizontalSwipe: ((MotionEvent) -> Unit)? = null
+    private var horizSwipeDetected = false
     private var hostController: WidgetHostController? = null
     private val mountedViews = mutableMapOf<String, View>()  // uuid → view montata
     
@@ -254,19 +257,36 @@ class WidgetContainerView @JvmOverloads constructor(
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 pressX = ev.x; pressY = ev.y
+                horizSwipeDetected = false
                 pressedWidgetUuid = findWidgetAt(ev.x, ev.y)
                 if (pressedWidgetUuid != null) {
-                    // Long press su widget → modal azioni
                     holdHandler.postDelayed(holdRunnable, 700L)
                 } else {
-                    // v244: long press su area vuota → HomeMenuSheet
                     holdHandler.postDelayed(emptyHoldRunnable, 700L)
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                val dx = abs(ev.x - pressX); val dy = abs(ev.y - pressY)
-                val slop = ViewConfiguration.get(context).scaledTouchSlop * 2
-                if (dx > slop || dy > slop) {
+                val dx = ev.x - pressX
+                val dy = ev.y - pressY
+                val adx = abs(dx); val ady = abs(dy)
+                val slop = ViewConfiguration.get(context).scaledTouchSlop
+                // v271: rilevo swipe orizzontale → giro al pagedHome
+                if (!horizSwipeDetected && adx > slop && adx > ady * 1.2f) {
+                    horizSwipeDetected = true
+                    holdHandler.removeCallbacks(holdRunnable)
+                    holdHandler.removeCallbacks(emptyHoldRunnable)
+                    pressedWidgetUuid = null
+                    // Invio cancel al super per pulire stato widget
+                    val cancel = MotionEvent.obtain(ev)
+                    cancel.action = MotionEvent.ACTION_CANCEL
+                    super.dispatchTouchEvent(cancel)
+                    cancel.recycle()
+                }
+                if (horizSwipeDetected) {
+                    onHorizontalSwipe?.invoke(ev)
+                    return true
+                }
+                if (adx > slop * 2 || ady > slop * 2) {
                     holdHandler.removeCallbacks(holdRunnable)
                     holdHandler.removeCallbacks(emptyHoldRunnable)
                     pressedWidgetUuid = null
@@ -276,6 +296,11 @@ class WidgetContainerView @JvmOverloads constructor(
                 holdHandler.removeCallbacks(holdRunnable)
                 holdHandler.removeCallbacks(emptyHoldRunnable)
                 pressedWidgetUuid = null
+                if (horizSwipeDetected) {
+                    onHorizontalSwipe?.invoke(ev)
+                    horizSwipeDetected = false
+                    return true
+                }
             }
         }
         return super.dispatchTouchEvent(ev)

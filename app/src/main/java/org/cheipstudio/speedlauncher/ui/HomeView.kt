@@ -242,11 +242,7 @@ class HomeView @JvmOverloads constructor(
                 onHomeLongPress?.invoke()
             }
         })
-        binding.pagedHome.setOnTouchListener { _, ev ->
-            homeGesture.onTouchEvent(ev)
-            false  // non consumo: PagedHomeContainer continua a gestire scroll
-        }
-        // v260: long press anche sulla parte alta (zona widget vuota) - listener su root
+        // v271: SOLO un listener (sulla root) - evita doppia vibrazione 
         setOnTouchListener { _, ev ->
             homeGesture.onTouchEvent(ev)
             false
@@ -962,8 +958,23 @@ class HomeView @JvmOverloads constructor(
     
     fun attachWidgetHost(host: WidgetHostController) { 
         binding.widgetSlot.setHostController(host)
-        // v244: long press su area vuota del container widget → apre menu home
         binding.widgetSlot.onEmptyLongPress = { onHomeLongPress?.invoke() }
+        // v271: swipe orizzontale sul widget → cambio pagina come se fosse sulla grid
+        binding.widgetSlot.onHorizontalSwipe = { ev ->
+            try {
+                // Trasformo coordinate da widgetSlot-local a pagedHome-local
+                val ws = binding.widgetSlot
+                val ph = binding.pagedHome
+                val wsLoc = IntArray(2); ws.getLocationOnScreen(wsLoc)
+                val phLoc = IntArray(2); ph.getLocationOnScreen(phLoc)
+                val offsetX = (wsLoc[0] - phLoc[0]).toFloat()
+                val offsetY = (wsLoc[1] - phLoc[1]).toFloat()
+                val translated = MotionEvent.obtain(ev)
+                translated.setLocation(ev.x + offsetX, ev.y + offsetY)
+                ph.dispatchTouchEvent(translated)
+                translated.recycle()
+            } catch (_: Throwable) {}
+        }
     }
     
     // v228: apre il widget picker per la slot corrente (chiamato da HomeMenuSheet "Aggiungi widget")
