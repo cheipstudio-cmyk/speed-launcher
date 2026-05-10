@@ -96,6 +96,8 @@ class HomeView @JvmOverloads constructor(
             }
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
+                // v256: su RSS leading page, swipe down NON apre notifiche (deve scrollare feed)
+                if (isOnRssLeadingPage) return false
                 if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 StatusBarHelper.expandNotifications(context)
                 return true
@@ -301,6 +303,19 @@ class HomeView @JvmOverloads constructor(
             // v245: trigger rimosso
         }
 
+        // v258: parallax wallpaper - offset 0..1 → setWallpaperOffsets
+        binding.pagedHome.onScrollFraction = { fraction ->
+            try {
+                val token = windowToken
+                if (token != null) {
+                    val wm = android.app.WallpaperManager.getInstance(context)
+                    val total = binding.pagedHome.pageCount.coerceAtLeast(2)
+                    wm.setWallpaperOffsetSteps(1f / (total - 1), 1f)
+                    wm.setWallpaperOffsets(token, fraction, 0.5f)
+                }
+            } catch (_: Throwable) {}
+        }
+        
         binding.pagedHome.onPageChanged = { idx -> 
             updatePageIndicator()
             // v250: il widgetSlot indicizza per home page logica (esclusa leading RSS)
@@ -762,6 +777,7 @@ class HomeView @JvmOverloads constructor(
                     }
                 }
                 if (settings.swipeDownNotifications.value == true &&
+                    !isOnRssLeadingPage &&  // v256: no notifiche su RSS, scroll feed
                     dy > swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
@@ -819,9 +835,13 @@ class HomeView @JvmOverloads constructor(
     /** v254: nasconde elementi home + blocca gesture quando siamo su RSS */
     private fun applyRssPageMode(onRss: Boolean) {
         isOnRssLeadingPage = onRss
-        // Dock raccomandate (top + bottom) - nascoste su RSS
-        for (id in intArrayOf(org.cheipstudio.speedlauncher.R.id.recommendedRow, org.cheipstudio.speedlauncher.R.id.recommendedRowBottom)) {
-            try { findViewById<View>(id)?.visibility = if (onRss) View.GONE else View.VISIBLE } catch (_: Throwable) {}
+        // v258: Dock raccomandate - nascoste su RSS, ripristinate via refreshRecommended che 
+        // rispetta posizione top/bottom configurata dall'utente
+        if (onRss) {
+            try { binding.recommendedRow.visibility = View.GONE } catch (_: Throwable) {}
+            try { binding.recommendedRowBottom.visibility = View.GONE } catch (_: Throwable) {}
+        } else {
+            refreshRecommended()  // ripristina logica corretta top/bottom/none
         }
         // Search bar - nascosta su RSS
         try { binding.searchBar.visibility = if (onRss) View.GONE else 

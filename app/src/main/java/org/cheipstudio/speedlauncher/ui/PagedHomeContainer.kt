@@ -32,6 +32,8 @@ class PagedHomeContainer @JvmOverloads constructor(
         private set
     val pageCount: Int get() = container.childCount
     var onPageChanged: ((Int) -> Unit)? = null
+    /** v258: chiamato durante lo scroll, fraction = scrollX / (totalWidth - width). 0..1. */
+    var onScrollFraction: ((Float) -> Unit)? = null
     
     // v250: leading page (RSS) prima della home page 0
     private var leadingView: android.view.View? = null
@@ -66,11 +68,21 @@ class PagedHomeContainer @JvmOverloads constructor(
         leadingView = view
         val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT)
         container.addView(view, 0, lp)
+        // v258: aspetta che width sia disponibile prima di scrollare
+        scheduleSnapAfterLeadingAdded()
+    }
+    
+    private fun scheduleSnapAfterLeadingAdded() {
         post {
             adjustChildWidths()
-            // dopo aggiunta scroll-to-skip leading page (rimaniamo su home 0)
-            scrollTo(width, 0)
-            currentPage = 1
+            if (width > 0) {
+                scrollTo(width, 0)
+                currentPage = 1
+                onPageChanged?.invoke(1)  // notifica observer (HomeView aggiorna applyRssPageMode)
+            } else {
+                // retry quando width è disponibile
+                postDelayed({ scheduleSnapAfterLeadingAdded() }, 16)
+            }
         }
     }
     
@@ -104,6 +116,14 @@ class PagedHomeContainer @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
         adjustChildWidths()
+    }
+    
+    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+        super.onScrollChanged(l, t, oldl, oldt)
+        // v258: notifica fraction di scroll per parallax wallpaper
+        val totalScrollable = (container.childCount * width - width).coerceAtLeast(1)
+        val fraction = (l.toFloat() / totalScrollable).coerceIn(0f, 1f)
+        onScrollFraction?.invoke(fraction)
     }
 
     fun snapToPage(idx: Int, animate: Boolean = true) {

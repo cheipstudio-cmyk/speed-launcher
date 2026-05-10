@@ -96,6 +96,16 @@ class RssPanelView @JvmOverloads constructor(
             lp.bottomMargin = (8 * density).toInt()
             layoutParams = lp
             visibility = GONE
+            // v257: blocca PagedHomeContainer dall'intercettare lo swipe orizzontale dei filtri
+            setOnTouchListener { v, ev ->
+                when (ev.action) {
+                    android.view.MotionEvent.ACTION_DOWN,
+                    android.view.MotionEvent.ACTION_MOVE -> v.parent?.requestDisallowInterceptTouchEvent(true)
+                    android.view.MotionEvent.ACTION_UP,
+                    android.view.MotionEvent.ACTION_CANCEL -> v.parent?.requestDisallowInterceptTouchEvent(false)
+                }
+                false  // non consumare, lascia che l'HorizontalScrollView gestisca normalmente
+            }
         }
         filterRow = LinearLayout(context).apply {
             orientation = HORIZONTAL
