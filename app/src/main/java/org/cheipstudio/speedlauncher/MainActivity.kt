@@ -180,6 +180,13 @@ class MainActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // v231: prima chiudi widget edit mode se attivo
+                try {
+                    if (binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).isInEditMode()) {
+                        binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).exitEditMode()
+                        return
+                    }
+                } catch (_: Throwable) {}
                 drawerSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
                 homeMenuSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
                 appActionsSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()

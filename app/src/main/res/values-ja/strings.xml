@@ -352,4 +352,5 @@
     <string name="dock_theme_label">ドックのテーマ</string>
     <string name="dock_settings_hint">モード(AI / 自動)の変更と推奨アプリの設定は設定から行ってください。</string>
     <string name="menu_add_widget">ウィジェットを追加</string>
+    <string name="widget_personalize">カスタマイズ</string>
 </resources>

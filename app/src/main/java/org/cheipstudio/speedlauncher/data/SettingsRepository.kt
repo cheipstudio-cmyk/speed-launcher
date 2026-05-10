@@ -331,6 +331,9 @@ class SettingsRepository(context: Context) {
     }
     fun resetHomeLayout() {
         homeLayoutPrefs.edit().clear().apply()
+        // v229: marca prefill come già fatto così al restart NON rimette le app default → home davvero vuota
+        ctx.getSharedPreferences("speed_prefill", Context.MODE_PRIVATE)
+            .edit().putBoolean("default_apps_prefilled", true).apply()
     }
     fun resetSettings() {
         prefs.edit().clear().apply()

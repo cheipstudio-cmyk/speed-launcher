@@ -52,7 +52,8 @@ class WidgetSlotView @JvmOverloads constructor(
     private val holdRunnable = Runnable {
         if (currentWidgetView != null) {
             HapticHelper.feedback(this, HapticFeedbackConstants.LONG_PRESS)
-            showResizeSheet()
+            // v231: long press → edit mode con maniglie (Launcher3 style)
+            enterEditMode()
         }
     }
 
@@ -250,6 +251,68 @@ class WidgetSlotView @JvmOverloads constructor(
         invalidate()
     }
 
+
+    // v231: edit mode con resize handles
+    private var editOverlay: WidgetEditOverlay? = null
+    private var inEditMode = false
+    
+    fun enterEditMode() {
+        if (inEditMode) return
+        if (currentWidgetView == null) return
+        inEditMode = true
+        val settings = SpeedApp.instance.settingsRepository
+        val curH = settings.widgetHeight.value ?: 160
+        val curW = settings.widgetWidthPercent.value ?: 100
+        val overlay = WidgetEditOverlay(context).apply {
+            configure(curH, curW)
+            onHeightChange = { newH ->
+                settings.setWidgetHeight(newH)
+                applyWidgetConfig()
+            }
+            onWidthChange = { newW ->
+                settings.setWidgetWidthPercent(newW)
+                applyWidgetConfig()
+            }
+            onDismiss = { exitEditMode() }
+            onOpenPersonalize = {
+                exitEditMode()
+                showResizeSheet()
+            }
+            onRemove = {
+                exitEditMode()
+                org.cheipstudio.speedlauncher.ui.WidgetRemoveSheet.show(context) {
+                    removeWidget()
+                }
+            }
+        }
+        addView(overlay, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+        editOverlay = overlay
+        // animazione "shake-pulse" leggera per indicare entrata edit mode
+        currentWidgetView?.animate()?.scaleX(0.97f)?.scaleY(0.97f)?.setDuration(200)?.withEndAction {
+            currentWidgetView?.animate()?.scaleX(1f)?.scaleY(1f)?.setDuration(200)?.start()
+        }?.start()
+    }
+    
+    fun exitEditMode() {
+        if (!inEditMode) return
+        inEditMode = false
+        editOverlay?.let { removeView(it) }
+        editOverlay = null
+    }
+    
+    fun isInEditMode(): Boolean = inEditMode
+    
+    private fun applyWidgetConfig() {
+        // forza relayout per applicare nuove dimensioni dal SettingsRepository
+        try {
+            (parent as? View)?.requestLayout()
+            requestLayout()
+        } catch (_: Throwable) {}
+    }
+    
     private fun showResizeSheet() {
         try {
             val activity = (context as? androidx.fragment.app.FragmentActivity) ?: return

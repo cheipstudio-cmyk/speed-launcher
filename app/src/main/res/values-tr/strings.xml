@@ -352,4 +352,5 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="dock_theme_label">Dock temasi</string>
     <string name="dock_settings_hint">Modu (AI / Otomatik) degistirmek ve onerilen uygulamalari ayarlamak icin Ayarlara gidin.</string>
     <string name="menu_add_widget">Widget ekle</string>
+    <string name="widget_personalize">Ozellestir</string>
 </resources>
