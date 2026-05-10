@@ -201,10 +201,11 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
         }
         val buttons = mutableListOf<MaterialButton>()
         labels.forEachIndexed { i, label ->
+            // v222: stato selezione gestito manualmente (no isCheckable per evitare toggle auto)
+            val isSelected = i == selectedIndex
             val btn = MaterialButton(ctx, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
                 text = label
-                isCheckable = true
-                isChecked = i == selectedIndex
+                isCheckable = false
                 cornerRadius = (24 * d).toInt()
                 strokeWidth = (1 * d).toInt()
                 typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
@@ -219,14 +220,15 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
                 )
                 lp.marginEnd = (8 * d).toInt()
                 layoutParams = lp
-                applyChipStyle(this, isChecked)
+                tag = isSelected  // memorizza stato in tag
+                applyChipStyle(this, isSelected)
                 setOnClickListener {
-                    if (isChecked) return@setOnClickListener
+                    if (tag == true) return@setOnClickListener
                     buttons.forEach {
-                        it.isChecked = false
+                        it.tag = false
                         applyChipStyle(it, false)
                     }
-                    isChecked = true
+                    tag = true
                     applyChipStyle(this, true)
                     onSelect(i)
                 }
