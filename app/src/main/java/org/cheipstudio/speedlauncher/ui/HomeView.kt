@@ -820,7 +820,7 @@ class HomeView @JvmOverloads constructor(
     private fun applyRssPageMode(onRss: Boolean) {
         isOnRssLeadingPage = onRss
         // Dock raccomandate (top + bottom) - nascoste su RSS
-        for (id in intArrayOf(R.id.recommendedRow, R.id.recommendedRowBottom)) {
+        for (id in intArrayOf(org.cheipstudio.speedlauncher.R.id.recommendedRow, org.cheipstudio.speedlauncher.R.id.recommendedRowBottom)) {
             try { findViewById<View>(id)?.visibility = if (onRss) View.GONE else View.VISIBLE } catch (_: Throwable) {}
         }
         // Search bar - nascosta su RSS
