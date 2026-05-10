@@ -22,12 +22,9 @@
         android:paddingHorizontal="@dimen/home_horizontal_padding"
         android:paddingBottom="@dimen/home_bottom_padding">
 
-        <org.cheipstudio.speedlauncher.ui.WidgetContainerView
-            android:id="@+id/widgetSlot"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/widget_slot_height"
-            android:layout_marginBottom="16dp" />
-
+        <!-- v259: widgetSlot rimosso da qui, ora è overlay nel FrameLayout root  
+             così può posizionarsi liberamente top/middle/bottom -->
+        
         <!-- v30: AI Launcher Mode - Raccomandate -->
         <org.cheipstudio.speedlauncher.ui.RecommendedView
             android:id="@+id/recommendedRow"
@@ -117,6 +114,15 @@
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
+
+    <!-- v259: widgetSlot come overlay - può galleggiare in qualsiasi posizione verticale -->
+    <org.cheipstudio.speedlauncher.ui.WidgetContainerView
+        android:id="@+id/widgetSlot"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/widget_slot_height"
+        android:layout_gravity="top"
+        android:layout_marginTop="@dimen/home_top_padding"
+        android:layout_marginHorizontal="@dimen/home_horizontal_padding" />
 
     <!-- v183: indicatore swipe RSS (sottile chevron lato sinistro) -->
     <!-- v194: pillola laterale visibile per RSS feed -->

@@ -34,6 +34,8 @@ class PagedHomeContainer @JvmOverloads constructor(
     var onPageChanged: ((Int) -> Unit)? = null
     /** v258: chiamato durante lo scroll, fraction = scrollX / (totalWidth - width). 0..1. */
     var onScrollFraction: ((Float) -> Unit)? = null
+    /** v259: se true, lascia che i child gestiscano touch orizzontale (es. filterScroll RSS) */
+    var allowChildHorizontalScroll: Boolean = false
     
     // v250: leading page (RSS) prima della home page 0
     private var leadingView: android.view.View? = null
@@ -136,6 +138,11 @@ class PagedHomeContainer @JvmOverloads constructor(
         }
     }
     
+    /** v259: child di una pagina (raw index, include leading) */
+    fun getChildAtSafe(idx: Int): android.view.View? {
+        return if (idx in 0 until container.childCount) container.getChildAt(idx) else null
+    }
+    
     /** v250: snap a una home page (ignora leading). idx=0 è la prima home reale. */
     fun snapToHomePage(idx: Int, animate: Boolean = true) {
         snapToPage(idx + leadingOffset, animate)
@@ -151,7 +158,10 @@ class PagedHomeContainer @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(ev.x - downX)
                 val dy = abs(ev.y - downY)
-                if (!dragging && dx > touchSlop && dx > dy) {
+                // v259: se i child possono scrollare orizzontalmente (es. filtri RSS), 
+                // richiedo soglia più alta per intercettare
+                val effectiveSlop = if (allowChildHorizontalScroll) touchSlop * 4 else touchSlop
+                if (!dragging && dx > effectiveSlop && dx > dy * 1.5f) {
                     dragging = true
                     parent?.requestDisallowInterceptTouchEvent(true)
                     return true

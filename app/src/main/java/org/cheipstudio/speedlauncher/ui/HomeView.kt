@@ -303,16 +303,11 @@ class HomeView @JvmOverloads constructor(
             // v245: trigger rimosso
         }
 
-        // v258: parallax wallpaper - offset 0..1 → setWallpaperOffsets
+        // v259: parallax sui contenuti + visibility live durante swipe
         binding.pagedHome.onScrollFraction = { fraction ->
             try {
-                val token = windowToken
-                if (token != null) {
-                    val wm = android.app.WallpaperManager.getInstance(context)
-                    val total = binding.pagedHome.pageCount.coerceAtLeast(2)
-                    wm.setWallpaperOffsetSteps(1f / (total - 1), 1f)
-                    wm.setWallpaperOffsets(token, fraction, 0.5f)
-                }
+                applyPageParallax(fraction)
+                applyRssTransitionAlpha(fraction)
             } catch (_: Throwable) {}
         }
         
@@ -828,6 +823,47 @@ class HomeView @JvmOverloads constructor(
         binding.pagedHome.snapToHomePage(0, animate = false)
     }
     
+    /** v259: parallax sui pages e widgetSlot durante lo scroll orizzontale */
+    /** v259: durante swipe verso/da RSS, fade in/out di dock+search per transizione fluida */
+    private fun applyRssTransitionAlpha(fraction: Float) {
+        if (!binding.pagedHome.hasLeadingPage) return
+        // fraction 0 = leading page (RSS), fraction = 1/(N-1)*1 = home page 0
+        val pageW = binding.pagedHome.width
+        if (pageW <= 0) return
+        val totalPages = binding.pagedHome.pageCount.coerceAtLeast(2)
+        val rawPageF = fraction * (totalPages - 1)  // posizione corrente in float (0..N-1)
+        // Distanza dalla leading page (0). 0 = sono su RSS, 1 = sono su home page 0
+        val homeAlpha = rawPageF.coerceIn(0f, 1f)
+        // Dock raccomandate, search bar, drawer handle: alpha proporzionale a homeAlpha
+        try { binding.searchBar.alpha = homeAlpha } catch (_: Throwable) {}
+        try { binding.recommendedRow.alpha = homeAlpha } catch (_: Throwable) {}
+        try { binding.recommendedRowBottom.alpha = homeAlpha } catch (_: Throwable) {}
+        try { binding.drawerHandle.alpha = homeAlpha } catch (_: Throwable) {}
+        try { binding.widgetSlot.alpha = homeAlpha } catch (_: Throwable) {}
+    }
+    
+    private fun applyPageParallax(fraction: Float) {
+        val pageW = binding.pagedHome.width
+        if (pageW <= 0) return
+        val totalPages = binding.pagedHome.pageCount.coerceAtLeast(1)
+        val scrollX = fraction * (totalPages - 1) * pageW
+        val currentRawPage = binding.pagedHome.currentPage
+        // Per ogni page: trasla in base al delta tra la sua posizione naturale e lo scrollX
+        for (i in 0 until binding.pagedHome.pageCount) {
+            val pageView = binding.pagedHome.getChildAtSafe(i) ?: continue
+            // posizione naturale della pagina i = i * pageW
+            val natural = i * pageW
+            val delta = natural - scrollX  // distanza dalla posizione corrente
+            // Parallax: la pagina si muove un 15% più rapida del normale
+            // (così appare più "in primo piano" rispetto allo sfondo)
+            val parallaxOffset = delta * 0.15f
+            pageView.translationX = parallaxOffset
+        }
+        // Widget slot: trasla in base alla pagina corrente (non si muove durante lo swipe orizzontale
+        // perché è esterno al pagedHome, ma con parallax leggero per coerenza)
+        // In realtà widgetSlot è esterno: non lo sposto, resta fermo nella sua posizione  
+    }
+    
     /** v254: true se siamo sulla leading page RSS - nasconde dock/searchBar/blocca gesture */
     var isOnRssLeadingPage: Boolean = false
         private set
@@ -835,6 +871,16 @@ class HomeView @JvmOverloads constructor(
     /** v254: nasconde elementi home + blocca gesture quando siamo su RSS */
     private fun applyRssPageMode(onRss: Boolean) {
         isOnRssLeadingPage = onRss
+        // v259: su RSS, lascia il container child (filtri) gestire scroll orizzontale
+        binding.pagedHome.allowChildHorizontalScroll = onRss
+        // v259: ripristino alpha dopo transizione (potrebbe essere intermedio per swipe)
+        if (!onRss) {
+            try { binding.searchBar.alpha = 1f } catch (_: Throwable) {}
+            try { binding.recommendedRow.alpha = 1f } catch (_: Throwable) {}
+            try { binding.recommendedRowBottom.alpha = 1f } catch (_: Throwable) {}
+            try { binding.drawerHandle.alpha = 1f } catch (_: Throwable) {}
+            try { binding.widgetSlot.alpha = 1f } catch (_: Throwable) {}
+        }
         // v258: Dock raccomandate - nascoste su RSS, ripristinate via refreshRecommended che 
         // rispetta posizione top/bottom configurata dall'utente
         if (onRss) {
@@ -849,9 +895,15 @@ class HomeView @JvmOverloads constructor(
         // Drawer handle - nascosto su RSS
         try { binding.drawerHandle.visibility = if (onRss) View.GONE else 
             (if (settings.drawerEnabled.value == true) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
-        // Widget container - nascosto su RSS (è una pagina speciale, non c'è widget container)
-        try { binding.widgetSlot.visibility = if (onRss) View.GONE else 
-            (if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
+        // v259: Widget container - INVISIBLE invece di GONE per mantenere lo spazio  
+        // (evita salto di layout quando si torna dalla pagina RSS alla home)
+        try {
+            if (settings.showWidgetSlot.value == true) {
+                binding.widgetSlot.visibility = if (onRss) View.INVISIBLE else View.VISIBLE
+            } else {
+                binding.widgetSlot.visibility = View.GONE
+            }
+        } catch (_: Throwable) {}
         // Page indicator resta visibile (utente deve poter vedere dove è)
     }
     
@@ -859,6 +911,32 @@ class HomeView @JvmOverloads constructor(
         binding.widgetSlot.setHostController(host)
         // v244: long press su area vuota del container widget → apre menu home
         binding.widgetSlot.onEmptyLongPress = { onHomeLongPress?.invoke() }
+        // v259: posiziono il widgetSlot top/middle/bottom in base al primo widget
+        binding.widgetSlot.onVerticalPosChanged = { pos ->
+            applyWidgetVerticalPos(pos)
+        }
+    }
+    
+    /** v259: trasla il widgetSlot via translationY in base alla posizione globale (top/middle/bottom) */
+    private fun applyWidgetVerticalPos(pos: String) {
+        post {
+            val ws = binding.widgetSlot
+            // home utile = altezza homeView - top padding - widgetSlot height - dock+search+pageIndicator+bottomPadding
+            val homeHeight = height
+            if (homeHeight <= 0) return@post
+            val widgetH = ws.height
+            if (widgetH <= 0) return@post
+            // Calcolo lo spazio occupato dagli elementi sotto il widget (dock, search, indicator, dock bottom)
+            val density = resources.displayMetrics.density
+            val bottomReserved = (180 * density).toInt()  // ~ pageIndicator + dock + search + drawerHandle
+            val topReserved = (48 * density).toInt()      // home_top_padding
+            val available = homeHeight - widgetH - topReserved - bottomReserved
+            ws.translationY = when (pos) {
+                org.cheipstudio.speedlauncher.data.WidgetItem.POS_MIDDLE -> (available / 2f).coerceAtLeast(0f)
+                org.cheipstudio.speedlauncher.data.WidgetItem.POS_BOTTOM -> available.toFloat().coerceAtLeast(0f)
+                else -> 0f
+            }
+        }
     }
     
     // v228: apre il widget picker per la slot corrente (chiamato da HomeMenuSheet "Aggiungi widget")

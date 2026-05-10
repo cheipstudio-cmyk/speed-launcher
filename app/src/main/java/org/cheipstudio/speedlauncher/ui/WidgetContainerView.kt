@@ -41,6 +41,8 @@ class WidgetContainerView @JvmOverloads constructor(
         }
 
     private val store = WidgetStore(context)
+    /** v259: callback quando il primo widget della pagina cambia verticalPos */
+    var onVerticalPosChanged: ((String) -> Unit)? = null
     private var hostController: WidgetHostController? = null
     private val mountedViews = mutableMapOf<String, View>()  // uuid → view montata
     
@@ -88,6 +90,9 @@ class WidgetContainerView @JvmOverloads constructor(
             requestLayout()
             if (width > 0 && height > 0) applyLayoutToChildren()
         }
+        // v259: emetto la posizione verticale prevalente (primo widget della pagina)
+        val firstPos = items.firstOrNull()?.verticalPos ?: WidgetItem.POS_TOP
+        onVerticalPosChanged?.invoke(firstPos)
     }
 
     /** Aggiunge un nuovo widget (chiamato dopo bind+configure successo) */
@@ -225,12 +230,9 @@ class WidgetContainerView @JvmOverloads constructor(
             lp.height = cellH * item.spanY
             // v247: centra orizzontalmente sempre, ignorando cellX
             lp.leftMargin = (width - lp.width) / 2
-            // v247: posizione verticale in base a verticalPos
-            lp.topMargin = when (item.verticalPos) {
-                WidgetItem.POS_MIDDLE -> (height - lp.height) / 2
-                WidgetItem.POS_BOTTOM -> height - lp.height
-                else -> 0  // POS_TOP
-            }
+            // v259: il widget resta in alto del container; posizione globale 
+            // è gestita dall'esterno (HomeView trasla il container intero)
+            lp.topMargin = 0
             view.layoutParams = lp
             updateWidgetOptions(item, view)
         }
