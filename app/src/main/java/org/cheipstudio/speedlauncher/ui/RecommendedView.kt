@@ -28,11 +28,53 @@ class RecommendedView @JvmOverloads constructor(
     var onAppClick: ((AppInfo) -> Unit)? = null
     var onAppLongPress: ((AppInfo) -> Unit)? = null
     var onContainerLongPress: (() -> Unit)? = null  // v226: long press sul vuoto della dock
+    
+    // v227: rilevazione long press su tutta la dock (anche sopra le icone)
+    private var dockLongPressDownX = 0f
+    private var dockLongPressDownY = 0f
+    private val dockLongPressHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var dockLongPressFired = false
+    private val dockLongPressRunnable = Runnable {
+        dockLongPressFired = true
+        onContainerLongPress?.invoke()
+    }
+    private val dockLongPressSlop by lazy {
+        android.view.ViewConfiguration.get(context).scaledTouchSlop * 2
+    }
 
     private val density = resources.displayMetrics.density
     private val card: MaterialCardView
     private val row: LinearLayout
 
+    override fun onInterceptTouchEvent(ev: android.view.MotionEvent): Boolean {
+        when (ev.action) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                dockLongPressDownX = ev.x
+                dockLongPressDownY = ev.y
+                dockLongPressFired = false
+                dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
+                // 700ms - se l'utente lascia prima, l'app riceve il tap normale
+                dockLongPressHandler.postDelayed(dockLongPressRunnable, 700)
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                val dx = kotlin.math.abs(ev.x - dockLongPressDownX)
+                val dy = kotlin.math.abs(ev.y - dockLongPressDownY)
+                if (dx > dockLongPressSlop || dy > dockLongPressSlop) {
+                    dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
+                }
+            }
+            android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
+            }
+        }
+        // Se long press si è avverato, intercetto e annullo i child
+        if (dockLongPressFired) {
+            dockLongPressFired = false
+            return true
+        }
+        return super.onInterceptTouchEvent(ev)
+    }
+    
     init {
         // Card wrapper
         card = MaterialCardView(context).apply {
@@ -62,11 +104,6 @@ class RecommendedView @JvmOverloads constructor(
         }
         card.addView(row)
         addView(card)
-        // v226: long press sul container (non sulle app) → callback
-        card.setOnLongClickListener {
-            onContainerLongPress?.invoke()
-            true
-        }
     }
 
     private fun resolveAttrColor(attr: Int): Int {

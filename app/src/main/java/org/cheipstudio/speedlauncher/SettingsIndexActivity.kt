@@ -69,7 +69,9 @@ class SettingsIndexActivity : AppCompatActivity() {
         val intent = Intent(this, SettingsActivity::class.java)
         if (section.isNotEmpty()) intent.putExtra("filterSection", section)
         startActivity(intent)
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
     }
 
     private fun resolveAttr(attr: Int): Int {

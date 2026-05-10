@@ -260,6 +260,12 @@ class HomeView @JvmOverloads constructor(
             SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) {
                 binding.rssEdgeIndicator.visibility = if (it == true) View.VISIBLE else View.GONE
             }
+            // v227: observers dock per refresh real-time
+            SpeedApp.instance.settingsRepository.recommendedPosition.observe(lo) { refreshRecommended() }
+            SpeedApp.instance.settingsRepository.dockTheme.observe(lo) {
+                binding.recommendedRow.refreshTheme()
+                binding.recommendedRowBottom.refreshTheme()
+            }
         }
         // v194: pillola laterale RSS sempre visibile + click
         binding.rssEdgeIndicator.visibility = 
