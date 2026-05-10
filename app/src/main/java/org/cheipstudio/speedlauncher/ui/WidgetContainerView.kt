@@ -67,6 +67,8 @@ class WidgetContainerView @JvmOverloads constructor(
     }
 
     init {
+        // v272: clickable per ricevere touch anche su area vuota (per swipe cambio pagina)
+        isClickable = true
         // v244: clip false, lascia che i widget disegnino oltre i bounds se necessario
         clipChildren = false
         clipToPadding = false

@@ -237,7 +237,8 @@ class HomeView @JvmOverloads constructor(
         val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 if (isRssOverlayOpen) return
-                // v263: haptic con View (più rapido del fallback Vibrator)
+                // v272: NON triggerare se uno swipe RSS è in corso o già scattato
+                if (edgeSwipeFired) return
                 HapticHelper.longPress(this@HomeView)
                 onHomeLongPress?.invoke()
             }
@@ -697,8 +698,13 @@ class HomeView @JvmOverloads constructor(
         if (settings.rssPanelEnabled.value == true && ev.action == MotionEvent.ACTION_MOVE && edgeSwipeStarted && !edgeSwipeFired) {
             val dx = ev.x - edgeSwipeStartX
             val dy = kotlin.math.abs(ev.y - edgeSwipeStartY)
-            if (dx > 6f && dx > dy * 0.8f) {
-                return true  // intercetto - dispatchTouchEvent gestirà apertura overlay
+            val adx = kotlin.math.abs(dx)
+            // Intercetto se chiaramente orizzontale (per preempt PagedHomeContainer)
+            // Apertura: swipe destra sulla pagina 0 / Chiusura: swipe sinistra con overlay aperto
+            val canOpen = !isRssOverlayOpen && dx > 0 && binding.pagedHome.currentPage == 0
+            val canClose = isRssOverlayOpen && dx < 0
+            if ((canOpen || canClose) && adx > 8f && adx > dy * 1.2f) {
+                return true
             }
         }
         // v233: se widget edit mode attivo, NON intercettare swipe → lascia che overlay gestisca tutto
@@ -788,10 +794,18 @@ class HomeView @JvmOverloads constructor(
                 MotionEvent.ACTION_MOVE -> {
                     val dx = event.x - edgeSwipeStartX
                     val dy = kotlin.math.abs(event.y - edgeSwipeStartY)
-                    if (dx > 20f && dx > dy * 0.8f && !isRssOverlayOpen) {
+                    val adx = kotlin.math.abs(dx)
+                    if (!isRssOverlayOpen && dx > 30f && adx > dy * 1.2f 
+                        && binding.pagedHome.currentPage == 0) {
                         edgeSwipeFired = true
                         performHapticFeedbackLight()
                         openRssOverlay()
+                        return true
+                    }
+                    if (isRssOverlayOpen && dx < -60f && adx > dy * 1.5f) {
+                        edgeSwipeFired = true
+                        performHapticFeedbackLight()
+                        closeRssOverlay()
                         return true
                     }
                 }
@@ -913,36 +927,35 @@ class HomeView @JvmOverloads constructor(
         if (settings.rssPanelEnabled.value == true) {
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    edgeSwipeStarted = false
+                    edgeSwipeStarted = true  // v272: sempre tracking, no edge restriction
                     edgeSwipeFired = false
-                    if (!isRssOverlayOpen && ev.x < edgeSize) {
-                        // Apertura: tocco parte dal bordo sinistro
-                        edgeSwipeStarted = true
-                        edgeSwipeStartX = ev.x
-                        edgeSwipeStartY = ev.y
-                    } else if (isRssOverlayOpen && ev.x > width - edgeSize) {
-                        // v267: Chiusura: tocco parte dal bordo destro (non disturba scroll filtri)
-                        edgeSwipeStarted = true
-                        edgeSwipeStartX = ev.x
-                        edgeSwipeStartY = ev.y
-                    }
+                    edgeSwipeStartX = ev.x
+                    edgeSwipeStartY = ev.y
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (edgeSwipeStarted && !edgeSwipeFired) {
                         val dx = ev.x - edgeSwipeStartX
                         val dy = kotlin.math.abs(ev.y - edgeSwipeStartY)
-                        if (kotlin.math.abs(dx) > 60f && kotlin.math.abs(dx) > dy * 1.5f) {
-                            if (dx > 0 && !isRssOverlayOpen) {
-                                edgeSwipeFired = true
-                                performHapticFeedbackLight()
-                                openRssOverlay()
-                                return true
-                            } else if (dx < 0 && isRssOverlayOpen) {
-                                edgeSwipeFired = true
-                                performHapticFeedbackLight()
-                                closeRssOverlay()
-                                return true
-                            }
+                        val adx = kotlin.math.abs(dx)
+                        // APERTURA: swipe destra ovunque sulla pagina 0 quando overlay chiuso
+                        if (!isRssOverlayOpen && dx > 30f && adx > dy * 1.2f
+                            && binding.pagedHome.currentPage == 0) {
+                            edgeSwipeFired = true
+                            // Cancello eventuali long-press pendenti
+                            val cancel = MotionEvent.obtain(ev)
+                            cancel.action = MotionEvent.ACTION_CANCEL
+                            try { super.dispatchTouchEvent(cancel) } catch (_: Throwable) {}
+                            cancel.recycle()
+                            performHapticFeedbackLight()
+                            openRssOverlay()
+                            return true
+                        }
+                        // CHIUSURA: swipe sinistra ovunque quando overlay aperto
+                        if (isRssOverlayOpen && dx < -60f && adx > dy * 1.5f) {
+                            edgeSwipeFired = true
+                            performHapticFeedbackLight()
+                            closeRssOverlay()
+                            return true
                         }
                     }
                 }
@@ -950,7 +963,6 @@ class HomeView @JvmOverloads constructor(
                     edgeSwipeStarted = false
                 }
             }
-            // Se l'edge-swipe è già scattato, consumo gli eventi successivi
             if (edgeSwipeFired) return true
         }
         return super.dispatchTouchEvent(ev)
