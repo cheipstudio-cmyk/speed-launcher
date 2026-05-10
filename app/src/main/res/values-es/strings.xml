@@ -360,4 +360,9 @@ Se usará solo para esta función.</string>
     <string name="widget_move_label">Mover a pagina</string>
     <string name="widget_move_prev">Anterior</string>
     <string name="widget_move_next">Siguiente</string>
+    <string name="widget_size_small">Pequeno</string>
+    <string name="widget_size_medium">Mediano</string>
+    <string name="widget_size_large">Grande</string>
+    <string name="widget_size_full">Completo</string>
+    <string name="widget_theme_label">Tema del widget</string>
 </resources>

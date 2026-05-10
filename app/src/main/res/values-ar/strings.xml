@@ -360,4 +360,9 @@
     <string name="widget_move_label">انقل إلى الصفحة</string>
     <string name="widget_move_prev">السابقة</string>
     <string name="widget_move_next">التالية</string>
+    <string name="widget_size_small">صغير</string>
+    <string name="widget_size_medium">متوسط</string>
+    <string name="widget_size_large">كبير</string>
+    <string name="widget_size_full">ممتلئ</string>
+    <string name="widget_theme_label">سمة الأداة</string>
 </resources>

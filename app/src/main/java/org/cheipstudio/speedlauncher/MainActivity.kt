@@ -323,12 +323,14 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             homeContent.scaleX = 1f
             homeContent.scaleY = 1f
             if (!isLandscape && shouldAnimate) {
-                homeContent.alpha = 0f
+                // v245: tolto alpha=0 su parent per evitare flash vuoto.
+                // Solo scale 1.04→1 sul parent. Il fade è gestito dai singoli sub-element.
+                homeContent.alpha = 1f
                 homeContent.scaleX = 1.04f
                 homeContent.scaleY = 1.04f
                 homeContent.animate().cancel()
                 homeContent.animate()
-                    .alpha(1f).scaleX(1f).scaleY(1f)
+                    .scaleX(1f).scaleY(1f)
                     .setDuration((280 * animMul()).toLong())
                     .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                     .start()

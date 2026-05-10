@@ -379,4 +379,9 @@ Vuoi scaricarla?</string>
     <string name="widget_move_label">Sposta a pagina</string>
     <string name="widget_move_prev">Precedente</string>
     <string name="widget_move_next">Successiva</string>
+    <string name="widget_size_small">Piccolo</string>
+    <string name="widget_size_medium">Medio</string>
+    <string name="widget_size_large">Grande</string>
+    <string name="widget_size_full">Pieno</string>
+    <string name="widget_theme_label">Tema widget</string>
 </resources>

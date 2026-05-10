@@ -99,13 +99,8 @@ class HomeView @JvmOverloads constructor(
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
-            // v168: swipe da sinistra verso destra in qualunque punto → pannello RSS
-            if (settings.rssPanelEnabled.value == true &&
-                vx > 250f && abs(vx) > abs(vy) * 1.0f) {
-                if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
-                onSwipeRightFromLeftEdge?.invoke()
-                return true
-            }
+            // v245: swipe orizzontale per RSS rimosso (apriva feed indesiderato durante navigazione pagine)
+            // Resta solo il bottone come trigger.
             return false
         }
     })
@@ -294,7 +289,7 @@ class HomeView @JvmOverloads constructor(
                         .start()
                 }
                 .start()
-            onSwipeRightFromLeftEdge?.invoke()
+            // v245: trigger rimosso
         }
 
         binding.pagedHome.onPageChanged = { idx -> 

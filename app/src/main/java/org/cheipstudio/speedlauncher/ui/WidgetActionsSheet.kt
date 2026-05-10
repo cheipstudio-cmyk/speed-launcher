@@ -17,8 +17,8 @@ import org.cheipstudio.speedlauncher.data.WidgetItem
 import org.cheipstudio.speedlauncher.data.WidgetStore
 
 /**
- * v244: Modal azioni widget. Mostra dimensioni (spanX/spanY), sposta tra pagine, rimuovi.
- * Stile Material 3 con chip segmented (come WidgetResizeSheet vecchio).
+ * v245: Modal azioni widget. Larghezza/Altezza con label umane (Piccolo/Medio/Grande/Pieno),
+ * sposta tra pagine, rimuovi.
  */
 class WidgetActionsSheet : BottomSheetDialogFragment() {
 
@@ -36,7 +36,6 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
         val pageIndex = arguments?.getInt(ARG_PAGE) ?: 0
         val store = WidgetStore(ctx)
 
-        // Trovo il widget item attuale
         val item = store.loadPage(pageIndex).firstOrNull { it.uuid == uuid }
             ?: return TextView(ctx).apply { text = "" }
 
@@ -75,27 +74,37 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             layoutParams = lp
         })
 
-        // ---- Larghezza (spanX) ----
+        // Larghezza: spanX → 1=25%, 2=50%, 3=75%, 4=100%
+        val widthOptions = listOf(
+            1 to getString(R.string.widget_size_small),
+            2 to getString(R.string.widget_size_medium),
+            3 to getString(R.string.widget_size_large),
+            4 to getString(R.string.widget_size_full)
+        )
         addSegmentedSection(
-            root, d, getString(R.string.widget_width_label),
-            listOf("1", "2", "3", "4"),
-            (item.spanX - 1).coerceIn(0, 3)
+            root, d, getString(R.string.settings_widget_width),
+            widthOptions.map { it.second },
+            widthOptions.indexOfFirst { it.first == item.spanX }.coerceAtLeast(0)
         ) { idx ->
-            val newSpanX = idx + 1
-            updateItem(store, item.copy(spanX = newSpanX))
+            updateItem(store, item.copy(spanX = widthOptions[idx].first))
         }
 
-        // ---- Altezza (spanY) ----
+        // Altezza: spanY → 1=Piccolo, 2=Medio, 3=Grande, 4=Pieno
+        val heightOptions = listOf(
+            1 to getString(R.string.widget_size_small),
+            2 to getString(R.string.widget_size_medium),
+            3 to getString(R.string.widget_size_large),
+            4 to getString(R.string.widget_size_full)
+        )
         addSegmentedSection(
-            root, d, getString(R.string.widget_height_label),
-            listOf("1", "2", "3", "4"),
-            (item.spanY - 1).coerceIn(0, 3)
+            root, d, getString(R.string.settings_widget_height),
+            heightOptions.map { it.second },
+            heightOptions.indexOfFirst { it.first == item.spanY }.coerceAtLeast(0)
         ) { idx ->
-            val newSpanY = idx + 1
-            updateItem(store, item.copy(spanY = newSpanY))
+            updateItem(store, item.copy(spanY = heightOptions[idx].first))
         }
 
-        // ---- Sposta pagina ----
+        // Sposta pagina
         root.addView(makeHeader(ctx, d, getString(R.string.widget_move_label)))
         val moveRow = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -109,16 +118,14 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
         val prevBtn = makeOutlinedButton(ctx, d, getString(R.string.widget_move_prev)) {
             if (item.pageIndex > 0) {
                 store.removeWidget(item.pageIndex, item.uuid)
-                val moved = item.copy(pageIndex = item.pageIndex - 1)
-                store.addWidget(moved)
+                store.addWidget(item.copy(pageIndex = item.pageIndex - 1))
                 onChanged?.invoke()
                 dismiss()
             }
         }
         val nextBtn = makeOutlinedButton(ctx, d, getString(R.string.widget_move_next)) {
             store.removeWidget(item.pageIndex, item.uuid)
-            val moved = item.copy(pageIndex = item.pageIndex + 1)
-            store.addWidget(moved)
+            store.addWidget(item.copy(pageIndex = item.pageIndex + 1))
             onChanged?.invoke()
             dismiss()
         }
@@ -132,7 +139,40 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
         moveRow.addView(nextBtn)
         root.addView(moveRow)
 
-        // ---- Rimuovi (filled tonal error) ----
+        // v246: Tema (visibile solo per Speed Stats widget)
+        try {
+            val mgr = android.appwidget.AppWidgetManager.getInstance(ctx)
+            val info = mgr.getAppWidgetInfo(item.appWidgetId)
+            val isSpeedStats = info?.provider?.className?.contains("SpeedStatsWidgetProvider") == true
+            if (isSpeedStats) {
+                val themePrefs = ctx.getSharedPreferences("speed_widget_prefs", Context.MODE_PRIVATE)
+                val curTheme = themePrefs.getString("widget_theme", "transparent") ?: "transparent"
+                val themes = listOf(
+                    "system" to getString(R.string.widget_theme_system),
+                    "transparent" to getString(R.string.widget_theme_transparent),
+                    "light" to getString(R.string.widget_theme_light),
+                    "dark" to getString(R.string.widget_theme_dark)
+                )
+                addSegmentedSection(
+                    root, d, getString(R.string.widget_theme_label),
+                    themes.map { it.second },
+                    themes.indexOfFirst { it.first == curTheme }.coerceAtLeast(0)
+                ) { idx ->
+                    val newTheme = themes[idx].first
+                    themePrefs.edit().putString("widget_theme", newTheme).apply()
+                    // Forza refresh widget Speed Stats per applicare tema
+                    try {
+                        val intent = android.content.Intent(ctx, Class.forName("org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider"))
+                        intent.action = android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                        val ids = mgr.getAppWidgetIds(android.content.ComponentName(ctx, "org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider"))
+                        intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                        ctx.sendBroadcast(intent)
+                    } catch (_: Throwable) {}
+                }
+            }
+        } catch (_: Throwable) {}
+
+        // Rimuovi
         val removeBtn = MaterialButton(ctx).apply {
             text = getString(R.string.widget_remove_action)
             cornerRadius = (32 * d).toInt()

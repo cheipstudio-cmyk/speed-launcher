@@ -360,4 +360,9 @@
     <string name="widget_move_label">ページを移動</string>
     <string name="widget_move_prev">前へ</string>
     <string name="widget_move_next">次へ</string>
+    <string name="widget_size_small">小</string>
+    <string name="widget_size_medium">中</string>
+    <string name="widget_size_large">大</string>
+    <string name="widget_size_full">満</string>
+    <string name="widget_theme_label">ウィジェットのテーマ</string>
 </resources>

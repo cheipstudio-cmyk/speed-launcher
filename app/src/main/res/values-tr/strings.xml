@@ -360,4 +360,9 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="widget_move_label">Sayfaya tasi</string>
     <string name="widget_move_prev">Onceki</string>
     <string name="widget_move_next">Sonraki</string>
+    <string name="widget_size_small">Kucuk</string>
+    <string name="widget_size_medium">Orta</string>
+    <string name="widget_size_large">Buyuk</string>
+    <string name="widget_size_full">Tam</string>
+    <string name="widget_theme_label">Widget temasi</string>
 </resources>

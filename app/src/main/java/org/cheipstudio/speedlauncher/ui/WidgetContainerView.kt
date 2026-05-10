@@ -93,9 +93,9 @@ class WidgetContainerView @JvmOverloads constructor(
     /** Aggiunge un nuovo widget (chiamato dopo bind+configure successo) */
     fun addWidget(appWidgetId: Int) {
         val existing = store.loadPage(pageIndex)
-        // v242: prova prima 4x2 (full), poi 4x1, poi 2x2, poi 2x1, poi 1x1
+        // v245: default più alto - 4x3 per dare al widget spazio decente
         val sizesToTry = listOf(
-            4 to 2, 4 to 1, 2 to 2, 2 to 1, 1 to 1
+            4 to 3, 4 to 2, 4 to 1, 2 to 3, 2 to 2, 2 to 1, 1 to 1
         )
         for ((sx, sy) in sizesToTry) {
             val (cellX, cellY) = findFirstFreeCell(existing, sx, sy) ?: continue

@@ -360,4 +360,9 @@ Télécharger maintenant ?</string>
     <string name="widget_move_label">Deplacer vers page</string>
     <string name="widget_move_prev">Precedente</string>
     <string name="widget_move_next">Suivante</string>
+    <string name="widget_size_small">Petit</string>
+    <string name="widget_size_medium">Moyen</string>
+    <string name="widget_size_large">Grand</string>
+    <string name="widget_size_full">Plein</string>
+    <string name="widget_theme_label">Theme widget</string>
 </resources>
