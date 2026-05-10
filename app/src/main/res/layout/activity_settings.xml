@@ -688,22 +688,6 @@
             <!-- ===== GESTI ===== -->
             <TextView style="@style/PixelSectionTitle" android:text="@string/settings_section_widget" />
 
-            <!-- Tema widget -->
-            <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetTheme" style="@style/PixelCard"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-                <LinearLayout style="@style/PixelItem">
-                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_cyan">
-                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_color" />
-                    </FrameLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_widget_theme" />
-                        <TextView android:id="@+id/widgetThemeValue" style="@style/PixelItemSubtitle" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <!-- Auto-refresh -->
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemWidgetAutoRefresh" style="@style/PixelCard"

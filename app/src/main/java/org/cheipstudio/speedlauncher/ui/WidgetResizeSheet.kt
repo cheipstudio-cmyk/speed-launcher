@@ -1,5 +1,6 @@
 package org.cheipstudio.speedlauncher.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -7,15 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
 import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
-import org.cheipstudio.speedlauncher.data.SettingsRepository
 
 /**
- * v212: BottomSheet Pixel Material 3 Expressive per ridimensionare/spostare il widget.
+ * v221: BottomSheet per personalizzare widget con look Material 3 Pixel.
  */
 class WidgetResizeSheet : BottomSheetDialogFragment() {
 
@@ -28,14 +28,16 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         val ctx = requireContext()
-        val density = resources.displayMetrics.density
+        val d = resources.displayMetrics.density
         val settings = SpeedApp.instance.settingsRepository
 
-        val scroll = androidx.core.widget.NestedScrollView(ctx)
+        val scroll = NestedScrollView(ctx).apply {
+            isFillViewport = true
+        }
         val root = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
             background = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.bg_modal_sheet)
-            setPadding(0, (8 * density).toInt(), 0, (24 * density).toInt())
+            setPadding(0, (8 * d).toInt(), 0, (24 * d).toInt())
         }
         scroll.addView(root, ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
@@ -44,10 +46,10 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
         // Drag handle
         root.addView(View(ctx).apply {
             background = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.bg_drag_handle)
-            val lp = LinearLayout.LayoutParams((40 * density).toInt(), (4 * density).toInt())
+            val lp = LinearLayout.LayoutParams((40 * d).toInt(), (4 * d).toInt())
             lp.gravity = Gravity.CENTER_HORIZONTAL
-            lp.topMargin = (8 * density).toInt()
-            lp.bottomMargin = (16 * density).toInt()
+            lp.topMargin = (8 * d).toInt()
+            lp.bottomMargin = (16 * d).toInt()
             layoutParams = lp
         })
 
@@ -61,86 +63,88 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.leftMargin = (24 * density).toInt()
-            lp.rightMargin = (24 * density).toInt()
-            lp.bottomMargin = (16 * density).toInt()
+            lp.leftMargin = (24 * d).toInt()
+            lp.rightMargin = (24 * d).toInt()
+            lp.bottomMargin = (8 * d).toInt()
             layoutParams = lp
         })
 
-        // ---- POSIZIONE WIDGET ----
-        addSectionHeader(root, density, R.string.settings_widget_position)
-        val posCard = makeGroupCard(ctx, density)
-        val curPos = settings.widgetPosition.value ?: "top"
+        // ---- POSIZIONE ----
         val positions = listOf(
-            "top" to R.string.widget_pos_top,
-            "middle" to R.string.widget_pos_middle,
-            "bottom" to R.string.widget_pos_bottom
+            "top" to getString(R.string.widget_pos_top),
+            "middle" to getString(R.string.widget_pos_middle),
+            "bottom" to getString(R.string.widget_pos_bottom)
         )
-        positions.forEachIndexed { i, (value, labelRes) ->
-            val row = makeRow(ctx, density, getString(labelRes), value == curPos) {
-                settings.setWidgetPosition(value)
-                onChanged?.invoke()
-                rebuildAll(posCard, density, ctx, settings, R.string.widget_pos_top, positions) { it as String == settings.widgetPosition.value }
-            }
-            posCard.addView(row)
+        addSegmentedSection(
+            root, d, getString(R.string.settings_widget_position),
+            positions.map { it.second },
+            positions.indexOfFirst { it.first == (settings.widgetPosition.value ?: "top") }
+        ) { idx ->
+            settings.setWidgetPosition(positions[idx].first)
+            onChanged?.invoke()
         }
-        root.addView(posCard)
 
-        // ---- ALTEZZA WIDGET ----
-        addSectionHeader(root, density, R.string.settings_widget_height)
-        val hCard = makeGroupCard(ctx, density)
-        val curH = settings.widgetHeight.value ?: 160
-        val heights = listOf(
-            120 to "Piccolo",
-            160 to "Medio",
-            220 to "Grande",
-            280 to "Extra"
-        )
-        heights.forEach { (h, label) ->
-            val row = makeRow(ctx, density, label, h == curH) {
-                settings.setWidgetHeight(h)
-                onChanged?.invoke()
-                rebuildHeights(hCard, density, ctx, settings, heights)
-            }
-            hCard.addView(row)
+        // ---- ALTEZZA ----
+        val heights = listOf(120 to "Piccolo", 160 to "Medio", 220 to "Grande", 280 to "Extra")
+        addSegmentedSection(
+            root, d, getString(R.string.settings_widget_height),
+            heights.map { it.second },
+            heights.indexOfFirst { it.first == (settings.widgetHeight.value ?: 160) }.coerceAtLeast(0)
+        ) { idx ->
+            settings.setWidgetHeight(heights[idx].first)
+            onChanged?.invoke()
         }
-        root.addView(hCard)
 
-        // ---- LARGHEZZA WIDGET ----
-        addSectionHeader(root, density, R.string.settings_widget_width)
-        val wCard = makeGroupCard(ctx, density)
-        val curW = settings.widgetWidthPercent.value ?: 100
+        // ---- LARGHEZZA ----
         val widths = listOf(
             50 to getString(R.string.widget_width_50),
             75 to getString(R.string.widget_width_75),
             100 to getString(R.string.widget_width_full)
         )
-        widths.forEach { (w, label) ->
-            val row = makeRow(ctx, density, label, w == curW) {
-                settings.setWidgetWidthPercent(w)
-                onChanged?.invoke()
-                rebuildWidths(wCard, density, ctx, settings, widths)
-            }
-            wCard.addView(row)
+        addSegmentedSection(
+            root, d, getString(R.string.settings_widget_width),
+            widths.map { it.second },
+            widths.indexOfFirst { it.first == (settings.widgetWidthPercent.value ?: 100) }.coerceAtLeast(0)
+        ) { idx ->
+            settings.setWidgetWidthPercent(widths[idx].first)
+            onChanged?.invoke()
         }
-        root.addView(wCard)
+
+        // ---- TEMA WIDGET ----
+        val themes = listOf(
+            "system" to getString(R.string.widget_theme_system),
+            "transparent" to getString(R.string.widget_theme_transparent),
+            "light" to getString(R.string.widget_theme_light),
+            "dark" to getString(R.string.widget_theme_dark)
+        )
+        addSegmentedSection(
+            root, d, getString(R.string.settings_widget_theme),
+            themes.map { it.second },
+            themes.indexOfFirst { it.first == (settings.widgetTheme.value ?: "system") }.coerceAtLeast(0)
+        ) { idx ->
+            settings.setWidgetTheme(themes[idx].first)
+            try {
+                org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider.refreshAll(ctx)
+            } catch (_: Throwable) {}
+            onChanged?.invoke()
+        }
 
         // ---- RIMUOVI WIDGET (filled tonal error) ----
         val removeBtn = MaterialButton(ctx).apply {
             text = getString(R.string.widget_remove_action)
-            cornerRadius = (32 * density).toInt()
+            cornerRadius = (32 * d).toInt()
             setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorErrorContainer))
             setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnErrorContainer))
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             textSize = 15f
-            val padV = (14 * density).toInt()
+            val padV = (14 * d).toInt()
             setPadding(padV, padV, padV, padV)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.leftMargin = (16 * density).toInt()
-            lp.rightMargin = (16 * density).toInt()
-            lp.topMargin = (24 * density).toInt()
+            lp.leftMargin = (16 * d).toInt()
+            lp.rightMargin = (16 * d).toInt()
+            lp.topMargin = (24 * d).toInt()
             layoutParams = lp
             setOnClickListener {
                 onRemove?.invoke()
@@ -152,132 +156,101 @@ class WidgetResizeSheet : BottomSheetDialogFragment() {
         return scroll
     }
 
-    private fun addSectionHeader(parent: LinearLayout, density: Float, labelRes: Int) {
-        parent.addView(TextView(requireContext()).apply {
-            setText(labelRes)
-            textSize = 13f
+    /**
+     * Crea una sezione "segmented control" stile Pixel:
+     * - Header testuale piccolo
+     * - Riga di chip MaterialButton selezionabili (toggle group implicito)
+     */
+    private fun addSegmentedSection(
+        parent: LinearLayout, d: Float, header: String,
+        labels: List<String>, selectedIndex: Int,
+        onSelect: (Int) -> Unit
+    ) {
+        val ctx = requireContext()
+        // Header
+        parent.addView(TextView(ctx).apply {
+            text = header
+            textSize = 12f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-            letterSpacing = 0.05f
+            letterSpacing = 0.04f
+            isAllCaps = false
             setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.leftMargin = (24 * density).toInt()
-            lp.rightMargin = (24 * density).toInt()
-            lp.topMargin = (16 * density).toInt()
-            lp.bottomMargin = (8 * density).toInt()
+            lp.leftMargin = (24 * d).toInt()
+            lp.rightMargin = (24 * d).toInt()
+            lp.topMargin = (16 * d).toInt()
+            lp.bottomMargin = (10 * d).toInt()
             layoutParams = lp
         })
-    }
 
-    private fun makeGroupCard(ctx: android.content.Context, density: Float): LinearLayout {
-        // Approccio: linearLayout con bg drawable rounded
-        val ll = LinearLayout(ctx).apply {
-            orientation = LinearLayout.VERTICAL
-            background = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = 28 * density
-                setColor(resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerHigh))
-            }
+        // Container scrollable horizontal per i chip
+        val scroller = android.widget.HorizontalScrollView(ctx).apply {
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.leftMargin = (16 * density).toInt()
-            lp.rightMargin = (16 * density).toInt()
+            lp.leftMargin = (16 * d).toInt()
+            lp.rightMargin = (16 * d).toInt()
             layoutParams = lp
-            setPadding(0, (4 * density).toInt(), 0, (4 * density).toInt())
         }
-        return ll
-    }
-
-    private fun makeRow(
-        ctx: android.content.Context,
-        density: Float,
-        label: String,
-        selected: Boolean,
-        onClick: () -> Unit
-    ): View {
-        val row = LinearLayout(ctx).apply {
+        val chipRow = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            isClickable = true; isFocusable = true
-            val tvSel = android.util.TypedValue()
-            ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, tvSel, true)
-            setBackgroundResource(tvSel.resourceId)
-            setPadding((24 * density).toInt(), (14 * density).toInt(), (24 * density).toInt(), (14 * density).toInt())
-            minimumHeight = (52 * density).toInt()
-            setOnClickListener { onClick() }
         }
-        // Radio circle
-        row.addView(View(ctx).apply {
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.OVAL
-                if (selected) {
-                    setColor(resolveAttr(com.google.android.material.R.attr.colorPrimary))
-                    setStroke((2 * density).toInt(), resolveAttr(com.google.android.material.R.attr.colorPrimary))
-                } else {
-                    setColor(0)
-                    setStroke((2 * density).toInt(), resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+        val buttons = mutableListOf<MaterialButton>()
+        labels.forEachIndexed { i, label ->
+            val btn = MaterialButton(ctx, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+                text = label
+                isCheckable = true
+                isChecked = i == selectedIndex
+                cornerRadius = (24 * d).toInt()
+                strokeWidth = (1 * d).toInt()
+                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                textSize = 14f
+                isAllCaps = false
+                minHeight = (44 * d).toInt()
+                minimumHeight = (44 * d).toInt()
+                insetTop = 0
+                insetBottom = 0
+                val lp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, (44 * d).toInt()
+                )
+                lp.marginEnd = (8 * d).toInt()
+                layoutParams = lp
+                applyChipStyle(this, isChecked)
+                setOnClickListener {
+                    if (isChecked) return@setOnClickListener
+                    buttons.forEach {
+                        it.isChecked = false
+                        applyChipStyle(it, false)
+                    }
+                    isChecked = true
+                    applyChipStyle(this, true)
+                    onSelect(i)
                 }
             }
-            val s = (20 * density).toInt()
-            val lp = LinearLayout.LayoutParams(s, s)
-            lp.marginEnd = (16 * density).toInt()
-            layoutParams = lp
-        })
-        // Inner dot if selected
-        if (selected) {
-            val frame = (row.getChildAt(0) as View)
-            // Inner dot done with another view stack
+            buttons.add(btn)
+            chipRow.addView(btn)
         }
-        // Label
-        row.addView(TextView(ctx).apply {
-            text = label
-            textSize = 16f
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurface))
-        })
-        return row
+        scroller.addView(chipRow)
+        parent.addView(scroller)
     }
 
-    private fun rebuildAll(
-        card: LinearLayout, density: Float, ctx: android.content.Context,
-        settings: SettingsRepository, headerRes: Int,
-        positions: List<Pair<String, Int>>, isSelected: (Any) -> Boolean
-    ) {
-        card.removeAllViews()
-        positions.forEach { (value, labelRes) ->
-            val row = makeRow(ctx, density, getString(labelRes), value == settings.widgetPosition.value) {
-                settings.setWidgetPosition(value)
-                onChanged?.invoke()
-                rebuildAll(card, density, ctx, settings, headerRes, positions, isSelected)
-            }
-            card.addView(row)
-        }
-    }
-
-    private fun rebuildHeights(card: LinearLayout, density: Float, ctx: android.content.Context, settings: SettingsRepository, heights: List<Pair<Int, String>>) {
-        card.removeAllViews()
-        val cur = settings.widgetHeight.value ?: 160
-        heights.forEach { (h, label) ->
-            val row = makeRow(ctx, density, label, h == cur) {
-                settings.setWidgetHeight(h)
-                onChanged?.invoke()
-                rebuildHeights(card, density, ctx, settings, heights)
-            }
-            card.addView(row)
-        }
-    }
-
-    private fun rebuildWidths(card: LinearLayout, density: Float, ctx: android.content.Context, settings: SettingsRepository, widths: List<Pair<Int, String>>) {
-        card.removeAllViews()
-        val cur = settings.widgetWidthPercent.value ?: 100
-        widths.forEach { (w, label) ->
-            val row = makeRow(ctx, density, label, w == cur) {
-                settings.setWidgetWidthPercent(w)
-                onChanged?.invoke()
-                rebuildWidths(card, density, ctx, settings, widths)
-            }
-            card.addView(row)
+    private fun applyChipStyle(btn: MaterialButton, checked: Boolean) {
+        if (checked) {
+            btn.setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSecondaryContainer))
+            btn.setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSecondaryContainer))
+            btn.strokeColor = android.content.res.ColorStateList.valueOf(
+                resolveAttr(com.google.android.material.R.attr.colorSecondaryContainer)
+            )
+        } else {
+            btn.setBackgroundColor(0)
+            btn.setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurface))
+            btn.strokeColor = android.content.res.ColorStateList.valueOf(
+                resolveAttr(com.google.android.material.R.attr.colorOutlineVariant)
+            )
         }
     }
 

@@ -437,7 +437,6 @@ class SettingsActivity : AppCompatActivity() {
 
         // === v47: WIDGET SPEED STATS ===
         updateWidgetThemeLabel()
-        binding.itemWidgetTheme.setOnClickListener { showWidgetThemeDialog() }
 
         binding.switchWidgetAutoRefresh.isChecked = settings.widgetAutoRefresh.value == true
         binding.switchWidgetAutoRefresh.setOnCheckedChangeListener { _, on ->
@@ -592,7 +591,7 @@ class SettingsActivity : AppCompatActivity() {
             "dark" -> R.string.widget_theme_dark
             else -> R.string.widget_theme_system
         }
-        binding.widgetThemeValue.text = getString(labelRes)
+
     }
 
     private fun updateSearchThemeLabel() {
@@ -1071,7 +1070,7 @@ class SettingsActivity : AppCompatActivity() {
 
     /** v72+v136+v138: abilita/disabilita ricorsivamente card widget (incluse posizione/dim) */
     private fun applyWidgetDependentEnabled(enabled: Boolean) {
-        setCardDependentEnabled(binding.itemWidgetTheme, enabled)
+
         setCardDependentEnabled(binding.itemWidgetAutoRefresh, enabled)
         setCardDependentEnabled(binding.itemWidgetPosition, enabled)
         setCardDependentEnabled(binding.itemWidgetHeight, enabled)
