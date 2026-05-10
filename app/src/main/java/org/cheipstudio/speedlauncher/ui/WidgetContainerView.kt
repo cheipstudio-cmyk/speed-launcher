@@ -251,6 +251,20 @@ class WidgetContainerView @JvmOverloads constructor(
                 putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
             }
             AppWidgetManager.getInstance(context).updateAppWidgetOptions(item.appWidgetId, opts)
+            // v282: forzo refresh del widget se è il nostro Speed Stats (chiama onAppWidgetOptionsChanged)
+            try {
+                val info = AppWidgetManager.getInstance(context).getAppWidgetInfo(item.appWidgetId)
+                if (info?.provider?.packageName == context.packageName) {
+                    val intent = android.content.Intent(
+                        context, 
+                        Class.forName(info.provider.className)
+                    ).apply {
+                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(item.appWidgetId))
+                    }
+                    context.sendBroadcast(intent)
+                }
+            } catch (_: Throwable) {}
         } catch (_: Throwable) {}
     }
 

@@ -1024,9 +1024,8 @@ class HomeView @JvmOverloads constructor(
                         val dx = kotlin.math.abs(dxRaw)
                         val dy = kotlin.math.abs(dyRaw)
                         val density = resources.displayMetrics.density
-                        // v280: cancel AGGRESSIVO su movimento verticale (swipe up/down) - 8dp basta
-                        // Per orizzontale resta tollerante (25dp) per coprire micro-scroll PagedHomeContainer
-                        val verticalCancel = dy > 8 * density && dy > dx * 1.5f
+                        // v282: vertical cancel meno aggressivo (12dp)  
+                        val verticalCancel = dy > 12 * density && dy > dx * 1.5f
                         val anyCancel = dx > 25 * density || dy > 25 * density
                         if (verticalCancel || anyCancel) {
                             homeGestureCancelled = true

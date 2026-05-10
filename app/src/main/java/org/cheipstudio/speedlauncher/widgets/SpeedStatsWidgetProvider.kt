@@ -39,6 +39,15 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             }
         }
     }
+    
+    /** v282: aggiorna il layout quando cambiano le dimensioni del widget */
+    override fun onAppWidgetOptionsChanged(
+        context: Context, manager: AppWidgetManager, id: Int, newOptions: android.os.Bundle?
+    ) {
+        super.onAppWidgetOptionsChanged(context, manager, id, newOptions)
+        try { updateWidgetSafe(context, manager, id) }
+        catch (t: Throwable) { logError(context, "optionsChanged id=$id", t) }
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         try {
