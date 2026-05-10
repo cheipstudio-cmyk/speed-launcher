@@ -759,7 +759,11 @@ class HomeView @JvmOverloads constructor(
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
-    fun attachWidgetHost(host: WidgetHostController) { binding.widgetSlot.setHostController(host) }
+    fun attachWidgetHost(host: WidgetHostController) { 
+        binding.widgetSlot.setHostController(host)
+        // v244: long press su area vuota del container widget → apre menu home
+        binding.widgetSlot.onEmptyLongPress = { onHomeLongPress?.invoke() }
+    }
     
     // v228: apre il widget picker per la slot corrente (chiamato da HomeMenuSheet "Aggiungi widget")
     fun openWidgetPickerForCurrentSlot() {

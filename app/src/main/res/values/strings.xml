@@ -375,4 +375,8 @@ Vuoi scaricarla?</string>
     <string name="widget_actions_title">Widget</string>
     <string name="widget_actions_hint">Cosa vuoi fare con questo widget?</string>
     <string name="widget_no_space_in_page">Nessuno spazio in questa pagina. Sposta o rimuovi widget esistenti.</string>
+    <string name="widget_width_label">Larghezza (colonne)</string>
+    <string name="widget_move_label">Sposta a pagina</string>
+    <string name="widget_move_prev">Precedente</string>
+    <string name="widget_move_next">Successiva</string>
 </resources>

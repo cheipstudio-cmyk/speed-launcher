@@ -356,4 +356,8 @@
     <string name="widget_actions_title">الأداة</string>
     <string name="widget_actions_hint">ماذا تريد أن تفعل مع هذه الأداة؟</string>
     <string name="widget_no_space_in_page">لا توجد مساحة في هذه الصفحة. قم بنقل أو إزالة الأدوات الموجودة.</string>
+    <string name="widget_width_label">العرض (أعمدة)</string>
+    <string name="widget_move_label">انقل إلى الصفحة</string>
+    <string name="widget_move_prev">السابقة</string>
+    <string name="widget_move_next">التالية</string>
 </resources>

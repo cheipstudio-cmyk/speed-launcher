@@ -43,6 +43,13 @@ class WidgetContainerView @JvmOverloads constructor(
     private val store = WidgetStore(context)
     private var hostController: WidgetHostController? = null
     private val mountedViews = mutableMapOf<String, View>()  // uuid → view montata
+    
+    // v244: callback long press su area vuota (no widget sotto) → apre HomeMenuSheet
+    var onEmptyLongPress: (() -> Unit)? = null
+    private val emptyHoldRunnable = Runnable {
+        try { HapticHelper.longPress(this) } catch (_: Throwable) {}
+        onEmptyLongPress?.invoke()
+    }
 
     // Long press detection per widget montati
     private val holdHandler = Handler(Looper.getMainLooper())
@@ -56,8 +63,9 @@ class WidgetContainerView @JvmOverloads constructor(
     }
 
     init {
-        clipChildren = true
-        clipToPadding = true
+        // v244: clip false, lascia che i widget disegnino oltre i bounds se necessario
+        clipChildren = false
+        clipToPadding = false
     }
     
     fun setHostController(controller: WidgetHostController) {
@@ -218,6 +226,9 @@ class WidgetContainerView @JvmOverloads constructor(
             lp.leftMargin = cellW * item.cellX
             lp.topMargin = cellH * item.cellY
             view.layoutParams = lp
+            // v244: aggiorna size opts del widget con dimensioni reali (era impostato a 40dp 
+            // se width era 0 al mount initial)
+            updateWidgetOptions(item, view)
         }
     }
 
@@ -238,13 +249,16 @@ class WidgetContainerView @JvmOverloads constructor(
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // Detect long press su un widget specifico
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 pressX = ev.x; pressY = ev.y
                 pressedWidgetUuid = findWidgetAt(ev.x, ev.y)
                 if (pressedWidgetUuid != null) {
+                    // Long press su widget → modal azioni
                     holdHandler.postDelayed(holdRunnable, 700L)
+                } else {
+                    // v244: long press su area vuota → HomeMenuSheet
+                    holdHandler.postDelayed(emptyHoldRunnable, 700L)
                 }
             }
             MotionEvent.ACTION_MOVE -> {
@@ -252,11 +266,13 @@ class WidgetContainerView @JvmOverloads constructor(
                 val slop = ViewConfiguration.get(context).scaledTouchSlop * 2
                 if (dx > slop || dy > slop) {
                     holdHandler.removeCallbacks(holdRunnable)
+                    holdHandler.removeCallbacks(emptyHoldRunnable)
                     pressedWidgetUuid = null
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 holdHandler.removeCallbacks(holdRunnable)
+                holdHandler.removeCallbacks(emptyHoldRunnable)
                 pressedWidgetUuid = null
             }
         }
@@ -284,6 +300,8 @@ class WidgetContainerView @JvmOverloads constructor(
             val activity = context as? FragmentActivity ?: return
             val sheet = WidgetActionsSheet.newInstance(uuid, pageIndex)
             sheet.onRemove = { removedUuid -> removeWidget(removedUuid) }
+            // v244: refresh dopo cambio dimensioni / spostamento pagina
+            sheet.onChanged = { refresh() }
             sheet.show(activity.supportFragmentManager, "widget_actions")
         } catch (_: Throwable) {}
     }

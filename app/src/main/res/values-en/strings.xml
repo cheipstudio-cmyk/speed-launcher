@@ -375,4 +375,8 @@ Download now?</string>
     <string name="widget_actions_title">Widget</string>
     <string name="widget_actions_hint">What do you want to do with this widget?</string>
     <string name="widget_no_space_in_page">No space on this page. Move or remove existing widgets.</string>
+    <string name="widget_width_label">Width (columns)</string>
+    <string name="widget_move_label">Move to page</string>
+    <string name="widget_move_prev">Previous</string>
+    <string name="widget_move_next">Next</string>
 </resources>

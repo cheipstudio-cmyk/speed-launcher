@@ -356,4 +356,8 @@
     <string name="widget_actions_title">ウィジェット</string>
     <string name="widget_actions_hint">このウィジェットをどうしますか?</string>
     <string name="widget_no_space_in_page">このページに空きがありません。既存のウィジェットを移動または削除してください。</string>
+    <string name="widget_width_label">幅(列)</string>
+    <string name="widget_move_label">ページを移動</string>
+    <string name="widget_move_prev">前へ</string>
+    <string name="widget_move_next">次へ</string>
 </resources>
