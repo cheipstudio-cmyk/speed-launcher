@@ -351,7 +351,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                         .scaleX(1f).scaleY(1f)
                         .setStartDelay(20)
                         .setDuration((280 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.OvershootInterpolator(1.4f))
+                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 }
             } catch (_: Throwable) {}
@@ -366,7 +366,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                         .translationY(0f)
                         .setStartDelay(0)
                         .setDuration((280 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.OvershootInterpolator(1.2f))
+                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 }
             } catch (_: Throwable) {}
@@ -380,7 +380,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                         .scaleX(1f).scaleY(1f)
                         .setStartDelay(40)
                         .setDuration((280 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.OvershootInterpolator(1.5f))
+                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 }
             } catch (_: Throwable) {}
@@ -398,17 +398,18 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                             if (pageView != null) {
                                 for (i in 0 until pageView.childCount) {
                                     val icon = pageView.getChildAt(i)
-                                    icon.scaleX = 0.65f
-                                    icon.scaleY = 0.65f
-                                    icon.alpha = 0.3f
-                                    icon.translationY = 30f
+                                    // v264: animazione morbida senza Overshoot - niente jumping
+                                    icon.scaleX = 0.85f
+                                    icon.scaleY = 0.85f
+                                    icon.alpha = 0.5f
+                                    icon.translationY = 16f
                                     icon.animate()
                                         .scaleX(1f).scaleY(1f)
                                         .alpha(1f)
                                         .translationY(0f)
-                                        .setStartDelay((i * 18).toLong())
-                                        .setDuration((460 * animMul()).toLong())
-                                        .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
+                                        .setStartDelay((i * 12).toLong())
+                                        .setDuration((360 * animMul()).toLong())
+                                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                                         .start()
                                 }
                             }
@@ -426,9 +427,9 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                             it.translationY = 12f
                             it.animate()
                                 .translationY(0f)
-                                .setStartDelay(180)
-                                .setDuration((440 * animMul()).toLong())
-                                .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
+                                .setStartDelay(50)
+                                .setDuration((320 * animMul()).toLong())
+                                .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                                 .start()
                         }
                     }
@@ -560,7 +561,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     binding.homeView.animate()
                         .scaleX(1f).scaleY(1f)
                         .setDuration(320)
-                        .setInterpolator(android.view.animation.OvershootInterpolator(1.4f))
+                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 } catch (_: Throwable) {}
             }

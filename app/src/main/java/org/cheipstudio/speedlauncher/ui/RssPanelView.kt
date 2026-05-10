@@ -55,7 +55,12 @@ class RssPanelView @JvmOverloads constructor(
 
     init {
         orientation = VERTICAL
-        setPadding(0, 0, 0, 0)
+        // v264: padding top per evitare overlap con status bar
+        val statusBarHeight = try {
+            val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+            if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else (24 * density).toInt()
+        } catch (_: Throwable) { (24 * density).toInt() }
+        setPadding(0, statusBarHeight + (8 * density).toInt(), 0, 0)
 
         // Header con titolo + refresh
         val header = LinearLayout(context).apply {
