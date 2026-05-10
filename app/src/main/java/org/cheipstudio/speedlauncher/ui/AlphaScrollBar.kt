@@ -1,5 +1,7 @@
 package org.cheipstudio.speedlauncher.ui
 
+import android.view.HapticFeedbackConstants
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -146,7 +148,7 @@ class AlphaScrollBar @JvmOverloads constructor(
                 selectedLetter = letter
                 selectedY = event.y
                 onLetterSelected?.invoke(letter)
-                performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                HapticHelper.feedback(this, HapticFeedbackConstants.CLOCK_TICK)
                 // v51: animazione scale 0.6 → 1.0
                 bubbleAnimator?.cancel()
                 bubbleAnimator = android.animation.ValueAnimator.ofFloat(0.6f, 1f).apply {
@@ -169,7 +171,7 @@ class AlphaScrollBar @JvmOverloads constructor(
                 if (letter != selectedLetter) {
                     selectedLetter = letter
                     onLetterSelected?.invoke(letter)
-                    performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                    HapticHelper.feedback(this, HapticFeedbackConstants.CLOCK_TICK)
                 }
                 invalidate()
                 parent?.requestDisallowInterceptTouchEvent(true)

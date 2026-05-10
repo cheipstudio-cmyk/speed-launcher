@@ -56,7 +56,7 @@ class FolderCellView(context: Context) : LinearLayout(context) {
     private val armRunnable = Runnable {
         if (pressing && !longPressFired && !dragFired) {
             armed = true
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            HapticHelper.feedback(this, HapticFeedbackConstants.LONG_PRESS)
             // pulse leggero
             scaleX = 0.92f; scaleY = 0.92f
             animate().scaleX(1f).scaleY(1f).setDuration(150).start()
@@ -66,7 +66,7 @@ class FolderCellView(context: Context) : LinearLayout(context) {
     private val menuRunnable = Runnable {
         if (pressing && armed && !longPressFired && !dragFired) {
             longPressFired = true
-            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            HapticHelper.feedback(this, HapticFeedbackConstants.CONTEXT_CLICK)
             val f = folder ?: return@Runnable
             onLongPress?.invoke(f)
         }

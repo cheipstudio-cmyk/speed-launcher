@@ -72,7 +72,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private val armRunnable = Runnable {
         if (pressing && !menuFired && !dragFired) {
             armed = true
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            HapticHelper.feedback(this, HapticFeedbackConstants.LONG_PRESS)
             // v46: pulse leggero per feedback visivo, drag scatta subito al primo MOVE
             scaleX = 0.92f; scaleY = 0.92f
             animate().scaleX(1f).scaleY(1f).setDuration(150).start()
@@ -82,7 +82,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
     private val menuRunnable = Runnable {
         if (pressing && armed && !menuFired && !dragFired) {
             menuFired = true
-            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            HapticHelper.feedback(this, HapticFeedbackConstants.CONTEXT_CLICK)
             // v59: tool memory cleaner non ha menu Info/Disinstalla
             if (isMemoryCleaner) return@Runnable
             val a = app ?: return@Runnable
@@ -181,7 +181,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 if (!wasArmed && !wasMenu && !wasDrag) {
                     // tap normale
                     if (isMemoryCleaner) {
-                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        HapticHelper.feedback(this, HapticFeedbackConstants.VIRTUAL_KEY)
                         onMemoryCleaner?.invoke()
                     } else if (a != null) {
                         onLaunch?.invoke(a, this)

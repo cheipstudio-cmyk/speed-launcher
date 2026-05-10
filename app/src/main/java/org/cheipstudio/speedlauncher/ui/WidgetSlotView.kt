@@ -51,7 +51,7 @@ class WidgetSlotView @JvmOverloads constructor(
     private val holdHandler = Handler(Looper.getMainLooper())
     private val holdRunnable = Runnable {
         if (currentWidgetView != null) {
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            HapticHelper.feedback(this, HapticFeedbackConstants.LONG_PRESS)
             showResizeSheet()
         }
     }
