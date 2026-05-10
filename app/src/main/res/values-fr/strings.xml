@@ -345,4 +345,10 @@ Télécharger maintenant ?</string>
     <string name="settings_donate_sub">Soutenez le développement de Speed Launcher</string>
     <string name="settings_diagnostic_label">Journal de diagnostic</string>
     <string name="settings_diagnostic_sub">Voir événements et plantages</string>
+    <string name="dock_resize_title">Personnaliser dock</string>
+    <string name="dock_position_label">Position dock</string>
+    <string name="dock_pos_top">En haut</string>
+    <string name="dock_pos_bottom">En bas</string>
+    <string name="dock_theme_label">Theme dock</string>
+    <string name="dock_settings_hint">Pour changer de mode (IA ou Auto) et configurer vos apps recommandees allez dans Parametres.</string>
 </resources>

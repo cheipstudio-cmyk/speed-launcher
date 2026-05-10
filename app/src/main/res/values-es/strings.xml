@@ -345,4 +345,10 @@ Se usará solo para esta función.</string>
     <string name="settings_donate_sub">Apoya el desarrollo de Speed Launcher</string>
     <string name="settings_diagnostic_label">Registro de diagnóstico</string>
     <string name="settings_diagnostic_sub">Ver eventos y fallos de la app</string>
+    <string name="dock_resize_title">Personalizar dock</string>
+    <string name="dock_position_label">Posicion del dock</string>
+    <string name="dock_pos_top">Arriba</string>
+    <string name="dock_pos_bottom">Abajo</string>
+    <string name="dock_theme_label">Tema del dock</string>
+    <string name="dock_settings_hint">Para cambiar el modo (IA o Automatico) y configurar tus apps recomendadas ve a Ajustes.</string>
 </resources>

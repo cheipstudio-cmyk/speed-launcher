@@ -1721,7 +1721,9 @@ override fun onResume() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+            overridePendingTransition(R.anim.slide_in_left_back, R.anim.slide_out_right)
+        }
     }
 
     /** v162: forza isClickable/isFocusable/isEnabled=true sulle card item* dopo tutti gli observer

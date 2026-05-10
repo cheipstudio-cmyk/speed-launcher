@@ -345,4 +345,10 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_donate_sub">Speed Launcher geliştirmeyi destekle</string>
     <string name="settings_diagnostic_label">Tanılama kaydı</string>
     <string name="settings_diagnostic_sub">Uygulama olaylarını ve çökmelerini görüntüle</string>
+    <string name="dock_resize_title">Dock\'u ozellestir</string>
+    <string name="dock_position_label">Dock konumu</string>
+    <string name="dock_pos_top">Ustte</string>
+    <string name="dock_pos_bottom">Altta</string>
+    <string name="dock_theme_label">Dock temasi</string>
+    <string name="dock_settings_hint">Modu (AI / Otomatik) degistirmek ve onerilen uygulamalari ayarlamak icin Ayarlara gidin.</string>
 </resources>

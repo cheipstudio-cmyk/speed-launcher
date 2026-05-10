@@ -1,0 +1,214 @@
+package org.cheipstudio.speedlauncher.ui
+
+import android.content.Context
+import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.widget.NestedScrollView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.button.MaterialButton
+import org.cheipstudio.speedlauncher.R
+import org.cheipstudio.speedlauncher.SpeedApp
+import org.cheipstudio.speedlauncher.data.SettingsRepository
+
+/**
+ * v226: BottomSheet per personalizzare dock raccomandate
+ * Stesso stile di WidgetResizeSheet: chip Material 3 segmented.
+ */
+class DockResizeSheet : BottomSheetDialogFragment() {
+
+    var onChanged: (() -> Unit)? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val ctx = requireContext()
+        val d = resources.displayMetrics.density
+        val settings = SpeedApp.instance.settingsRepository
+
+        val scroll = NestedScrollView(ctx).apply { isFillViewport = true }
+        val root = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            background = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.bg_modal_sheet)
+            setPadding(0, (8 * d).toInt(), 0, (24 * d).toInt())
+        }
+        scroll.addView(root, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+
+        // Drag handle
+        root.addView(View(ctx).apply {
+            background = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.bg_drag_handle)
+            val lp = LinearLayout.LayoutParams((40 * d).toInt(), (4 * d).toInt())
+            lp.gravity = Gravity.CENTER_HORIZONTAL
+            lp.topMargin = (8 * d).toInt()
+            lp.bottomMargin = (16 * d).toInt()
+            layoutParams = lp
+        })
+
+        // Title
+        root.addView(TextView(ctx).apply {
+            text = getString(R.string.dock_resize_title)
+            textSize = 22f
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            letterSpacing = -0.01f
+            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurface))
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.leftMargin = (24 * d).toInt()
+            lp.rightMargin = (24 * d).toInt()
+            lp.bottomMargin = (8 * d).toInt()
+            layoutParams = lp
+        })
+
+        // ---- POSIZIONE DOCK ----
+        val positions = listOf(
+            SettingsRepository.REC_POS_TOP to getString(R.string.dock_pos_top),
+            SettingsRepository.REC_POS_BOTTOM to getString(R.string.dock_pos_bottom)
+        )
+        addSegmentedSection(
+            root, d, getString(R.string.dock_position_label),
+            positions.map { it.second },
+            positions.indexOfFirst { it.first == (settings.recommendedPosition.value ?: SettingsRepository.REC_POS_BOTTOM) }
+                .coerceAtLeast(0)
+        ) { idx ->
+            settings.setRecommendedPosition(positions[idx].first)
+            onChanged?.invoke()
+        }
+
+        // ---- TEMA DOCK ----
+        val themes = listOf(
+            "system" to getString(R.string.widget_theme_system),
+            "transparent" to getString(R.string.widget_theme_transparent),
+            "light" to getString(R.string.widget_theme_light),
+            "dark" to getString(R.string.widget_theme_dark)
+        )
+        addSegmentedSection(
+            root, d, getString(R.string.dock_theme_label),
+            themes.map { it.second },
+            themes.indexOfFirst { it.first == (settings.dockTheme.value ?: "system") }.coerceAtLeast(0)
+        ) { idx ->
+            settings.setDockTheme(themes[idx].first)
+            onChanged?.invoke()
+        }
+
+        // ---- HINT TESTO ----
+        root.addView(TextView(ctx).apply {
+            text = getString(R.string.dock_settings_hint)
+            textSize = 13f
+            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.leftMargin = (24 * d).toInt()
+            lp.rightMargin = (24 * d).toInt()
+            lp.topMargin = (24 * d).toInt()
+            layoutParams = lp
+        })
+
+        return scroll
+    }
+
+    private fun addSegmentedSection(
+        parent: LinearLayout, d: Float, header: String,
+        labels: List<String>, selectedIndex: Int,
+        onSelect: (Int) -> Unit
+    ) {
+        val ctx = requireContext()
+        parent.addView(TextView(ctx).apply {
+            text = header
+            textSize = 12f
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            letterSpacing = 0.04f
+            isAllCaps = false
+            setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant))
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.leftMargin = (24 * d).toInt()
+            lp.rightMargin = (24 * d).toInt()
+            lp.topMargin = (16 * d).toInt()
+            lp.bottomMargin = (10 * d).toInt()
+            layoutParams = lp
+        })
+
+        val scroller = android.widget.HorizontalScrollView(ctx).apply {
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.leftMargin = (16 * d).toInt()
+            lp.rightMargin = (16 * d).toInt()
+            layoutParams = lp
+        }
+        val chipRow = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
+        val buttons = mutableListOf<MaterialButton>()
+        labels.forEachIndexed { i, label ->
+            val isSelected = i == selectedIndex
+            val btn = MaterialButton(ctx, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+                text = label
+                isCheckable = false
+                cornerRadius = (24 * d).toInt()
+                strokeWidth = (1 * d).toInt()
+                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                textSize = 14f
+                isAllCaps = false
+                minHeight = (44 * d).toInt()
+                minimumHeight = (44 * d).toInt()
+                insetTop = 0
+                insetBottom = 0
+                val lp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, (44 * d).toInt()
+                )
+                lp.marginEnd = (8 * d).toInt()
+                layoutParams = lp
+                tag = isSelected
+                applyChipStyle(this, isSelected)
+                setOnClickListener {
+                    if (tag == true) return@setOnClickListener
+                    buttons.forEach {
+                        it.tag = false
+                        applyChipStyle(it, false)
+                    }
+                    tag = true
+                    applyChipStyle(this, true)
+                    onSelect(i)
+                }
+            }
+            buttons.add(btn)
+            chipRow.addView(btn)
+        }
+        scroller.addView(chipRow)
+        parent.addView(scroller)
+    }
+
+    private fun applyChipStyle(btn: MaterialButton, checked: Boolean) {
+        if (checked) {
+            btn.setBackgroundColor(resolveAttr(com.google.android.material.R.attr.colorSecondaryContainer))
+            btn.setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSecondaryContainer))
+            btn.strokeColor = android.content.res.ColorStateList.valueOf(
+                resolveAttr(com.google.android.material.R.attr.colorSecondaryContainer)
+            )
+        } else {
+            btn.setBackgroundColor(0)
+            btn.setTextColor(resolveAttr(com.google.android.material.R.attr.colorOnSurface))
+            btn.strokeColor = android.content.res.ColorStateList.valueOf(
+                resolveAttr(com.google.android.material.R.attr.colorOutlineVariant)
+            )
+        }
+    }
+
+    private fun resolveAttr(attr: Int): Int {
+        val tv = android.util.TypedValue()
+        requireContext().theme.resolveAttribute(attr, tv, true)
+        return tv.data
+    }
+}

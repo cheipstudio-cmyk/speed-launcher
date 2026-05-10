@@ -185,6 +185,21 @@ class HomeView @JvmOverloads constructor(
         binding.recommendedRow.onAppLongPress = onRecLong
         binding.recommendedRowBottom.onAppClick = onRecClick
         binding.recommendedRowBottom.onAppLongPress = onRecLong
+        // v226: long press sul container dock apre DockResizeSheet
+        val dockLongPress = {
+            try {
+                val ctx = context as? android.content.Context
+                val act = ctx as? androidx.fragment.app.FragmentActivity
+                if (act != null) {
+                    HapticHelper.longPress(this)
+                    DockResizeSheet().apply {
+                        onChanged = { refreshRecommended() }
+                    }.show(act.supportFragmentManager, "dockResize")
+                }
+            } catch (_: Throwable) {}
+        }
+        binding.recommendedRow.onContainerLongPress = dockLongPress
+        binding.recommendedRowBottom.onContainerLongPress = dockLongPress
 
         // v18: animazione layout dipende dallo stile selezionato
         applyAnimationStyle()
@@ -660,7 +675,9 @@ class HomeView @JvmOverloads constructor(
         val cols = settings.gridCols.value ?: 4
         val rows = settings.gridRows.value ?: 4
         for (page in pages) {
-            page.applyGridSize(cols, rows)
+            // v226: rotate non deve sovrascrivere lo store - ricarico SEMPRE da store dopo applyGridSize
+            page.applyGridSize(cols, rows, persistChanges = false)
+            page.setLayout(layoutStore.loadPage(page.pageIndex))
             // refresh icone per nuova forma/colore dot
             SpeedApp.instance.appRepository.apps.value?.let { page.refresh(it) }
         }
@@ -866,8 +883,8 @@ class HomeView @JvmOverloads constructor(
         if (binding.pagedHome.currentPage > 0) {
             binding.pagedHome.snapToPage(0, animate = true)
         }
-        // v45: animazione "welcome back" quando torni alla home
-        playWelcomeAnim()
+        // v226: playWelcomeAnim disabilitato — MainActivity onResume gestisce tutto in modo orchestrato
+        // playWelcomeAnim()
     }
 
     /** v48: applica il tema alla search bar (transparent/light/dark/system) */

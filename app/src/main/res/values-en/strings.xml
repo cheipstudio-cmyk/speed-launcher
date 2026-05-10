@@ -364,4 +364,10 @@ Download now?</string>
     <string name="settings_donate_sub">Support Speed Launcher development</string>
     <string name="settings_diagnostic_label">Diagnostic log</string>
     <string name="settings_diagnostic_sub">View app events and crashes</string>
+    <string name="dock_resize_title">Customize dock</string>
+    <string name="dock_position_label">Dock position</string>
+    <string name="dock_pos_top">Top</string>
+    <string name="dock_pos_bottom">Bottom</string>
+    <string name="dock_theme_label">Dock theme</string>
+    <string name="dock_settings_hint">To change mode (AI or Automatic) and set your recommended apps go to Settings.</string>
 </resources>

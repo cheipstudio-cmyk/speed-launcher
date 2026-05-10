@@ -345,4 +345,10 @@
     <string name="settings_donate_sub">ادعم تطوير Speed Launcher</string>
     <string name="settings_diagnostic_label">سجل التشخيص</string>
     <string name="settings_diagnostic_sub">عرض أحداث التطبيق والأعطال</string>
+    <string name="dock_resize_title">تخصيص الشريط</string>
+    <string name="dock_position_label">موضع الشريط</string>
+    <string name="dock_pos_top">أعلى</string>
+    <string name="dock_pos_bottom">أسفل</string>
+    <string name="dock_theme_label">سمة الشريط</string>
+    <string name="dock_settings_hint">لتغيير الوضع (الذكاء الاصطناعي / تلقائي) وتعيين التطبيقات الموصى بها انتقل إلى الإعدادات.</string>
 </resources>

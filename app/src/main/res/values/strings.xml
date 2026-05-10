@@ -364,4 +364,10 @@ Vuoi scaricarla?</string>
     <string name="settings_donate_sub">Sostieni lo sviluppo di Speed Launcher</string>
     <string name="settings_diagnostic_label">Log diagnostico</string>
     <string name="settings_diagnostic_sub">Visualizza eventi e crash dell\'app</string>
+    <string name="dock_resize_title">Personalizza dock</string>
+    <string name="dock_position_label">Posizione dock</string>
+    <string name="dock_pos_top">In alto</string>
+    <string name="dock_pos_bottom">In fondo</string>
+    <string name="dock_theme_label">Tema dock</string>
+    <string name="dock_settings_hint">Per cambiare modalita (AI o Automatica) e impostare le tue app raccomandate vai in Impostazioni.</string>
 </resources>

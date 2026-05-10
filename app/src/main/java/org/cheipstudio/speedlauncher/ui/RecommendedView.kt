@@ -27,6 +27,7 @@ class RecommendedView @JvmOverloads constructor(
 
     var onAppClick: ((AppInfo) -> Unit)? = null
     var onAppLongPress: ((AppInfo) -> Unit)? = null
+    var onContainerLongPress: (() -> Unit)? = null  // v226: long press sul vuoto della dock
 
     private val density = resources.displayMetrics.density
     private val card: MaterialCardView
@@ -61,6 +62,11 @@ class RecommendedView @JvmOverloads constructor(
         }
         card.addView(row)
         addView(card)
+        // v226: long press sul container (non sulle app) → callback
+        card.setOnLongClickListener {
+            onContainerLongPress?.invoke()
+            true
+        }
     }
 
     private fun resolveAttrColor(attr: Int): Int {

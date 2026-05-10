@@ -76,7 +76,7 @@ class IconGridView @JvmOverloads constructor(
         setOnDragListener { _, event -> handleDrag(event) }
     }
 
-    fun applyGridSize(newCols: Int, newRows: Int) {
+    fun applyGridSize(newCols: Int, newRows: Int, persistChanges: Boolean = true) {
         if (newCols == cols && newRows == rows) return
         // v225: FIX CRASH ROTATE - rimuovo TUTTE le children prima di cambiare columnCount
         // Senza questo, le children esistenti hanno columnSpec/rowSpec che puntano fuori dal nuovo range
@@ -118,14 +118,36 @@ class IconGridView @JvmOverloads constructor(
             // Se non c\'è più spazio l\'item viene perso (raro: succede solo riducendo griglia molto)
         }
 
-        persist(); rebuild()
+        // v226: persist solo se cambio richiesto da utente, non da rotate
+        if (persistChanges) persist()
+        rebuild()
     }
 
     fun setLayout(items: List<HomeItem>) {
         pinnedItems = MutableList(cols * rows) { null }
+        // v226: riposiziona items che non entrano (es. landscape con meno righe)
+        val orphans = mutableListOf<HomeItem>()
         for (item in items) {
-            val idx = item.cellY * cols + item.cellX
-            if (idx in 0 until cols * rows) pinnedItems[idx] = item
+            if (item.cellX < cols && item.cellY < rows) {
+                val idx = item.cellY * cols + item.cellX
+                if (idx in 0 until cols * rows && pinnedItems[idx] == null) {
+                    pinnedItems[idx] = item
+                } else {
+                    orphans.add(item)
+                }
+            } else {
+                orphans.add(item)
+            }
+        }
+        // Riempio gli slot vuoti con gli orphans
+        for (item in orphans) {
+            val emptyIdx = pinnedItems.indexOf(null)
+            if (emptyIdx >= 0) {
+                pinnedItems[emptyIdx] = item.copy(
+                    cellX = emptyIdx % cols,
+                    cellY = emptyIdx / cols
+                )
+            }
         }
         initialized = items.isNotEmpty()
         rebuild()
