@@ -118,7 +118,7 @@ class HomeView @JvmOverloads constructor(
         }
         override fun onDoubleTap(e: MotionEvent): Boolean {
             if (settings.doubleTapLock.value == true) {
-                HapticHelper.longPress(this)
+                HapticHelper.longPress(null)
                 val act = context as? Activity
                 if (act != null) ScreenLockHelper.lockScreen(act)
                 return true
@@ -224,7 +224,7 @@ class HomeView @JvmOverloads constructor(
         val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 // Ignoro se c'è un'icona sotto (le icone consumano onTouch)
-                HapticHelper.longPress(this)
+                HapticHelper.longPress(null)
                 onHomeLongPress?.invoke()
             }
         })
