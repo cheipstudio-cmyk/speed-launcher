@@ -69,6 +69,12 @@ class WidgetContainerView @JvmOverloads constructor(
         for (item in items) {
             mountWidget(item, host)
         }
+        // v241: forza layout pass dopo mount (caso width già > 0 al refresh)
+        if (width > 0 && height > 0) applyLayoutToChildren()
+        else post { 
+            requestLayout()
+            if (width > 0 && height > 0) applyLayoutToChildren()
+        }
     }
 
     /** Aggiunge un nuovo widget (chiamato dopo bind+configure successo) */
@@ -148,14 +154,30 @@ class WidgetContainerView @JvmOverloads constructor(
     }
 
     private fun layoutParamsForItem(item: WidgetItem): FrameLayout.LayoutParams {
-        // Le dimensioni reali vengono calcolate in onSizeChanged (dipende dal width effettivo)
-        val lp = FrameLayout.LayoutParams(0, 0)
-        // Tag per identificare nel layout pass
-        lp.leftMargin = 0
-        lp.topMargin = 0
+        // v241: dimensioni iniziali calcolate al volo se width disponibile
+        val lp = if (width > 0 && height > 0) {
+            val cellW = width / WidgetItem.GRID_COLS
+            val cellH = height / WidgetItem.GRID_ROWS
+            FrameLayout.LayoutParams(cellW * item.spanX, cellH * item.spanY).apply {
+                leftMargin = cellW * item.cellX
+                topMargin = cellH * item.cellY
+            }
+        } else {
+            // Fallback: match_parent così il widget non è 0x0 mentre aspettiamo onSizeChanged
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
         return lp
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // v241: assicura layout corretto al primo attach
+        post { applyLayoutToChildren() }
+    }
+    
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
         applyLayoutToChildren()

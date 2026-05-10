@@ -36,14 +36,12 @@ class RecommendedView @JvmOverloads constructor(
     private var dockLongPressFired = false
     private val dockLongPressRunnable = Runnable {
         dockLongPressFired = true
-        // v234: haptic feedback per indicare long press riuscito
-        try {
-            performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
-        } catch (_: Throwable) {}
+        // v241: haptic via HapticHelper (rispetta hapticEnabled setting)
+        try { HapticHelper.longPress(this) } catch (_: Throwable) {}
         onContainerLongPress?.invoke()
     }
     private val dockLongPressSlop by lazy {
-        android.view.ViewConfiguration.get(context).scaledTouchSlop * 2
+        android.view.ViewConfiguration.get(context).scaledTouchSlop * 4  // v241: più tollerante allo scroll
     }
 
     private val density = resources.displayMetrics.density
@@ -64,8 +62,13 @@ class RecommendedView @JvmOverloads constructor(
             }
             android.view.MotionEvent.ACTION_MOVE -> {
                 val dx = kotlin.math.abs(ev.x - dockLongPressDownX)
-                val dy = kotlin.math.abs(ev.y - dockLongPressDownY)
-                if (dx > dockLongPressSlop || dy > dockLongPressSlop) {
+                val dyRaw = ev.y - dockLongPressDownY  // negativo = swipe up
+                val dy = kotlin.math.abs(dyRaw)
+                // v241: swipe up (dy negativo) cancella IMMEDIATAMENTE - apre drawer non dock menu
+                val touchSlop = android.view.ViewConfiguration.get(context).scaledTouchSlop
+                if (dyRaw < -touchSlop && dy > dx) {
+                    dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
+                } else if (dx > dockLongPressSlop || dy > dockLongPressSlop) {
                     dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
                 }
             }
