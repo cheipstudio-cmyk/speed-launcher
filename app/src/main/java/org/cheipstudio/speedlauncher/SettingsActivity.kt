@@ -146,14 +146,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.itemDrawerLayout.setOnClickListener { showDrawerLayoutDialog() }
         binding.itemFolderBg.setOnClickListener { showFolderBgDialog() }
         binding.itemBadgeMode.setOnClickListener { showBadgeModeDialog() }
-
-        binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
-        binding.switchShowWidget.setOnCheckedChangeListener { _, c -> settings.setShowWidgetSlot(c) }
         // v72: enabled/disabled delle card widget dipendenti
-        settings.showWidgetSlot.observe(this) { enabled ->
-            applyWidgetDependentEnabled(enabled == true)
-        }
-        applyWidgetDependentEnabled(settings.showWidgetSlot.value == true)
 
         // v85: drawer enabled toggle + reset auto grid
         binding.switchDrawerEnabled.isChecked = settings.drawerEnabled.value != false

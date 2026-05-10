@@ -351,4 +351,5 @@ Télécharger maintenant ?</string>
     <string name="dock_pos_bottom">En bas</string>
     <string name="dock_theme_label">Theme dock</string>
     <string name="dock_settings_hint">Pour changer de mode (IA ou Auto) et configurer vos apps recommandees allez dans Parametres.</string>
+    <string name="menu_add_widget">Ajouter widget</string>
 </resources>

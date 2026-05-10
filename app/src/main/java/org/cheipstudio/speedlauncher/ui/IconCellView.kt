@@ -104,13 +104,13 @@ class IconCellView(context: Context) : LinearLayout(context) {
         // v34: icone più piccole in landscape per più colonne sullo schermo
         val isLandscape = resources.configuration.orientation ==
             android.content.res.Configuration.ORIENTATION_LANDSCAPE
-        val iconSizeDp = if (isLandscape) 44 else 48
+        val iconSizeDp = if (isLandscape) 38 else 48  // v228: ridotto landscape
         val iconSize = (iconSizeDp * resources.displayMetrics.density).toInt()
         iconView.layoutParams = LayoutParams(iconSize, iconSize)
         addView(iconView)
 
         labelView.apply {
-            textSize = 11.5f
+            textSize = if (isLandscape) 10f else 11.5f  // v228
             setTextColor(Color.WHITE)
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END

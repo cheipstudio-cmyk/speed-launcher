@@ -351,4 +351,5 @@
     <string name="dock_pos_bottom">أسفل</string>
     <string name="dock_theme_label">سمة الشريط</string>
     <string name="dock_settings_hint">لتغيير الوضع (الذكاء الاصطناعي / تلقائي) وتعيين التطبيقات الموصى بها انتقل إلى الإعدادات.</string>
+    <string name="menu_add_widget">إضافة أداة</string>
 </resources>

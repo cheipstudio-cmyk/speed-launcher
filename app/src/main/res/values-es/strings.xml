@@ -351,4 +351,5 @@ Se usará solo para esta función.</string>
     <string name="dock_pos_bottom">Abajo</string>
     <string name="dock_theme_label">Tema del dock</string>
     <string name="dock_settings_hint">Para cambiar el modo (IA o Automatico) y configurar tus apps recomendadas ve a Ajustes.</string>
+    <string name="menu_add_widget">Agregar widget</string>
 </resources>

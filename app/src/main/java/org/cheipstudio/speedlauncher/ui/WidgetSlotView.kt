@@ -129,6 +129,8 @@ class WidgetSlotView @JvmOverloads constructor(
         return super.dispatchTouchEvent(ev)
     }
 
+    fun openPicker() = showCustomPicker()
+    
     private fun showCustomPicker() {
         val activity = context as? FragmentActivity ?: return
         // v20: passiamo larghezza E altezza dello slot per filtrare correttamente

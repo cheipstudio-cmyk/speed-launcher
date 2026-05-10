@@ -641,6 +641,12 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     onRemovePage = { idx -> binding.homeView.forceRemovePageAt(idx) }
                 )
             }
+            // v228: aggiungi widget → apre picker direttamente sul widget slot
+            it.onAddWidget = {
+                try {
+                    binding.homeView.openWidgetPickerForCurrentSlot()
+                } catch (_: Throwable) {}
+            }
             it.show(supportFragmentManager, "homemenu")
         }
     }

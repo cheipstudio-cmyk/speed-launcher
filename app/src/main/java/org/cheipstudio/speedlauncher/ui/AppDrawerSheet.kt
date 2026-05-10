@@ -243,6 +243,13 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         val container = _binding?.searchActionsContainer ?: return
         val ctx = container.context
         val query = q.trim()
+        // v228: action chip SOLO in modalità Universale - se mode = "app" o "web" non ne mostro
+        val mode = SpeedApp.instance.settingsRepository.searchMode.value
+        if (mode != org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_UNIVERSAL) {
+            container.visibility = View.GONE
+            container.removeAllViews()
+            return
+        }
         if (query.isBlank()) {
             container.visibility = View.GONE
             container.removeAllViews()

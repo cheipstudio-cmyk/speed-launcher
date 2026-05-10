@@ -17,6 +17,7 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
     var onSettings: (() -> Unit)? = null
     var onSorted: (() -> Unit)? = null
     var onManagePages: (() -> Unit)? = null
+    var onAddWidget: (() -> Unit)? = null  // v228: aggiungi widget
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -42,6 +43,10 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
         view.findViewById<View>(R.id.menuPages)?.setOnClickListener {
             dismissAllowingStateLoss()
             onManagePages?.invoke()
+        }
+        view.findViewById<View>(R.id.menuAddWidget)?.setOnClickListener {
+            dismissAllowingStateLoss()
+            onAddWidget?.invoke()
         }
         view.findViewById<View>(R.id.menuSettings).setOnClickListener {
             dismissAllowingStateLoss()

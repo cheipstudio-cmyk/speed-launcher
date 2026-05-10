@@ -266,6 +266,10 @@ class HomeView @JvmOverloads constructor(
                 binding.recommendedRow.refreshTheme()
                 binding.recommendedRowBottom.refreshTheme()
             }
+            // v228: nascondi drawerHandle se drawer disattivato
+            SpeedApp.instance.settingsRepository.drawerEnabled.observe(lo) { enabled ->
+                binding.drawerHandle.visibility = if (enabled == true) View.VISIBLE else View.GONE
+            }
         }
         // v194: pillola laterale RSS sempre visibile + click
         binding.rssEdgeIndicator.visibility = 
@@ -785,6 +789,16 @@ class HomeView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
     fun attachWidgetHost(host: WidgetHostController) { binding.widgetSlot.setHostController(host) }
+    
+    // v228: apre il widget picker per la slot corrente (chiamato da HomeMenuSheet "Aggiungi widget")
+    fun openWidgetPickerForCurrentSlot() {
+        // Forza widgetSlot visible se nascosto
+        if (binding.widgetSlot.visibility != View.VISIBLE) {
+            settings.setShowWidgetSlot(true)
+            binding.widgetSlot.visibility = View.VISIBLE
+        }
+        binding.widgetSlot.openPicker()
+    }
     fun refreshApps(apps: List<AppInfo>) {
         for (page in pages) page.refresh(apps)
         maybeCreateNextPage()

@@ -43,6 +43,8 @@ class RecommendedView @JvmOverloads constructor(
     }
 
     private val density = resources.displayMetrics.density
+    private fun isLand(): Boolean = resources.configuration.orientation == 
+        android.content.res.Configuration.ORIENTATION_LANDSCAPE
     private val card: MaterialCardView
     private val row: LinearLayout
 
@@ -91,12 +93,9 @@ class RecommendedView @JvmOverloads constructor(
         row = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            setPadding(
-                (8 * density).toInt(),
-                (10 * density).toInt(),
-                (8 * density).toInt(),
-                (10 * density).toInt()
-            )
+            val padH = ((if (isLand()) 6 else 8) * density).toInt()
+            val padV = ((if (isLand()) 4 else 10) * density).toInt()
+            setPadding(padH, padV, padH, padV)
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
@@ -257,13 +256,13 @@ class RecommendedView @JvmOverloads constructor(
         cell.layoutParams = lp
 
         val iconWrap = FrameLayout(context).apply {
-            val s = (52 * density).toInt()
-            layoutParams = LinearLayout.LayoutParams(s, s).also { it.gravity = Gravity.CENTER_HORIZONTAL }
+            val sz = if (isLand()) (42 * density).toInt() else (52 * density).toInt()
+            layoutParams = LinearLayout.LayoutParams(sz, sz).also { it.gravity = Gravity.CENTER_HORIZONTAL }
         }
         val icon = ImageView(context).apply {
             setImageDrawable(IconShaper.shape(app.icon, shape, context, app.packageName, app.componentName))
-            val s = (44 * density).toInt()
-            layoutParams = FrameLayout.LayoutParams(s, s, Gravity.CENTER)
+            val sz = if (isLand()) (36 * density).toInt() else (44 * density).toInt()
+            layoutParams = FrameLayout.LayoutParams(sz, sz, Gravity.CENTER)
         }
         iconWrap.addView(icon)
         // v67: badge notifiche sull'icon (overlay drawable, refresh on demand)

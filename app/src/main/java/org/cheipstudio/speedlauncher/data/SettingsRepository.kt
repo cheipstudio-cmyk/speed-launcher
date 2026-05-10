@@ -15,7 +15,7 @@ class SettingsRepository(context: Context) {
     private val defaultRows = if (isTablet) 6 else 5
     val gridCols = MutableLiveData(prefs.getInt(KEY_COLS, defaultCols))
     val gridRows = MutableLiveData(prefs.getInt(KEY_ROWS, defaultRows))
-    val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, false))
+    val showWidgetSlot = MutableLiveData(prefs.getBoolean(KEY_SHOW_WIDGETS, true))  // v228: true di default
     /** v138: posizione widget — top, middle, bottom */
     val widgetPosition = MutableLiveData(prefs.getString(KEY_WIDGET_POSITION, "top") ?: "top")
     /** v138: altezza widget in dp (60-320) */
