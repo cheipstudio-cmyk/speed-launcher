@@ -352,10 +352,6 @@ Download now?</string>
     <string name="search_action_contacts">Search "%1$s" in contacts</string>
     <string name="search_action_files">Search "%1$s" in files</string>
     <string name="search_action_playstore">Search "%1$s" on Play Store</string>
-    <string name="widget_speed_time_label">Speed Time</string>
-    <string name="widget_speed_time_description">Time, date and battery</string>
-    <string name="widget_time_label">Time</string>
-    <string name="widget_battery_label">Battery</string>
     <string name="search_universal">Search anywhere</string>
     <string name="settings_idx_system">System</string>
     <string name="settings_idx_system_sub">Default launcher, notification access, landscape mode</string>

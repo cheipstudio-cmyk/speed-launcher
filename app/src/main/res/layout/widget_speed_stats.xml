@@ -4,92 +4,155 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_widget_speed_stats"
-    android:padding="14dp">
+    android:padding="20dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:weightSum="3">
+        android:gravity="center"
+        android:weightSum="3"
+        android:baselineAligned="false">
 
         <!-- RAM -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/widget_ram"
-                android:textColor="#B0B0BD" android:textSize="11sp"
-                android:fontFamily="sans-serif-medium" android:textAllCaps="true"
-                android:letterSpacing="0.06" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:orientation="vertical"
+            android:gravity="center" android:padding="8dp">
+            
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_widget_memory"
+                android:tint="#7AE582" />
+            
             <TextView android:id="@+id/ramPct"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#FFFFFF"
-                android:textSize="22sp" android:fontFamily="sans-serif-medium" android:text="—" />
+                android:layout_marginTop="6dp"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp" 
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02"
+                android:text="—" />
+            
+            <TextView 
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/widget_ram"
+                android:textColor="#80B0B0BD" 
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium" 
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+            
             <ProgressBar android:id="@+id/ramProgress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent" android:layout_height="8dp"
-                android:layout_marginTop="6dp" android:layout_marginHorizontal="8dp"
+                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_marginTop="10dp"
                 android:max="100" android:progress="0"
                 android:progressDrawable="@drawable/progress_widget_ram" />
+            
             <TextView android:id="@+id/ramSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#B0B0BD"
-                android:textSize="10sp" android:text="" />
+                android:layout_marginTop="6dp" 
+                android:textColor="#80B0B0BD"
+                android:textSize="9sp" 
+                android:fontFamily="sans-serif"
+                android:text="" />
         </LinearLayout>
 
         <!-- Storage -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/widget_storage"
-                android:textColor="#B0B0BD" android:textSize="11sp"
-                android:fontFamily="sans-serif-medium" android:textAllCaps="true"
-                android:letterSpacing="0.06" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:orientation="vertical"
+            android:gravity="center" android:padding="8dp">
+            
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_widget_storage"
+                android:tint="#82AAFF" />
+            
             <TextView android:id="@+id/storPct"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#FFFFFF"
-                android:textSize="22sp" android:fontFamily="sans-serif-medium" android:text="—" />
+                android:layout_marginTop="6dp"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp" 
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02"
+                android:text="—" />
+            
+            <TextView 
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/widget_storage"
+                android:textColor="#80B0B0BD"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+            
             <ProgressBar android:id="@+id/storProgress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent" android:layout_height="8dp"
-                android:layout_marginTop="6dp" android:layout_marginHorizontal="8dp"
+                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_marginTop="10dp"
                 android:max="100" android:progress="0"
                 android:progressDrawable="@drawable/progress_widget_storage" />
+            
             <TextView android:id="@+id/storSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#B0B0BD"
-                android:textSize="10sp" android:text="" />
+                android:layout_marginTop="6dp"
+                android:textColor="#80B0B0BD"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif"
+                android:text="" />
         </LinearLayout>
 
         <!-- Battery -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/widget_battery"
-                android:textColor="#B0B0BD" android:textSize="11sp"
-                android:fontFamily="sans-serif-medium" android:textAllCaps="true"
-                android:letterSpacing="0.06" />
-            <TextView android:id="@+id/battPct"
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:orientation="vertical"
+            android:gravity="center" android:padding="8dp">
+            
+            <ImageView
+                android:id="@+id/batIcon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_widget_battery"
+                android:tint="#FFCC80" />
+            
+            <TextView android:id="@+id/batPct"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#FFFFFF"
-                android:textSize="22sp" android:fontFamily="sans-serif-medium" android:text="—" />
-            <ProgressBar android:id="@+id/battProgress"
+                android:layout_marginTop="6dp"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02"
+                android:text="—" />
+            
+            <TextView 
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/widget_battery"
+                android:textColor="#80B0B0BD"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+            
+            <ProgressBar android:id="@+id/batProgress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent" android:layout_height="8dp"
-                android:layout_marginTop="6dp" android:layout_marginHorizontal="8dp"
+                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_marginTop="10dp"
                 android:max="100" android:progress="0"
                 android:progressDrawable="@drawable/progress_widget_battery" />
-            <TextView android:id="@+id/battSubtitle"
+            
+            <TextView android:id="@+id/batSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#B0B0BD"
-                android:textSize="10sp" android:text="" />
+                android:layout_marginTop="6dp"
+                android:textColor="#80B0B0BD"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif"
+                android:text="" />
         </LinearLayout>
+
     </LinearLayout>
 
-    <ImageView android:id="@+id/refreshBtn"
-        android:clickable="true" android:focusable="true"
-        android:layout_width="32dp" android:layout_height="32dp"
-        android:layout_gravity="top|end" android:padding="6dp"
-        android:background="@drawable/bg_widget_refresh_btn"
-        android:src="@drawable/ic_refresh_widget" android:visibility="gone" />
 </FrameLayout>

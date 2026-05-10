@@ -331,7 +331,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_widget_height">Widget yüksekliği</string>
     <string name="settings_widget_position">Widget konumu</string>
     <string name="settings_widget_width">Widget genişliği</string>
-    <string name="widget_battery_label">Pil</string>
     <string name="widget_height_label">%1$d dp</string>
     <string name="widget_pos_bottom">Altta</string>
     <string name="widget_pos_middle">Ortada</string>
@@ -339,9 +338,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="widget_remove_action">Widget\'ı kaldır</string>
     <string name="widget_remove_subtitle">Widget ana ekrandan kaldırılacak</string>
     <string name="widget_resize_title">Widget\'ı özelleştir</string>
-    <string name="widget_speed_time_description">Saat, tarih ve pil</string>
-    <string name="widget_speed_time_label">Speed Time</string>
-    <string name="widget_time_label">Saat</string>
     <string name="widget_width_50">%50</string>
     <string name="widget_width_75">%75</string>
     <string name="widget_width_full">Tam ekran</string>

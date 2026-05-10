@@ -25,8 +25,25 @@ class MainActivity : AppCompatActivity() {
     private var appActionsSheet: AppActionsSheet? = null
     private var tutorialOverlay: TutorialOverlay? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+    private fun logEvent(event: String) {
+        try {
+            val dir = getExternalFilesDir(null)
+            if (dir != null) {
+                val f = java.io.File(dir, "events.txt")
+                val ori = if (resources.configuration.orientation == 
+                    android.content.res.Configuration.ORIENTATION_LANDSCAPE) "L" else "P"
+                f.appendText("${System.currentTimeMillis()} $ori $event\n")
+                if (f.length() > 50000) {
+                    f.writeText(f.readText().takeLast(20000))
+                }
+            }
+        } catch (_: Throwable) {}
+    }
+    
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        logEvent("onCreate")
         // v81: disabilita snapshot della Activity per evitare ghost dopo multitasking close
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             try {
@@ -231,13 +248,15 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         } catch (_: Throwable) {}
     }
 
-    private var hasBeenPaused = false
+    private var pauseTimestamp = 0L
     
     override fun onResume() {
         super.onResume()
-        // v213: animazione entrata home SOLO se torno da app esterna (no al primo open, no al rotate, no al focus)
-        val shouldAnimate = hasBeenPaused
-        hasBeenPaused = false
+        logEvent("onResume")
+        // v215: animazione entrata home SOLO se in pausa per >800ms (esclude tap widget, focus events)
+        val pauseDuration = if (pauseTimestamp > 0) System.currentTimeMillis() - pauseTimestamp else 0
+        val shouldAnimate = pauseTimestamp > 0 && pauseDuration > 800
+        pauseTimestamp = 0L
         if (!shouldAnimate) {
             // Garantisco visibilità  
             try {
@@ -394,8 +413,9 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     
     override fun onPause() {
         super.onPause()
+        logEvent("onPause")
         widgetHostController.stopListening()
-        hasBeenPaused = true
+        pauseTimestamp = System.currentTimeMillis()
     }
 
     override fun onNewIntent(intent: Intent) {

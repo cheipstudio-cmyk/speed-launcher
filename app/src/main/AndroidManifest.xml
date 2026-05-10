@@ -158,20 +158,6 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-    
-        <receiver
-            android:name=".widgets.SpeedTimeWidgetProvider"
-            android:label="@string/widget_speed_time_label"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="org.cheipstudio.speedlauncher.WIDGET_TIME_TICK" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_speed_time_info" />
-        </receiver>
-
     </application>
 
 </manifest>

@@ -331,7 +331,6 @@ Télécharger maintenant ?</string>
     <string name="settings_widget_height">Hauteur du widget</string>
     <string name="settings_widget_position">Position du widget</string>
     <string name="settings_widget_width">Largeur du widget</string>
-    <string name="widget_battery_label">Batterie</string>
     <string name="widget_height_label">%1$d dp</string>
     <string name="widget_pos_bottom">En bas</string>
     <string name="widget_pos_middle">Au milieu</string>
@@ -339,9 +338,6 @@ Télécharger maintenant ?</string>
     <string name="widget_remove_action">Supprimer le widget</string>
     <string name="widget_remove_subtitle">Le widget sera supprimé de l\'accueil</string>
     <string name="widget_resize_title">Personnaliser le widget</string>
-    <string name="widget_speed_time_description">Heure, date et batterie</string>
-    <string name="widget_speed_time_label">Speed Time</string>
-    <string name="widget_time_label">Heure</string>
     <string name="widget_width_50">50 %</string>
     <string name="widget_width_75">75 %</string>
     <string name="widget_width_full">Plein écran</string>

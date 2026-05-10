@@ -904,7 +904,6 @@ class SettingsActivity : AppCompatActivity() {
                 settings.setWidgetTheme(keys[which])
                 updateWidgetThemeLabel()
                 org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider.refreshAll(this)
-                org.cheipstudio.speedlauncher.widgets.SpeedTimeWidgetProvider.refreshAll(this)
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
