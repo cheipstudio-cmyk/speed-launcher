@@ -697,6 +697,14 @@ class HomeView @JvmOverloads constructor(
 
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        // v267: intercetto edge-swipe RSS PRIMA che i child (PagedHomeContainer) intercettino
+        if (settings.rssPanelEnabled.value == true && ev.action == MotionEvent.ACTION_MOVE && edgeSwipeStarted && !edgeSwipeFired) {
+            val dx = ev.x - edgeSwipeStartX
+            val dy = kotlin.math.abs(ev.y - edgeSwipeStartY)
+            if (dx > 8f && dx > dy * 1.2f) {
+                return true  // intercetto - dispatchTouchEvent gestirà apertura overlay
+            }
+        }
         // v233: se widget edit mode attivo, NON intercettare swipe → lascia che overlay gestisca tutto
         try {
             if (binding.widgetSlot.isInWidgetEditMode()) return false
@@ -777,7 +785,27 @@ class HomeView @JvmOverloads constructor(
     }
 
     @Suppress("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        // v267: edge-swipe RSS handling anche in onTouchEvent (dopo che onIntercept ha intercettato)
+        if (settings.rssPanelEnabled.value == true && edgeSwipeStarted && !edgeSwipeFired) {
+            when (event.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.x - edgeSwipeStartX
+                    val dy = kotlin.math.abs(event.y - edgeSwipeStartY)
+                    if (dx > 40f && dx > dy * 1.2f && !isRssOverlayOpen) {
+                        edgeSwipeFired = true
+                        performHapticFeedbackLight()
+                        openRssOverlay()
+                        return true
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    edgeSwipeStarted = false
+                }
+            }
+        }
+        return gestureDetector.onTouchEvent(event)
+    }
 
     
     /** v259: parallax sui pages e widgetSlot durante lo scroll orizzontale */
@@ -801,6 +829,8 @@ class HomeView @JvmOverloads constructor(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 ))
+                // v267: callback chiusura overlay via swipe-left interno
+                v.onSwipeLeftToClose = { closeRssOverlay() }
                 v.reload()
             }
         } else {
@@ -862,7 +892,7 @@ class HomeView @JvmOverloads constructor(
     }
     
     // v265: edge-swipe detector per aprire RSS dal bordo sinistro
-    private val edgeSize = (24 * resources.displayMetrics.density).toInt()
+    private val edgeSize = (40 * resources.displayMetrics.density).toInt()
     private var edgeSwipeStarted = false
     private var edgeSwipeStartX = 0f
     private var edgeSwipeStartY = 0f
@@ -880,7 +910,7 @@ class HomeView @JvmOverloads constructor(
                         edgeSwipeStartX = ev.x
                         edgeSwipeStartY = ev.y
                     } else if (isRssOverlayOpen && ev.x > width - edgeSize) {
-                        // v266: Chiusura: tocco SOLO dal bordo destro (non disturba scroll filtri)
+                        // v267: Chiusura: tocco parte dal bordo destro (non disturba scroll filtri)
                         edgeSwipeStarted = true
                         edgeSwipeStartX = ev.x
                         edgeSwipeStartY = ev.y
@@ -891,12 +921,13 @@ class HomeView @JvmOverloads constructor(
                         val dx = ev.x - edgeSwipeStartX
                         val dy = kotlin.math.abs(ev.y - edgeSwipeStartY)
                         if (kotlin.math.abs(dx) > 60f && kotlin.math.abs(dx) > dy * 1.5f) {
-                            edgeSwipeFired = true
-                            if (!isRssOverlayOpen && dx > 0) {
+                            if (dx > 0 && !isRssOverlayOpen) {
+                                edgeSwipeFired = true
                                 performHapticFeedbackLight()
                                 openRssOverlay()
                                 return true
-                            } else if (isRssOverlayOpen && dx < 0) {
+                            } else if (dx < 0 && isRssOverlayOpen) {
+                                edgeSwipeFired = true
                                 performHapticFeedbackLight()
                                 closeRssOverlay()
                                 return true

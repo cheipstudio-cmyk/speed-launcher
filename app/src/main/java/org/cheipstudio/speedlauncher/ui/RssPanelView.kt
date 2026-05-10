@@ -53,6 +53,38 @@ class RssPanelView @JvmOverloads constructor(
     private val progress: ProgressBar
     private val adapter = ArticleAdapter()
 
+    /** v267: chiamato quando l'utente swippa a sinistra dentro il pannello → chiude overlay */
+    var onSwipeLeftToClose: (() -> Unit)? = null
+    
+    // v267: swipe-left detection
+    private var swDownX = 0f
+    private var swDownY = 0f
+    private var swFired = false
+    
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        when (ev.action) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                swDownX = ev.x
+                swDownY = ev.y
+                swFired = false
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                if (!swFired) {
+                    val dx = ev.x - swDownX
+                    val dy = kotlin.math.abs(ev.y - swDownY)
+                    // Swipe-left chiaramente orizzontale > 80dp → chiudi
+                    if (dx < -80f && kotlin.math.abs(dx) > dy * 1.8f) {
+                        swFired = true
+                        onSwipeLeftToClose?.invoke()
+                        return true
+                    }
+                }
+            }
+        }
+        if (swFired) return true
+        return super.dispatchTouchEvent(ev)
+    }
+    
     init {
         orientation = VERTICAL
         // v264: padding top per evitare overlap con status bar
