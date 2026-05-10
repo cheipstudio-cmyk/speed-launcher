@@ -247,6 +247,11 @@ class SettingsActivity : AppCompatActivity() {
         applySearchBarDependentEnabled(settings.showSearchBar.value != false)
         binding.switchHaptic.isChecked = settings.hapticEnabled.value == true
         binding.switchHaptic.setOnCheckedChangeListener { _, c -> settings.setHapticEnabled(c) }
+        // v243: spazio widget on/off
+        binding.switchShowWidget.isChecked = settings.showWidgetSlot.value == true
+        binding.switchShowWidget.setOnCheckedChangeListener { _, isChecked ->
+            settings.setShowWidgetSlot(isChecked)
+        }
 
         // v68: observers per aggiornamento subtitle in tempo reale
         settings.iconShape.observe(this) { updateShapeLabel() }

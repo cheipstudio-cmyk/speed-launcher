@@ -44,9 +44,16 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
             dismissAllowingStateLoss()
             onManagePages?.invoke()
         }
-        view.findViewById<View>(R.id.menuAddWidget)?.setOnClickListener {
-            dismissAllowingStateLoss()
-            onAddWidget?.invoke()
+        // v243: nascondi voce "Aggiungi widget" se spazio widget è OFF
+        val widgetMenuItem = view.findViewById<View>(R.id.menuAddWidget)
+        if (SpeedApp.instance.settingsRepository.showWidgetSlot.value != true) {
+            widgetMenuItem?.visibility = View.GONE
+        } else {
+            widgetMenuItem?.visibility = View.VISIBLE
+            widgetMenuItem?.setOnClickListener {
+                dismissAllowingStateLoss()
+                onAddWidget?.invoke()
+            }
         }
         view.findViewById<View>(R.id.menuSettings).setOnClickListener {
             dismissAllowingStateLoss()

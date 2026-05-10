@@ -270,6 +270,11 @@ class HomeView @JvmOverloads constructor(
             SpeedApp.instance.settingsRepository.drawerEnabled.observe(lo) { enabled ->
                 binding.drawerHandle.visibility = if (enabled == true) View.VISIBLE else View.GONE
             }
+            // v243: real-time visibility spazio widget
+            SpeedApp.instance.settingsRepository.showWidgetSlot.observe(lo) { show ->
+                binding.widgetSlot.visibility = if (show == true) View.VISIBLE else View.GONE
+                applyWidgetConfig()
+            }
         }
         // v194: pillola laterale RSS sempre visibile + click
         binding.rssEdgeIndicator.visibility = 
@@ -615,6 +620,11 @@ class HomeView @JvmOverloads constructor(
             return
         }
         val density = resources.displayMetrics.density
+        // v243: se setting "spazio widget" disattivato, nascondi e basta
+        if (settings.showWidgetSlot.value != true) {
+            ws.visibility = android.view.View.GONE
+            return
+        }
         // In landscape nascondo (schermo basso)
         val isLandscape = resources.configuration.orientation ==
             android.content.res.Configuration.ORIENTATION_LANDSCAPE

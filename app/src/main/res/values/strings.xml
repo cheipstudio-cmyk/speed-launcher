@@ -374,4 +374,5 @@ Vuoi scaricarla?</string>
     <string name="widget_personalize">Personalizza</string>
     <string name="widget_actions_title">Widget</string>
     <string name="widget_actions_hint">Cosa vuoi fare con questo widget?</string>
+    <string name="widget_no_space_in_page">Nessuno spazio in questa pagina. Sposta o rimuovi widget esistenti.</string>
 </resources>

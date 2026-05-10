@@ -355,4 +355,5 @@
     <string name="widget_personalize">تخصيص</string>
     <string name="widget_actions_title">الأداة</string>
     <string name="widget_actions_hint">ماذا تريد أن تفعل مع هذه الأداة؟</string>
+    <string name="widget_no_space_in_page">لا توجد مساحة في هذه الصفحة. قم بنقل أو إزالة الأدوات الموجودة.</string>
 </resources>

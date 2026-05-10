@@ -55,6 +55,11 @@ class WidgetContainerView @JvmOverloads constructor(
         showWidgetActions(uuid)
     }
 
+    init {
+        clipChildren = true
+        clipToPadding = true
+    }
+    
     fun setHostController(controller: WidgetHostController) {
         hostController = controller
         refresh()
@@ -79,20 +84,36 @@ class WidgetContainerView @JvmOverloads constructor(
 
     /** Aggiunge un nuovo widget (chiamato dopo bind+configure successo) */
     fun addWidget(appWidgetId: Int) {
-        // Posiziona in prima area libera
         val existing = store.loadPage(pageIndex)
-        val (cellX, cellY) = findFirstFreeCell(existing, defaultSpanX = WidgetItem.GRID_COLS, defaultSpanY = 2)
-        val item = WidgetItem(
-            uuid = "w_${System.currentTimeMillis()}_${appWidgetId}",
-            appWidgetId = appWidgetId,
-            pageIndex = pageIndex,
-            cellX = cellX,
-            cellY = cellY,
-            spanX = WidgetItem.GRID_COLS,
-            spanY = 2
+        // v242: prova prima 4x2 (full), poi 4x1, poi 2x2, poi 2x1, poi 1x1
+        val sizesToTry = listOf(
+            4 to 2, 4 to 1, 2 to 2, 2 to 1, 1 to 1
         )
-        store.addWidget(item)
-        refresh()
+        for ((sx, sy) in sizesToTry) {
+            val (cellX, cellY) = findFirstFreeCell(existing, sx, sy) ?: continue
+            val item = WidgetItem(
+                uuid = "w_${System.currentTimeMillis()}_${appWidgetId}",
+                appWidgetId = appWidgetId,
+                pageIndex = pageIndex,
+                cellX = cellX,
+                cellY = cellY,
+                spanX = sx,
+                spanY = sy
+            )
+            store.addWidget(item)
+            refresh()
+            return
+        }
+        // Niente spazio per nessuna taglia: avviso utente e abort
+        try {
+            android.widget.Toast.makeText(
+                context,
+                context.getString(org.cheipstudio.speedlauncher.R.string.widget_no_space_in_page),
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        } catch (_: Throwable) {}
+        // Pulisci appWidgetId allocato per evitare leak
+        try { hostController?.deleteWidget(appWidgetId) } catch (_: Throwable) {}
     }
 
     /** Rimuove un widget specifico */
@@ -106,8 +127,8 @@ class WidgetContainerView @JvmOverloads constructor(
         refresh()
     }
 
-    /** Trova il primo cellY libero (semplice: cerca dall'alto verso il basso) */
-    private fun findFirstFreeCell(existing: List<WidgetItem>, defaultSpanX: Int, defaultSpanY: Int): Pair<Int, Int> {
+    /** Trova prima cella libera per un widget di dimensione spanX×spanY. null se niente spazio. */
+    private fun findFirstFreeCell(existing: List<WidgetItem>, spanX: Int, spanY: Int): Pair<Int, Int>? {
         val occupied = Array(WidgetItem.GRID_ROWS) { BooleanArray(WidgetItem.GRID_COLS) }
         for (w in existing) {
             for (dy in 0 until w.spanY) {
@@ -120,19 +141,18 @@ class WidgetContainerView @JvmOverloads constructor(
                 }
             }
         }
-        // Cerca first-fit
-        for (y in 0..WidgetItem.GRID_ROWS - defaultSpanY) {
-            outer@ for (x in 0..WidgetItem.GRID_COLS - defaultSpanX) {
-                for (dy in 0 until defaultSpanY) {
-                    for (dx in 0 until defaultSpanX) {
+        // First-fit row-by-row, top-to-bottom
+        for (y in 0..WidgetItem.GRID_ROWS - spanY) {
+            outer@ for (x in 0..WidgetItem.GRID_COLS - spanX) {
+                for (dy in 0 until spanY) {
+                    for (dx in 0 until spanX) {
                         if (occupied[y + dy][x + dx]) continue@outer
                     }
                 }
                 return x to y
             }
         }
-        // Niente spazio: ritorna 0,0 (sovrapposizione, ma meglio che crash)
-        return 0 to 0
+        return null
     }
 
     private fun mountWidget(item: WidgetItem, host: WidgetHostController) {

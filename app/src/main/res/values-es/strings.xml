@@ -355,4 +355,5 @@ Se usará solo para esta función.</string>
     <string name="widget_personalize">Personalizar</string>
     <string name="widget_actions_title">Widget</string>
     <string name="widget_actions_hint">¿Que quieres hacer con este widget?</string>
+    <string name="widget_no_space_in_page">No hay espacio en esta pagina. Mueve o elimina widgets existentes.</string>
 </resources>

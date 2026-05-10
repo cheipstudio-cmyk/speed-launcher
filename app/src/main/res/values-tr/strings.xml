@@ -355,4 +355,5 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="widget_personalize">Ozellestir</string>
     <string name="widget_actions_title">Widget</string>
     <string name="widget_actions_hint">Bu widget ile ne yapmak istersiniz?</string>
+    <string name="widget_no_space_in_page">Bu sayfada yer yok. Mevcut widgetlari tasiyin veya kaldirin.</string>
 </resources>

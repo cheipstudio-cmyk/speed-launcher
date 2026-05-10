@@ -72,7 +72,21 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-
+            <com.google.android.material.card.MaterialCardView style="@style/PixelCard">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_teal">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_widget" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_show_widget" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_show_widget_sub" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchShowWidget"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/itemGridSize" style="@style/PixelCard"
                 android:clickable="true"
