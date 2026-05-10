@@ -26,6 +26,17 @@ class MainActivity : AppCompatActivity() {
     private var tutorialOverlay: TutorialOverlay? = null
 
 
+
+    /** v225: moltiplicatore durata animazioni in base a settings.animationStyle */
+    private fun animMul(): Float {
+        return when (SpeedApp.instance.settingsRepository.animationStyle.value) {
+            org.cheipstudio.speedlauncher.data.SettingsRepository.ANIM_NONE -> 0f
+            org.cheipstudio.speedlauncher.data.SettingsRepository.ANIM_FAST -> 0.55f
+            else -> 1.0f
+        }
+    }
+    private fun shouldRunAnim(): Boolean = animMul() > 0f
+
     private fun logEvent(event: String) {
         try {
             val dir = getExternalFilesDir(null)
@@ -285,7 +296,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         }
         // v215: animazione entrata home SOLO se in pausa per >800ms (esclude tap widget, focus events)
         val pauseDuration = if (pauseTimestamp > 0) System.currentTimeMillis() - pauseTimestamp else 0
-        val shouldAnimate = pauseTimestamp > 0 && pauseDuration > 400
+        val shouldAnimate = pauseTimestamp > 0 && pauseDuration > 400 && shouldRunAnim()
         pauseTimestamp = 0L
         if (!shouldAnimate) {
             // Garantisco visibilità  
@@ -311,7 +322,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 homeContent.animate().cancel()
                 homeContent.animate()
                     .alpha(1f).scaleX(1f).scaleY(1f)
-                    .setDuration(280)
+                    .setDuration((280 * animMul()).toLong())
                     .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                     .start()
             }
@@ -326,7 +337,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     it.animate()
                         .scaleX(1f).scaleY(1f)
                         .setStartDelay(60)
-                        .setDuration(420)
+                        .setDuration((420 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(2.2f))
                         .start()
                 }
@@ -341,7 +352,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     it.animate()
                         .translationY(0f).alpha(1f)
                         .setStartDelay(100)
-                        .setDuration(420)
+                        .setDuration((420 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(1.8f))
                         .start()
                 }
@@ -355,9 +366,35 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     it.animate()
                         .scaleX(1f).scaleY(1f).alpha(1f)
                         .setStartDelay(140)
-                        .setDuration(360)
+                        .setDuration((360 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(2f))
                         .start()
+                }
+            } catch (_: Throwable) {}
+            
+            // v225: Griglia icone con stagger entrance (Launcher3 pattern)
+            try {
+                val pagedHome = binding.homeView.findViewById<android.view.ViewGroup>(R.id.pagedHome)
+                if (pagedHome != null) {
+                    // Trova la pagina corrente e anima le sue icone con stagger
+                    val currentPage = (pagedHome.javaClass.getMethod("getCurrentPage").invoke(pagedHome) as? Int) ?: 0
+                    if (currentPage < pagedHome.childCount) {
+                        val pageView = pagedHome.getChildAt(currentPage) as? android.view.ViewGroup
+                        if (pageView != null) {
+                            for (i in 0 until pageView.childCount) {
+                                val icon = pageView.getChildAt(i)
+                                icon.alpha = 0f
+                                icon.scaleX = 0.6f
+                                icon.scaleY = 0.6f
+                                icon.animate()
+                                    .alpha(1f).scaleX(1f).scaleY(1f)
+                                    .setStartDelay((120 + i * 18).toLong())
+                                    .setDuration((360 * animMul()).toLong())
+                                    .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
+                                    .start()
+                            }
+                        }
+                    }
                 }
             } catch (_: Throwable) {}
             
@@ -372,7 +409,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                             it.animate()
                                 .translationY(0f).alpha(1f)
                                 .setStartDelay(180)
-                                .setDuration(440)
+                                .setDuration((440 * animMul()).toLong())
                                 .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
                                 .start()
                         }
@@ -516,7 +553,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 binding.homeView.animate()
                     .scaleX(0.96f).scaleY(0.96f)
-                    .setDuration(280)
+                    .setDuration((280 * animMul()).toLong())
                     .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                     .start()
             } catch (_: Throwable) {}

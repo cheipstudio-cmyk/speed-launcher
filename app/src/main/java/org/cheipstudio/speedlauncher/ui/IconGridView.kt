@@ -78,6 +78,10 @@ class IconGridView @JvmOverloads constructor(
 
     fun applyGridSize(newCols: Int, newRows: Int) {
         if (newCols == cols && newRows == rows) return
+        // v225: FIX CRASH ROTATE - rimuovo TUTTE le children prima di cambiare columnCount
+        // Senza questo, le children esistenti hanno columnSpec/rowSpec che puntano fuori dal nuovo range
+        // → IllegalArgumentException → schermo nero in landscape
+        removeAllViews()
         // v100: salvo gli items con la loro posizione originale (cellX/cellY)
         val oldItems = pinnedItems.toList()
         val oldCols = cols
