@@ -366,7 +366,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         }
         
         // v166: ricerca universale — aggiunge Contatti, File, Play Store
-        val mode = SpeedApp.instance.settingsRepository.searchMode.value
+        // v228: 'mode' già dichiarato sopra
         if (mode == org.cheipstudio.speedlauncher.data.SettingsRepository.MODE_UNIVERSAL) {
             // Cerca tra i contatti
             addAction(ctx.getString(R.string.search_action_contacts, query), R.drawable.ic_search_contacts) {

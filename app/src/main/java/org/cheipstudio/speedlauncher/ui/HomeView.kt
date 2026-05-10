@@ -817,8 +817,11 @@ class HomeView @JvmOverloads constructor(
         val maxPage = items.maxOfOrNull { it.page } ?: 0
         // Espandi pages se serve
         ensurePageExists(maxPage)
-        // Refresh ogni pagina
-        for (page in pages) page.refresh(apps)
+        // v228: ricarica pinnedItems dal disco (era il bug auto-add nuove app)
+        for (page in pages) {
+            page.setLayout(layoutStore.loadPage(page.pageIndex))
+            page.refresh(apps)
+        }
         updatePageIndicator()
     }
 
