@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity() {
             override fun handleOnBackPressed() {
                 // v231: prima chiudi widget edit mode se attivo
                 try {
-                    if (binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).isInEditMode()) {
+                    if (binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).isInWidgetEditMode()) {
                         binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.WidgetSlotView>(R.id.widgetSlot).exitEditMode()
                         return
                     }

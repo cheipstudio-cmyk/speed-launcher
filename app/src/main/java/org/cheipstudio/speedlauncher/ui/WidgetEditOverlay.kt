@@ -197,7 +197,9 @@ class WidgetEditOverlay @JvmOverloads constructor(
             DragMode.RESIZE_BOTTOM -> {
                 val deltaPx = rawY - initialFingerY
                 val deltaDp = (deltaPx / density).toInt()
-                val newH = (initialHeightDp + deltaDp).coerceIn(minHeightDp, maxHeightDp)
+                // v232: snap-to-grid 20dp
+                val unsnapped = (initialHeightDp + deltaDp).coerceIn(minHeightDp, maxHeightDp)
+                val newH = ((unsnapped + 10) / 20) * 20
                 if (newH != heightDp) {
                     heightDp = newH
                     onHeightChange?.invoke(newH)
@@ -207,10 +209,11 @@ class WidgetEditOverlay @JvmOverloads constructor(
             DragMode.RESIZE_TOP -> {
                 val deltaPx = initialFingerY - rawY
                 val deltaDp = (deltaPx / density).toInt()
-                val newH = (initialHeightDp + deltaDp).coerceIn(minHeightDp, maxHeightDp)
-                if (newH != heightDp) {
-                    heightDp = newH
-                    onHeightChange?.invoke(newH)
+                val unsnapped = (initialHeightDp + deltaDp).coerceIn(minHeightDp, maxHeightDp)
+                val newH2 = ((unsnapped + 10) / 20) * 20
+                if (newH2 != heightDp) {
+                    heightDp = newH2
+                    onHeightChange?.invoke(newH2)
                     HapticHelper.tick(this)
                 }
             }

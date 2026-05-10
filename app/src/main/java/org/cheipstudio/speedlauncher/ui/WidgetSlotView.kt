@@ -23,6 +23,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import org.cheipstudio.speedlauncher.R
+import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.widgets.WidgetHostController
 import kotlin.math.abs
 import kotlin.math.max
@@ -303,7 +304,7 @@ class WidgetSlotView @JvmOverloads constructor(
         editOverlay = null
     }
     
-    fun isInEditMode(): Boolean = inEditMode
+    fun isInWidgetEditMode(): Boolean = inEditMode
     
     private fun applyWidgetConfig() {
         // forza relayout per applicare nuove dimensioni dal SettingsRepository
