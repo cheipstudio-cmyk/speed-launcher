@@ -573,6 +573,12 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     private fun openHomeMenu() {
         if (homeMenuSheet?.isAdded == true) return
         homeMenuSheet = HomeMenuSheet().also {
+            // v283: check se la pagina corrente ha già un widget
+            it.currentPageHasWidget = try {
+                val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome)
+                val pageIdx = pagedHome?.currentPage ?: 0
+                org.cheipstudio.speedlauncher.data.WidgetStore(this).loadPage(pageIdx).isNotEmpty()
+            } catch (_: Throwable) { false }
             it.onSettings = {
                 startActivity(Intent(this, SettingsIndexActivity::class.java))
                 if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {

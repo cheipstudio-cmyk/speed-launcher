@@ -949,6 +949,8 @@ class HomeView @JvmOverloads constructor(
             val pageTop = pageLoc[1] - myLoc[1]
             for (i in 0 until pageView.childCount) {
                 val child = pageView.getChildAt(i) ?: continue
+                // v283: solo IconCellView e FolderCellView contano (skip emptyCell View base)
+                if (child !is IconCellView && child !is FolderCellView) continue
                 val cLeft = pageLeft + child.left
                 val cTop = pageTop + child.top
                 val cRight = cLeft + child.width

@@ -118,13 +118,26 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         val veryCompact = widgetMinH in 1..79
         val mediumCompact = widgetMinH in 80..119
         val progressVisible = if (veryCompact || mediumCompact) android.view.View.GONE else android.view.View.VISIBLE
-        val subtitleVisible = if (veryCompact) android.view.View.GONE else android.view.View.VISIBLE
+        val subtitleVisible = if (veryCompact || mediumCompact) android.view.View.GONE else android.view.View.VISIBLE
+        val labelVisible = if (veryCompact) android.view.View.GONE else android.view.View.VISIBLE
         views.setViewVisibility(R.id.ramProgress, progressVisible)
         views.setViewVisibility(R.id.storProgress, progressVisible)
         views.setViewVisibility(R.id.batProgress, progressVisible)
         views.setViewVisibility(R.id.ramSubtitle, subtitleVisible)
         views.setViewVisibility(R.id.storSubtitle, subtitleVisible)
         views.setViewVisibility(R.id.batSubtitle, subtitleVisible)
+        // v283: in veryCompact nascondo anche label e riduco textSize del valore
+        views.setViewVisibility(R.id.ramLabel, labelVisible)
+        views.setViewVisibility(R.id.storLabel, labelVisible)
+        views.setViewVisibility(R.id.batLabel, labelVisible)
+        val valueTextSize = when {
+            veryCompact -> 14f
+            mediumCompact -> 18f
+            else -> 22f
+        }
+        views.setTextViewTextSize(R.id.ramPct, android.util.TypedValue.COMPLEX_UNIT_SP, valueTextSize)
+        views.setTextViewTextSize(R.id.storPct, android.util.TypedValue.COMPLEX_UNIT_SP, valueTextSize)
+        views.setTextViewTextSize(R.id.batPct, android.util.TypedValue.COMPLEX_UNIT_SP, valueTextSize)
 
         // Background
         try {

@@ -35,6 +35,7 @@
                 android:text="—" />
             
             <TextView 
+                android:id="@+id/ramLabel"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="@string/widget_ram"
@@ -81,6 +82,7 @@
                 android:text="—" />
             
             <TextView 
+                android:id="@+id/storLabel"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="@string/widget_storage"
@@ -128,6 +130,7 @@
                 android:text="—" />
             
             <TextView 
+                android:id="@+id/batLabel"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="@string/widget_battery"

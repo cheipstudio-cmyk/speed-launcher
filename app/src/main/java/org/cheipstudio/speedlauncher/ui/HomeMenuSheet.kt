@@ -13,6 +13,9 @@ import org.cheipstudio.speedlauncher.data.HomeItem
 import org.cheipstudio.speedlauncher.data.HomeLayoutStore
 
 class HomeMenuSheet : BottomSheetDialogFragment() {
+    /** v283: true se la pagina corrente ha già un widget (nasconde "Aggiungi widget") */
+    var currentPageHasWidget: Boolean = false
+
 
     var onSettings: (() -> Unit)? = null
     var onSorted: (() -> Unit)? = null
@@ -44,9 +47,11 @@ class HomeMenuSheet : BottomSheetDialogFragment() {
             dismissAllowingStateLoss()
             onManagePages?.invoke()
         }
-        // v243: nascondi voce "Aggiungi widget" se spazio widget è OFF
+        // v243+v283: nascondi "Aggiungi widget" se spazio widget OFF o se pagina ha già un widget
         val widgetMenuItem = view.findViewById<View>(R.id.menuAddWidget)
-        if (SpeedApp.instance.settingsRepository.showWidgetSlot.value != true) {
+        val widgetOn = SpeedApp.instance.settingsRepository.showWidgetSlot.value == true
+        val pageHasWidget = currentPageHasWidget
+        if (!widgetOn || pageHasWidget) {
             widgetMenuItem?.visibility = View.GONE
         } else {
             widgetMenuItem?.visibility = View.VISIBLE
