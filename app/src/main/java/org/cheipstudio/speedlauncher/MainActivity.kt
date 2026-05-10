@@ -252,10 +252,40 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     
     override fun onResume() {
         super.onResume()
-        logEvent("onResume")
+        logEvent("onResume orient=${resources.configuration.orientation}")
+        // v218: forza visibilità in landscape (fix schermo nero)
+        try {
+            val isLand = resources.configuration.orientation == 
+                android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            if (isLand) {
+                binding.homeView.alpha = 1f
+                binding.homeView.scaleX = 1f
+                binding.homeView.scaleY = 1f
+                binding.homeView.translationY = 0f
+                binding.homeView.visibility = android.view.View.VISIBLE
+                // Reset anche su tutti i child principali
+                for (id in intArrayOf(R.id.widgetSlot, R.id.searchBar, R.id.pageIndicator,
+                                      R.id.recommendedRow, R.id.recommendedRowBottom,
+                                      R.id.pagedHome)) {
+                    try {
+                        binding.homeView.findViewById<android.view.View>(id)?.let {
+                            it.alpha = 1f
+                            it.scaleX = 1f
+                            it.scaleY = 1f
+                            it.translationY = 0f
+                            it.translationX = 0f
+                        }
+                    } catch (_: Throwable) {}
+                }
+                binding.homeView.invalidate()
+                binding.homeView.requestLayout()
+            }
+        } catch (e: Throwable) {
+            logEvent("onResume reset ERR: ${e.message}")
+        }
         // v215: animazione entrata home SOLO se in pausa per >800ms (esclude tap widget, focus events)
         val pauseDuration = if (pauseTimestamp > 0) System.currentTimeMillis() - pauseTimestamp else 0
-        val shouldAnimate = pauseTimestamp > 0 && pauseDuration > 800
+        val shouldAnimate = pauseTimestamp > 0 && pauseDuration > 400
         pauseTimestamp = 0L
         if (!shouldAnimate) {
             // Garantisco visibilità  

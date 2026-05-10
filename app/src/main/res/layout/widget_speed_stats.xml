@@ -20,8 +20,8 @@
             android:gravity="center" android:padding="8dp">
             
             <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:src="@drawable/ic_widget_memory"
                 android:tint="#7AE582" />
             
@@ -38,8 +38,8 @@
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="@string/widget_ram"
-                android:textColor="#80B0B0BD" 
-                android:textSize="10sp"
+                android:textColor="#C0B0B0BD" 
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium" 
                 android:textAllCaps="true"
                 android:letterSpacing="0.08" />
@@ -54,8 +54,8 @@
             <TextView android:id="@+id/ramSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="6dp" 
-                android:textColor="#80B0B0BD"
-                android:textSize="9sp" 
+                android:textColor="#C0B0B0BD"
+                android:textSize="11sp" 
                 android:fontFamily="sans-serif"
                 android:text="" />
         </LinearLayout>
@@ -66,8 +66,8 @@
             android:gravity="center" android:padding="8dp">
             
             <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:src="@drawable/ic_widget_storage"
                 android:tint="#82AAFF" />
             
@@ -84,8 +84,8 @@
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="@string/widget_storage"
-                android:textColor="#80B0B0BD"
-                android:textSize="10sp"
+                android:textColor="#C0B0B0BD"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="true"
                 android:letterSpacing="0.08" />
@@ -100,8 +100,8 @@
             <TextView android:id="@+id/storSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:textColor="#80B0B0BD"
-                android:textSize="9sp"
+                android:textColor="#C0B0B0BD"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif"
                 android:text="" />
         </LinearLayout>
@@ -113,8 +113,8 @@
             
             <ImageView
                 android:id="@+id/batIcon"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:src="@drawable/ic_widget_battery"
                 android:tint="#FFCC80" />
             
@@ -131,8 +131,8 @@
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="@string/widget_battery"
-                android:textColor="#80B0B0BD"
-                android:textSize="10sp"
+                android:textColor="#C0B0B0BD"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="true"
                 android:letterSpacing="0.08" />
@@ -147,8 +147,8 @@
             <TextView android:id="@+id/batSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:textColor="#80B0B0BD"
-                android:textSize="9sp"
+                android:textColor="#C0B0B0BD"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif"
                 android:text="" />
         </LinearLayout>
