@@ -53,8 +53,8 @@ class WidgetSlotView @JvmOverloads constructor(
     private val holdRunnable = Runnable {
         if (currentWidgetView != null) {
             HapticHelper.feedback(this, HapticFeedbackConstants.LONG_PRESS)
-            // v231: long press → edit mode con maniglie (Launcher3 style)
-            enterEditMode()
+            // v233: long press → modal completo (le maniglie overlay erano instabili)
+            showResizeSheet()
         }
     }
 

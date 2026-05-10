@@ -715,6 +715,10 @@ class HomeView @JvmOverloads constructor(
 
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        // v233: se widget edit mode attivo, NON intercettare swipe → lascia che overlay gestisca tutto
+        try {
+            if (binding.widgetSlot.isInWidgetEditMode()) return false
+        } catch (_: Throwable) {}
         val activity = context as? androidx.fragment.app.FragmentActivity
         if (activity != null) {
             for (frag in activity.supportFragmentManager.fragments) {
