@@ -67,13 +67,14 @@ class RssPanelView @JvmOverloads constructor(
                 swDownX = ev.x
                 swDownY = ev.y
                 swFired = false
+                // v268: se il DOWN è dentro il filterScroll, NON gestire swipe-left (lascia scrollare i chip)
+                swSkipDueToFilter = isPointInFilterScroll(ev.x, ev.y)
             }
             android.view.MotionEvent.ACTION_MOVE -> {
-                if (!swFired) {
+                if (!swFired && !swSkipDueToFilter) {
                     val dx = ev.x - swDownX
                     val dy = kotlin.math.abs(ev.y - swDownY)
-                    // Swipe-left chiaramente orizzontale > 80dp → chiudi
-                    if (dx < -80f && kotlin.math.abs(dx) > dy * 1.8f) {
+                    if (dx < -100f && kotlin.math.abs(dx) > dy * 2.0f) {
                         swFired = true
                         onSwipeLeftToClose?.invoke()
                         return true
@@ -83,6 +84,22 @@ class RssPanelView @JvmOverloads constructor(
         }
         if (swFired) return true
         return super.dispatchTouchEvent(ev)
+    }
+    
+    private var swSkipDueToFilter = false
+    
+    private fun isPointInFilterScroll(x: Float, y: Float): Boolean {
+        try {
+            if (filterScroll.visibility != VISIBLE) return false
+            val loc = IntArray(2)
+            filterScroll.getLocationOnScreen(loc)
+            val myLoc = IntArray(2)
+            getLocationOnScreen(myLoc)
+            val relX = loc[0] - myLoc[0]
+            val relY = loc[1] - myLoc[1]
+            return y >= relY && y <= relY + filterScroll.height &&
+                   x >= relX && x <= relX + filterScroll.width
+        } catch (_: Throwable) { return false }
     }
     
     init {

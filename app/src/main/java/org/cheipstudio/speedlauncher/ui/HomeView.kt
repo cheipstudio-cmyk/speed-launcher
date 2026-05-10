@@ -701,7 +701,7 @@ class HomeView @JvmOverloads constructor(
         if (settings.rssPanelEnabled.value == true && ev.action == MotionEvent.ACTION_MOVE && edgeSwipeStarted && !edgeSwipeFired) {
             val dx = ev.x - edgeSwipeStartX
             val dy = kotlin.math.abs(ev.y - edgeSwipeStartY)
-            if (dx > 8f && dx > dy * 1.2f) {
+            if (dx > 6f && dx > dy * 0.8f) {
                 return true  // intercetto - dispatchTouchEvent gestirà apertura overlay
             }
         }
@@ -792,7 +792,7 @@ class HomeView @JvmOverloads constructor(
                 MotionEvent.ACTION_MOVE -> {
                     val dx = event.x - edgeSwipeStartX
                     val dy = kotlin.math.abs(event.y - edgeSwipeStartY)
-                    if (dx > 25f && dx > dy * 1.0f && !isRssOverlayOpen) {
+                    if (dx > 20f && dx > dy * 0.8f && !isRssOverlayOpen) {
                         edgeSwipeFired = true
                         performHapticFeedbackLight()
                         openRssOverlay()
