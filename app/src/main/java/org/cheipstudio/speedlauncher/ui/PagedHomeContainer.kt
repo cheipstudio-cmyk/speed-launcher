@@ -65,27 +65,16 @@ class PagedHomeContainer @JvmOverloads constructor(
     }
     
     /** v250: aggiunge una pagina speciale prima della pagina 0 (es. RSS). */
+    private var pendingLeadingSnap = false
+    
     fun addLeadingPage(view: android.view.View) {
         if (leadingView != null) removeLeadingPage()
         leadingView = view
         val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT)
         container.addView(view, 0, lp)
-        // v258: aspetta che width sia disponibile prima di scrollare
-        scheduleSnapAfterLeadingAdded()
-    }
-    
-    private fun scheduleSnapAfterLeadingAdded() {
-        post {
-            adjustChildWidths()
-            if (width > 0) {
-                scrollTo(width, 0)
-                currentPage = 1
-                onPageChanged?.invoke(1)  // notifica observer (HomeView aggiorna applyRssPageMode)
-            } else {
-                // retry quando width è disponibile
-                postDelayed({ scheduleSnapAfterLeadingAdded() }, 16)
-            }
-        }
+        pendingLeadingSnap = true
+        // v260: forza layout subito; lo snap effettivo avviene in onLayout quando width > 0
+        requestLayout()
     }
     
     fun removeLeadingPage() {
@@ -118,6 +107,17 @@ class PagedHomeContainer @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
         adjustChildWidths()
+    }
+    
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+        if (pendingLeadingSnap && width > 0) {
+            pendingLeadingSnap = false
+            adjustChildWidths()
+            scrollTo(width, 0)  // skip leading page, vai a home page 0
+            currentPage = 1
+            onPageChanged?.invoke(1)
+        }
     }
     
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {

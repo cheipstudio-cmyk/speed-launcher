@@ -248,6 +248,11 @@ class HomeView @JvmOverloads constructor(
             homeGesture.onTouchEvent(ev)
             false  // non consumo: PagedHomeContainer continua a gestire scroll
         }
+        // v260: long press anche sulla parte alta (zona widget vuota) - listener su root
+        setOnTouchListener { _, ev ->
+            homeGesture.onTouchEvent(ev)
+            false
+        }
 
         updateSearchBarText()
         applySearchBarStyle()
@@ -847,21 +852,19 @@ class HomeView @JvmOverloads constructor(
         if (pageW <= 0) return
         val totalPages = binding.pagedHome.pageCount.coerceAtLeast(1)
         val scrollX = fraction * (totalPages - 1) * pageW
-        val currentRawPage = binding.pagedHome.currentPage
-        // Per ogni page: trasla in base al delta tra la sua posizione naturale e lo scrollX
         for (i in 0 until binding.pagedHome.pageCount) {
             val pageView = binding.pagedHome.getChildAtSafe(i) ?: continue
-            // posizione naturale della pagina i = i * pageW
             val natural = i * pageW
-            val delta = natural - scrollX  // distanza dalla posizione corrente
-            // Parallax: la pagina si muove un 15% più rapida del normale
-            // (così appare più "in primo piano" rispetto allo sfondo)
-            val parallaxOffset = delta * 0.15f
-            pageView.translationX = parallaxOffset
+            val delta = natural - scrollX
+            // v260: parallax 30% + scale leggero della pagina che sta uscendo
+            pageView.translationX = delta * 0.30f
+            // Pagina al centro = scale 1, pagine ai lati scale 0.92
+            val distNorm = (kotlin.math.abs(delta) / pageW).coerceIn(0f, 1f)
+            val scale = 1f - 0.08f * distNorm
+            pageView.scaleX = scale
+            pageView.scaleY = scale
+            pageView.alpha = 1f - 0.4f * distNorm
         }
-        // Widget slot: trasla in base alla pagina corrente (non si muove durante lo swipe orizzontale
-        // perché è esterno al pagedHome, ma con parallax leggero per coerenza)
-        // In realtà widgetSlot è esterno: non lo sposto, resta fermo nella sua posizione  
     }
     
     /** v254: true se siamo sulla leading page RSS - nasconde dock/searchBar/blocca gesture */
@@ -911,32 +914,6 @@ class HomeView @JvmOverloads constructor(
         binding.widgetSlot.setHostController(host)
         // v244: long press su area vuota del container widget → apre menu home
         binding.widgetSlot.onEmptyLongPress = { onHomeLongPress?.invoke() }
-        // v259: posiziono il widgetSlot top/middle/bottom in base al primo widget
-        binding.widgetSlot.onVerticalPosChanged = { pos ->
-            applyWidgetVerticalPos(pos)
-        }
-    }
-    
-    /** v259: trasla il widgetSlot via translationY in base alla posizione globale (top/middle/bottom) */
-    private fun applyWidgetVerticalPos(pos: String) {
-        post {
-            val ws = binding.widgetSlot
-            // home utile = altezza homeView - top padding - widgetSlot height - dock+search+pageIndicator+bottomPadding
-            val homeHeight = height
-            if (homeHeight <= 0) return@post
-            val widgetH = ws.height
-            if (widgetH <= 0) return@post
-            // Calcolo lo spazio occupato dagli elementi sotto il widget (dock, search, indicator, dock bottom)
-            val density = resources.displayMetrics.density
-            val bottomReserved = (180 * density).toInt()  // ~ pageIndicator + dock + search + drawerHandle
-            val topReserved = (48 * density).toInt()      // home_top_padding
-            val available = homeHeight - widgetH - topReserved - bottomReserved
-            ws.translationY = when (pos) {
-                org.cheipstudio.speedlauncher.data.WidgetItem.POS_MIDDLE -> (available / 2f).coerceAtLeast(0f)
-                org.cheipstudio.speedlauncher.data.WidgetItem.POS_BOTTOM -> available.toFloat().coerceAtLeast(0f)
-                else -> 0f
-            }
-        }
     }
     
     // v228: apre il widget picker per la slot corrente (chiamato da HomeMenuSheet "Aggiungi widget")

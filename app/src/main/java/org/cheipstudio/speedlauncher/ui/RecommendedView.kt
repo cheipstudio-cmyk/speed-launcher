@@ -58,17 +58,15 @@ class RecommendedView @JvmOverloads constructor(
                 dockLongPressFired = false
                 dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
                 dockLongPressHandler.removeCallbacks(dockLongPressArm)
-                // v251: warm-up 100ms prima di armare il timer.
-                // Se in 100ms il dito si è già mosso, il timer NON parte → nessun rischio
-                // di trigger durante swipe rapido.
-                dockLongPressHandler.postDelayed(dockLongPressArm, 100)
+                // v260: warm-up più lungo (180ms) per swipe veloci
+                dockLongPressHandler.postDelayed(dockLongPressArm, 180)
             }
             android.view.MotionEvent.ACTION_MOVE -> {
                 val dx = kotlin.math.abs(ev.x - dockLongPressDownX)
                 val dyRaw = ev.y - dockLongPressDownY  // negativo = swipe up
                 val dy = kotlin.math.abs(dyRaw)
-                // v251: cancellazione MOLTO aggressiva per swipe up (anche solo 3px)
-                if (dyRaw < -3 && dy > dx / 2) {
+                // v260: cancellazione iper-aggressiva per swipe up (1px basta)
+                if (dyRaw < -1) {
                     dockLongPressHandler.removeCallbacks(dockLongPressArm)
                     dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
                 } else if (dx > dockLongPressSlop || dy > dockLongPressSlop) {
@@ -88,10 +86,9 @@ class RecommendedView @JvmOverloads constructor(
         return super.onInterceptTouchEvent(ev)
     }
     
-    // v251: Armatura del timer - posta il vero timer 600ms (700-100 warm-up = 600)
-    // dopo che il dito è stato fermo per 100ms
+    // v260: armatura - dopo 180ms di immobilità posta timer 520ms (totale ~700ms)
     private val dockLongPressArm = Runnable {
-        dockLongPressHandler.postDelayed(dockLongPressRunnable, 600)
+        dockLongPressHandler.postDelayed(dockLongPressRunnable, 520)
     }
     
     init {

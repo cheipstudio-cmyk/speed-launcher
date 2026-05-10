@@ -389,27 +389,32 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome)
                 if (pagedHome != null) {
-                    // v259: animazione su TUTTE le pagine home (non solo current).  
-                    // Quando l'utente swippa subito dopo onResume, vede l'animazione anche in altre pagine.
-                    val leadingOffset = if (pagedHome.hasLeadingPage) 1 else 0
-                    for (pageIdx in leadingOffset until pagedHome.childCount) {
-                        val pageView = pagedHome.getChildAt(pageIdx) as? android.view.ViewGroup ?: continue
-                        for (i in 0 until pageView.childCount) {
-                            val icon = pageView.getChildAt(i)
-                            icon.scaleX = 0.7f
-                            icon.scaleY = 0.7f
-                            icon.alpha = 0.4f
-                            icon.translationY = 24f
-                            icon.animate()
-                                .scaleX(1f).scaleY(1f)
-                                .alpha(1f)
-                                .translationY(0f)
-                                .setStartDelay((i * 18).toLong())
-                                .setDuration((420 * animMul()).toLong())
-                                .setInterpolator(android.view.animation.OvershootInterpolator(1.5f))
-                                .start()
-                        }
-                    }
+                    // v260: animo solo la pagina visibile, dopo che lo snap iniziale è completato
+                    // (evita conflitto con applyPageParallax che sovrascriverebbe scale/alpha)
+                    pagedHome.postDelayed({
+                        try {
+                            val leadingOffset = if (pagedHome.hasLeadingPage) 1 else 0
+                            val targetIdx = pagedHome.currentPage.coerceAtLeast(leadingOffset)
+                            val pageView = pagedHome.getChildAt(targetIdx) as? android.view.ViewGroup
+                            if (pageView != null) {
+                                for (i in 0 until pageView.childCount) {
+                                    val icon = pageView.getChildAt(i)
+                                    icon.scaleX = 0.65f
+                                    icon.scaleY = 0.65f
+                                    icon.alpha = 0.3f
+                                    icon.translationY = 30f
+                                    icon.animate()
+                                        .scaleX(1f).scaleY(1f)
+                                        .alpha(1f)
+                                        .translationY(0f)
+                                        .setStartDelay((i * 18).toLong())
+                                        .setDuration((460 * animMul()).toLong())
+                                        .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
+                                        .start()
+                                }
+                            }
+                        } catch (_: Throwable) {}
+                    }, 80)
                 }
             } catch (_: Throwable) {}
             

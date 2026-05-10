@@ -104,20 +104,6 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             updateItem(store, item.copy(spanY = heightOptions[idx].first))
         }
 
-        // v247: Posizione verticale
-        val posOptions = listOf(
-            WidgetItem.POS_TOP to getString(R.string.widget_pos_top),
-            WidgetItem.POS_MIDDLE to getString(R.string.widget_pos_middle),
-            WidgetItem.POS_BOTTOM to getString(R.string.widget_pos_bottom)
-        )
-        addSegmentedSection(
-            root, d, getString(R.string.widget_position_label),
-            posOptions.map { it.second },
-            posOptions.indexOfFirst { it.first == item.verticalPos }.coerceAtLeast(0)
-        ) { idx ->
-            updateItem(store, item.copy(verticalPos = posOptions[idx].first))
-        }
-
         // v246: Tema (visibile solo per Speed Stats widget)
         try {
             val mgr = android.appwidget.AppWidgetManager.getInstance(ctx)
