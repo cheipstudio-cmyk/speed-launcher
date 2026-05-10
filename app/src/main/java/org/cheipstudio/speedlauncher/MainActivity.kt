@@ -36,6 +36,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun shouldRunAnim(): Boolean = animMul() > 0f
+    
+    /** v277: anima un child del homeView entrando con translateY offset + fade */
+    private fun animateChildEntry(parent: android.view.View, viewId: Int, offsetY: Float, 
+                                  startDelay: Long, duration: Long, 
+                                  interp: android.view.animation.Interpolator) {
+        try {
+            val v = parent.findViewById<android.view.View>(viewId) ?: return
+            v.animate().cancel()
+            v.translationY = offsetY
+            v.alpha = 0f
+            v.animate()
+                .translationY(0f).alpha(1f)
+                .setStartDelay(startDelay)
+                .setDuration(duration)
+                .setInterpolator(interp)
+                .start()
+        } catch (_: Throwable) {}
+    }
 
     
         override fun onCreate(savedInstanceState: Bundle?) {
@@ -317,26 +335,44 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 binding.homeView.scaleY = 1f
             } catch (_: Throwable) {}
         }
-        // v276: animazione ritorno home - soft zoom in senza fade (no flash)
+        // v277: animazione ritorno home - elementi entrano da off-screen con fade
         try {
             val isLandscape = resources.configuration.orientation ==
                 android.content.res.Configuration.ORIENTATION_LANDSCAPE
             val homeContent = binding.homeView
             homeContent.animate().cancel()
-            homeContent.translationX = 0f
-            homeContent.translationY = 0f
-            homeContent.alpha = 1f
-            homeContent.scaleX = 1f
-            homeContent.scaleY = 1f
+            homeContent.translationX = 0f; homeContent.translationY = 0f
+            homeContent.alpha = 1f; homeContent.scaleX = 1f; homeContent.scaleY = 1f
+            
             if (!isLandscape && shouldAnimate) {
-                // Soft zoom da 1.04 a 1 (sembra "che si calma"): no fade, no jumping
-                homeContent.scaleX = 1.04f
-                homeContent.scaleY = 1.04f
-                homeContent.animate()
-                    .scaleX(1f).scaleY(1f)
-                    .setDuration((280 * animMul()).toLong())
-                    .setInterpolator(android.view.animation.DecelerateInterpolator(2.5f))
-                    .start()
+                val density = resources.displayMetrics.density
+                val offsetTop = 40 * density   // 40dp
+                val offsetBot = 40 * density
+                val durMain = (380 * animMul()).toLong()
+                val interp = android.view.animation.DecelerateInterpolator(2.0f)
+                
+                // Top elements (widget + dock top) - dall'alto
+                animateChildEntry(binding.homeView, R.id.widgetSlot, -offsetTop, 0L, durMain, interp)
+                animateChildEntry(binding.homeView, R.id.recommendedRow, -offsetTop, 30L, durMain, interp)
+                
+                // Grid pages - fade + scale leggero
+                val pagedHome = binding.homeView.findViewById<android.view.View>(R.id.pagedHome)
+                pagedHome?.let { v ->
+                    v.animate().cancel()
+                    v.alpha = 0f
+                    v.scaleX = 0.92f; v.scaleY = 0.92f
+                    v.animate()
+                        .alpha(1f).scaleX(1f).scaleY(1f)
+                        .setStartDelay(60L)
+                        .setDuration(durMain)
+                        .setInterpolator(interp)
+                        .start()
+                }
+                
+                // Bottom elements (dock bottom + search) - dal basso
+                animateChildEntry(binding.homeView, R.id.pageIndicator, offsetBot, 90L, durMain, interp)
+                animateChildEntry(binding.homeView, R.id.recommendedRowBottom, offsetBot, 120L, durMain, interp)
+                animateChildEntry(binding.homeView, R.id.searchBar, offsetBot, 150L, durMain, interp)
             }
         } catch (_: Throwable) {}
         widgetHostController.startListening()

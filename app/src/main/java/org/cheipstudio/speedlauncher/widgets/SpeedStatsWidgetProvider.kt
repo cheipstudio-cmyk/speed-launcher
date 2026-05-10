@@ -96,6 +96,29 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             R.layout.widget_speed_stats
 
         val views = RemoteViews(context.packageName, layoutRes)
+        
+        // v277: detect altezza widget per nascondere elementi su altezze piccole
+        val isCompact = try {
+            val options = manager.getAppWidgetOptions(id)
+            val minH = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
+            minH in 1..90  // < 90dp = compact
+        } catch (_: Throwable) { false }
+        if (isCompact) {
+            // Nascondo progress bars + subtitles per stare in altezza ridotta
+            views.setViewVisibility(R.id.ramProgress, android.view.View.GONE)
+            views.setViewVisibility(R.id.storProgress, android.view.View.GONE)
+            views.setViewVisibility(R.id.batProgress, android.view.View.GONE)
+            views.setViewVisibility(R.id.ramSubtitle, android.view.View.GONE)
+            views.setViewVisibility(R.id.storSubtitle, android.view.View.GONE)
+            views.setViewVisibility(R.id.batSubtitle, android.view.View.GONE)
+        } else {
+            views.setViewVisibility(R.id.ramProgress, android.view.View.VISIBLE)
+            views.setViewVisibility(R.id.storProgress, android.view.View.VISIBLE)
+            views.setViewVisibility(R.id.batProgress, android.view.View.VISIBLE)
+            views.setViewVisibility(R.id.ramSubtitle, android.view.View.VISIBLE)
+            views.setViewVisibility(R.id.storSubtitle, android.view.View.VISIBLE)
+            views.setViewVisibility(R.id.batSubtitle, android.view.View.VISIBLE)
+        }
 
         // Background
         try {

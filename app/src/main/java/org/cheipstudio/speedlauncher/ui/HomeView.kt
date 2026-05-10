@@ -981,10 +981,37 @@ class HomeView @JvmOverloads constructor(
         } catch (_: Throwable) {}
     }
     
+    private var homeGestureStartX = 0f
+    private var homeGestureStartY = 0f
+    private var homeGestureCancelled = false
+    
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // v276: long press home ovunque TRANNE sopra un widget montato (lì gestisce WidgetContainerView)
+        // v277: long press home ovunque TRANNE sopra widget/icone/cartelle E ANNULLA su movimento
         try {
-            if (!isTouchOnMountedWidget(ev)) {
+            when (ev.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    homeGestureStartX = ev.x
+                    homeGestureStartY = ev.y
+                    homeGestureCancelled = isTouchOnMountedWidget(ev)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (!homeGestureCancelled) {
+                        val dx = kotlin.math.abs(ev.x - homeGestureStartX)
+                        val dy = kotlin.math.abs(ev.y - homeGestureStartY)
+                        // Se si è mosso > 8dp, annullo long press (sta swippando)
+                        val cancelThreshold = 8 * resources.displayMetrics.density
+                        if (dx > cancelThreshold || dy > cancelThreshold) {
+                            homeGestureCancelled = true
+                            // Invio CANCEL al GestureDetector per annullare il long press
+                            val cancel = MotionEvent.obtain(ev)
+                            cancel.action = MotionEvent.ACTION_CANCEL
+                            homeGesture.onTouchEvent(cancel)
+                            cancel.recycle()
+                        }
+                    }
+                }
+            }
+            if (!homeGestureCancelled) {
                 homeGesture.onTouchEvent(ev)
             }
         } catch (_: Throwable) {}
