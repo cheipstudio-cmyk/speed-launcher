@@ -141,4 +141,14 @@
             app:tint="?attr/colorOnPrimaryContainer" />
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- v261: RSS overlay - full-screen, sliding da sinistra -->
+    <FrameLayout
+        android:id="@+id/rssOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="#1a1a1a" />
+
 </merge>

@@ -85,7 +85,7 @@ class HomeView @JvmOverloads constructor(
             // v77: dedup vibrazione — usa flag swipeFireVibrated, una sola vibrazione per gesto.
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
                 // v254: su RSS leading page, swipe up NON apre il drawer (deve scrollare il feed)
-                if (isOnRssLeadingPage) return false
+                if (isRssOverlayOpen) return false
                 // v85: rispetta drawerEnabled
                 if (settings.drawerEnabled.value != false) {
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
@@ -97,7 +97,7 @@ class HomeView @JvmOverloads constructor(
             if (settings.swipeDownNotifications.value == true &&
                 vy > 500f && abs(vy) > abs(vx) * 1.0f) {
                 // v256: su RSS leading page, swipe down NON apre notifiche (deve scrollare feed)
-                if (isOnRssLeadingPage) return false
+                if (isRssOverlayOpen) return false
                 if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                 StatusBarHelper.expandNotifications(context)
                 return true
@@ -232,14 +232,14 @@ class HomeView @JvmOverloads constructor(
             true
         }
         binding.btnHomeMenu.setOnClickListener { 
-            if (!isOnRssLeadingPage) onHomeLongPress?.invoke()  // v254: no menu su RSS
+            if (!isRssOverlayOpen) onHomeLongPress?.invoke()  // v254: no menu su RSS
         }
 
         // v46: long press home robusto via GestureDetector (più affidabile di setOnLongClickListener su scroll view)
         val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 // v254: niente menu home su pagina RSS (non c'è widget da aggiungere)
-                if (isOnRssLeadingPage) return
+                if (isRssOverlayOpen) return
                 HapticHelper.longPress(null)
                 onHomeLongPress?.invoke()
             }
@@ -264,9 +264,8 @@ class HomeView @JvmOverloads constructor(
         (context as? androidx.lifecycle.LifecycleOwner)?.let { lo ->
             SpeedApp.instance.settingsRepository.searchMode.observe(lo) { updateSearchBarText() }
             SpeedApp.instance.settingsRepository.rssPanelEnabled.observe(lo) { enabled ->
-                // v250: bottone laterale rimosso, RSS è leading page
                 binding.rssEdgeIndicator.visibility = View.GONE
-                applyRssPanelState(enabled == true)
+                applyRssOverlayEnabled(enabled == true)
             }
             // v227: observers dock per refresh real-time
             SpeedApp.instance.settingsRepository.recommendedPosition.observe(lo) { refreshRecommended() }
@@ -284,9 +283,7 @@ class HomeView @JvmOverloads constructor(
                 applyWidgetConfig()
             }
         }
-        // v250: applico stato RSS leading page se setting attivo
-        applyRssPanelState(SpeedApp.instance.settingsRepository.rssPanelEnabled.value == true)
-        
+
         // v194: pillola laterale RSS sempre visibile + click
         // v250: bottone laterale RSS rimosso (sostituito da leading page swipe)
         binding.rssEdgeIndicator.visibility = View.GONE
@@ -308,32 +305,14 @@ class HomeView @JvmOverloads constructor(
             // v245: trigger rimosso
         }
 
-        // v259: parallax sui contenuti + visibility live durante swipe
-        binding.pagedHome.onScrollFraction = { fraction ->
-            try {
-                applyPageParallax(fraction)
-                applyRssTransitionAlpha(fraction)
-            } catch (_: Throwable) {}
-        }
-        
+
         binding.pagedHome.onPageChanged = { idx -> 
             updatePageIndicator()
-            // v250: il widgetSlot indicizza per home page logica (esclusa leading RSS)
-            val logical = binding.pagedHome.logicalPage
-            if (logical >= 0) {
-                try { binding.widgetSlot.pageIndex = logical } catch (_: Throwable) {}
-            }
-            // v254: applica modalità "RSS leading page" (nasconde dock/search/blocca gesture)
-            applyRssPageMode(logical < 0)
+            try { binding.widgetSlot.pageIndex = idx } catch (_: Throwable) {}
         }
-        // v250: pageIndicator.onPageTap riceve logical home index → conversione raw
-        binding.pageIndicator.onPageTap = { idx -> 
-            binding.pagedHome.snapToHomePage(idx, true)
-        }
-        // v250: tap dot RSS → vai alla leading page
-        binding.pageIndicator.onLeadingTap = {
-            binding.pagedHome.snapToPage(0, true)  // raw 0 = leading
-        }
+        binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
+        // v261: tap dot RSS → apre overlay
+        binding.pageIndicator.onLeadingTap = { openRssOverlay() }
 
         SpeedApp.instance.dragHandler = { origin, key, target -> handleDrag(origin, key, target) }
 
@@ -525,19 +504,15 @@ class HomeView @JvmOverloads constructor(
     }
 
     private fun updatePageIndicator() {
-        // v250: indicatore con dot RSS leading se attivo
-        val hasLeading = binding.pagedHome.hasLeadingPage
-        val logical = binding.pagedHome.logicalPage  // -1 se siamo su RSS
-        val leadingActive = logical < 0
-        val homeIdx = if (leadingActive) 0 else logical
+        // v261: indicatore con dot RSS extra se overlay abilitato
+        val rssEnabled = settings.rssPanelEnabled.value == true
         binding.pageIndicator.setPages(
             count = pages.size,
-            current = homeIdx.coerceAtMost(pages.size - 1).coerceAtLeast(0),
-            hasLeading = hasLeading,
-            leadingActive = leadingActive
+            current = binding.pagedHome.currentPage.coerceAtMost(pages.size - 1).coerceAtLeast(0),
+            hasLeading = rssEnabled,
+            leadingActive = isRssOverlayOpen
         )
-        // visibile se ci sono multiple pagine OPPURE se c'è il leading dot
-        binding.pageIndicator.visibility = if (pages.size > 1 || hasLeading) View.VISIBLE else View.INVISIBLE
+        binding.pageIndicator.visibility = if (pages.size > 1 || rssEnabled) View.VISIBLE else View.INVISIBLE
     }
 
     private fun maybeCreateNextPage() {
@@ -765,7 +740,7 @@ class HomeView @JvmOverloads constructor(
                 if (isFastSwipeUp || isSlowSwipeUp) {
                     tracking = false
                     // v254: su RSS leading page, swipe up NON apre drawer (deve scrollare feed)
-                    if (isOnRssLeadingPage) {
+                    if (isRssOverlayOpen) {
                         fadeOverlay.animate().alpha(0f).setDuration(120).start()
                         return false
                     }
@@ -777,7 +752,7 @@ class HomeView @JvmOverloads constructor(
                     }
                 }
                 if (settings.swipeDownNotifications.value == true &&
-                    !isOnRssLeadingPage &&  // v256: no notifiche su RSS, scroll feed
+                    !isRssOverlayOpen &&
                     dy > swipeThreshold && abs(dy) > dx * 1.0f) {
                     tracking = false
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
@@ -802,112 +777,69 @@ class HomeView @JvmOverloads constructor(
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean = gestureDetector.onTouchEvent(event)
 
-    // v250: leading page RSS
-    private var rssPanelView: RssPanelView? = null
     
-    private fun applyRssPanelState(enabled: Boolean) {
+    /** v259: parallax sui pages e widgetSlot durante lo scroll orizzontale */
+    
+    
+    
+    // v261: RSS overlay - sliding panel da sinistra
+    private var rssPanelView: RssPanelView? = null
+    var isRssOverlayOpen: Boolean = false
+        private set
+    
+    private fun applyRssOverlayEnabled(enabled: Boolean) {
         if (enabled) {
             if (rssPanelView == null) {
                 val v = RssPanelView(context)
                 rssPanelView = v
-                binding.pagedHome.addLeadingPage(v)
+                binding.rssOverlay.removeAllViews()
+                binding.rssOverlay.addView(v, FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                ))
                 v.reload()
-                updatePageIndicator()
             }
         } else {
-            rssPanelView?.let {
-                binding.pagedHome.removeLeadingPage()
-                rssPanelView = null
-            }
-            updatePageIndicator()
+            // Setting OFF: chiudi overlay se aperto e rimuovi
+            if (isRssOverlayOpen) closeRssOverlay()
+            rssPanelView = null
+            binding.rssOverlay.removeAllViews()
+            binding.rssOverlay.visibility = View.GONE
         }
+        updatePageIndicator()
     }
     
-    /** v250: chiamata da MainActivity onResume per tornare alla home page (fuori da RSS) */
+    /** v261: apre il pannello RSS con animazione slide da sinistra */
+    fun openRssOverlay() {
+        if (isRssOverlayOpen) return
+        if (rssPanelView == null) return
+        isRssOverlayOpen = true
+        binding.rssOverlay.visibility = View.VISIBLE
+        binding.rssOverlay.translationX = -width.toFloat()
+        binding.rssOverlay.animate()
+            .translationX(0f)
+            .setDuration(280L)
+            .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+            .start()
+        updatePageIndicator()
+    }
+    
+    /** v261: chiude il pannello RSS con animazione slide a sinistra */
+    fun closeRssOverlay() {
+        if (!isRssOverlayOpen) return
+        isRssOverlayOpen = false
+        binding.rssOverlay.animate()
+            .translationX(-width.toFloat())
+            .setDuration(280L)
+            .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+            .withEndAction { binding.rssOverlay.visibility = View.GONE }
+            .start()
+        updatePageIndicator()
+    }
+    
     fun snapToFirstHomePage() {
-        binding.pagedHome.snapToHomePage(0, animate = false)
-    }
-    
-    /** v259: parallax sui pages e widgetSlot durante lo scroll orizzontale */
-    /** v259: durante swipe verso/da RSS, fade in/out di dock+search per transizione fluida */
-    private fun applyRssTransitionAlpha(fraction: Float) {
-        if (!binding.pagedHome.hasLeadingPage) return
-        // fraction 0 = leading page (RSS), fraction = 1/(N-1)*1 = home page 0
-        val pageW = binding.pagedHome.width
-        if (pageW <= 0) return
-        val totalPages = binding.pagedHome.pageCount.coerceAtLeast(2)
-        val rawPageF = fraction * (totalPages - 1)  // posizione corrente in float (0..N-1)
-        // Distanza dalla leading page (0). 0 = sono su RSS, 1 = sono su home page 0
-        val homeAlpha = rawPageF.coerceIn(0f, 1f)
-        // Dock raccomandate, search bar, drawer handle: alpha proporzionale a homeAlpha
-        try { binding.searchBar.alpha = homeAlpha } catch (_: Throwable) {}
-        try { binding.recommendedRow.alpha = homeAlpha } catch (_: Throwable) {}
-        try { binding.recommendedRowBottom.alpha = homeAlpha } catch (_: Throwable) {}
-        try { binding.drawerHandle.alpha = homeAlpha } catch (_: Throwable) {}
-        try { binding.widgetSlot.alpha = homeAlpha } catch (_: Throwable) {}
-    }
-    
-    private fun applyPageParallax(fraction: Float) {
-        val pageW = binding.pagedHome.width
-        if (pageW <= 0) return
-        val totalPages = binding.pagedHome.pageCount.coerceAtLeast(1)
-        val scrollX = fraction * (totalPages - 1) * pageW
-        for (i in 0 until binding.pagedHome.pageCount) {
-            val pageView = binding.pagedHome.getChildAtSafe(i) ?: continue
-            val natural = i * pageW
-            val delta = natural - scrollX
-            // v260: parallax 30% + scale leggero della pagina che sta uscendo
-            pageView.translationX = delta * 0.30f
-            // Pagina al centro = scale 1, pagine ai lati scale 0.92
-            val distNorm = (kotlin.math.abs(delta) / pageW).coerceIn(0f, 1f)
-            val scale = 1f - 0.08f * distNorm
-            pageView.scaleX = scale
-            pageView.scaleY = scale
-            pageView.alpha = 1f - 0.4f * distNorm
-        }
-    }
-    
-    /** v254: true se siamo sulla leading page RSS - nasconde dock/searchBar/blocca gesture */
-    var isOnRssLeadingPage: Boolean = false
-        private set
-    
-    /** v254: nasconde elementi home + blocca gesture quando siamo su RSS */
-    private fun applyRssPageMode(onRss: Boolean) {
-        isOnRssLeadingPage = onRss
-        // v259: su RSS, lascia il container child (filtri) gestire scroll orizzontale
-        binding.pagedHome.allowChildHorizontalScroll = onRss
-        // v259: ripristino alpha dopo transizione (potrebbe essere intermedio per swipe)
-        if (!onRss) {
-            try { binding.searchBar.alpha = 1f } catch (_: Throwable) {}
-            try { binding.recommendedRow.alpha = 1f } catch (_: Throwable) {}
-            try { binding.recommendedRowBottom.alpha = 1f } catch (_: Throwable) {}
-            try { binding.drawerHandle.alpha = 1f } catch (_: Throwable) {}
-            try { binding.widgetSlot.alpha = 1f } catch (_: Throwable) {}
-        }
-        // v258: Dock raccomandate - nascoste su RSS, ripristinate via refreshRecommended che 
-        // rispetta posizione top/bottom configurata dall'utente
-        if (onRss) {
-            try { binding.recommendedRow.visibility = View.GONE } catch (_: Throwable) {}
-            try { binding.recommendedRowBottom.visibility = View.GONE } catch (_: Throwable) {}
-        } else {
-            refreshRecommended()  // ripristina logica corretta top/bottom/none
-        }
-        // Search bar - nascosta su RSS
-        try { binding.searchBar.visibility = if (onRss) View.GONE else 
-            (if (settings.showSearchBar.value != false) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
-        // Drawer handle - nascosto su RSS
-        try { binding.drawerHandle.visibility = if (onRss) View.GONE else 
-            (if (settings.drawerEnabled.value == true) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
-        // v259: Widget container - INVISIBLE invece di GONE per mantenere lo spazio  
-        // (evita salto di layout quando si torna dalla pagina RSS alla home)
-        try {
-            if (settings.showWidgetSlot.value == true) {
-                binding.widgetSlot.visibility = if (onRss) View.INVISIBLE else View.VISIBLE
-            } else {
-                binding.widgetSlot.visibility = View.GONE
-            }
-        } catch (_: Throwable) {}
-        // Page indicator resta visibile (utente deve poter vedere dove è)
+        if (isRssOverlayOpen) closeRssOverlay()
+        binding.pagedHome.snapToPage(0, animate = false)
     }
     
     fun attachWidgetHost(host: WidgetHostController) { 
@@ -1029,8 +961,9 @@ class HomeView @JvmOverloads constructor(
 
     /** v27: chiamato da MainActivity quando si preme home dalla home */
     fun snapToFirstPage() {
-        // v250: vai alla prima pagina home logica (skipping RSS leading page)
-        binding.pagedHome.snapToHomePage(0, animate = true)
+        // v261: chiudi overlay RSS se aperto + snap a home page 0
+        if (isRssOverlayOpen) closeRssOverlay()
+        binding.pagedHome.snapToPage(0, animate = true)
         // v226: playWelcomeAnim disabilitato — MainActivity onResume gestisce tutto in modo orchestrato
         // playWelcomeAnim()
     }

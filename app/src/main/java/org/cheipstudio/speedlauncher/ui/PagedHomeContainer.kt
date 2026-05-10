@@ -32,18 +32,7 @@ class PagedHomeContainer @JvmOverloads constructor(
         private set
     val pageCount: Int get() = container.childCount
     var onPageChanged: ((Int) -> Unit)? = null
-    /** v258: chiamato durante lo scroll, fraction = scrollX / (totalWidth - width). 0..1. */
-    var onScrollFraction: ((Float) -> Unit)? = null
-    /** v259: se true, lascia che i child gestiscano touch orizzontale (es. filterScroll RSS) */
-    var allowChildHorizontalScroll: Boolean = false
-    
-    // v250: leading page (RSS) prima della home page 0
-    private var leadingView: android.view.View? = null
-    val hasLeadingPage: Boolean get() = leadingView != null
-    val leadingOffset: Int get() = if (hasLeadingPage) 1 else 0
-    /** index logico (home page 0 = 0). Negativo se siamo sulla leading page (RSS). */
-    val logicalPage: Int get() = currentPage - leadingOffset
-    val homePageCount: Int get() = container.childCount - leadingOffset
+
 
     private val tracker = VelocityTracker.obtain()
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -64,29 +53,6 @@ class PagedHomeContainer @JvmOverloads constructor(
         post { adjustChildWidths() }
     }
     
-    /** v250: aggiunge una pagina speciale prima della pagina 0 (es. RSS). */
-    private var pendingLeadingSnap = false
-    
-    fun addLeadingPage(view: android.view.View) {
-        if (leadingView != null) removeLeadingPage()
-        leadingView = view
-        val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT)
-        container.addView(view, 0, lp)
-        pendingLeadingSnap = true
-        // v260: forza layout subito; lo snap effettivo avviene in onLayout quando width > 0
-        requestLayout()
-    }
-    
-    fun removeLeadingPage() {
-        val v = leadingView ?: return
-        leadingView = null
-        container.removeView(v)
-        post {
-            adjustChildWidths()
-            scrollTo(0, 0)
-            currentPage = 0
-        }
-    }
 
     fun removePage(idx: Int) {
         if (idx in 0 until container.childCount) {
@@ -109,24 +75,7 @@ class PagedHomeContainer @JvmOverloads constructor(
         adjustChildWidths()
     }
     
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-        if (pendingLeadingSnap && width > 0) {
-            pendingLeadingSnap = false
-            adjustChildWidths()
-            scrollTo(width, 0)  // skip leading page, vai a home page 0
-            currentPage = 1
-            onPageChanged?.invoke(1)
-        }
-    }
     
-    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
-        super.onScrollChanged(l, t, oldl, oldt)
-        // v258: notifica fraction di scroll per parallax wallpaper
-        val totalScrollable = (container.childCount * width - width).coerceAtLeast(1)
-        val fraction = (l.toFloat() / totalScrollable).coerceIn(0f, 1f)
-        onScrollFraction?.invoke(fraction)
-    }
 
     fun snapToPage(idx: Int, animate: Boolean = true) {
         val target = idx.coerceIn(0, max(0, container.childCount - 1))
@@ -138,15 +87,6 @@ class PagedHomeContainer @JvmOverloads constructor(
         }
     }
     
-    /** v259: child di una pagina (raw index, include leading) */
-    fun getChildAtSafe(idx: Int): android.view.View? {
-        return if (idx in 0 until container.childCount) container.getChildAt(idx) else null
-    }
-    
-    /** v250: snap a una home page (ignora leading). idx=0 è la prima home reale. */
-    fun snapToHomePage(idx: Int, animate: Boolean = true) {
-        snapToPage(idx + leadingOffset, animate)
-    }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         when (ev.action) {
@@ -158,10 +98,7 @@ class PagedHomeContainer @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 val dx = abs(ev.x - downX)
                 val dy = abs(ev.y - downY)
-                // v259: se i child possono scrollare orizzontalmente (es. filtri RSS), 
-                // richiedo soglia più alta per intercettare
-                val effectiveSlop = if (allowChildHorizontalScroll) touchSlop * 4 else touchSlop
-                if (!dragging && dx > effectiveSlop && dx > dy * 1.5f) {
+                if (!dragging && dx > touchSlop && dx > dy) {
                     dragging = true
                     parent?.requestDisallowInterceptTouchEvent(true)
                     return true

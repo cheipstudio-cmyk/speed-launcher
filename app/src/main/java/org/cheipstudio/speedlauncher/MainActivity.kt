@@ -393,8 +393,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     // (evita conflitto con applyPageParallax che sovrascriverebbe scale/alpha)
                     pagedHome.postDelayed({
                         try {
-                            val leadingOffset = if (pagedHome.hasLeadingPage) 1 else 0
-                            val targetIdx = pagedHome.currentPage.coerceAtLeast(leadingOffset)
+                            val targetIdx = pagedHome.currentPage
                             val pageView = pagedHome.getChildAt(targetIdx) as? android.view.ViewGroup
                             if (pageView != null) {
                                 for (i in 0 until pageView.childCount) {
