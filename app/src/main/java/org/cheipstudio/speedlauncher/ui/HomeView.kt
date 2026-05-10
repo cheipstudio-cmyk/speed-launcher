@@ -102,8 +102,20 @@ class HomeView @JvmOverloads constructor(
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
-            // v245: swipe orizzontale per RSS rimosso (apriva feed indesiderato durante navigazione pagine)
-            // Resta solo il bottone come trigger.
+            // v263: swipe orizzontale per RSS overlay
+            if (settings.rssPanelEnabled.value == true && abs(vx) > 250f && abs(vx) > abs(vy) * 1.2f) {
+                val onPage0 = binding.pagedHome.currentPage == 0
+                if (vx > 250f && onPage0 && !isRssOverlayOpen) {
+                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
+                    openRssOverlay()
+                    return true
+                }
+                if (vx < -250f && isRssOverlayOpen) {
+                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
+                    closeRssOverlay()
+                    return true
+                }
+            }
             return false
         }
     })
@@ -238,9 +250,9 @@ class HomeView @JvmOverloads constructor(
         // v46: long press home robusto via GestureDetector (più affidabile di setOnLongClickListener su scroll view)
         val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
-                // v254: niente menu home su pagina RSS (non c'è widget da aggiungere)
                 if (isRssOverlayOpen) return
-                HapticHelper.longPress(null)
+                // v263: haptic con View (più rapido del fallback Vibrator)
+                HapticHelper.longPress(this@HomeView)
                 onHomeLongPress?.invoke()
             }
         })
