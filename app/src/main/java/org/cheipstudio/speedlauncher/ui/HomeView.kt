@@ -963,16 +963,15 @@ class HomeView @JvmOverloads constructor(
     // v265: edge-swipe detector per aprire RSS dal bordo sinistro
     private val edgeSize = (40 * resources.displayMetrics.density).toInt()
     
-    // v275: gesture detector home long press (collegato a dispatchTouchEvent per coprire pagedHome)
-    private val homeGesture: GestureDetector by lazy {
-        GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onLongPress(e: MotionEvent) {
-                if (isRssOverlayOpen) return
-                if (edgeSwipeFired) return
-                HapticHelper.longPress(this@HomeView)
-                onHomeLongPress?.invoke()
-            }
-        })
+    // v279: long press home detector custom (più tollerante del GestureDetector standard)
+    private val homeLongPressHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val homeLongPressRunnable = Runnable {
+        if (isRssOverlayOpen) return@Runnable
+        if (edgeSwipeFired) return@Runnable
+        if (homeGestureCancelled) return@Runnable
+        HapticHelper.longPress(this@HomeView)
+        onHomeLongPress?.invoke()
+        homeGestureCancelled = true  // evita doppio trigger
     }
     private var edgeSwipeStarted = false
     private var edgeSwipeStartX = 0f
@@ -999,33 +998,33 @@ class HomeView @JvmOverloads constructor(
     private var homeGestureCancelled = false
     
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // v277: long press home ovunque TRANNE sopra widget/icone/cartelle E ANNULLA su movimento
+        // v279: long press home detector custom (resiste a micro-movimenti del PagedHomeContainer)
         try {
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
                     homeGestureStartX = ev.x
                     homeGestureStartY = ev.y
                     homeGestureCancelled = isTouchOnMountedWidget(ev)
+                    homeLongPressHandler.removeCallbacks(homeLongPressRunnable)
+                    if (!homeGestureCancelled) {
+                        homeLongPressHandler.postDelayed(homeLongPressRunnable, 500L)
+                    }
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (!homeGestureCancelled) {
                         val dx = kotlin.math.abs(ev.x - homeGestureStartX)
                         val dy = kotlin.math.abs(ev.y - homeGestureStartY)
-                        // Se si è mosso > 8dp, annullo long press (sta swippando)
-                        val cancelThreshold = 8 * resources.displayMetrics.density
+                        // Threshold 20dp: tollero micro-tremori
+                        val cancelThreshold = 20 * resources.displayMetrics.density
                         if (dx > cancelThreshold || dy > cancelThreshold) {
                             homeGestureCancelled = true
-                            // Invio CANCEL al GestureDetector per annullare il long press
-                            val cancel = MotionEvent.obtain(ev)
-                            cancel.action = MotionEvent.ACTION_CANCEL
-                            homeGesture.onTouchEvent(cancel)
-                            cancel.recycle()
+                            homeLongPressHandler.removeCallbacks(homeLongPressRunnable)
                         }
                     }
                 }
-            }
-            if (!homeGestureCancelled) {
-                homeGesture.onTouchEvent(ev)
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    homeLongPressHandler.removeCallbacks(homeLongPressRunnable)
+                }
             }
         } catch (_: Throwable) {}
         if (settings.rssPanelEnabled.value == true) {

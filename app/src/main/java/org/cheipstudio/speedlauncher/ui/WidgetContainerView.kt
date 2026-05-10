@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
+import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.WidgetItem
 import org.cheipstudio.speedlauncher.data.WidgetStore
