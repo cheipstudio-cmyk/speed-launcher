@@ -32,6 +32,21 @@ class PagedHomeContainer @JvmOverloads constructor(
         private set
     val pageCount: Int get() = container.childCount
     var onPageChanged: ((Int) -> Unit)? = null
+    /** v266: invocato durante lo scroll. fraction = scrollX / max scrollable */
+    var onScrollFraction: ((Float) -> Unit)? = null
+    
+    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+        super.onScrollChanged(l, t, oldl, oldt)
+        val totalScrollable = (container.childCount * width - width).coerceAtLeast(1)
+        val frac = (l.toFloat() / totalScrollable).coerceIn(0f, 1f)
+        onScrollFraction?.invoke(frac)
+    }
+    
+    /** v266: ottiene una pagina per parallax (raw index) */
+    fun getPageAt(idx: Int): android.view.View? {
+        return if (idx in 0 until container.childCount) container.getChildAt(idx) else null
+    }
+    
 
 
     private val tracker = VelocityTracker.obtain()

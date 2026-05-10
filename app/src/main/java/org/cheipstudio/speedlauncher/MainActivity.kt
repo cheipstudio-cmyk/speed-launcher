@@ -317,24 +317,25 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 binding.homeView.scaleY = 1f
             } catch (_: Throwable) {}
         }
-        // v265: animazione entrata home semplificata - SOLO fade alpha
+        // v266: animazione entrata home - fade + zoom in soft (no bounce)
         try {
             val isLandscape = resources.configuration.orientation ==
                 android.content.res.Configuration.ORIENTATION_LANDSCAPE
             val homeContent = binding.homeView
-            // Reset stato di base (no scale, no translate)
-            homeContent.scaleX = 1f
-            homeContent.scaleY = 1f
             homeContent.translationX = 0f
             homeContent.translationY = 0f
+            homeContent.scaleX = 1f
+            homeContent.scaleY = 1f
             homeContent.alpha = 1f
             if (!isLandscape && shouldAnimate) {
                 homeContent.alpha = 0f
+                homeContent.scaleX = 0.94f
+                homeContent.scaleY = 0.94f
                 homeContent.animate().cancel()
                 homeContent.animate()
-                    .alpha(1f)
-                    .setDuration((220 * animMul()).toLong())
-                    .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+                    .alpha(1f).scaleX(1f).scaleY(1f)
+                    .setDuration((320 * animMul()).toLong())
+                    .setInterpolator(android.view.animation.DecelerateInterpolator(2.0f))
                     .start()
             }
         } catch (_: Throwable) {}

@@ -308,6 +308,10 @@ class HomeView @JvmOverloads constructor(
             updatePageIndicator()
             try { binding.widgetSlot.pageIndex = idx } catch (_: Throwable) {}
         }
+        // v266: parallax pagine durante swipe orizzontale
+        binding.pagedHome.onScrollFraction = { fraction ->
+            try { applyPageParallax(fraction) } catch (_: Throwable) {}
+        }
         binding.pageIndicator.onPageTap = { idx -> binding.pagedHome.snapToPage(idx, true) }
         // v261: tap dot RSS → apre overlay
         binding.pageIndicator.onLeadingTap = { openRssOverlay() }
@@ -837,6 +841,21 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
     }
     
+    /** v266: parallax sulle pagine - le icone scorrono leggermente più rapide del wallpaper */
+    private fun applyPageParallax(fraction: Float) {
+        val pageW = binding.pagedHome.width
+        if (pageW <= 0) return
+        val totalPages = binding.pagedHome.pageCount.coerceAtLeast(1)
+        val scrollX = fraction * (totalPages - 1) * pageW
+        for (i in 0 until binding.pagedHome.pageCount) {
+            val pageView = binding.pagedHome.getPageAt(i) ?: continue
+            val natural = i * pageW
+            val delta = natural - scrollX
+            // 25% parallax: la pagina si muove un 25% in più del normale
+            pageView.translationX = delta * 0.25f
+        }
+    }
+    
     fun snapToFirstHomePage() {
         if (isRssOverlayOpen) closeRssOverlay()
         binding.pagedHome.snapToPage(0, animate = false)
@@ -856,12 +875,12 @@ class HomeView @JvmOverloads constructor(
                     edgeSwipeStarted = false
                     edgeSwipeFired = false
                     if (!isRssOverlayOpen && ev.x < edgeSize) {
-                        // Touch parte dall'edge sinistro - candidato per edge-swipe
+                        // Apertura: tocco parte dal bordo sinistro
                         edgeSwipeStarted = true
                         edgeSwipeStartX = ev.x
                         edgeSwipeStartY = ev.y
-                    } else if (isRssOverlayOpen) {
-                        // Overlay aperto: candidato a swipe-left ovunque
+                    } else if (isRssOverlayOpen && ev.x > width - edgeSize) {
+                        // v266: Chiusura: tocco SOLO dal bordo destro (non disturba scroll filtri)
                         edgeSwipeStarted = true
                         edgeSwipeStartX = ev.x
                         edgeSwipeStartY = ev.y
