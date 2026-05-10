@@ -792,7 +792,7 @@ class HomeView @JvmOverloads constructor(
                 MotionEvent.ACTION_MOVE -> {
                     val dx = event.x - edgeSwipeStartX
                     val dy = kotlin.math.abs(event.y - edgeSwipeStartY)
-                    if (dx > 40f && dx > dy * 1.2f && !isRssOverlayOpen) {
+                    if (dx > 25f && dx > dy * 1.0f && !isRssOverlayOpen) {
                         edgeSwipeFired = true
                         performHapticFeedbackLight()
                         openRssOverlay()
