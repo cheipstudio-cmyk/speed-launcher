@@ -84,13 +84,14 @@ class HomeView @JvmOverloads constructor(
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             // v77: dedup vibrazione — usa flag swipeFireVibrated, una sola vibrazione per gesto.
             if (vy < -500f && abs(vy) > abs(vx) * 1.0f) {
+                // v254: su RSS leading page, swipe up NON apre il drawer (deve scrollare il feed)
+                if (isOnRssLeadingPage) return false
                 // v85: rispetta drawerEnabled
                 if (settings.drawerEnabled.value != false) {
                     if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                     onSwipeUp?.invoke()
                     return true
                 }
-                // v120: drawer disabilitato → ignoro fling up senza consumare
                 return false
             }
             if (settings.swipeDownNotifications.value == true &&
@@ -228,12 +229,15 @@ class HomeView @JvmOverloads constructor(
             searchBarDoubleTapDetector.onTouchEvent(ev)
             true
         }
-        binding.btnHomeMenu.setOnClickListener { onHomeLongPress?.invoke() }
+        binding.btnHomeMenu.setOnClickListener { 
+            if (!isOnRssLeadingPage) onHomeLongPress?.invoke()  // v254: no menu su RSS
+        }
 
         // v46: long press home robusto via GestureDetector (più affidabile di setOnLongClickListener su scroll view)
         val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
-                // Ignoro se c'è un'icona sotto (le icone consumano onTouch)
+                // v254: niente menu home su pagina RSS (non c'è widget da aggiungere)
+                if (isOnRssLeadingPage) return
                 HapticHelper.longPress(null)
                 onHomeLongPress?.invoke()
             }
@@ -304,6 +308,8 @@ class HomeView @JvmOverloads constructor(
             if (logical >= 0) {
                 try { binding.widgetSlot.pageIndex = logical } catch (_: Throwable) {}
             }
+            // v254: applica modalità "RSS leading page" (nasconde dock/search/blocca gesture)
+            applyRssPageMode(logical < 0)
         }
         // v250: pageIndicator.onPageTap riceve logical home index → conversione raw
         binding.pageIndicator.onPageTap = { idx -> 
@@ -743,7 +749,11 @@ class HomeView @JvmOverloads constructor(
 
                 if (isFastSwipeUp || isSlowSwipeUp) {
                     tracking = false
-                    // v85: rispetta drawerEnabled
+                    // v254: su RSS leading page, swipe up NON apre drawer (deve scrollare feed)
+                    if (isOnRssLeadingPage) {
+                        fadeOverlay.animate().alpha(0f).setDuration(120).start()
+                        return false
+                    }
                     if (settings.drawerEnabled.value != false) {
                         if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
                         onSwipeUp?.invoke()
@@ -800,6 +810,29 @@ class HomeView @JvmOverloads constructor(
     /** v250: chiamata da MainActivity onResume per tornare alla home page (fuori da RSS) */
     fun snapToFirstHomePage() {
         binding.pagedHome.snapToHomePage(0, animate = false)
+    }
+    
+    /** v254: true se siamo sulla leading page RSS - nasconde dock/searchBar/blocca gesture */
+    var isOnRssLeadingPage: Boolean = false
+        private set
+    
+    /** v254: nasconde elementi home + blocca gesture quando siamo su RSS */
+    private fun applyRssPageMode(onRss: Boolean) {
+        isOnRssLeadingPage = onRss
+        // Dock raccomandate (top + bottom) - nascoste su RSS
+        for (id in intArrayOf(R.id.recommendedRow, R.id.recommendedRowBottom)) {
+            try { findViewById<View>(id)?.visibility = if (onRss) View.GONE else View.VISIBLE } catch (_: Throwable) {}
+        }
+        // Search bar - nascosta su RSS
+        try { binding.searchBar.visibility = if (onRss) View.GONE else 
+            (if (settings.showSearchBar.value != false) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
+        // Drawer handle - nascosto su RSS
+        try { binding.drawerHandle.visibility = if (onRss) View.GONE else 
+            (if (settings.drawerEnabled.value == true) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
+        // Widget container - nascosto su RSS (è una pagina speciale, non c'è widget container)
+        try { binding.widgetSlot.visibility = if (onRss) View.GONE else 
+            (if (settings.showWidgetSlot.value == true) View.VISIBLE else View.GONE) } catch (_: Throwable) {}
+        // Page indicator resta visibile (utente deve poter vedere dove è)
     }
     
     fun attachWidgetHost(host: WidgetHostController) { 

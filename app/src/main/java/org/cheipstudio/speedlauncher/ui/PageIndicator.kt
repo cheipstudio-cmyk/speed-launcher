@@ -48,15 +48,19 @@ class PageIndicator @JvmOverloads constructor(
         val active = (28 * density).toInt()
         val margin = (5 * density).toInt()
         
-        // v250: dot leading per RSS (pre-page) - shape circolare per distinguerlo
+        // v254: dot leading per RSS - icona feed invece di cerchietto
         if (hasLeading) {
-            val leadingDot = View(context).apply {
-                background = GradientDrawable().apply {
-                    shape = GradientDrawable.OVAL  // circolare invece che rectangle
-                    setColor(if (leadingActive) Color.WHITE else Color.parseColor("#66FFFFFF"))
-                }
-                layoutParams = LayoutParams(small, small).apply {
-                    leftMargin = margin; rightMargin = margin + (4 * density).toInt()
+            val iconSize = (16 * density).toInt()
+            val leadingDot = android.widget.ImageView(context).apply {
+                setImageResource(org.cheipstudio.speedlauncher.R.drawable.ic_feed)
+                imageTintList = android.content.res.ColorStateList.valueOf(
+                    if (leadingActive) Color.WHITE else Color.parseColor("#88FFFFFF")
+                )
+                scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                layoutParams = LayoutParams(iconSize, iconSize).apply {
+                    leftMargin = margin
+                    rightMargin = margin + (6 * density).toInt()
+                    gravity = android.view.Gravity.CENTER_VERTICAL
                 }
                 isClickable = true
                 isFocusable = true

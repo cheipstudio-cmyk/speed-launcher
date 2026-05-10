@@ -330,8 +330,8 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 // v245: tolto alpha=0 su parent per evitare flash vuoto.
                 // Solo scale 1.04→1 sul parent. Il fade è gestito dai singoli sub-element.
                 homeContent.alpha = 1f
-                homeContent.scaleX = 1.04f
-                homeContent.scaleY = 1.04f
+                homeContent.scaleX = 1.02f
+                homeContent.scaleY = 1.02f
                 homeContent.animate().cancel()
                 homeContent.animate()
                     .scaleX(1f).scaleY(1f)
@@ -345,13 +345,13 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.widgetSlot)
                 v?.let {
-                    it.scaleX = 0.85f
-                    it.scaleY = 0.85f
+                    it.scaleX = 0.95f
+                    it.scaleY = 0.95f
                     it.animate()
                         .scaleX(1f).scaleY(1f)
-                        .setStartDelay(60)
-                        .setDuration((420 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.OvershootInterpolator(2.2f))
+                        .setStartDelay(20)
+                        .setDuration((280 * animMul()).toLong())
+                        .setInterpolator(android.view.animation.OvershootInterpolator(1.4f))
                         .start()
                 }
             } catch (_: Throwable) {}
@@ -360,13 +360,13 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.searchBar)
                 v?.let {
-                    // v247: niente alpha=0 → non c'è frame vuoto
-                    it.translationY = 60f
+                    // v254: animazione molto leggera per non lasciare frame vuoto
+                    it.translationY = 16f
                     it.animate()
                         .translationY(0f)
-                        .setStartDelay(90)
-                        .setDuration((420 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.OvershootInterpolator(1.8f))
+                        .setStartDelay(0)
+                        .setDuration((280 * animMul()).toLong())
+                        .setInterpolator(android.view.animation.OvershootInterpolator(1.2f))
                         .start()
                 }
             } catch (_: Throwable) {}
@@ -375,12 +375,12 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             try {
                 val v = binding.homeView.findViewById<android.view.View>(R.id.pageIndicator)
                 v?.let {
-                    it.scaleX = 0.5f; it.scaleY = 0.5f
+                    it.scaleX = 0.85f; it.scaleY = 0.85f
                     it.animate()
                         .scaleX(1f).scaleY(1f)
-                        .setStartDelay(220)
-                        .setDuration((360 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.OvershootInterpolator(2f))
+                        .setStartDelay(40)
+                        .setDuration((280 * animMul()).toLong())
+                        .setInterpolator(android.view.animation.OvershootInterpolator(1.5f))
                         .start()
                 }
             } catch (_: Throwable) {}
@@ -395,13 +395,13 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                         if (pageView != null) {
                             for (i in 0 until pageView.childCount) {
                                 val icon = pageView.getChildAt(i)
-                                icon.scaleX = 0.6f
-                                icon.scaleY = 0.6f
+                                icon.scaleX = 0.88f
+                                icon.scaleY = 0.88f
                                 icon.animate()
                                     .scaleX(1f).scaleY(1f)
-                                    .setStartDelay((120 + i * 15).toLong())
-                                    .setDuration((360 * animMul()).toLong())
-                                    .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
+                                    .setStartDelay((i * 8).toLong())
+                                    .setDuration((280 * animMul()).toLong())
+                                    .setInterpolator(android.view.animation.OvershootInterpolator(1.3f))
                                     .start()
                             }
                         }
@@ -415,7 +415,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     val v = binding.homeView.findViewById<android.view.View>(id)
                     v?.let {
                         if (it.visibility == android.view.View.VISIBLE) {
-                            it.translationY = 50f
+                            it.translationY = 12f
                             it.animate()
                                 .translationY(0f)
                                 .setStartDelay(180)
