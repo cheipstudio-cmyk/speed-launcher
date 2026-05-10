@@ -101,7 +101,7 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         val isCompact = try {
             val options = manager.getAppWidgetOptions(id)
             val minH = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
-            minH in 1..90  // < 90dp = compact
+            minH in 1..110  // < 110dp = compact (nasconde progress+subtitle)
         } catch (_: Throwable) { false }
         if (isCompact) {
             // Nascondo progress bars + subtitles per stare in altezza ridotta

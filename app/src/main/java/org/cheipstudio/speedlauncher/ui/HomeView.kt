@@ -897,10 +897,10 @@ class HomeView @JvmOverloads constructor(
     
     private fun isTouchOnMountedWidget(ev: MotionEvent): Boolean {
         return try {
+            val myLoc = IntArray(2); getLocationOnScreen(myLoc)
             // 1) widget montato
             val ws = binding.widgetSlot
             val wsLoc = IntArray(2); ws.getLocationOnScreen(wsLoc)
-            val myLoc = IntArray(2); getLocationOnScreen(myLoc)
             val wsLeft = wsLoc[0] - myLoc[0]
             val wsTop = wsLoc[1] - myLoc[1]
             if (ev.x >= wsLeft && ev.x <= wsLeft + ws.width &&
@@ -909,8 +909,21 @@ class HomeView @JvmOverloads constructor(
             }
             // 2) icona app o cartella nella grid
             if (isTouchOnIconOrFolder(ev)) return true
+            // 3) v278: dock (recommendedRow top o bottom) o searchBar
+            if (isTouchInView(ev, binding.recommendedRow, myLoc)) return true
+            if (isTouchInView(ev, binding.recommendedRowBottom, myLoc)) return true
+            if (isTouchInView(ev, binding.searchBar, myLoc)) return true
             false
         } catch (_: Throwable) { false }
+    }
+    
+    private fun isTouchInView(ev: MotionEvent, v: android.view.View?, myLoc: IntArray): Boolean {
+        if (v == null || v.visibility != View.VISIBLE) return false
+        val loc = IntArray(2); v.getLocationOnScreen(loc)
+        val left = loc[0] - myLoc[0]
+        val top = loc[1] - myLoc[1]
+        return ev.x >= left && ev.x <= left + v.width &&
+               ev.y >= top && ev.y <= top + v.height
     }
     
     /** v276: ritorna true se il touch è sopra un IconCellView o FolderCellView */

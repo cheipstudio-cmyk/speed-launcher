@@ -17,17 +17,17 @@
         <!-- RAM -->
         <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="4dp">
+            android:gravity="center" android:padding="2dp">
             
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:src="@drawable/ic_widget_memory"
                 android:tint="#2E7D32" />
             
             <TextView android:id="@+id/ramPct"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#1A1A2E"
                 android:textSize="22sp" 
                 android:fontFamily="sans-serif-medium"
@@ -63,17 +63,17 @@
         <!-- Storage -->
         <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="4dp">
+            android:gravity="center" android:padding="2dp">
             
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:src="@drawable/ic_widget_storage"
                 android:tint="#1565C0" />
             
             <TextView android:id="@+id/storPct"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#1A1A2E"
                 android:textSize="22sp" 
                 android:fontFamily="sans-serif-medium"
@@ -99,7 +99,7 @@
             
             <TextView android:id="@+id/storSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#B06B6B7C"
                 android:textSize="11sp"
                 android:fontFamily="sans-serif"
@@ -109,18 +109,18 @@
         <!-- Battery -->
         <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="4dp">
+            android:gravity="center" android:padding="2dp">
             
             <ImageView
                 android:id="@+id/batIcon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:src="@drawable/ic_widget_battery"
                 android:tint="#EF6C00" />
             
             <TextView android:id="@+id/batPct"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#1A1A2E"
                 android:textSize="22sp"
                 android:fontFamily="sans-serif-medium"
@@ -146,7 +146,7 @@
             
             <TextView android:id="@+id/batSubtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#B06B6B7C"
                 android:textSize="11sp"
                 android:fontFamily="sans-serif"

@@ -89,10 +89,10 @@ class WidgetContainerView @JvmOverloads constructor(
             mountWidget(item, host)
         }
         // v241: forza layout pass dopo mount (caso width già > 0 al refresh)
-        if (width > 0 && height > 0) applyLayoutToChildren()
+        if (width > 0) applyLayoutToChildren()
         else post { 
             requestLayout()
-            if (width > 0 && height > 0) applyLayoutToChildren()
+            if (width > 0) applyLayoutToChildren()
         }
     }
 
@@ -217,32 +217,49 @@ class WidgetContainerView @JvmOverloads constructor(
         applyLayoutToChildren()
     }
 
+    // v278: altezza "logica" base per i calcoli di cella (dimens widget_slot_height)
+    private val baseSlotHeight: Int by lazy {
+        resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+    }
+    
     private fun applyLayoutToChildren() {
         val cols = WidgetItem.GRID_COLS
         val rows = WidgetItem.GRID_ROWS
-        if (width <= 0 || height <= 0) return
+        if (width <= 0) return
+        // v278: cellH calcolato su baseSlotHeight (fisso), così non cambia se ridimensiono il container
         val cellW = width / cols
-        val cellH = height / rows
+        val cellH = baseSlotHeight / rows
         val items = store.loadPage(pageIndex)
+        var maxSpanY = 0
         for (item in items) {
             val view = mountedViews[item.uuid] ?: continue
             val lp = view.layoutParams as? FrameLayout.LayoutParams ?: continue
             lp.width = cellW * item.spanX
             lp.height = cellH * item.spanY
-            // v247: centra orizzontalmente sempre, ignorando cellX
             lp.leftMargin = (width - lp.width) / 2
-            // v259: il widget resta in alto del container; posizione globale 
-            // è gestita dall'esterno (HomeView trasla il container intero)
             lp.topMargin = 0
             view.layoutParams = lp
             updateWidgetOptions(item, view)
+            if (item.spanY > maxSpanY) maxSpanY = item.spanY
         }
+        // v278: adatto altezza container al widget più grande - se vuoto, altezza 0 (no gap)
+        adaptContainerHeight(maxSpanY * cellH)
+    }
+    
+    private fun adaptContainerHeight(desired: Int) {
+        try {
+            val lp = layoutParams ?: return
+            if (lp.height != desired) {
+                lp.height = desired
+                layoutParams = lp
+            }
+        } catch (_: Throwable) {}
     }
 
     private fun updateWidgetOptions(item: WidgetItem, view: View) {
         try {
             val cellW = width / WidgetItem.GRID_COLS
-            val cellH = height / WidgetItem.GRID_ROWS
+            val cellH = baseSlotHeight / WidgetItem.GRID_ROWS
             val widthDp = ((cellW * item.spanX) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
             val heightDp = ((cellH * item.spanY) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
             val opts = Bundle().apply {
