@@ -10,6 +10,9 @@ import android.os.Looper
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
+import androidx.dynamicanimation.animation.DynamicAnimation
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.ImageView
@@ -149,6 +152,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 menuFired = false; dragFired = false
                 handler.postDelayed(armRunnable, ARM_DELAY)
                 handler.postDelayed(menuRunnable, MENU_DELAY)
+                pressDown()
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -178,6 +182,7 @@ class IconCellView(context: Context) : LinearLayout(context) {
                 val wasMenu = menuFired
                 val wasDrag = dragFired
                 cancelAll()
+                pressUp()
                 if (!wasArmed && !wasMenu && !wasDrag) {
                     // tap normale
                     if (isMemoryCleaner) {
@@ -191,10 +196,36 @@ class IconCellView(context: Context) : LinearLayout(context) {
             }
             MotionEvent.ACTION_CANCEL -> {
                 cancelAll()
+                pressUp()
                 return true
             }
         }
         return super.onTouchEvent(event)
+    }
+
+
+    // v223 (Lawnchair pattern): SpringAnimation press feedback
+    private val springScaleX = SpringAnimation(this, DynamicAnimation.SCALE_X).apply {
+        spring = SpringForce(1f).apply {
+            stiffness = SpringForce.STIFFNESS_MEDIUM
+            dampingRatio = SpringForce.DAMPING_RATIO_LOW_BOUNCY
+        }
+    }
+    private val springScaleY = SpringAnimation(this, DynamicAnimation.SCALE_Y).apply {
+        spring = SpringForce(1f).apply {
+            stiffness = SpringForce.STIFFNESS_MEDIUM
+            dampingRatio = SpringForce.DAMPING_RATIO_LOW_BOUNCY
+        }
+    }
+    
+    private fun pressDown() {
+        springScaleX.cancel(); springScaleY.cancel()
+        scaleX = 0.92f; scaleY = 0.92f
+    }
+    
+    private fun pressUp() {
+        springScaleX.animateToFinalPosition(1f)
+        springScaleY.animateToFinalPosition(1f)
     }
 
     private fun cancelAll() {
