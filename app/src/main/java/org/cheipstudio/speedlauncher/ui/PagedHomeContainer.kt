@@ -99,12 +99,6 @@ class PagedHomeContainer @JvmOverloads constructor(
                 val dx = abs(ev.x - downX)
                 val dy = abs(ev.y - downY)
                 if (!dragging && dx > touchSlop && dx > dy) {
-                    // v264: se siamo sulla pagina 0 e si swippa verso destra (positive dx),
-                    // NON intercettare - lascia passare al parent (HomeView) per RSS open
-                    val swipeRight = ev.x - downX > 0
-                    if (currentPage == 0 && swipeRight) {
-                        return false  // delega al parent (gesture detector RSS in HomeView)
-                    }
                     dragging = true
                     parent?.requestDisallowInterceptTouchEvent(true)
                     return true

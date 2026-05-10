@@ -102,20 +102,6 @@ class HomeView @JvmOverloads constructor(
                 StatusBarHelper.expandNotifications(context)
                 return true
             }
-            // v263: swipe orizzontale per RSS overlay
-            if (settings.rssPanelEnabled.value == true && abs(vx) > 250f && abs(vx) > abs(vy) * 1.2f) {
-                val onPage0 = binding.pagedHome.currentPage == 0
-                if (vx > 250f && onPage0 && !isRssOverlayOpen) {
-                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
-                    openRssOverlay()
-                    return true
-                }
-                if (vx < -250f && isRssOverlayOpen) {
-                    if (!swipeFireVibrated) { performHapticFeedbackLight(); swipeFireVibrated = true }
-                    closeRssOverlay()
-                    return true
-                }
-            }
             return false
         }
     })
@@ -854,6 +840,59 @@ class HomeView @JvmOverloads constructor(
     fun snapToFirstHomePage() {
         if (isRssOverlayOpen) closeRssOverlay()
         binding.pagedHome.snapToPage(0, animate = false)
+    }
+    
+    // v265: edge-swipe detector per aprire RSS dal bordo sinistro
+    private val edgeSize = (24 * resources.displayMetrics.density).toInt()
+    private var edgeSwipeStarted = false
+    private var edgeSwipeStartX = 0f
+    private var edgeSwipeStartY = 0f
+    private var edgeSwipeFired = false
+    
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (settings.rssPanelEnabled.value == true) {
+            when (ev.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    edgeSwipeStarted = false
+                    edgeSwipeFired = false
+                    if (!isRssOverlayOpen && ev.x < edgeSize) {
+                        // Touch parte dall'edge sinistro - candidato per edge-swipe
+                        edgeSwipeStarted = true
+                        edgeSwipeStartX = ev.x
+                        edgeSwipeStartY = ev.y
+                    } else if (isRssOverlayOpen) {
+                        // Overlay aperto: candidato a swipe-left ovunque
+                        edgeSwipeStarted = true
+                        edgeSwipeStartX = ev.x
+                        edgeSwipeStartY = ev.y
+                    }
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (edgeSwipeStarted && !edgeSwipeFired) {
+                        val dx = ev.x - edgeSwipeStartX
+                        val dy = kotlin.math.abs(ev.y - edgeSwipeStartY)
+                        if (kotlin.math.abs(dx) > 60f && kotlin.math.abs(dx) > dy * 1.5f) {
+                            edgeSwipeFired = true
+                            if (!isRssOverlayOpen && dx > 0) {
+                                performHapticFeedbackLight()
+                                openRssOverlay()
+                                return true
+                            } else if (isRssOverlayOpen && dx < 0) {
+                                performHapticFeedbackLight()
+                                closeRssOverlay()
+                                return true
+                            }
+                        }
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    edgeSwipeStarted = false
+                }
+            }
+            // Se l'edge-swipe è già scattato, consumo gli eventi successivi
+            if (edgeSwipeFired) return true
+        }
+        return super.dispatchTouchEvent(ev)
     }
     
     fun attachWidgetHost(host: WidgetHostController) { 

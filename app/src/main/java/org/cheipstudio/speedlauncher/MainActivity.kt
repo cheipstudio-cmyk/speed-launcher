@@ -317,125 +317,26 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 binding.homeView.scaleY = 1f
             } catch (_: Throwable) {}
         }
-        // v211: animazione entrata home — solo se NON in landscape (causava schermo nero al rotate)
+        // v265: animazione entrata home semplificata - SOLO fade alpha
         try {
             val isLandscape = resources.configuration.orientation ==
                 android.content.res.Configuration.ORIENTATION_LANDSCAPE
             val homeContent = binding.homeView
-            // Garantisco sempre stato visibile
-            homeContent.alpha = 1f
+            // Reset stato di base (no scale, no translate)
             homeContent.scaleX = 1f
             homeContent.scaleY = 1f
+            homeContent.translationX = 0f
+            homeContent.translationY = 0f
+            homeContent.alpha = 1f
             if (!isLandscape && shouldAnimate) {
-                // v245: tolto alpha=0 su parent per evitare flash vuoto.
-                // Solo scale 1.04→1 sul parent. Il fade è gestito dai singoli sub-element.
-                homeContent.alpha = 1f
-                homeContent.scaleX = 1.02f
-                homeContent.scaleY = 1.02f
+                homeContent.alpha = 0f
                 homeContent.animate().cancel()
                 homeContent.animate()
-                    .scaleX(1f).scaleY(1f)
-                    .setDuration((280 * animMul()).toLong())
-                    .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
+                    .alpha(1f)
+                    .setDuration((220 * animMul()).toLong())
+                    .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                     .start()
             }
-            
-            if (!isLandscape && shouldAnimate) {
-            // Rimbalzo widget - spring effect
-            try {
-                val v = binding.homeView.findViewById<android.view.View>(R.id.widgetSlot)
-                v?.let {
-                    it.scaleX = 0.95f
-                    it.scaleY = 0.95f
-                    it.animate()
-                        .scaleX(1f).scaleY(1f)
-                        .setStartDelay(20)
-                        .setDuration((280 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-                        .start()
-                }
-            } catch (_: Throwable) {}
-            
-            // Rimbalzo search bar - spring effect (translateY con bounce)
-            try {
-                val v = binding.homeView.findViewById<android.view.View>(R.id.searchBar)
-                v?.let {
-                    // v254: animazione molto leggera per non lasciare frame vuoto
-                    it.translationY = 16f
-                    it.animate()
-                        .translationY(0f)
-                        .setStartDelay(0)
-                        .setDuration((280 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-                        .start()
-                }
-            } catch (_: Throwable) {}
-            
-            // Page indicator pop
-            try {
-                val v = binding.homeView.findViewById<android.view.View>(R.id.pageIndicator)
-                v?.let {
-                    it.scaleX = 0.85f; it.scaleY = 0.85f
-                    it.animate()
-                        .scaleX(1f).scaleY(1f)
-                        .setStartDelay(40)
-                        .setDuration((280 * animMul()).toLong())
-                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-                        .start()
-                }
-            } catch (_: Throwable) {}
-            
-            // v234: Griglia icone con stagger entrance (Launcher3 pattern) - accesso diretto, no reflection
-            try {
-                val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome)
-                if (pagedHome != null) {
-                    // v260: animo solo la pagina visibile, dopo che lo snap iniziale è completato
-                    // (evita conflitto con applyPageParallax che sovrascriverebbe scale/alpha)
-                    pagedHome.postDelayed({
-                        try {
-                            val targetIdx = pagedHome.currentPage
-                            val pageView = pagedHome.getChildAt(targetIdx) as? android.view.ViewGroup
-                            if (pageView != null) {
-                                for (i in 0 until pageView.childCount) {
-                                    val icon = pageView.getChildAt(i)
-                                    // v264: animazione morbida senza Overshoot - niente jumping
-                                    icon.scaleX = 0.85f
-                                    icon.scaleY = 0.85f
-                                    icon.alpha = 0.5f
-                                    icon.translationY = 16f
-                                    icon.animate()
-                                        .scaleX(1f).scaleY(1f)
-                                        .alpha(1f)
-                                        .translationY(0f)
-                                        .setStartDelay((i * 12).toLong())
-                                        .setDuration((360 * animMul()).toLong())
-                                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-                                        .start()
-                                }
-                            }
-                        } catch (_: Throwable) {}
-                    }, 80)
-                }
-            } catch (_: Throwable) {}
-            
-            // v202: Dock raccomandate (top + bottom) - rimbalzo dal basso
-            for (id in intArrayOf(R.id.recommendedRow, R.id.recommendedRowBottom)) {
-                try {
-                    val v = binding.homeView.findViewById<android.view.View>(id)
-                    v?.let {
-                        if (it.visibility == android.view.View.VISIBLE) {
-                            it.translationY = 12f
-                            it.animate()
-                                .translationY(0f)
-                                .setStartDelay(50)
-                                .setDuration((320 * animMul()).toLong())
-                                .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-                                .start()
-                        }
-                    }
-                } catch (_: Throwable) {}
-            }
-            } // fine if !isLandscape v211
         } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()
