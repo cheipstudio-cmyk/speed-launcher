@@ -36,6 +36,10 @@ class RecommendedView @JvmOverloads constructor(
     private var dockLongPressFired = false
     private val dockLongPressRunnable = Runnable {
         dockLongPressFired = true
+        // v234: haptic feedback per indicare long press riuscito
+        try {
+            performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+        } catch (_: Throwable) {}
         onContainerLongPress?.invoke()
     }
     private val dockLongPressSlop by lazy {

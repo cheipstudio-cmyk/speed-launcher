@@ -360,7 +360,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     it.alpha = 0f
                     it.animate()
                         .translationY(0f).alpha(1f)
-                        .setStartDelay(100)
+                        .setStartDelay(90)
                         .setDuration((420 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(1.8f))
                         .start()
@@ -374,19 +374,18 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                     it.scaleX = 0.5f; it.scaleY = 0.5f; it.alpha = 0f
                     it.animate()
                         .scaleX(1f).scaleY(1f).alpha(1f)
-                        .setStartDelay(140)
+                        .setStartDelay(220)
                         .setDuration((360 * animMul()).toLong())
                         .setInterpolator(android.view.animation.OvershootInterpolator(2f))
                         .start()
                 }
             } catch (_: Throwable) {}
             
-            // v225: Griglia icone con stagger entrance (Launcher3 pattern)
+            // v234: Griglia icone con stagger entrance (Launcher3 pattern) - accesso diretto, no reflection
             try {
-                val pagedHome = binding.homeView.findViewById<android.view.ViewGroup>(R.id.pagedHome)
+                val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome)
                 if (pagedHome != null) {
-                    // Trova la pagina corrente e anima le sue icone con stagger
-                    val currentPage = (pagedHome.javaClass.getMethod("getCurrentPage").invoke(pagedHome) as? Int) ?: 0
+                    val currentPage = pagedHome.currentPage
                     if (currentPage < pagedHome.childCount) {
                         val pageView = pagedHome.getChildAt(currentPage) as? android.view.ViewGroup
                         if (pageView != null) {
@@ -397,7 +396,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                                 icon.scaleY = 0.6f
                                 icon.animate()
                                     .alpha(1f).scaleX(1f).scaleY(1f)
-                                    .setStartDelay((120 + i * 18).toLong())
+                                    .setStartDelay((120 + i * 15).toLong())
                                     .setDuration((360 * animMul()).toLong())
                                     .setInterpolator(android.view.animation.OvershootInterpolator(1.6f))
                                     .start()
