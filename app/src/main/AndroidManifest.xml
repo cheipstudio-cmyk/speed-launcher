@@ -159,6 +159,10 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-    </application>
+            <activity
+            android:name=".DiagnosticLogActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SpeedLauncher" />
+        </application>
 
 </manifest>

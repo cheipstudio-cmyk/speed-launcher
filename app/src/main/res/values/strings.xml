@@ -362,4 +362,6 @@ Vuoi scaricarla?</string>
     <string name="rss_suggested">Feed suggeriti</string>
     <string name="settings_donate_label">Offrimi un caffè</string>
     <string name="settings_donate_sub">Sostieni lo sviluppo di Speed Launcher</string>
+    <string name="settings_diagnostic_label">Log diagnostico</string>
+    <string name="settings_diagnostic_sub">Visualizza eventi e crash dell\'app</string>
 </resources>

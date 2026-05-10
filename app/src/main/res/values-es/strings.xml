@@ -343,4 +343,6 @@ Se usará solo para esta función.</string>
     <string name="widget_width_full">Pantalla completa</string>
     <string name="settings_donate_label">Invítame un café</string>
     <string name="settings_donate_sub">Apoya el desarrollo de Speed Launcher</string>
+    <string name="settings_diagnostic_label">Registro de diagnóstico</string>
+    <string name="settings_diagnostic_sub">Ver eventos y fallos de la app</string>
 </resources>

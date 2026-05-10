@@ -362,4 +362,6 @@ Download now?</string>
     <string name="rss_suggested">Suggested feeds</string>
     <string name="settings_donate_label">Buy me a coffee</string>
     <string name="settings_donate_sub">Support Speed Launcher development</string>
+    <string name="settings_diagnostic_label">Diagnostic log</string>
+    <string name="settings_diagnostic_sub">View app events and crashes</string>
 </resources>

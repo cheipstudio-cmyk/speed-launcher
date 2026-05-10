@@ -343,4 +343,6 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="widget_width_full">Tam ekran</string>
     <string name="settings_donate_label">Bir kahve ısmarla</string>
     <string name="settings_donate_sub">Speed Launcher geliştirmeyi destekle</string>
+    <string name="settings_diagnostic_label">Tanılama kaydı</string>
+    <string name="settings_diagnostic_sub">Uygulama olaylarını ve çökmelerini görüntüle</string>
 </resources>

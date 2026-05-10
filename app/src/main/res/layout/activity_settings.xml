@@ -1057,6 +1057,23 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- v224: Log diagnostico -->
+            <com.google.android.material.card.MaterialCardView android:id="@+id/itemDiagnostic" style="@style/PixelCard"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout style="@style/PixelItem">
+                    <FrameLayout style="@style/PixelColoredIconWrap" android:background="@drawable/bg_settings_icon_grey">
+                        <ImageView style="@style/PixelColoredIcon" android:src="@drawable/ic_help" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/PixelItemTitle" android:text="@string/settings_diagnostic_label" />
+                        <TextView style="@style/PixelItemSubtitle" android:text="@string/settings_diagnostic_sub" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Footer: spacer per non far appoggiare la sezione al bordo -->
             <View
                 android:layout_width="match_parent"

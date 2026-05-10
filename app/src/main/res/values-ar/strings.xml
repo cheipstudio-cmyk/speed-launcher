@@ -343,4 +343,6 @@
     <string name="widget_width_full">ملء الشاشة</string>
     <string name="settings_donate_label">اشتر لي قهوة</string>
     <string name="settings_donate_sub">ادعم تطوير Speed Launcher</string>
+    <string name="settings_diagnostic_label">سجل التشخيص</string>
+    <string name="settings_diagnostic_sub">عرض أحداث التطبيق والأعطال</string>
 </resources>

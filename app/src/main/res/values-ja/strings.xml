@@ -343,4 +343,6 @@
     <string name="widget_width_full">全画面</string>
     <string name="settings_donate_label">コーヒーをおごる</string>
     <string name="settings_donate_sub">Speed Launcherの開発を支援</string>
+    <string name="settings_diagnostic_label">診断ログ</string>
+    <string name="settings_diagnostic_sub">アプリのイベントとクラッシュを表示</string>
 </resources>

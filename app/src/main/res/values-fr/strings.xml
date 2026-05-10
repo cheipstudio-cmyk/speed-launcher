@@ -343,4 +343,6 @@ Télécharger maintenant ?</string>
     <string name="widget_width_full">Plein écran</string>
     <string name="settings_donate_label">Offrez-moi un café</string>
     <string name="settings_donate_sub">Soutenez le développement de Speed Launcher</string>
+    <string name="settings_diagnostic_label">Journal de diagnostic</string>
+    <string name="settings_diagnostic_sub">Voir événements et plantages</string>
 </resources>
