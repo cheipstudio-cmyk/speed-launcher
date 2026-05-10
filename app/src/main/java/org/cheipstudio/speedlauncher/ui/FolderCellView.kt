@@ -253,9 +253,12 @@ class FolderCellView(context: Context) : LinearLayout(context) {
                     val row = i / 2
                     val x = pad + col * (cellSize + gap)
                     val y = pad + row * (cellSize + gap)
+                    // v274: salvo bounds originali per non mutare il drawable shared (es icona in dock)
                     val d = icons[i]
+                    val saved = android.graphics.Rect(d.bounds)
                     d.setBounds(x.toInt(), y.toInt(), (x + cellSize).toInt(), (y + cellSize).toInt())
                     d.draw(canvas)
+                    d.bounds = saved
                 }
                 canvas.restore()
             }

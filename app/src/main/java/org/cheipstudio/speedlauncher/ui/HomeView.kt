@@ -234,20 +234,6 @@ class HomeView @JvmOverloads constructor(
         }
 
         // v46: long press home robusto via GestureDetector (più affidabile di setOnLongClickListener su scroll view)
-        val homeGesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onLongPress(e: MotionEvent) {
-                if (isRssOverlayOpen) return
-                // v272: NON triggerare se uno swipe RSS è in corso o già scattato
-                if (edgeSwipeFired) return
-                HapticHelper.longPress(this@HomeView)
-                onHomeLongPress?.invoke()
-            }
-        })
-        // v271: SOLO un listener (sulla root) - evita doppia vibrazione 
-        setOnTouchListener { _, ev ->
-            homeGesture.onTouchEvent(ev)
-            false
-        }
 
         updateSearchBarText()
         applySearchBarStyle()
@@ -702,7 +688,7 @@ class HomeView @JvmOverloads constructor(
             // Intercetto se chiaramente orizzontale (per preempt PagedHomeContainer)
             // Apertura: swipe destra sulla pagina 0 / Chiusura: swipe sinistra con overlay aperto
             val canOpen = !isRssOverlayOpen && dx > 0 && binding.pagedHome.currentPage == 0
-            val canClose = isRssOverlayOpen && dx < 0
+            val canClose = isRssOverlayOpen && dx < 0 && edgeSwipeStartX > width - edgeSize
             if ((canOpen || canClose) && adx > 8f && adx > dy * 1.2f) {
                 return true
             }
@@ -802,7 +788,8 @@ class HomeView @JvmOverloads constructor(
                         openRssOverlay()
                         return true
                     }
-                    if (isRssOverlayOpen && dx < -60f && adx > dy * 1.5f) {
+                    if (isRssOverlayOpen && dx < -60f && adx > dy * 1.5f 
+                        && edgeSwipeStartX > width - edgeSize) {
                         edgeSwipeFired = true
                         performHapticFeedbackLight()
                         closeRssOverlay()
@@ -881,7 +868,7 @@ class HomeView @JvmOverloads constructor(
         updatePageIndicator()
     }
     
-    /** v266: parallax sulle pagine - le icone scorrono leggermente più rapide del wallpaper */
+    /** v274: animazione swipe schermata - parallax + scale + alpha sulle pagine */
     private fun applyPageParallax(fraction: Float) {
         val pageW = binding.pagedHome.width
         if (pageW <= 0) return
@@ -891,8 +878,14 @@ class HomeView @JvmOverloads constructor(
             val pageView = binding.pagedHome.getPageAt(i) ?: continue
             val natural = i * pageW
             val delta = natural - scrollX
-            // 25% parallax: la pagina si muove un 25% in più del normale
-            pageView.translationX = delta * 0.25f
+            // Distanza normalizzata della pagina dal centro corrente (0 = centro, 1 = un page intero di distanza)
+            val distNorm = (kotlin.math.abs(delta) / pageW).coerceIn(0f, 1f)
+            // Parallax + scale + fade visibili come Pixel/Motorola
+            pageView.translationX = delta * 0.20f
+            val scale = 1f - 0.06f * distNorm
+            pageView.scaleX = scale
+            pageView.scaleY = scale
+            pageView.alpha = 1f - 0.35f * distNorm
         }
     }
     
@@ -903,6 +896,18 @@ class HomeView @JvmOverloads constructor(
     
     // v265: edge-swipe detector per aprire RSS dal bordo sinistro
     private val edgeSize = (40 * resources.displayMetrics.density).toInt()
+    
+    // v275: gesture detector home long press (collegato a dispatchTouchEvent per coprire pagedHome)
+    private val homeGesture: GestureDetector by lazy {
+        GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onLongPress(e: MotionEvent) {
+                if (isRssOverlayOpen) return
+                if (edgeSwipeFired) return
+                HapticHelper.longPress(this@HomeView)
+                onHomeLongPress?.invoke()
+            }
+        })
+    }
     private var edgeSwipeStarted = false
     private var edgeSwipeStartX = 0f
     private var edgeSwipeStartY = 0f
@@ -924,6 +929,8 @@ class HomeView @JvmOverloads constructor(
     }
     
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // v275: long press home funziona ovunque (anche su pagedHome vuoto)
+        try { homeGesture.onTouchEvent(ev) } catch (_: Throwable) {}
         if (settings.rssPanelEnabled.value == true) {
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -950,8 +957,9 @@ class HomeView @JvmOverloads constructor(
                             openRssOverlay()
                             return true
                         }
-                        // CHIUSURA: swipe sinistra ovunque quando overlay aperto
-                        if (isRssOverlayOpen && dx < -60f && adx > dy * 1.5f) {
+                        // v274: CHIUSURA solo se DOWN è partito dal bordo destro (NON disturba chip filtri al centro)
+                        if (isRssOverlayOpen && dx < -60f && adx > dy * 1.5f 
+                            && edgeSwipeStartX > width - edgeSize) {
                             edgeSwipeFired = true
                             performHapticFeedbackLight()
                             closeRssOverlay()

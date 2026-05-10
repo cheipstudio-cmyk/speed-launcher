@@ -317,27 +317,18 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 binding.homeView.scaleY = 1f
             } catch (_: Throwable) {}
         }
-        // v266: animazione entrata home - fade + zoom in soft (no bounce)
+        // v273: NIENTE animazione manuale entry home
+        // L'animazione "app → home" è gestita nativamente dal sistema operativo (SystemUI).
+        // L'home resta visibile dietro l'app, non serve fade/scale.
+        // Reset proprietà per sicurezza
         try {
-            val isLandscape = resources.configuration.orientation ==
-                android.content.res.Configuration.ORIENTATION_LANDSCAPE
             val homeContent = binding.homeView
+            homeContent.animate().cancel()
             homeContent.translationX = 0f
             homeContent.translationY = 0f
             homeContent.scaleX = 1f
             homeContent.scaleY = 1f
             homeContent.alpha = 1f
-            if (!isLandscape && shouldAnimate) {
-                homeContent.alpha = 0f
-                homeContent.scaleX = 0.94f
-                homeContent.scaleY = 0.94f
-                homeContent.animate().cancel()
-                homeContent.animate()
-                    .alpha(1f).scaleX(1f).scaleY(1f)
-                    .setDuration((320 * animMul()).toLong())
-                    .setInterpolator(android.view.animation.DecelerateInterpolator(2.0f))
-                    .start()
-            }
         } catch (_: Throwable) {}
         widgetHostController.startListening()
         binding.homeView.reapplySettings()
@@ -352,29 +343,24 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         // v79: cleanup ghost residui dopo return dal multitasking
         binding.homeView.cleanupGhostState()
         
-        // v122: force redraw immediato per evitare empty state lungo dopo
-        // chiusura completa del multitasking. Forza il re-rendering della home.
-        binding.homeView.post {
-            binding.homeView.cleanupGhostState()
-            binding.homeView.requestLayout()
-            binding.homeView.invalidate()
-            binding.root.invalidate()
+        // v273: force redraw SOLO se pausa lunga (multitasking close, > 5s)
+        // Per chiusure rapide app, niente refresh visibile → home fluida
+        if (pauseDuration > 5000) {
+            binding.homeView.post {
+                binding.homeView.cleanupGhostState()
+                binding.homeView.requestLayout()
+                binding.homeView.invalidate()
+                binding.root.invalidate()
+            }
         }
     }
     
-    // v132: cleanup AGGRESSIVO al ritorno focus (es. dopo multitasking close)
+    // v273: focus cleanup solo per ghost state (no invalidate forced)
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus && ::widgetHostController.isInitialized) {
             try {
                 binding.homeView.cleanupGhostState()
-                binding.homeView.invalidate()
-                binding.root.invalidate()
-                // Force frame refresh
-                binding.homeView.post {
-                    binding.homeView.requestLayout()
-                    binding.homeView.invalidate()
-                }
             } catch (_: Throwable) {}
         }
     }

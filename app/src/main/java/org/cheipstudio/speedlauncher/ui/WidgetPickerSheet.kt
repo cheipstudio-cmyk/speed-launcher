@@ -62,15 +62,9 @@ class WidgetPickerSheet : BottomSheetDialogFragment() {
         val ctx = requireContext()
         val manager = AppWidgetManager.getInstance(ctx)
         val all = manager.installedProviders
-        // v20: filtro per dimensioni reali dello slot, con un margine di tolleranza del 15%
-        val tolerance = 1.15f
-        val filtered = all.filter { info ->
-            val minW = info.minWidth.coerceAtLeast(1)
-            val minH = info.minHeight.coerceAtLeast(1)
-            val widthOk = slotWidthPx == 0 || minW <= slotWidthPx * tolerance
-            val heightOk = slotHeightPx == 0 || minH <= slotHeightPx * tolerance
-            widthOk && heightOk
-        }.sortedWith(compareBy(
+        // v273: niente filtro per dimensione - mostro tutti i widget disponibili
+        // (l'utente può sempre ridimensionarli dopo l'aggiunta)
+        val filtered = all.sortedWith(compareBy(
             // v50: i widget del nostro package (Speed Stats) per primi
             { if (it.provider.packageName == ctx.packageName) 0 else 1 },
             { it.loadLabel(ctx.packageManager).lowercase() }

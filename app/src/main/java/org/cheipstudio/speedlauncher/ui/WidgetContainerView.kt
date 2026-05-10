@@ -278,11 +278,17 @@ class WidgetContainerView @JvmOverloads constructor(
                     holdHandler.removeCallbacks(holdRunnable)
                     holdHandler.removeCallbacks(emptyHoldRunnable)
                     pressedWidgetUuid = null
-                    // Invio cancel al super per pulire stato widget
                     val cancel = MotionEvent.obtain(ev)
                     cancel.action = MotionEvent.ACTION_CANCEL
                     super.dispatchTouchEvent(cancel)
                     cancel.recycle()
+                    // v274: sintetizzo un DOWN al callback prima del MOVE (pagedHome ha bisogno di downX)
+                    val synthDown = MotionEvent.obtain(
+                        ev.downTime, ev.eventTime, MotionEvent.ACTION_DOWN,
+                        pressX, pressY, 0
+                    )
+                    onHorizontalSwipe?.invoke(synthDown)
+                    synthDown.recycle()
                 }
                 if (horizSwipeDetected) {
                     onHorizontalSwipe?.invoke(ev)
