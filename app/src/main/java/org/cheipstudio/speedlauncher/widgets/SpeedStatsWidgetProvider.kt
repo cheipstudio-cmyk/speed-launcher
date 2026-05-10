@@ -145,8 +145,8 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         try {
             val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
             val battPct = bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 0
-            views.setTextViewText(R.id.battPct, "$battPct%")
-            views.setProgressBar(R.id.battProgress, 100, battPct, false)
+            views.setTextViewText(R.id.batPct, "$battPct%")
+            views.setProgressBar(R.id.batProgress, 100, battPct, false)
 
             val charging = try { bm?.isCharging == true } catch (_: Throwable) { false }
             val chargeCounter = try {
@@ -160,11 +160,11 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             } else {
                 try { context.getString(R.string.widget_battery) } catch (_: Throwable) { "" }
             }
-            views.setTextViewText(R.id.battSubtitle, mahText)
+            views.setTextViewText(R.id.batSubtitle, mahText)
         } catch (t: Throwable) {
             logError(context, "Battery block", t)
-            views.setTextViewText(R.id.battPct, "—")
-            views.setTextViewText(R.id.battSubtitle, "")
+            views.setTextViewText(R.id.batPct, "—")
+            views.setTextViewText(R.id.batSubtitle, "")
         }
 
         // Refresh button
@@ -213,10 +213,10 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.widget_speed_stats)
             views.setTextViewText(R.id.ramPct, "—")
             views.setTextViewText(R.id.storPct, "—")
-            views.setTextViewText(R.id.battPct, "—")
+            views.setTextViewText(R.id.batPct, "—")
             views.setTextViewText(R.id.ramSubtitle, "")
             views.setTextViewText(R.id.storSubtitle, "")
-            views.setTextViewText(R.id.battSubtitle, "")
+            views.setTextViewText(R.id.batSubtitle, "")
             manager.updateAppWidget(id, views)
         } catch (_: Throwable) {}
     }

@@ -155,4 +155,15 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/refreshBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_refresh_widget"
+        android:visibility="gone"
+        android:contentDescription="@null" />
+
 </FrameLayout>
