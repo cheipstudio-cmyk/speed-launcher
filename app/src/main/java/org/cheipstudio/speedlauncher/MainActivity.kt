@@ -60,6 +60,33 @@ class MainActivity : AppCompatActivity() {
      * posizione nella home grid con scale 4x → 1x + translate dal punto del tap.
      * Ritorna true se è stata avviata l'animazione (caller può skippare la parte standard di entry).
      */
+    /** 
+     * v295: chiede a UsageStatsManager l'ultima app foreground prima della home.
+     * Funziona solo se l'utente ha dato il permesso PACKAGE_USAGE_STATS.
+     * Ritorna null se non disponibile/permesso negato → fallback a lastLaunchedPackage.
+     */
+    private fun getLastForegroundPackage(): String? {
+        return try {
+            val usm = getSystemService(android.content.Context.USAGE_STATS_SERVICE) as? android.app.usage.UsageStatsManager ?: return null
+            val end = System.currentTimeMillis()
+            val begin = end - 60_000L  // ultimi 60 secondi
+            val events = usm.queryEvents(begin, end)
+            var lastMoveToFg: String? = null
+            val event = android.app.usage.UsageEvents.Event()
+            val myPkg = packageName
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                if (event.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                    val pkg = event.packageName
+                    if (pkg != null && pkg != myPkg) {
+                        lastMoveToFg = pkg
+                    }
+                }
+            }
+            lastMoveToFg
+        } catch (_: Throwable) { null }
+    }
+    
     private fun tryAnimateAppIconDrop(durMain: Long): Boolean {
         try {
             // v295: preferisci UsageStatsManager se disponibile (più accurato in multitasking)
