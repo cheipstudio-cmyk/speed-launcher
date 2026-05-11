@@ -11,155 +11,153 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:gravity="center"
-        android:weightSum="3"
-        android:baselineAligned="false">
+        android:weightSum="3">
 
-        <!-- Colonna 1 -->
         <LinearLayout 
             android:id="@+id/col1_root"
-            android:layout_width="0dp" android:layout_height="match_parent"
-            android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="1dp"
-            android:clickable="true" android:focusable="true">
+            android:layout_width="0dp" 
+            android:layout_height="match_parent"
+            android:layout_weight="1" 
+            android:orientation="vertical"
+            android:gravity="center">
             
             <ImageView
                 android:id="@+id/col1_icon"
-                android:layout_width="12dp"
-                android:layout_height="12dp" />
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_widget_memory" />
             
             <TextView android:id="@+id/col1_value"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:textColor="#171515"
                 android:textSize="22sp" 
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="-0.02"
                 android:text="—" />
             
             <TextView 
                 android:id="@+id/col1_label"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="#80606064" 
+                android:textColor="#606064"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-medium" 
-                android:textAllCaps="true"
-                android:letterSpacing="0.08" />
+                android:text="RAM" />
             
             <ProgressBar android:id="@+id/col1_progress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_width="match_parent" 
+                android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                android:max="100" android:progress="0" />
+                android:max="100" android:progress="50"
+                android:visibility="gone" />
             
             <TextView android:id="@+id/col1_subtitle"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp" 
-                android:textColor="#80606064"
+                android:textColor="#606064"
                 android:textSize="10sp" 
-                android:fontFamily="sans-serif"
+                android:visibility="gone"
                 android:text="" />
         </LinearLayout>
 
-        <!-- Colonna 2 -->
         <LinearLayout 
             android:id="@+id/col2_root"
-            android:layout_width="0dp" android:layout_height="match_parent"
-            android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="1dp"
-            android:clickable="true" android:focusable="true">
+            android:layout_width="0dp" 
+            android:layout_height="match_parent"
+            android:layout_weight="1" 
+            android:orientation="vertical"
+            android:gravity="center">
             
             <ImageView
                 android:id="@+id/col2_icon"
-                android:layout_width="12dp"
-                android:layout_height="12dp" />
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_widget_storage" />
             
             <TextView android:id="@+id/col2_value"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:textColor="#171515"
                 android:textSize="22sp" 
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="-0.02"
                 android:text="—" />
             
             <TextView 
                 android:id="@+id/col2_label"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="#80606064"
+                android:textColor="#606064"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.08" />
+                android:text="MEM" />
             
             <ProgressBar android:id="@+id/col2_progress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_width="match_parent" 
+                android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                android:max="100" android:progress="0" />
+                android:max="100" android:progress="50"
+                android:visibility="gone" />
             
             <TextView android:id="@+id/col2_subtitle"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="#80606064"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" 
+                android:textColor="#606064"
                 android:textSize="10sp" 
-                android:fontFamily="sans-serif"
+                android:visibility="gone"
                 android:text="" />
         </LinearLayout>
 
-        <!-- Colonna 3 -->
         <LinearLayout 
             android:id="@+id/col3_root"
-            android:layout_width="0dp" android:layout_height="match_parent"
-            android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="1dp"
-            android:clickable="true" android:focusable="true">
+            android:layout_width="0dp" 
+            android:layout_height="match_parent"
+            android:layout_weight="1" 
+            android:orientation="vertical"
+            android:gravity="center">
             
             <ImageView
                 android:id="@+id/col3_icon"
-                android:layout_width="12dp"
-                android:layout_height="12dp" />
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_widget_battery" />
             
             <TextView android:id="@+id/col3_value"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:textColor="#171515"
                 android:textSize="22sp" 
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="-0.02"
                 android:text="—" />
             
             <TextView 
                 android:id="@+id/col3_label"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="#80606064"
+                android:textColor="#606064"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.08" />
+                android:text="BAT" />
             
             <ProgressBar android:id="@+id/col3_progress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_width="match_parent" 
+                android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                android:max="100" android:progress="0" />
+                android:max="100" android:progress="50"
+                android:visibility="gone" />
             
             <TextView android:id="@+id/col3_subtitle"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="#80606064"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" 
+                android:textColor="#606064"
                 android:textSize="10sp" 
-                android:fontFamily="sans-serif"
+                android:visibility="gone"
                 android:text="" />
         </LinearLayout>
     </LinearLayout>
-    
-    <!-- Refresh button overlay (mantenuto invisibile per ora) -->
-    <View android:id="@+id/refreshBtn"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="top|end"
-        android:visibility="gone" />
 </FrameLayout>
