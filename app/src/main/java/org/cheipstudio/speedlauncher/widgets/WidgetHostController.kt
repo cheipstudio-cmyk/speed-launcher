@@ -139,11 +139,11 @@ class WidgetHostController(private val activity: Activity) {
     }
 
     private fun placeWidget(id: Int, info: AppWidgetProviderInfo) {
-        val view = createView(id, info)
-        view.setAppWidget(id, info)
+        // v289: non creo la view qui - WidgetContainerView.mountWidget la crea con createView
+        // Creare due AppWidgetHostView per lo stesso id può rompere il binding
         lastWidgetId = id
         prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
-        pendingPlaceCallback?.invoke(view)
+        pendingPlaceCallback?.invoke(null)
         pendingPlaceCallback = null
         pendingBindWidget = null
         pendingBindAppWidgetId = -1

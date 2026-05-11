@@ -211,7 +211,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, context.getString(R.string.speed_widget_section_ram_subtitle, ramAvailMb.toInt()))
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_ram))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_memory)
-        views.setInt(ids.icon, "setColorFilter", 0xFF7AE582.toInt())
         views.setProgressBar(ids.progress, 100, ramPct, false)
     }
 
@@ -225,7 +224,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, context.getString(R.string.speed_widget_section_storage_subtitle, availGb.toInt()))
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_storage))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_storage)
-        views.setInt(ids.icon, "setColorFilter", 0xFF82AAFF.toInt())
         views.setProgressBar(ids.progress, 100, storPct, false)
     }
 
@@ -242,7 +240,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, subtitle)
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_battery))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_battery)
-        views.setInt(ids.icon, "setColorFilter", 0xFFFFB86C.toInt())
         views.setProgressBar(ids.progress, 100, battPct, false)
     }
 
@@ -256,7 +253,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, "")
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_date))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_date)
-        views.setInt(ids.icon, "setColorFilter", 0xFFFF6B9D.toInt())
         views.setViewVisibility(ids.progress, View.GONE)
         views.setViewVisibility(ids.subtitle, View.GONE)
     }
@@ -271,7 +267,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, suffix.trim())
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_time))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_time)
-        views.setInt(ids.icon, "setColorFilter", 0xFFB892FF.toInt())
         views.setViewVisibility(ids.progress, View.GONE)
         if (suffix.isEmpty()) views.setViewVisibility(ids.subtitle, View.GONE)
     }
@@ -291,7 +286,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, "")
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_wifi))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_wifi)
-        views.setInt(ids.icon, "setColorFilter", 0xFF64D2FF.toInt())
         views.setViewVisibility(ids.progress, View.GONE)
         views.setViewVisibility(ids.subtitle, View.GONE)
     }
@@ -305,7 +299,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, "$current/$max")
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_volume))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_volume)
-        views.setInt(ids.icon, "setColorFilter", 0xFFFFCB6B.toInt())
         views.setProgressBar(ids.progress, 100, pct, false)
     }
 
@@ -319,7 +312,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(ids.subtitle, "")
         views.setTextViewText(ids.label, context.getString(R.string.speed_widget_section_brightness))
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_brightness)
-        views.setInt(ids.icon, "setColorFilter", 0xFFFFE066.toInt())
         views.setProgressBar(ids.progress, 100, pct, false)
         views.setViewVisibility(ids.subtitle, View.GONE)
     }
