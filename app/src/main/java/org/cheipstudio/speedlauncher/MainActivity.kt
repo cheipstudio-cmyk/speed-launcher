@@ -55,6 +55,93 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Throwable) {}
     }
 
+    /** 
+     * v288: animazione "drop" stile Pixel - l'icona dell'app appena chiusa ritorna alla sua 
+     * posizione nella home grid con scale 4x → 1x + translate dal punto del tap.
+     * Ritorna true se è stata avviata l'animazione (caller può skippare la parte standard di entry).
+     */
+    private fun tryAnimateAppIconDrop(durMain: Long): Boolean {
+        try {
+            val pkg = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchedPackage ?: return false
+            val ts = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchTimestamp
+            // Solo se launch < 5 min fa (evita drop per app aperte molto tempo fa)
+            if (System.currentTimeMillis() - ts > 5 * 60_000L) return false
+            // Trovo l'icona corrispondente nella home
+            val targetIcon = findHomeIconForPackage(pkg) ?: return false
+            val originX = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchOriginX
+            val originY = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchOriginY
+            if (originX <= 0f || originY <= 0f) return false
+            
+            // Coordinate target icon sullo schermo
+            val targetLoc = IntArray(2)
+            targetIcon.getLocationOnScreen(targetLoc)
+            val targetX = targetLoc[0] + targetIcon.width / 2f
+            val targetY = targetLoc[1] + targetIcon.height / 2f
+            
+            // Offset da origin a target
+            val deltaX = originX - targetX
+            val deltaY = originY - targetY
+            
+            targetIcon.animate().cancel()
+            targetIcon.translationX = deltaX
+            targetIcon.translationY = deltaY
+            targetIcon.scaleX = 3.5f
+            targetIcon.scaleY = 3.5f
+            targetIcon.alpha = 0f
+            
+            // M3 emphasized decelerate
+            val interp = androidx.core.view.animation.PathInterpolatorCompat.create(
+                0.05f, 0.7f, 0.1f, 1.0f
+            )
+            
+            targetIcon.animate()
+                .translationX(0f).translationY(0f)
+                .scaleX(1f).scaleY(1f)
+                .alpha(1f)
+                .setStartDelay(30L)
+                .setDuration(durMain + 80)
+                .setInterpolator(interp)
+                .start()
+            
+            // Reset al termine
+            targetIcon.postDelayed({
+                try {
+                    targetIcon.translationX = 0f
+                    targetIcon.translationY = 0f
+                    targetIcon.scaleX = 1f
+                    targetIcon.scaleY = 1f
+                    targetIcon.alpha = 1f
+                } catch (_: Throwable) {}
+            }, durMain + 120L)
+            
+            // Reset una tantum: dopo aver usato, azzero lastLaunched per non rifare l'anim al prossimo onResume
+            org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchedPackage = null
+            
+            return true
+        } catch (_: Throwable) { return false }
+    }
+    
+    /** Cerca l'IconCellView nella home grid che ha questo packageName */
+    private fun findHomeIconForPackage(pkg: String): android.view.View? {
+        try {
+            val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome) ?: return null
+            // Itero le pagine
+            for (i in 0 until pagedHome.pageCount) {
+                val page = pagedHome.getPageAt(i) as? android.view.ViewGroup ?: continue
+                for (j in 0 until page.childCount) {
+                    val child = page.getChildAt(j)
+                    if (child is org.cheipstudio.speedlauncher.ui.IconCellView && child.packageName == pkg) {
+                        return child
+                    }
+                    // Dentro le folder potrebbe esserci - skipper folder per ora (l'icona è la cartella, non l'app)
+                }
+            }
+        } catch (_: Throwable) {}
+        return null
+    }
+    
+
+
     
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -368,6 +455,10 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                         .setInterpolator(interp)
                         .start()
                 }
+                // v288: drop animation icona app (stile Pixel) - dopo che il pagedHome è visibile
+                binding.homeView.postDelayed({
+                    tryAnimateAppIconDrop(durMain)
+                }, 100L)
                 
                 // Bottom elements (dock bottom + search) - dal basso
                 animateChildEntry(binding.homeView, R.id.pageIndicator, offsetBot, 90L, durMain, interp)

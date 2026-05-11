@@ -108,7 +108,29 @@ class AppRepository(private val context: Context) {
         }
     }
 
+    companion object {
+        /** v288: ultimo package lanciato - usato da MainActivity per drop animation al ritorno home */
+        @Volatile var lastLaunchedPackage: String? = null
+        @Volatile var lastLaunchOriginX: Float = 0f
+        @Volatile var lastLaunchOriginY: Float = 0f
+        @Volatile var lastLaunchTimestamp: Long = 0L
+    }
+    
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
+        // v288: registro l'origine per la drop animation al ritorno home
+        try {
+            lastLaunchedPackage = app.packageName
+            lastLaunchTimestamp = System.currentTimeMillis()
+            if (sourceView != null && sourceView.width > 0) {
+                val loc = IntArray(2)
+                sourceView.getLocationOnScreen(loc)
+                lastLaunchOriginX = (loc[0] + sourceView.width / 2f)
+                lastLaunchOriginY = (loc[1] + sourceView.height / 2f)
+            } else {
+                lastLaunchOriginX = 0f
+                lastLaunchOriginY = 0f
+            }
+        } catch (_: Throwable) {}
         // v200: push espressivo Material 3 — scale 1 → 0.80 → 1.06 → 1 con elastic overshoot
         if (sourceView != null && sourceView.width > 0) {
             try {
