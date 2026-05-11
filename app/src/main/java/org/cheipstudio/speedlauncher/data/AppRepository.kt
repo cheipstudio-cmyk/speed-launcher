@@ -120,6 +120,19 @@ class AppRepository(private val context: Context) {
         @Volatile var lastLaunchFolderUuid: String? = null
     }
     
+
+    /** v300: moltiplicatore durata anim per rispettare animationStyle */
+    private fun animMul(): Float {
+        return try {
+            when (org.cheipstudio.speedlauncher.SpeedApp.instance.settingsRepository.animationStyle.value) {
+                SettingsRepository.ANIM_NONE -> 0f
+                SettingsRepository.ANIM_FAST -> 0.55f
+                SettingsRepository.ANIM_STANDARD -> 0.85f
+                else -> 1.0f
+            }
+        } catch (_: Throwable) { 1.0f }
+    }
+    
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
         // v288: registro l'origine per la drop animation al ritorno home
         try {
@@ -148,17 +161,16 @@ class AppRepository(private val context: Context) {
                 }
             } catch (_: Throwable) {}
         } catch (_: Throwable) {}
-        // v293: zoom-out launch - l'icona cresce verso lo schermo PRIMA del launch dell'Activity
-        if (sourceView != null && sourceView.width > 0) {
+        // v300: zoom-out launch - rispetta animationStyle setting
+        val mul = animMul()
+        if (sourceView != null && sourceView.width > 0 && mul > 0f) {
             try {
                 sourceView.animate().cancel()
-                // Forzo hardware layer per anim fluida
                 sourceView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
-                // Zoom OUT istantaneo (cresce + fade) - 150ms ben visibili
                 sourceView.animate()
                     .scaleX(1.8f).scaleY(1.8f)
                     .alpha(0f)
-                    .setDuration(180)
+                    .setDuration((180 * mul).toLong())
                     .setInterpolator(android.view.animation.AccelerateInterpolator(1.8f))
                     .withEndAction {
                         try { doLaunch(app, sourceView) }

@@ -27,12 +27,18 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    /** v225: moltiplicatore durata animazioni in base a settings.animationStyle */
+    /** v300: moltiplicatore durata animazioni in base a settings.animationStyle 
+     *  - Espressivo: durata piena M3 (1.0x)
+     *  - Standard: -15% più snappy (0.85x)
+     *  - Veloce: -45% molto rapido (0.55x)
+     *  - Nessuna: 0 (skippa anim)
+     */
     private fun animMul(): Float {
         return when (SpeedApp.instance.settingsRepository.animationStyle.value) {
             org.cheipstudio.speedlauncher.data.SettingsRepository.ANIM_NONE -> 0f
             org.cheipstudio.speedlauncher.data.SettingsRepository.ANIM_FAST -> 0.55f
-            else -> 1.0f
+            org.cheipstudio.speedlauncher.data.SettingsRepository.ANIM_STANDARD -> 0.85f
+            else -> 1.0f  // ANIM_EXPRESSIVE
         }
     }
     private fun shouldRunAnim(): Boolean = animMul() > 0f

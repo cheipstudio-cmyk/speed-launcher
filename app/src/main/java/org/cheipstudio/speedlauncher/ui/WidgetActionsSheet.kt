@@ -110,9 +110,6 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             val info = mgr.getAppWidgetInfo(item.appWidgetId)
             val isSpeedStats = info?.provider?.className?.contains("SpeedStatsWidgetProvider") == true
             if (isSpeedStats) {
-                // v286: configurazione 3 sezioni del Speed Widget
-                addSpeedWidgetSectionsConfig(root, d, ctx, item.appWidgetId, mgr)
-                
                 val themePrefs = ctx.getSharedPreferences("speed_widget_prefs", Context.MODE_PRIVATE)
                 val curTheme = themePrefs.getString("widget_theme", "transparent") ?: "transparent"
                 val themes = listOf(
