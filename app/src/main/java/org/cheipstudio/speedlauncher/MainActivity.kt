@@ -62,10 +62,23 @@ class MainActivity : AppCompatActivity() {
      */
     private fun tryAnimateAppIconDrop(durMain: Long): Boolean {
         try {
-            val pkg = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchedPackage ?: return false
+            // v295: preferisci UsageStatsManager se disponibile (più accurato in multitasking)
+            val fgPkg = getLastForegroundPackage()
+            val ourLastPkg = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchedPackage
             val ts = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchTimestamp
+            // Se UsageStatsManager ci dice un pkg diverso da quello che abbiamo registrato, 
+            // l'utente è passato a un'altra app via multitasking → usa quello reale
+            val pkg = when {
+                fgPkg != null && fgPkg != ourLastPkg -> {
+                    // Verifico se la app foreground è anche nella home grid (altrimenti niente anim)
+                    if (findHomeIconForPackage(fgPkg) != null) fgPkg else return false
+                }
+                ourLastPkg != null -> ourLastPkg
+                else -> return false
+            }
             // Solo se launch < 5 min fa (evita drop per app aperte molto tempo fa)
-            if (System.currentTimeMillis() - ts > 5 * 60_000L) return false
+            // Senza UsageStats permission, accetto solo se < 2 min dal launch (riduce falsi positivi)
+            if (fgPkg == null && System.currentTimeMillis() - ts > 2 * 60_000L) return false
             // Trovo l'icona corrispondente nella home
             val targetIcon = findHomeIconForPackage(pkg) ?: return false
             val originX = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchOriginX

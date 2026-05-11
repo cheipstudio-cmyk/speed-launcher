@@ -18,6 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:paddingTop="@dimen/home_top_padding"
         android:paddingHorizontal="@dimen/home_horizontal_padding"
         android:paddingBottom="@dimen/home_bottom_padding">

@@ -70,9 +70,10 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             if (aiOn) {
                 _binding?.recommendedRow?.visibility = View.VISIBLE
                 _binding?.recommendedRow?.refresh("drawer")
-                _binding?.recommendedRow?.onAppClick = { app ->
-                    SpeedApp.instance.appRepository.launch(app)
-                    dismissAllowingStateLoss()
+                _binding?.recommendedRow?.onAppClick = { app, cell ->
+                    SpeedApp.instance.appRepository.launch(app, cell)
+                    // v293: ritardo dismiss per anim
+                    cell.postDelayed({ try { dismissAllowingStateLoss() } catch (_: Throwable) {} }, 200L)
                 }
                 // v87: niente long press sulla dock raccomandate
                 _binding?.recommendedRow?.onAppLongPress = null

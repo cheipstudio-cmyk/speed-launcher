@@ -167,10 +167,10 @@ class HomeView @JvmOverloads constructor(
         addView(fadeOverlay)
 
         // v32: setup callback per entrambe le RecommendedView (top + bottom)
-        val onRecClick: (org.cheipstudio.speedlauncher.data.AppInfo) -> Unit = { app ->
-            // v160: usa AppRepository.launch per beneficiare dell'animazione di apertura Pixel-style
+        val onRecClick: (org.cheipstudio.speedlauncher.data.AppInfo, android.view.View) -> Unit = { app, cell ->
+            // v293: passo la cell come sourceView per la zoom anim
             try {
-                SpeedApp.instance.appRepository.launch(app, binding.recommendedRow)
+                SpeedApp.instance.appRepository.launch(app, cell)
             } catch (_: Throwable) {}
             postDelayed({ refreshRecommended() }, 500)
         }

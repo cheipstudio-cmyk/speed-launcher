@@ -25,7 +25,7 @@ class RecommendedView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
 
-    var onAppClick: ((AppInfo) -> Unit)? = null
+    var onAppClick: ((AppInfo, android.view.View) -> Unit)? = null
     var onAppLongPress: ((AppInfo) -> Unit)? = null
     var onContainerLongPress: (() -> Unit)? = null  // v226: long press sul vuoto della dock
     
@@ -102,10 +102,16 @@ class RecommendedView @JvmOverloads constructor(
     }
     
     init {
+        // v293: il root view stesso non clippa (icone possono uscire per drop anim)
+        clipChildren = false
+        clipToPadding = false
         // Card wrapper
         card = MaterialCardView(context).apply {
             radius = 28 * density
             cardElevation = 0f
+            // v293: non clippare children per drop animation (icone si estendono oltre il card)
+            clipChildren = false
+            clipToPadding = false
             // v41: sfondo appena percepibile, no stacco grigio
             setCardBackgroundColor(themedBgColor())
             val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
@@ -117,6 +123,9 @@ class RecommendedView @JvmOverloads constructor(
         row = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
+            // v293: no clip per drop animation
+            clipChildren = false
+            clipToPadding = false
             val padH = ((if (isLand()) 6 else 8) * density).toInt()
             val padV = ((if (isLand()) 4 else 10) * density).toInt()
             setPadding(padH, padV, padH, padV)
@@ -313,7 +322,7 @@ class RecommendedView @JvmOverloads constructor(
         }
         cell.addView(label)
 
-        cell.setOnClickListener { onAppClick?.invoke(app) }
+        cell.setOnClickListener { onAppClick?.invoke(app, cell) }
         // v87: rimosso onLongClickListener — niente modal sulla dock raccomandate
         return cell
     }
