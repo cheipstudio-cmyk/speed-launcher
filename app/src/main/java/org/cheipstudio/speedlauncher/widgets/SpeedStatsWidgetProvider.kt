@@ -8,11 +8,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
 import android.os.BatteryManager
 import android.os.Environment
 import android.os.StatFs
@@ -24,8 +19,8 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 /**
- * v303: Speed Widget Material Expressive con donut rings.
- * Bitmap dim ridotta (62dp), niente setViewVisibility (safe RemoteViews).
+ * v304: Speed Widget - design Material Expressive con icone vector + progress bar lineari.
+ * NIENTE bitmap (causa fallimento RemoteViews bind). 3 sezioni fisse RAM/Memoria/Batteria.
  */
 class SpeedStatsWidgetProvider : AppWidgetProvider() {
 
@@ -71,19 +66,50 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, layoutRes)
 
         // RAM
-        val ramPct = readRamPct(context)
-        views.setImageViewBitmap(R.id.col1_ring, renderDonutRing(context, ramPct, COLOR_RAM, isLight))
-        views.setTextViewText(R.id.col1_subtitle, readRamSubtitle(context))
+        try {
+            val mi = ActivityManager.MemoryInfo()
+            (context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)?.getMemoryInfo(mi)
+            val avail = mi.availMem / (1024 * 1024)
+            val tot = mi.totalMem / (1024 * 1024)
+            val pct = if (tot > 0) 100 - ((avail * 100) / tot).toInt() else 0
+            views.setTextViewText(R.id.col1_value, "$pct%")
+            views.setTextViewText(R.id.col1_subtitle, "$avail MB liberi")
+            views.setProgressBar(R.id.col1_progress, 100, pct, false)
+        } catch (_: Throwable) {
+            views.setTextViewText(R.id.col1_value, "—")
+            views.setTextViewText(R.id.col1_subtitle, "")
+        }
         
         // Memoria
-        val storPct = readStoragePct()
-        views.setImageViewBitmap(R.id.col2_ring, renderDonutRing(context, storPct, COLOR_STORAGE, isLight))
-        views.setTextViewText(R.id.col2_subtitle, readStorageSubtitle())
+        try {
+            val s = StatFs(Environment.getDataDirectory().path)
+            val tot = s.blockCountLong * s.blockSizeLong
+            val avail = s.availableBlocksLong * s.blockSizeLong
+            val pct = if (tot > 0) 100 - ((avail * 100) / tot).toInt() else 0
+            val availGb = avail / (1024 * 1024 * 1024)
+            views.setTextViewText(R.id.col2_value, "$pct%")
+            views.setTextViewText(R.id.col2_subtitle, "$availGb GB liberi")
+            views.setProgressBar(R.id.col2_progress, 100, pct, false)
+        } catch (_: Throwable) {
+            views.setTextViewText(R.id.col2_value, "—")
+            views.setTextViewText(R.id.col2_subtitle, "")
+        }
         
         // Battery
-        val battPct = readBatteryPct(context)
-        views.setImageViewBitmap(R.id.col3_ring, renderDonutRing(context, battPct, COLOR_BATTERY, isLight))
-        views.setTextViewText(R.id.col3_subtitle, readBatterySubtitle(context))
+        try {
+            val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+            val pct = bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 0
+            val charge = try {
+                bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) ?: Int.MIN_VALUE
+            } catch (_: Throwable) { Int.MIN_VALUE }
+            views.setTextViewText(R.id.col3_value, "$pct%")
+            val sub = if (charge > 0 && charge != Int.MIN_VALUE) "${charge / 1000} mAh" else ""
+            views.setTextViewText(R.id.col3_subtitle, sub)
+            views.setProgressBar(R.id.col3_progress, 100, pct, false)
+        } catch (_: Throwable) {
+            views.setTextViewText(R.id.col3_value, "—")
+            views.setTextViewText(R.id.col3_subtitle, "")
+        }
         
         // Tap
         try {
@@ -97,84 +123,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         
         manager.updateAppWidget(id, views)
     }
-
-    /** Bitmap donut ring 62dp con valore al centro */
-    private fun renderDonutRing(context: Context, pct: Int, color: Int, isLight: Boolean): Bitmap {
-        val density = context.resources.displayMetrics.density
-        val size = (62 * density).toInt().coerceAtLeast(120).coerceAtMost(300)
-        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        
-        val strokeW = 7f * density
-        val pad = strokeW / 2f + 2f
-        val rect = RectF(pad, pad, size - pad, size - pad)
-        
-        val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = strokeW
-            strokeCap = Paint.Cap.ROUND
-            this.color = if (isLight) 0x1A000000 else 0x33FFFFFF
-        }
-        canvas.drawArc(rect, 0f, 360f, false, paintTrack)
-        
-        val paintProg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = strokeW
-            strokeCap = Paint.Cap.ROUND
-            this.color = color
-        }
-        val sweep = (pct.coerceIn(0, 100) * 360f / 100f)
-        canvas.drawArc(rect, -90f, sweep, false, paintProg)
-        
-        val paintText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            this.color = if (isLight) Color.parseColor("#1A1A1A") else Color.WHITE
-            textSize = 17 * density
-            textAlign = Paint.Align.CENTER
-            isFakeBoldText = true
-        }
-        val textY = size / 2f - (paintText.fontMetrics.ascent + paintText.fontMetrics.descent) / 2f
-        canvas.drawText("$pct%", size / 2f, textY, paintText)
-        
-        return bmp
-    }
-    
-    private fun readRamPct(context: Context): Int = try {
-        val mi = ActivityManager.MemoryInfo()
-        (context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)?.getMemoryInfo(mi)
-        val avail = mi.availMem / (1024 * 1024)
-        val tot = mi.totalMem / (1024 * 1024)
-        if (tot > 0) 100 - ((avail * 100) / tot).toInt() else 0
-    } catch (_: Throwable) { 0 }
-
-    private fun readRamSubtitle(context: Context): String = try {
-        val mi = ActivityManager.MemoryInfo()
-        (context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)?.getMemoryInfo(mi)
-        "${mi.availMem / (1024 * 1024)} MB"
-    } catch (_: Throwable) { "" }
-
-    private fun readStoragePct(): Int = try {
-        val s = StatFs(Environment.getDataDirectory().path)
-        val tot = s.blockCountLong * s.blockSizeLong
-        val avail = s.availableBlocksLong * s.blockSizeLong
-        if (tot > 0) 100 - ((avail * 100) / tot).toInt() else 0
-    } catch (_: Throwable) { 0 }
-
-    private fun readStorageSubtitle(): String = try {
-        val s = StatFs(Environment.getDataDirectory().path)
-        val avail = s.availableBlocksLong * s.blockSizeLong
-        "${avail / (1024 * 1024 * 1024)} GB"
-    } catch (_: Throwable) { "" }
-
-    private fun readBatteryPct(context: Context): Int = try {
-        val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
-        bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 0
-    } catch (_: Throwable) { 0 }
-
-    private fun readBatterySubtitle(context: Context): String = try {
-        val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
-        val charge = bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) ?: Int.MIN_VALUE
-        if (charge > 0 && charge != Int.MIN_VALUE) "${charge / 1000} mAh" else ""
-    } catch (_: Throwable) { "" }
 
     private fun readTheme(context: Context): String = try {
         val raw = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
@@ -212,10 +160,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         const val THEME_TRANSPARENT = "transparent"
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
-        
-        const val COLOR_RAM = 0xFF4ADE80.toInt()
-        const val COLOR_STORAGE = 0xFF60A5FA.toInt()
-        const val COLOR_BATTERY = 0xFFFB923C.toInt()
 
         fun refreshAll(context: Context) {
             try {

@@ -969,7 +969,14 @@ class HomeView @JvmOverloads constructor(
     fun snapToPage(pageIndex: Int) {
         try {
             val clampedIdx = pageIndex.coerceIn(0, (binding.pagedHome.pageCount - 1).coerceAtLeast(0))
-            binding.pagedHome.snapToPage(clampedIdx, animate = false)
+            // v304: se il container non ha ancora width misurata, post per attendere layout
+            if (binding.pagedHome.width <= 0) {
+                binding.pagedHome.post {
+                    try { binding.pagedHome.snapToPage(clampedIdx, animate = false) } catch (_: Throwable) {}
+                }
+            } else {
+                binding.pagedHome.snapToPage(clampedIdx, animate = false)
+            }
         } catch (_: Throwable) {
             try { binding.pagedHome.snapToPage(0, animate = false) } catch (_: Throwable) {}
         }
@@ -977,7 +984,13 @@ class HomeView @JvmOverloads constructor(
     
     fun snapToFirstHomePage() {
         if (isRssOverlayOpen) closeRssOverlay()
-        binding.pagedHome.snapToPage(0, animate = false)
+        if (binding.pagedHome.width <= 0) {
+            binding.pagedHome.post {
+                try { binding.pagedHome.snapToPage(0, animate = false) } catch (_: Throwable) {}
+            }
+        } else {
+            binding.pagedHome.snapToPage(0, animate = false)
+        }
     }
     
     // v265: edge-swipe detector per aprire RSS dal bordo sinistro

@@ -21,18 +21,40 @@
             android:layout_weight="1" 
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="2dp">
+            android:padding="4dp">
             
             <ImageView
-                android:id="@+id/col1_ring"
-                android:layout_width="62dp"
-                android:layout_height="62dp" />
+                android:id="@+id/col1_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_widget_memory" />
+            
+            <TextView android:id="@+id/col1_value"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#1A1A1A"
+                android:textSize="24sp"
+                android:text="—" />
+            
+            <ProgressBar
+                android:id="@+id/col1_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="#1F8048"
+                android:progressBackgroundTint="#33000000" />
             
             <TextView 
                 android:id="@+id/col1_label"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:textColor="#1F8048"
                 android:textSize="11sp"
                 android:text="RAM" />
@@ -54,18 +76,40 @@
             android:layout_weight="1" 
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="2dp">
+            android:padding="4dp">
             
             <ImageView
-                android:id="@+id/col2_ring"
-                android:layout_width="62dp"
-                android:layout_height="62dp" />
+                android:id="@+id/col2_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_widget_storage" />
+            
+            <TextView android:id="@+id/col2_value"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#1A1A1A"
+                android:textSize="24sp"
+                android:text="—" />
+            
+            <ProgressBar
+                android:id="@+id/col2_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="#1F4DB0"
+                android:progressBackgroundTint="#33000000" />
             
             <TextView 
                 android:id="@+id/col2_label"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:textColor="#1F4DB0"
                 android:textSize="11sp"
                 android:text="MEMORIA" />
@@ -87,18 +131,40 @@
             android:layout_weight="1" 
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="2dp">
+            android:padding="4dp">
             
             <ImageView
-                android:id="@+id/col3_ring"
-                android:layout_width="62dp"
-                android:layout_height="62dp" />
+                android:id="@+id/col3_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_widget_battery" />
+            
+            <TextView android:id="@+id/col3_value"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#1A1A1A"
+                android:textSize="24sp"
+                android:text="—" />
+            
+            <ProgressBar
+                android:id="@+id/col3_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="#A0541F"
+                android:progressBackgroundTint="#33000000" />
             
             <TextView 
                 android:id="@+id/col3_label"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:textColor="#A0541F"
                 android:textSize="11sp"
                 android:text="BATTERIA" />
