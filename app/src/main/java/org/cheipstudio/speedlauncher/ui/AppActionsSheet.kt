@@ -20,6 +20,7 @@ class AppActionsSheet : BottomSheetDialogFragment() {
     var isPinned: ((AppInfo) -> Boolean)? = null
 
     private var app: AppInfo? = null
+    private var fromDrawer: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -54,12 +55,12 @@ class AppActionsSheet : BottomSheetDialogFragment() {
         }
 
         // v24: Hide / Show toggle
+        // v303: visibile SOLO se aperto dal drawer (non ha senso da home/dock/folder)
         val settings = SpeedApp.instance.settingsRepository
         val hideLabel = view.findViewById<TextView>(R.id.hideLabel)
         val actionHide = view.findViewById<View>(R.id.actionHide)
         val isHidden = settings.isAppHidden(a.key)
-        // v252: nascondi voce "Rimuovi dal drawer" se drawer è disattivato (non ha senso)
-        if (settings.drawerEnabled.value == false) {
+        if (!fromDrawer || settings.drawerEnabled.value == false) {
             actionHide.visibility = View.GONE
         } else {
             hideLabel.text = getString(if (isHidden) R.string.action_unhide else R.string.action_hide)
@@ -98,8 +99,11 @@ class AppActionsSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(app: AppInfo): AppActionsSheet {
-            return AppActionsSheet().apply { this.app = app }
+        fun newInstance(app: AppInfo, fromDrawer: Boolean = false): AppActionsSheet {
+            return AppActionsSheet().apply { 
+                this.app = app
+                this.fromDrawer = fromDrawer
+            }
         }
     }
 }

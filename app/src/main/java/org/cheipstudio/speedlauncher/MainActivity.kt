@@ -681,7 +681,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
                 cleanupOldDrawer()
             }
             val sheet = AppDrawerSheet()
-            sheet.onAppLongPress = { app -> openAppActions(app) }
+            sheet.onAppLongPress = { app -> openAppActions(app, fromDrawer = true) }
             sheet.onDismissCallback = { 
                 drawerSheet = null
                 animateHomeBlur(false)
@@ -744,7 +744,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         if (drawerSheet?.isAdded == true || drawerSheet?.isVisible == true) return
         cleanupOldDrawer()
         drawerSheet = AppDrawerSheet.newInstance(focusSearch = true).also {
-            it.onAppLongPress = { app -> openAppActions(app) }
+            it.onAppLongPress = { app -> openAppActions(app, fromDrawer = true) }
             try { it.show(supportFragmentManager, "drawer") } catch (_: Throwable) {}
         }
     }
@@ -803,9 +803,9 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         }
     }
 
-    private fun openAppActions(app: AppInfo) {
+    private fun openAppActions(app: AppInfo, fromDrawer: Boolean = false) {
         if (appActionsSheet?.isAdded == true) return
-        appActionsSheet = AppActionsSheet.newInstance(app).also {
+        appActionsSheet = AppActionsSheet.newInstance(app, fromDrawer).also {
             it.isPinned = { a -> binding.homeView.isPinned(a) }
             it.onPinToggle = { a ->
                 if (binding.homeView.isPinned(a)) binding.homeView.unpinApp(a)

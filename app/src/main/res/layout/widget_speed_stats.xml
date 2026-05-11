@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_widget_speed_stats"
-    android:padding="10dp">
+    android:padding="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,134 +14,102 @@
         android:gravity="center"
         android:baselineAligned="false">
 
-        <!-- Colonna 1 RAM -->
         <LinearLayout 
             android:id="@+id/col1_root"
             android:layout_width="0dp" 
             android:layout_height="match_parent"
             android:layout_weight="1" 
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:padding="2dp">
             
-            <!-- Ring + valore centrato (altezza ≥ ~90dp) -->
             <ImageView
                 android:id="@+id/col1_ring"
-                android:layout_width="76dp"
-                android:layout_height="76dp"
-                android:scaleType="fitCenter" />
-            
-            <!-- Valore COMPACT visibile solo in compact (altezza < ~90dp) -->
-            <TextView android:id="@+id/col1_value_compact"
-                android:layout_width="wrap_content" 
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp"
-                android:text="—"
-                android:visibility="gone" />
+                android:layout_width="62dp"
+                android:layout_height="62dp" />
             
             <TextView 
                 android:id="@+id/col1_label"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#4ADE80"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
                 android:text="RAM" />
             
             <TextView 
                 android:id="@+id/col1_subtitle"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="1dp"
                 android:textColor="#80FFFFFF"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:text="" />
         </LinearLayout>
 
-        <!-- Colonna 2 MEMORIA -->
         <LinearLayout 
             android:id="@+id/col2_root"
             android:layout_width="0dp" 
             android:layout_height="match_parent"
             android:layout_weight="1" 
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:padding="2dp">
             
             <ImageView
                 android:id="@+id/col2_ring"
-                android:layout_width="76dp"
-                android:layout_height="76dp"
-                android:scaleType="fitCenter" />
-            
-            <TextView android:id="@+id/col2_value_compact"
-                android:layout_width="wrap_content" 
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp"
-                android:text="—"
-                android:visibility="gone" />
+                android:layout_width="62dp"
+                android:layout_height="62dp" />
             
             <TextView 
                 android:id="@+id/col2_label"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#60A5FA"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
                 android:text="MEMORIA" />
             
             <TextView 
                 android:id="@+id/col2_subtitle"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="1dp"
                 android:textColor="#80FFFFFF"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:text="" />
         </LinearLayout>
 
-        <!-- Colonna 3 BATTERIA -->
         <LinearLayout 
             android:id="@+id/col3_root"
             android:layout_width="0dp" 
             android:layout_height="match_parent"
             android:layout_weight="1" 
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:padding="2dp">
             
             <ImageView
                 android:id="@+id/col3_ring"
-                android:layout_width="76dp"
-                android:layout_height="76dp"
-                android:scaleType="fitCenter" />
-            
-            <TextView android:id="@+id/col3_value_compact"
-                android:layout_width="wrap_content" 
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp"
-                android:text="—"
-                android:visibility="gone" />
+                android:layout_width="62dp"
+                android:layout_height="62dp" />
             
             <TextView 
                 android:id="@+id/col3_label"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="#FB923C"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
                 android:text="BATTERIA" />
             
             <TextView 
                 android:id="@+id/col3_subtitle"
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="1dp"
                 android:textColor="#80FFFFFF"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:text="" />
         </LinearLayout>
     </LinearLayout>

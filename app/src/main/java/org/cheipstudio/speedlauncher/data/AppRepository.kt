@@ -116,6 +116,8 @@ class AppRepository(private val context: Context) {
         @Volatile var lastLaunchTimestamp: Long = 0L
         /** v292: pagina home da cui l'app è stata aperta - per ritornare alla stessa pagina */
         @Volatile var lastLaunchPageIndex: Int = -1
+        /** v303: ultima pagina home corrente, aggiornata da HomeView ogni volta che cambia */
+        @Volatile var currentHomePageIndex: Int = 0
         /** v292: era dentro una folder? folder uuid */
         @Volatile var lastLaunchFolderUuid: String? = null
     }
@@ -148,6 +150,8 @@ class AppRepository(private val context: Context) {
                 lastLaunchOriginY = 0f
             }
             // v292: registro la pagina home da cui parte l'app (se proviene dalla home grid)
+            // v303: fallback alla pagina home corrente se la sourceView non è in IconGridView
+            //       (es. lancio da drawer, dock, folder)
             lastLaunchPageIndex = -1
             lastLaunchFolderUuid = null
             try {
@@ -158,6 +162,10 @@ class AppRepository(private val context: Context) {
                         break
                     }
                     v = v.parent as? android.view.View
+                }
+                // Se non trovato (sourceView dock/drawer/folder), uso la pagina corrente della home
+                if (lastLaunchPageIndex < 0) {
+                    lastLaunchPageIndex = currentHomePageIndex
                 }
             } catch (_: Throwable) {}
         } catch (_: Throwable) {}

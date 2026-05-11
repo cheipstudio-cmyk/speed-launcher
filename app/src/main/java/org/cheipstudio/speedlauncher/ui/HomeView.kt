@@ -290,6 +290,8 @@ class HomeView @JvmOverloads constructor(
         binding.pagedHome.onPageChanged = { idx -> 
             updatePageIndicator()
             try { binding.widgetSlot.pageIndex = idx } catch (_: Throwable) {}
+            // v303: notifico AppRepository la pagina corrente per ripristinare al ritorno da un'app
+            try { org.cheipstudio.speedlauncher.data.AppRepository.currentHomePageIndex = idx } catch (_: Throwable) {}
         }
         // v266: parallax pagine durante swipe orizzontale
         binding.pagedHome.onScrollFraction = { fraction ->

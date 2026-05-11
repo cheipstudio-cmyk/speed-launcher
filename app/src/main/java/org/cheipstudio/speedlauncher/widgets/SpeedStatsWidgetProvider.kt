@@ -16,7 +16,6 @@ import android.graphics.RectF
 import android.os.BatteryManager
 import android.os.Environment
 import android.os.StatFs
-import android.view.View
 import android.widget.RemoteViews
 import org.cheipstudio.speedlauncher.MainActivity
 import org.cheipstudio.speedlauncher.R
@@ -25,9 +24,8 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 /**
- * v302: Speed Widget Material Expressive con donut rings.
- * 3 sezioni fisse (RAM, Memoria, Batteria).
- * Altezza adattiva: full (ring + label + sub), compact (solo valore grande + label).
+ * v303: Speed Widget Material Expressive con donut rings.
+ * Bitmap dim ridotta (62dp), niente setViewVisibility (safe RemoteViews).
  */
 class SpeedStatsWidgetProvider : AppWidgetProvider() {
 
@@ -72,30 +70,20 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         }
         val views = RemoteViews(context.packageName, layoutRes)
 
-        // Detect altezza widget
-        val widgetMinH = try {
-            manager.getAppWidgetOptions(id)?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
-        } catch (_: Throwable) { 0 }
-        // < 90dp = compact (no anelli, solo valore + label)
-        // 90-130 = medium (anelli ma no subtitle)
-        // >= 130 = full
-        val isCompact = widgetMinH in 1..89
-        val isMedium = widgetMinH in 90..129
-        
         // RAM
         val ramPct = readRamPct(context)
-        val ramSubtitle = readRamSubtitle(context)
-        applyColumn(context, views, 1, ramPct, ramSubtitle, COLOR_RAM, isCompact, isMedium, isLight)
+        views.setImageViewBitmap(R.id.col1_ring, renderDonutRing(context, ramPct, COLOR_RAM, isLight))
+        views.setTextViewText(R.id.col1_subtitle, readRamSubtitle(context))
         
         // Memoria
         val storPct = readStoragePct()
-        val storSubtitle = readStorageSubtitle()
-        applyColumn(context, views, 2, storPct, storSubtitle, COLOR_STORAGE, isCompact, isMedium, isLight)
+        views.setImageViewBitmap(R.id.col2_ring, renderDonutRing(context, storPct, COLOR_STORAGE, isLight))
+        views.setTextViewText(R.id.col2_subtitle, readStorageSubtitle())
         
         // Battery
         val battPct = readBatteryPct(context)
-        val battSubtitle = readBatterySubtitle(context)
-        applyColumn(context, views, 3, battPct, battSubtitle, COLOR_BATTERY, isCompact, isMedium, isLight)
+        views.setImageViewBitmap(R.id.col3_ring, renderDonutRing(context, battPct, COLOR_BATTERY, isLight))
+        views.setTextViewText(R.id.col3_subtitle, readBatterySubtitle(context))
         
         // Tap
         try {
@@ -110,41 +98,17 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         manager.updateAppWidget(id, views)
     }
 
-    private fun applyColumn(
-        context: Context, views: RemoteViews, colIdx: Int,
-        pct: Int, subtitle: String, color: Int,
-        isCompact: Boolean, isMedium: Boolean, isLight: Boolean
-    ) {
-        val ids = colIds(colIdx)
-        if (isCompact) {
-            // Nascondo ring, mostro testo grande
-            views.setViewVisibility(ids.ring, View.GONE)
-            views.setViewVisibility(ids.valueCompact, View.VISIBLE)
-            views.setViewVisibility(ids.subtitle, View.GONE)
-            views.setTextViewText(ids.valueCompact, "$pct%")
-        } else {
-            // Anello + valore al centro (bitmap)
-            views.setViewVisibility(ids.ring, View.VISIBLE)
-            views.setViewVisibility(ids.valueCompact, View.GONE)
-            views.setViewVisibility(ids.subtitle, if (isMedium) View.GONE else View.VISIBLE)
-            val bitmap = renderDonutRing(context, pct, color, isLight)
-            views.setImageViewBitmap(ids.ring, bitmap)
-            views.setTextViewText(ids.subtitle, subtitle)
-        }
-    }
-
-    /** Genera bitmap donut con valore al centro */
+    /** Bitmap donut ring 62dp con valore al centro */
     private fun renderDonutRing(context: Context, pct: Int, color: Int, isLight: Boolean): Bitmap {
         val density = context.resources.displayMetrics.density
-        val size = (76 * density).toInt()
+        val size = (62 * density).toInt().coerceAtLeast(120).coerceAtMost(300)
         val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         
-        val strokeW = 9f * density
-        val pad = strokeW / 2f + 1f
+        val strokeW = 7f * density
+        val pad = strokeW / 2f + 2f
         val rect = RectF(pad, pad, size - pad, size - pad)
         
-        // Track (background ring)
         val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = strokeW
@@ -153,7 +117,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         }
         canvas.drawArc(rect, 0f, 360f, false, paintTrack)
         
-        // Progress arc colorato
         val paintProg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = strokeW
@@ -163,22 +126,18 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         val sweep = (pct.coerceIn(0, 100) * 360f / 100f)
         canvas.drawArc(rect, -90f, sweep, false, paintProg)
         
-        // Valore al centro
         val paintText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.color = if (isLight) Color.parseColor("#1A1A1A") else Color.WHITE
-            textSize = 19 * density
+            textSize = 17 * density
             textAlign = Paint.Align.CENTER
             isFakeBoldText = true
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         }
-        val text = "$pct%"
         val textY = size / 2f - (paintText.fontMetrics.ascent + paintText.fontMetrics.descent) / 2f
-        canvas.drawText(text, size / 2f, textY, paintText)
+        canvas.drawText("$pct%", size / 2f, textY, paintText)
         
         return bmp
     }
     
-    // ============== READERS ==============
     private fun readRamPct(context: Context): Int = try {
         val mi = ActivityManager.MemoryInfo()
         (context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)?.getMemoryInfo(mi)
@@ -190,7 +149,7 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
     private fun readRamSubtitle(context: Context): String = try {
         val mi = ActivityManager.MemoryInfo()
         (context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)?.getMemoryInfo(mi)
-        "${mi.availMem / (1024 * 1024)} MB liberi"
+        "${mi.availMem / (1024 * 1024)} MB"
     } catch (_: Throwable) { "" }
 
     private fun readStoragePct(): Int = try {
@@ -203,7 +162,7 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
     private fun readStorageSubtitle(): String = try {
         val s = StatFs(Environment.getDataDirectory().path)
         val avail = s.availableBlocksLong * s.blockSizeLong
-        "${avail / (1024 * 1024 * 1024)} GB liberi"
+        "${avail / (1024 * 1024 * 1024)} GB"
     } catch (_: Throwable) { "" }
 
     private fun readBatteryPct(context: Context): Int = try {
@@ -217,7 +176,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         if (charge > 0 && charge != Int.MIN_VALUE) "${charge / 1000} mAh" else ""
     } catch (_: Throwable) { "" }
 
-    // ============== HELPERS ==============
     private fun readTheme(context: Context): String = try {
         val raw = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
             .getString(KEY_THEME, THEME_TRANSPARENT)
@@ -233,14 +191,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             nightMode != Configuration.UI_MODE_NIGHT_YES
         } catch (_: Throwable) { false }
     }
-
-    private fun colIds(c: Int): ColIds = when (c) {
-        1 -> ColIds(R.id.col1_root, R.id.col1_ring, R.id.col1_value_compact, R.id.col1_label, R.id.col1_subtitle)
-        2 -> ColIds(R.id.col2_root, R.id.col2_ring, R.id.col2_value_compact, R.id.col2_label, R.id.col2_subtitle)
-        else -> ColIds(R.id.col3_root, R.id.col3_ring, R.id.col3_value_compact, R.id.col3_label, R.id.col3_subtitle)
-    }
-    
-    private data class ColIds(val root: Int, val ring: Int, val valueCompact: Int, val label: Int, val subtitle: Int)
 
     private fun logError(context: Context, tag: String, t: Throwable) {
         try {
