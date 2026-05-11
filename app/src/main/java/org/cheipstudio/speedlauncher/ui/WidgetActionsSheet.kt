@@ -304,7 +304,7 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
     /** v286: aggiunge UI per configurare le 3 sezioni del Speed Widget */
     private fun addSpeedWidgetSectionsConfig(
         root: android.widget.LinearLayout,
-        d: android.app.Dialog,
+        density: Float,
         ctx: Context,
         widgetId: Int,
         mgr: android.appwidget.AppWidgetManager
@@ -344,7 +344,7 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             val selectedIdx = sections.indexOfFirst { it.first == curSection }.coerceAtLeast(0)
             
             addSegmentedSection(
-                root, d, labels[i], sectionLabels, selectedIdx
+                root, density, labels[i], sectionLabels, selectedIdx
             ) { idx ->
                 val newSection = sections[idx].first
                 // Vincolo: se la nuova sezione è già in un altro slot, scambia
