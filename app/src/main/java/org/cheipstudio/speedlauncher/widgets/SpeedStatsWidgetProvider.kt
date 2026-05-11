@@ -213,9 +213,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_memory)
         views.setInt(ids.icon, "setColorFilter", 0xFF7AE582.toInt())
         views.setProgressBar(ids.progress, 100, ramPct, false)
-        try {
-            views.setInt(ids.progress, "setProgressDrawable", R.drawable.progress_widget_ram)
-        } catch (_: Throwable) {}
     }
 
     private fun renderStorage(context: Context, views: RemoteViews, ids: ColIds) {
@@ -230,9 +227,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_storage)
         views.setInt(ids.icon, "setColorFilter", 0xFF82AAFF.toInt())
         views.setProgressBar(ids.progress, 100, storPct, false)
-        try {
-            views.setInt(ids.progress, "setProgressDrawable", R.drawable.progress_widget_storage)
-        } catch (_: Throwable) {}
     }
 
     private fun renderBattery(context: Context, views: RemoteViews, ids: ColIds) {
@@ -250,9 +244,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_battery)
         views.setInt(ids.icon, "setColorFilter", 0xFFFFB86C.toInt())
         views.setProgressBar(ids.progress, 100, battPct, false)
-        try {
-            views.setInt(ids.progress, "setProgressDrawable", R.drawable.progress_widget_unified)
-        } catch (_: Throwable) {}
     }
 
     private fun renderDate(context: Context, views: RemoteViews, ids: ColIds) {
@@ -316,9 +307,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setImageViewResource(ids.icon, R.drawable.ic_widget_volume)
         views.setInt(ids.icon, "setColorFilter", 0xFFFFCB6B.toInt())
         views.setProgressBar(ids.progress, 100, pct, false)
-        try {
-            views.setInt(ids.progress, "setProgressDrawable", R.drawable.progress_widget_unified)
-        } catch (_: Throwable) {}
     }
 
     private fun renderBrightness(context: Context, views: RemoteViews, ids: ColIds) {
@@ -334,9 +322,6 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         views.setInt(ids.icon, "setColorFilter", 0xFFFFE066.toInt())
         views.setProgressBar(ids.progress, 100, pct, false)
         views.setViewVisibility(ids.subtitle, View.GONE)
-        try {
-            views.setInt(ids.progress, "setProgressDrawable", R.drawable.progress_widget_unified)
-        } catch (_: Throwable) {}
     }
 
     // ============= TAP HANDLERS =============
