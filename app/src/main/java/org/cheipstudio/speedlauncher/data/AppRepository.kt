@@ -148,34 +148,28 @@ class AppRepository(private val context: Context) {
                 }
             } catch (_: Throwable) {}
         } catch (_: Throwable) {}
-        // v292: zoom-out launch (opposto della drop) - l'icona "esplode" verso lo schermo dell'app
+        // v293: zoom-out launch - l'icona cresce verso lo schermo PRIMA del launch dell'Activity
         if (sourceView != null && sourceView.width > 0) {
             try {
                 sourceView.animate().cancel()
-                // Subito piccolo squash percettivo
+                // Forzo hardware layer per anim fluida
+                sourceView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+                // Zoom OUT istantaneo (cresce + fade) - 150ms ben visibili
                 sourceView.animate()
-                    .scaleX(0.92f).scaleY(0.92f)
-                    .setDuration(50)
-                    .setInterpolator(android.view.animation.AccelerateInterpolator(1.5f))
+                    .scaleX(1.8f).scaleY(1.8f)
+                    .alpha(0f)
+                    .setDuration(180)
+                    .setInterpolator(android.view.animation.AccelerateInterpolator(1.8f))
                     .withEndAction {
-                        try {
-                            // Zoom out crescente verso lo schermo  
-                            sourceView.animate()
-                                .scaleX(1.6f).scaleY(1.6f)
-                                .alpha(0.3f)
-                                .setDuration(120)
-                                .setInterpolator(android.view.animation.AccelerateInterpolator(2.0f))
-                                .start()
-                            doLaunch(app, sourceView)
-                            // Reset al ritorno (dopo che onResume avrà tempo di prendere il controllo)
-                            sourceView.postDelayed({
-                                try {
-                                    sourceView.scaleX = 1f; sourceView.scaleY = 1f; sourceView.alpha = 1f
-                                } catch (_: Throwable) {}
-                            }, 800L)
-                        } catch (_: Throwable) {
-                            doLaunch(app, sourceView)
-                        }
+                        try { doLaunch(app, sourceView) }
+                        catch (_: Throwable) {}
+                        // Reset al ritorno
+                        sourceView.postDelayed({
+                            try {
+                                sourceView.scaleX = 1f; sourceView.scaleY = 1f; sourceView.alpha = 1f
+                                sourceView.setLayerType(android.view.View.LAYER_TYPE_NONE, null)
+                            } catch (_: Throwable) {}
+                        }, 700L)
                     }
                     .start()
                 return

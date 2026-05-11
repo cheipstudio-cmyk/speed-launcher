@@ -41,7 +41,7 @@ object FolderSheet {
     
     /** v132: callbacks come dataclass per riapertura */
     data class FolderCallbacks(
-        val onLaunch: (AppInfo) -> Unit,
+        val onLaunch: (AppInfo, android.view.View) -> Unit,
         val onRename: (String) -> Unit,
         val onRemoveFromFolder: (AppInfo) -> Unit,
         val onDeleteFolder: () -> Unit
@@ -63,7 +63,7 @@ object FolderSheet {
     fun show(
         context: Context,
         folder: HomeItem,
-        onLaunch: (AppInfo) -> Unit,
+        onLaunch: (AppInfo, android.view.View) -> Unit,
         onRename: (String) -> Unit,
         onRemoveFromFolder: (AppInfo) -> Unit,
         onDeleteFolder: () -> Unit
@@ -259,9 +259,11 @@ object FolderSheet {
                 .start()
         }
 
-        val onLaunchAndDismiss: (AppInfo) -> Unit = { app ->
-            onLaunch(app)
-            closeFolder()
+        // v293: la cell viene passata al onLaunch per zoom anim
+        val onLaunchAndDismiss: (AppInfo, android.view.View) -> Unit = { app, cell ->
+            onLaunch(app, cell)
+            // v293: ritarda close folder per dare tempo all'anim
+            cell.postDelayed({ closeFolder() }, 200L)
         }
         for (app in folderApps) grid.addView(buildAppCell(context, app, onLaunchAndDismiss, onRemoveFromFolder, textColor))
 
@@ -448,7 +450,7 @@ object FolderSheet {
     private fun buildAppCell(
         context: Context,
         app: AppInfo,
-        onLaunch: (AppInfo) -> Unit,
+        onLaunch: (AppInfo, android.view.View) -> Unit,
         onRemoveFromFolder: (AppInfo) -> Unit,
         labelTextColor: Int
     ): View {
@@ -499,7 +501,7 @@ object FolderSheet {
         }
         cell.addView(label)
 
-        cell.setOnClickListener { onLaunch(app) }
+        cell.setOnClickListener { onLaunch(app, cell) }
         cell.setOnLongClickListener {
             onRemoveFromFolder(app)
             true

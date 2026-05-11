@@ -113,22 +113,7 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         renderColumn(context, views, 3, sections[2], veryCompact, mediumCompact, valueTextSize,
                      progressVisible, subtitleVisible, labelVisible)
 
-        // Refresh button
-        try {
-            if (!autoRefresh) {
-                views.setViewVisibility(R.id.refreshBtn, View.VISIBLE)
-                val refreshIntent = Intent(context, SpeedStatsWidgetProvider::class.java).apply {
-                    action = ACTION_REFRESH
-                }
-                val pi = PendingIntent.getBroadcast(
-                    context, 1, refreshIntent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                )
-                views.setOnClickPendingIntent(R.id.refreshBtn, pi)
-            } else {
-                views.setViewVisibility(R.id.refreshBtn, View.GONE)
-            }
-        } catch (_: Throwable) {}
+        // v293: refresh button rimosso - causa potenziale di crash su View senza handler clickable
 
         // Fallback tap su root (apre launcher) - viene OVERRIDE da renderColumn se la sezione 
         // ha un tap handler. RemoteViews permette OnClickPendingIntent solo se si applica a un 
@@ -173,7 +158,7 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
                 else -> renderRam(context, views, ids)
             }
             
-            // Tap handler per la colonna
+            // v293: tap per colonna (col_root è clickable nel layout)
             val tapIntent = tapIntentForSection(context, section)
             if (tapIntent != null) {
                 val pi = PendingIntent.getActivity(

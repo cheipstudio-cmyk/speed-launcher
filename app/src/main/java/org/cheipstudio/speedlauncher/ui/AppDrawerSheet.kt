@@ -54,7 +54,8 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         adapter = AppListAdapter(
             onClick = { app, source ->
                 SpeedApp.instance.appRepository.launch(app, source)
-                dismissAllowingStateLoss()
+                // v293: ritarda dismiss per dare tempo alla zoom anim di essere visibile
+                source.postDelayed({ try { dismissAllowingStateLoss() } catch (_: Throwable) {} }, 200L)
             },
             onLongPress = { app ->
                 onAppLongPress?.invoke(app)

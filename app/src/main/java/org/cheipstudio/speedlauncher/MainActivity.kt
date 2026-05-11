@@ -156,12 +156,18 @@ class MainActivity : AppCompatActivity() {
         return null
     }
     
-    /** Cerca ricorsivamente un'icona col packageName dentro un ViewGroup (per dock) */
+    /** v293: Cerca ricorsivamente un'icona col packageName dentro un ViewGroup (per dock) */
     private fun findIconInGroup(group: android.view.ViewGroup?, pkg: String): android.view.View? {
         if (group == null || group.visibility != android.view.View.VISIBLE) return null
         for (i in 0 until group.childCount) {
             val child = group.getChildAt(i)
+            // IconCellView match diretto
             if (child is org.cheipstudio.speedlauncher.ui.IconCellView && child.packageName == pkg) {
+                return child
+            }
+            // v293: dock cell match per tag "dockcell:<pkg>"
+            val tag = child.tag as? String
+            if (tag != null && tag == "dockcell:$pkg") {
                 return child
             }
             if (child is android.view.ViewGroup) {

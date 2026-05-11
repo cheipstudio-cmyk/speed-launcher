@@ -275,6 +275,8 @@ class RecommendedView @JvmOverloads constructor(
             isClickable = true
             isFocusable = true
             background = ContextCompat.getDrawable(context, R.drawable.bg_app_icon_ripple_themed)
+            // v293: tag = packageName per drop animation
+            tag = "dockcell:${app.packageName}"
         }
         val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         cell.layoutParams = lp

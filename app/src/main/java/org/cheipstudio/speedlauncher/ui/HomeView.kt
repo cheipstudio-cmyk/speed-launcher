@@ -546,7 +546,7 @@ class HomeView @JvmOverloads constructor(
         FolderSheet.show(
             context = context,
             folder = folder,
-            onLaunch = { app -> SpeedApp.instance.appRepository.launch(app, this) },
+            onLaunch = { app, view -> SpeedApp.instance.appRepository.launch(app, view) },
             onRename = { newName ->
                 var updated: HomeItem? = null
                 pages.forEach { grid ->
