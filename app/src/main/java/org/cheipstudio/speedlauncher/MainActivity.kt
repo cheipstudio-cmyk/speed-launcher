@@ -640,8 +640,14 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             drawerSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
             homeMenuSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
             appActionsSheet?.takeIf { it.isAdded }?.dismissAllowingStateLoss()
-            // v27: pressione tasto home da home → torna a pagina 1 con animazione
-            binding.homeView.snapToFirstPage()
+            // v305: SOLO se NON stiamo tornando da un app appena lanciata (onResume gestirà il ripristino).
+            // Altrimenti il tasto home dall'app forzava sempre pagina 1.
+            val lastTs = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchTimestamp
+            val isRecentAppReturn = lastTs > 0 && (System.currentTimeMillis() - lastTs) < 5 * 60_000L
+            if (!isRecentAppReturn) {
+                // pressione tasto home da home stessa → torna a pagina 1 con animazione
+                binding.homeView.snapToFirstPage()
+            }
         }
     }
 

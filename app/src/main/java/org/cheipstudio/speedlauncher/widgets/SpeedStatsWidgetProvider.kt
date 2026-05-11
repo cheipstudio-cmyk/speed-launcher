@@ -64,6 +64,14 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             else -> R.layout.widget_speed_stats
         }
         val views = RemoteViews(context.packageName, layoutRes)
+        
+        // v305: altezza adattiva
+        val widgetMinH = try {
+            manager.getAppWidgetOptions(id)?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 130) ?: 130
+        } catch (_: Throwable) { 130 }
+        val showSubtitle = widgetMinH >= 130
+        val showLabel = widgetMinH >= 90
+        applyVisibility(views, showLabel, showSubtitle)
 
         // RAM
         try {
@@ -124,6 +132,19 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         manager.updateAppWidget(id, views)
     }
 
+    private fun applyVisibility(views: RemoteViews, showLabel: Boolean, showSubtitle: Boolean) {
+        try {
+            val labelVis = if (showLabel) android.view.View.VISIBLE else android.view.View.GONE
+            val subVis = if (showSubtitle) android.view.View.VISIBLE else android.view.View.GONE
+            views.setViewVisibility(R.id.col1_label, labelVis)
+            views.setViewVisibility(R.id.col2_label, labelVis)
+            views.setViewVisibility(R.id.col3_label, labelVis)
+            views.setViewVisibility(R.id.col1_subtitle, subVis)
+            views.setViewVisibility(R.id.col2_subtitle, subVis)
+            views.setViewVisibility(R.id.col3_subtitle, subVis)
+        } catch (_: Throwable) {}
+    }
+    
     private fun readTheme(context: Context): String = try {
         val raw = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
             .getString(KEY_THEME, THEME_TRANSPARENT)
