@@ -963,6 +963,16 @@ class HomeView @JvmOverloads constructor(
         } catch (_: Throwable) { false }
     }
     
+    /** v292: snap a una specifica pagina home senza animazione (per ritorno da app) */
+    fun snapToPage(pageIndex: Int) {
+        try {
+            val clampedIdx = pageIndex.coerceIn(0, (binding.pagedHome.pageCount - 1).coerceAtLeast(0))
+            binding.pagedHome.snapToPage(clampedIdx, animate = false)
+        } catch (_: Throwable) {
+            try { binding.pagedHome.snapToPage(0, animate = false) } catch (_: Throwable) {}
+        }
+    }
+    
     fun snapToFirstHomePage() {
         if (isRssOverlayOpen) closeRssOverlay()
         binding.pagedHome.snapToPage(0, animate = false)

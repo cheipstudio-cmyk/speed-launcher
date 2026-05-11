@@ -76,10 +76,11 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         val autoRefresh = readAutoRefresh(context)
         val isLight = isLightTheme(context, theme)
 
-        val layoutRes = if (isLight && theme != THEME_TRANSPARENT)
-            R.layout.widget_speed_stats_light
-        else
-            R.layout.widget_speed_stats
+        val layoutRes = when {
+            theme == THEME_TRANSPARENT -> R.layout.widget_speed_stats_transparent
+            isLight -> R.layout.widget_speed_stats_light
+            else -> R.layout.widget_speed_stats
+        }
 
         val views = RemoteViews(context.packageName, layoutRes)
 
@@ -98,16 +99,8 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             else -> 22f
         }
 
-        // Background
-        try {
-            val bgRes = when (theme) {
-                THEME_TRANSPARENT -> R.drawable.bg_widget_speed_stats_transparent
-                THEME_LIGHT -> R.drawable.bg_widget_speed_stats_light
-                THEME_DARK -> R.drawable.bg_widget_speed_stats
-                else -> if (isLight) R.drawable.bg_widget_speed_stats_light else R.drawable.bg_widget_speed_stats
-            }
-            views.setInt(R.id.widgetRoot, "setBackgroundResource", bgRes)
-        } catch (_: Throwable) {}
+        // v289: background NON settato via setInt - non è @RemotableViewMethod su tutti gli Android
+        // Il layout XML determina il background. Per il tema transparent forzo il layout dark via layoutRes già selezionato sopra.
 
         // Leggo le 3 sezioni configurate per questo widget
         val sections = readSections(context, id)

@@ -121,23 +121,66 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Throwable) { return false }
     }
     
-    /** Cerca l'IconCellView nella home grid che ha questo packageName */
+    /** 
+     * v292: Cerca l'icona corrispondente al package - prima nella home grid, poi in dock, 
+     * poi nelle folder (in quel caso ritorna la folder).
+     */
     private fun findHomeIconForPackage(pkg: String): android.view.View? {
         try {
-            val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome) ?: return null
-            // Itero le pagine
-            for (i in 0 until pagedHome.pageCount) {
-                val page = pagedHome.getPageAt(i) as? android.view.ViewGroup ?: continue
-                for (j in 0 until page.childCount) {
-                    val child = page.getChildAt(j)
-                    if (child is org.cheipstudio.speedlauncher.ui.IconCellView && child.packageName == pkg) {
-                        return child
+            // 1) Home grid pagine
+            val pagedHome = binding.homeView.findViewById<org.cheipstudio.speedlauncher.ui.PagedHomeContainer>(R.id.pagedHome)
+            if (pagedHome != null) {
+                for (i in 0 until pagedHome.pageCount) {
+                    val page = pagedHome.getPageAt(i) as? android.view.ViewGroup ?: continue
+                    for (j in 0 until page.childCount) {
+                        val child = page.getChildAt(j)
+                        if (child is org.cheipstudio.speedlauncher.ui.IconCellView && child.packageName == pkg) {
+                            return child
+                        }
+                        // v292: cartelle - se l'app è dentro una folder, ritorno la folder
+                        if (child is org.cheipstudio.speedlauncher.ui.FolderCellView) {
+                            try {
+                                if (folderContainsPackage(child, pkg)) return child
+                            } catch (_: Throwable) {}
+                        }
                     }
-                    // Dentro le folder potrebbe esserci - skipper folder per ora (l'icona è la cartella, non l'app)
                 }
             }
+            // 2) Dock top (recommendedRow)
+            val dockTop = binding.homeView.findViewById<android.view.ViewGroup>(R.id.recommendedRow)
+            findIconInGroup(dockTop, pkg)?.let { return it }
+            // 3) Dock bottom (recommendedRowBottom)
+            val dockBot = binding.homeView.findViewById<android.view.ViewGroup>(R.id.recommendedRowBottom)
+            findIconInGroup(dockBot, pkg)?.let { return it }
         } catch (_: Throwable) {}
         return null
+    }
+    
+    /** Cerca ricorsivamente un'icona col packageName dentro un ViewGroup (per dock) */
+    private fun findIconInGroup(group: android.view.ViewGroup?, pkg: String): android.view.View? {
+        if (group == null || group.visibility != android.view.View.VISIBLE) return null
+        for (i in 0 until group.childCount) {
+            val child = group.getChildAt(i)
+            if (child is org.cheipstudio.speedlauncher.ui.IconCellView && child.packageName == pkg) {
+                return child
+            }
+            if (child is android.view.ViewGroup) {
+                val found = findIconInGroup(child, pkg)
+                if (found != null) return found
+            }
+        }
+        return null
+    }
+    
+    /** Verifica se una folder contiene una app con questo packageName */
+    private fun folderContainsPackage(folder: org.cheipstudio.speedlauncher.ui.FolderCellView, pkg: String): Boolean {
+        return try {
+            val item = folder.folder ?: return false
+            // folderApps è una List<String> di "package/component"
+            item.folderApps.any { entry -> 
+                entry.substringBefore("/") == pkg || entry == pkg
+            }
+        } catch (_: Throwable) { false }
     }
     
 
@@ -378,7 +421,17 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     override fun onResume() {
         super.onResume()
         // v250: ritorno alla home → skip RSS leading page
-        try { binding.homeView.snapToFirstHomePage() } catch (_: Throwable) {}
+        // v292: se torno da un'app aperta dalla home, snap alla pagina di partenza (non a pagina 1)
+        try {
+            val lastPage = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchPageIndex
+            val ts = org.cheipstudio.speedlauncher.data.AppRepository.lastLaunchTimestamp
+            val isRecentAppReturn = lastPage >= 0 && (System.currentTimeMillis() - ts) < 5 * 60_000L
+            if (isRecentAppReturn) {
+                binding.homeView.snapToPage(lastPage)
+            } else {
+                binding.homeView.snapToFirstHomePage()
+            }
+        } catch (_: Throwable) {}
 
         // v218: forza visibilità in landscape (fix schermo nero)
         try {

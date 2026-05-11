@@ -114,6 +114,10 @@ class AppRepository(private val context: Context) {
         @Volatile var lastLaunchOriginX: Float = 0f
         @Volatile var lastLaunchOriginY: Float = 0f
         @Volatile var lastLaunchTimestamp: Long = 0L
+        /** v292: pagina home da cui l'app è stata aperta - per ritornare alla stessa pagina */
+        @Volatile var lastLaunchPageIndex: Int = -1
+        /** v292: era dentro una folder? folder uuid */
+        @Volatile var lastLaunchFolderUuid: String? = null
     }
     
     fun launch(app: AppInfo, sourceView: android.view.View? = null) {
@@ -130,25 +134,45 @@ class AppRepository(private val context: Context) {
                 lastLaunchOriginX = 0f
                 lastLaunchOriginY = 0f
             }
+            // v292: registro la pagina home da cui parte l'app (se proviene dalla home grid)
+            lastLaunchPageIndex = -1
+            lastLaunchFolderUuid = null
+            try {
+                var v: android.view.View? = sourceView
+                while (v != null) {
+                    if (v is org.cheipstudio.speedlauncher.ui.IconGridView) {
+                        lastLaunchPageIndex = v.pageIndex
+                        break
+                    }
+                    v = v.parent as? android.view.View
+                }
+            } catch (_: Throwable) {}
         } catch (_: Throwable) {}
-        // v200: push espressivo Material 3 — scale 1 → 0.80 → 1.06 → 1 con elastic overshoot
+        // v292: zoom-out launch (opposto della drop) - l'icona "esplode" verso lo schermo dell'app
         if (sourceView != null && sourceView.width > 0) {
             try {
                 sourceView.animate().cancel()
-                // Squash veloce
+                // Subito piccolo squash percettivo
                 sourceView.animate()
-                    .scaleX(0.80f).scaleY(0.80f)
-                    .setDuration(60)
-                    .setInterpolator(android.view.animation.PathInterpolator(0.4f, 0.0f, 1.0f, 0.4f))
+                    .scaleX(0.92f).scaleY(0.92f)
+                    .setDuration(50)
+                    .setInterpolator(android.view.animation.AccelerateInterpolator(1.5f))
                     .withEndAction {
                         try {
-                            // Elastic snap-back
+                            // Zoom out crescente verso lo schermo  
                             sourceView.animate()
-                                .scaleX(1f).scaleY(1f)
-                                .setDuration(90)
-                                .setInterpolator(android.view.animation.OvershootInterpolator(3.0f))
+                                .scaleX(1.6f).scaleY(1.6f)
+                                .alpha(0.3f)
+                                .setDuration(120)
+                                .setInterpolator(android.view.animation.AccelerateInterpolator(2.0f))
                                 .start()
                             doLaunch(app, sourceView)
+                            // Reset al ritorno (dopo che onResume avrà tempo di prendere il controllo)
+                            sourceView.postDelayed({
+                                try {
+                                    sourceView.scaleX = 1f; sourceView.scaleY = 1f; sourceView.alpha = 1f
+                                } catch (_: Throwable) {}
+                            }, 800L)
                         } catch (_: Throwable) {
                             doLaunch(app, sourceView)
                         }
