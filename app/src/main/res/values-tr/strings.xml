@@ -181,7 +181,7 @@ Yalnızca bu özellik için kullanılır.</string>
         <item quantity="one">%1$d simge</item>
         <item quantity="other">%1$d simge</item>
     </plurals>
-    <string name="widget_label">Speed Stats</string>
+    <string name="widget_label">Speed Widget</string>
     <string name="widget_description">Mevcut RAM, depolama ve pili gösterir.</string>
     <string name="widget_ram">RAM</string>
     <string name="widget_storage">Depolama</string>
@@ -372,4 +372,21 @@ Yalnızca bu özellik için kullanılır.</string>
     <string name="settings_rss_swipe_label">Kaydirmayla RSS ac</string>
     <string name="settings_rss_swipe_sub">Ana ekranda soldan saga kaydirma RSS akisini acar</string>
     <string name="search_drawer_off_apps_only">Drawer kapali: webde aramak icin arama modunu degistirin</string>
+
+    <!-- v286: Speed Widget configurabile -->
+    <string name="speed_widget_section_ram">RAM</string>
+    <string name="speed_widget_section_storage">Depolama</string>
+    <string name="speed_widget_section_battery">Pil</string>
+    <string name="speed_widget_section_date">Tarih</string>
+    <string name="speed_widget_section_time">Saat</string>
+    <string name="speed_widget_section_wifi">Wi-Fi</string>
+    <string name="speed_widget_section_volume">Ses</string>
+    <string name="speed_widget_section_brightness">Parlaklık</string>
+    <string name="speed_widget_section_label_1">Bölüm 1</string>
+    <string name="speed_widget_section_label_2">Bölüm 2</string>
+    <string name="speed_widget_section_label_3">Bölüm 3</string>
+    <string name="speed_widget_section_ram_subtitle">%1$d MB</string>
+    <string name="speed_widget_section_storage_subtitle">%1$d GB</string>
+    <string name="speed_widget_section_battery_subtitle">%1$d mAh</string>
+    <string name="speed_widget_no_wifi">Bağlı değil</string>
 </resources>

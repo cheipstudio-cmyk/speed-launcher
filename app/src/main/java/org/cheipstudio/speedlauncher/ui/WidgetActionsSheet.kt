@@ -110,6 +110,9 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
             val info = mgr.getAppWidgetInfo(item.appWidgetId)
             val isSpeedStats = info?.provider?.className?.contains("SpeedStatsWidgetProvider") == true
             if (isSpeedStats) {
+                // v286: configurazione 3 sezioni del Speed Widget
+                addSpeedWidgetSectionsConfig(root, d, ctx, item.appWidgetId, mgr)
+                
                 val themePrefs = ctx.getSharedPreferences("speed_widget_prefs", Context.MODE_PRIVATE)
                 val curTheme = themePrefs.getString("widget_theme", "transparent") ?: "transparent"
                 val themes = listOf(
@@ -295,6 +298,75 @@ class WidgetActionsSheet : BottomSheetDialogFragment() {
                     putString(ARG_UUID, uuid)
                     putInt(ARG_PAGE, pageIndex)
                 }
+            }
+        }
+    }
+    /** v286: aggiunge UI per configurare le 3 sezioni del Speed Widget */
+    private fun addSpeedWidgetSectionsConfig(
+        root: android.widget.LinearLayout,
+        d: android.app.Dialog,
+        ctx: Context,
+        widgetId: Int,
+        mgr: android.appwidget.AppWidgetManager
+    ) {
+        val providerCls = "org.cheipstudio.speedlauncher.widgets.SpeedStatsWidgetProvider"
+        val sections = listOf(
+            "ram" to getString(R.string.speed_widget_section_ram),
+            "storage" to getString(R.string.speed_widget_section_storage),
+            "battery" to getString(R.string.speed_widget_section_battery),
+            "date" to getString(R.string.speed_widget_section_date),
+            "time" to getString(R.string.speed_widget_section_time),
+            "wifi" to getString(R.string.speed_widget_section_wifi),
+            "volume" to getString(R.string.speed_widget_section_volume),
+            "brightness" to getString(R.string.speed_widget_section_brightness)
+        )
+        val prefs = ctx.getSharedPreferences("speed_widget_prefs", Context.MODE_PRIVATE)
+        val raw = prefs.getString("widget_sections_$widgetId", null)
+        val current: Array<String> = if (raw.isNullOrBlank()) {
+            arrayOf("ram", "storage", "battery")
+        } else {
+            val parts = raw.split(",")
+            if (parts.size == 3) parts.toTypedArray() else arrayOf("ram", "storage", "battery")
+        }
+        
+        val labels = listOf(
+            getString(R.string.speed_widget_section_label_1),
+            getString(R.string.speed_widget_section_label_2),
+            getString(R.string.speed_widget_section_label_3)
+        )
+        
+        for (i in 0..2) {
+            // Per ogni slot, mostro tutte le 8 opzioni MA tengo evidenziato il selezionato
+            // Vincolo no-duplicati: opzioni già usate negli altri 2 slot vengono comunque mostrate 
+            // ma cliccarle scambierà automaticamente le sezioni
+            val sectionLabels = sections.map { it.second }
+            val curSection = current[i]
+            val selectedIdx = sections.indexOfFirst { it.first == curSection }.coerceAtLeast(0)
+            
+            addSegmentedSection(
+                root, d, labels[i], sectionLabels, selectedIdx
+            ) { idx ->
+                val newSection = sections[idx].first
+                // Vincolo: se la nuova sezione è già in un altro slot, scambia
+                val otherSlot = current.indexOfFirst { it == newSection && it != current[i] }
+                if (otherSlot >= 0 && otherSlot != i) {
+                    // Scambio: nuova in slot corrente, vecchia in slot dove era
+                    val old = current[i]
+                    current[i] = newSection
+                    current[otherSlot] = old
+                } else {
+                    current[i] = newSection
+                }
+                // Salvo
+                prefs.edit().putString("widget_sections_$widgetId", current.joinToString(",")).apply()
+                // Refresh widget
+                try {
+                    val intent = android.content.Intent(ctx, Class.forName(providerCls)).apply {
+                        action = android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                        putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(widgetId))
+                    }
+                    ctx.sendBroadcast(intent)
+                } catch (_: Throwable) {}
             }
         }
     }

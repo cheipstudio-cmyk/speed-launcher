@@ -181,7 +181,7 @@
         <item quantity="one">%1$d アイコン</item>
         <item quantity="other">%1$d アイコン</item>
     </plurals>
-    <string name="widget_label">Speed Stats</string>
+    <string name="widget_label">Speed Widget</string>
     <string name="widget_description">利用可能なRAM、ストレージ、バッテリーを表示します。</string>
     <string name="widget_ram">RAM</string>
     <string name="widget_storage">ストレージ</string>
@@ -372,4 +372,21 @@
     <string name="settings_rss_swipe_label">スワイプでRSSを開く</string>
     <string name="settings_rss_swipe_sub">ホームで左から右にスワイプするとRSSフィードが開きます</string>
     <string name="search_drawer_off_apps_only">ドロワーがオフです。Webを検索するには検索モードを変更してください</string>
+
+    <!-- v286: Speed Widget configurabile -->
+    <string name="speed_widget_section_ram">RAM</string>
+    <string name="speed_widget_section_storage">ストレージ</string>
+    <string name="speed_widget_section_battery">バッテリー</string>
+    <string name="speed_widget_section_date">日付</string>
+    <string name="speed_widget_section_time">時刻</string>
+    <string name="speed_widget_section_wifi">Wi-Fi</string>
+    <string name="speed_widget_section_volume">音量</string>
+    <string name="speed_widget_section_brightness">明るさ</string>
+    <string name="speed_widget_section_label_1">セクション 1</string>
+    <string name="speed_widget_section_label_2">セクション 2</string>
+    <string name="speed_widget_section_label_3">セクション 3</string>
+    <string name="speed_widget_section_ram_subtitle">%1$d MB</string>
+    <string name="speed_widget_section_storage_subtitle">%1$d GB</string>
+    <string name="speed_widget_section_battery_subtitle">%1$d mAh</string>
+    <string name="speed_widget_no_wifi">未接続</string>
 </resources>

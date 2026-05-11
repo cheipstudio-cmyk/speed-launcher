@@ -30,15 +30,17 @@ class RecommendedView @JvmOverloads constructor(
     var onContainerLongPress: (() -> Unit)? = null  // v226: long press sul vuoto della dock
     
     // v227: rilevazione long press su tutta la dock (anche sopra le icone)
+    // v287: trigger SU UP invece che su timer - elimina falsi positivi su swipe lenti
     private var dockLongPressDownX = 0f
     private var dockLongPressDownY = 0f
+    private var dockLongPressDownTime = 0L
     private val dockLongPressHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var dockLongPressFired = false
-    private val dockLongPressRunnable = Runnable {
-        dockLongPressFired = true
-        // v241: haptic via HapticHelper (rispetta hapticEnabled setting)
-        try { HapticHelper.longPress(this) } catch (_: Throwable) {}
-        onContainerLongPress?.invoke()
+    private var dockLongPressArmed = false  // diventa true dopo 500ms di immobilità
+    private var dockLongPressDirty = false  // diventa true se il dito si muove troppo durante l'attesa
+    private val dockLongPressArmTimer = Runnable {
+        // Se arrivo qui senza aver mai mosso troppo, sono "armato" - aspetto UP per scattare
+        if (!dockLongPressDirty) dockLongPressArmed = true
     }
     private val dockLongPressSlop by lazy {
         android.view.ViewConfiguration.get(context).scaledTouchSlop * 4  // v241: più tollerante allo scroll
@@ -55,28 +57,41 @@ class RecommendedView @JvmOverloads constructor(
             android.view.MotionEvent.ACTION_DOWN -> {
                 dockLongPressDownX = ev.x
                 dockLongPressDownY = ev.y
+                dockLongPressDownTime = System.currentTimeMillis()
                 dockLongPressFired = false
-                dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
-                dockLongPressHandler.removeCallbacks(dockLongPressArm)
-                // v260: warm-up più lungo (180ms) per swipe veloci
-                dockLongPressHandler.postDelayed(dockLongPressArm, 180)
+                dockLongPressArmed = false
+                dockLongPressDirty = false
+                dockLongPressHandler.removeCallbacks(dockLongPressArmTimer)
+                // v287: armo dopo 500ms di immobilità (durata classica long press)
+                dockLongPressHandler.postDelayed(dockLongPressArmTimer, 500)
             }
             android.view.MotionEvent.ACTION_MOVE -> {
                 val dx = kotlin.math.abs(ev.x - dockLongPressDownX)
                 val dyRaw = ev.y - dockLongPressDownY  // negativo = swipe up
                 val dy = kotlin.math.abs(dyRaw)
-                // v260: cancellazione iper-aggressiva per swipe up (1px basta)
-                if (dyRaw < -1) {
-                    dockLongPressHandler.removeCallbacks(dockLongPressArm)
-                    dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
-                } else if (dx > dockLongPressSlop || dy > dockLongPressSlop) {
-                    dockLongPressHandler.removeCallbacks(dockLongPressArm)
-                    dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
+                // v287: anche micro-movimento verso l'alto sporca il long press
+                if (dyRaw < -2 || dx > dockLongPressSlop || dy > dockLongPressSlop) {
+                    dockLongPressDirty = true
+                    dockLongPressArmed = false
+                    dockLongPressHandler.removeCallbacks(dockLongPressArmTimer)
                 }
             }
-            android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                dockLongPressHandler.removeCallbacks(dockLongPressArm)
-                dockLongPressHandler.removeCallbacks(dockLongPressRunnable)
+            android.view.MotionEvent.ACTION_UP -> {
+                dockLongPressHandler.removeCallbacks(dockLongPressArmTimer)
+                // v287: fire SOLO su UP se armato E non dirty E ferma almeno 500ms
+                val elapsed = System.currentTimeMillis() - dockLongPressDownTime
+                if (dockLongPressArmed && !dockLongPressDirty && elapsed >= 500) {
+                    dockLongPressFired = true
+                    try { HapticHelper.longPress(this) } catch (_: Throwable) {}
+                    onContainerLongPress?.invoke()
+                }
+                dockLongPressArmed = false
+                dockLongPressDirty = false
+            }
+            android.view.MotionEvent.ACTION_CANCEL -> {
+                dockLongPressHandler.removeCallbacks(dockLongPressArmTimer)
+                dockLongPressArmed = false
+                dockLongPressDirty = false
             }
         }
         if (dockLongPressFired) {
@@ -84,11 +99,6 @@ class RecommendedView @JvmOverloads constructor(
             return true
         }
         return super.onInterceptTouchEvent(ev)
-    }
-    
-    // v260: armatura - dopo 180ms di immobilità posta timer 520ms (totale ~700ms)
-    private val dockLongPressArm = Runnable {
-        dockLongPressHandler.postDelayed(dockLongPressRunnable, 520)
     }
     
     init {

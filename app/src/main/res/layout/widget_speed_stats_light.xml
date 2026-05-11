@@ -14,159 +14,149 @@
         android:weightSum="3"
         android:baselineAligned="false">
 
-        <!-- RAM -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+        <!-- Colonna 1 -->
+        <LinearLayout 
+            android:id="@+id/col1_root"
+            android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="2dp">
+            android:gravity="center" android:padding="1dp">
             
             <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_widget_memory"
-                android:tint="#2E7D32" />
+                android:id="@+id/col1_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp" />
             
-            <TextView android:id="@+id/ramPct"
+            <TextView android:id="@+id/col1_value"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#1A1A2E"
+                android:layout_marginTop="2dp"
+                android:textColor="#171515"
                 android:textSize="22sp" 
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="-0.02"
                 android:text="—" />
             
             <TextView 
-                android:id="@+id/ramLabel"
+                android:id="@+id/col1_label"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="@string/widget_ram"
-                android:textColor="#B06B6B7C"
+                android:textColor="#80606064" 
                 android:textSize="11sp"
                 android:fontFamily="sans-serif-medium" 
                 android:textAllCaps="true"
                 android:letterSpacing="0.08" />
             
-            <ProgressBar android:id="@+id/ramProgress"
+            <ProgressBar android:id="@+id/col1_progress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="match_parent" android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                android:max="100" android:progress="0"
-                android:progressDrawable="@drawable/progress_widget_ram" />
+                android:max="100" android:progress="0" />
             
-            <TextView android:id="@+id/ramSubtitle"
+            <TextView android:id="@+id/col1_subtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="6dp" 
-                android:textColor="#B06B6B7C"
-                android:textSize="11sp" 
+                android:layout_marginTop="2dp" 
+                android:textColor="#80606064"
+                android:textSize="10sp" 
                 android:fontFamily="sans-serif"
                 android:text="" />
         </LinearLayout>
 
-        <!-- Storage -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+        <!-- Colonna 2 -->
+        <LinearLayout 
+            android:id="@+id/col2_root"
+            android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="2dp">
+            android:gravity="center" android:padding="1dp">
             
             <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_widget_storage"
-                android:tint="#1565C0" />
+                android:id="@+id/col2_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp" />
             
-            <TextView android:id="@+id/storPct"
+            <TextView android:id="@+id/col2_value"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#1A1A2E"
+                android:layout_marginTop="2dp"
+                android:textColor="#171515"
                 android:textSize="22sp" 
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="-0.02"
                 android:text="—" />
             
             <TextView 
-                android:id="@+id/storLabel"
+                android:id="@+id/col2_label"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="@string/widget_storage"
-                android:textColor="#B06B6B7C"
+                android:textColor="#80606064"
                 android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="true"
                 android:letterSpacing="0.08" />
             
-            <ProgressBar android:id="@+id/storProgress"
+            <ProgressBar android:id="@+id/col2_progress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="match_parent" android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                android:max="100" android:progress="0"
-                android:progressDrawable="@drawable/progress_widget_storage" />
+                android:max="100" android:progress="0" />
             
-            <TextView android:id="@+id/storSubtitle"
+            <TextView android:id="@+id/col2_subtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#B06B6B7C"
-                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:textColor="#80606064"
+                android:textSize="10sp" 
                 android:fontFamily="sans-serif"
                 android:text="" />
         </LinearLayout>
 
-        <!-- Battery -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+        <!-- Colonna 3 -->
+        <LinearLayout 
+            android:id="@+id/col3_root"
+            android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="1" android:orientation="vertical"
-            android:gravity="center" android:padding="2dp">
+            android:gravity="center" android:padding="1dp">
             
             <ImageView
-                android:id="@+id/batIcon"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_widget_battery"
-                android:tint="#EF6C00" />
+                android:id="@+id/col3_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp" />
             
-            <TextView android:id="@+id/batPct"
+            <TextView android:id="@+id/col3_value"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#1A1A2E"
-                android:textSize="22sp"
+                android:layout_marginTop="2dp"
+                android:textColor="#171515"
+                android:textSize="22sp" 
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="-0.02"
                 android:text="—" />
             
             <TextView 
-                android:id="@+id/batLabel"
+                android:id="@+id/col3_label"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="@string/widget_battery"
-                android:textColor="#B06B6B7C"
+                android:textColor="#80606064"
                 android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="true"
                 android:letterSpacing="0.08" />
             
-            <ProgressBar android:id="@+id/batProgress"
+            <ProgressBar android:id="@+id/col3_progress"
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="match_parent" android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                android:max="100" android:progress="0"
-                android:progressDrawable="@drawable/progress_widget_battery" />
+                android:max="100" android:progress="0" />
             
-            <TextView android:id="@+id/batSubtitle"
+            <TextView android:id="@+id/col3_subtitle"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#B06B6B7C"
-                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:textColor="#80606064"
+                android:textSize="10sp" 
                 android:fontFamily="sans-serif"
                 android:text="" />
         </LinearLayout>
-
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/refreshBtn"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+    
+    <!-- Refresh button overlay (mantenuto invisibile per ora) -->
+    <View android:id="@+id/refreshBtn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="top|end"
-        android:layout_margin="8dp"
-        android:padding="6dp"
-        android:src="@drawable/ic_refresh_widget"
-        android:visibility="gone"
-        android:contentDescription="@null" />
-
+        android:visibility="gone" />
 </FrameLayout>

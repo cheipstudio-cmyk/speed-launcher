@@ -181,7 +181,7 @@ Se usará solo para esta función.</string>
         <item quantity="one">%1$d icono</item>
         <item quantity="other">%1$d iconos</item>
     </plurals>
-    <string name="widget_label">Speed Stats</string>
+    <string name="widget_label">Speed Widget</string>
     <string name="widget_description">Muestra la RAM, el almacenamiento y la batería disponibles.</string>
     <string name="widget_ram">RAM</string>
     <string name="widget_storage">Memoria</string>
@@ -372,4 +372,21 @@ Se usará solo para esta función.</string>
     <string name="settings_rss_swipe_label">Abrir RSS con deslizar</string>
     <string name="settings_rss_swipe_sub">Desliza de izquierda a derecha en la home para abrir el feed RSS</string>
     <string name="search_drawer_off_apps_only">Drawer desactivado: cambia el modo de busqueda para buscar en la web</string>
+
+    <!-- v286: Speed Widget configurabile -->
+    <string name="speed_widget_section_ram">RAM</string>
+    <string name="speed_widget_section_storage">Memoria</string>
+    <string name="speed_widget_section_battery">Batería</string>
+    <string name="speed_widget_section_date">Fecha</string>
+    <string name="speed_widget_section_time">Hora</string>
+    <string name="speed_widget_section_wifi">Wi-Fi</string>
+    <string name="speed_widget_section_volume">Volumen</string>
+    <string name="speed_widget_section_brightness">Brillo</string>
+    <string name="speed_widget_section_label_1">Sección 1</string>
+    <string name="speed_widget_section_label_2">Sección 2</string>
+    <string name="speed_widget_section_label_3">Sección 3</string>
+    <string name="speed_widget_section_ram_subtitle">%1$d MB</string>
+    <string name="speed_widget_section_storage_subtitle">%1$d GB</string>
+    <string name="speed_widget_section_battery_subtitle">%1$d mAh</string>
+    <string name="speed_widget_no_wifi">No conectado</string>
 </resources>

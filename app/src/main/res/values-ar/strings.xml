@@ -181,7 +181,7 @@
         <item quantity="one">أيقونة %1$d</item>
         <item quantity="other">%1$d أيقونات</item>
     </plurals>
-    <string name="widget_label">Speed Stats</string>
+    <string name="widget_label">Speed Widget</string>
     <string name="widget_description">يعرض ذاكرة الوصول العشوائي والتخزين والبطارية المتاحة.</string>
     <string name="widget_ram">RAM</string>
     <string name="widget_storage">التخزين</string>
@@ -372,4 +372,21 @@
     <string name="settings_rss_swipe_label">افتح RSS بالتمرير</string>
     <string name="settings_rss_swipe_sub">اسحب من اليسار إلى اليمين في الشاشة الرئيسية لفتح خلاصة RSS</string>
     <string name="search_drawer_off_apps_only">الدرج معطل: غيّر وضع البحث للبحث على الويب</string>
+
+    <!-- v286: Speed Widget configurabile -->
+    <string name="speed_widget_section_ram">ذاكرة الوصول</string>
+    <string name="speed_widget_section_storage">التخزين</string>
+    <string name="speed_widget_section_battery">البطارية</string>
+    <string name="speed_widget_section_date">التاريخ</string>
+    <string name="speed_widget_section_time">الوقت</string>
+    <string name="speed_widget_section_wifi">واي فاي</string>
+    <string name="speed_widget_section_volume">الصوت</string>
+    <string name="speed_widget_section_brightness">السطوع</string>
+    <string name="speed_widget_section_label_1">القسم 1</string>
+    <string name="speed_widget_section_label_2">القسم 2</string>
+    <string name="speed_widget_section_label_3">القسم 3</string>
+    <string name="speed_widget_section_ram_subtitle">%1$d ميجابايت</string>
+    <string name="speed_widget_section_storage_subtitle">%1$d جيجابايت</string>
+    <string name="speed_widget_section_battery_subtitle">%1$d مللي أمبير</string>
+    <string name="speed_widget_no_wifi">غير متصل</string>
 </resources>
