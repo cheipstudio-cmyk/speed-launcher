@@ -117,15 +117,8 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.col3_subtitle, "")
         }
         
-        // Tap
-        try {
-            val pi = PendingIntent.getActivity(
-                context, 0,
-                Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            views.setOnClickPendingIntent(R.id.widgetRoot, pi)
-        } catch (_: Throwable) {}
+        // v319: niente PendingIntent on click - il widget è sulla home, tap non fa nulla
+        // (evita che MainActivity appaia nelle recents come task duplicato)
         
         manager.updateAppWidget(id, views)
     }

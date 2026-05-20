@@ -4,20 +4,13 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.widget.RemoteViews
 
 /**
- * v315: AppWidgetHost custom replica del LauncherAppWidgetHost di Launcher3.
+ * v320: AppWidgetHost minimale.
+ * - startListening cattura TransactionTooLargeException (issue 14255011 di AOSP)
+ * - onCreateView ritorna view standard (no custom)
  */
 class SpeedAppWidgetHost(context: Context, hostId: Int) : AppWidgetHost(context, hostId) {
-    
-    override fun onCreateView(
-        context: Context,
-        appWidgetId: Int,
-        appWidget: AppWidgetProviderInfo?
-    ): AppWidgetHostView {
-        return SpeedAppWidgetHostView(context)
-    }
     
     override fun startListening() {
         try {
@@ -32,59 +25,5 @@ class SpeedAppWidgetHost(context: Context, hostId: Int) : AppWidgetHost(context,
     
     override fun stopListening() {
         try { super.stopListening() } catch (_: Throwable) {}
-    }
-}
-
-/**
- * v316: HostView custom con error handling - cattura eccezioni RemoteViews per evitare
- * "Aggiunta widget non riuscita" placeholder. Replica pattern Launcher3.
- */
-class SpeedAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
-    
-    private var lastValidRemoteViews: RemoteViews? = null
-    private var retryCount = 0
-    
-    override fun updateAppWidget(remoteViews: RemoteViews?) {
-        try {
-            super.updateAppWidget(remoteViews)
-            // Reset retry count su success
-            if (remoteViews != null) {
-                lastValidRemoteViews = remoteViews
-                retryCount = 0
-            }
-        } catch (e: Throwable) {
-            // RemoteViews inflate fallisce - non mostrare error placeholder
-            // se abbiamo una view valida precedente, la teniamo
-            android.util.Log.w("SpeedAppWidgetHostView", 
-                "updateAppWidget exception (will retry): ${e.message}")
-            
-            // Retry con i RemoteViews validi precedenti
-            if (lastValidRemoteViews != null && retryCount == 0) {
-                retryCount++
-                try {
-                    super.updateAppWidget(lastValidRemoteViews)
-                } catch (_: Throwable) {}
-            }
-            // Altrimenti tieni lo stato attuale - il widget si aggiornerà dal prossimo broadcast
-        }
-    }
-    
-    override fun getDefaultView(): android.view.View {
-        // Override per evitare il default view di sistema.
-        // Restituisce una view trasparente - widget si caricherà al prossimo update.
-        return android.view.View(context).apply {
-            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        }
-    }
-    
-    /**
-     * v317: override getErrorView (@hide method nell'API SDK pubblica).
-     * Il vero "Aggiunta widget non riuscita" viene mostrato dal default getErrorView di AOSP.
-     * Restituiamo una view vuota - widget si aggiornerà al prossimo broadcast del provider.
-     */
-    override fun getErrorView(): android.view.View {
-        return android.view.View(context).apply {
-            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        }
     }
 }

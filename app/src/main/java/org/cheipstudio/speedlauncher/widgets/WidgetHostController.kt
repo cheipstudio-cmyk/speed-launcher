@@ -78,11 +78,6 @@ class WidgetHostController(private val activity: Activity) {
         when (requestCode) {
             REQ_BIND -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    // v311: segno che l'utente ha già concesso il permesso, prossime volte salta dialog
-                    try {
-                        activity.getSharedPreferences("widget_bind", android.content.Context.MODE_PRIVATE)
-                            .edit().putBoolean("always_allowed", true).apply()
-                    } catch (_: Throwable) {}
                     val info = pendingBindWidget
                     val id = pendingBindAppWidgetId
                     if (info != null && id >= 0) {
@@ -94,16 +89,10 @@ class WidgetHostController(private val activity: Activity) {
                             try {
                                 activity.startActivityForResult(configIntent, REQ_CONFIGURE)
                             } catch (_: Throwable) {
-                                // configure activity inacessibile → fallback: place direttamente
-                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
-                                    { placeWidget(id, info) }, 100L
-                                )
+                                placeWidget(id, info)
                             }
                         } else {
-                            // v309: piccolo delay per dare tempo al bind di registrarsi
-                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
-                                { placeWidget(id, info) }, 100L
-                            )
+                            placeWidget(id, info)
                         }
                     }
                 } else {
@@ -112,12 +101,9 @@ class WidgetHostController(private val activity: Activity) {
                     pendingPlaceCallback = null
                     pendingBindWidget = null
                     pendingBindAppWidgetId = -1
-                    showError(org.cheipstudio.speedlauncher.R.string.widget_bind_failed)
                 }
             }
             REQ_CONFIGURE -> {
-                // v210: data può essere null da molte app di config (es. Spotify/Calendar) ma il widget è valido
-                // Usa pendingBindAppWidgetId che abbiamo salvato prima di lanciare config
                 if (resultCode == Activity.RESULT_OK) {
                     val id = data?.getIntExtra(
                         AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -136,7 +122,6 @@ class WidgetHostController(private val activity: Activity) {
                     if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
                     pendingPlaceCallback?.invoke(false)
                     pendingPlaceCallback = null
-                    showError(org.cheipstudio.speedlauncher.R.string.widget_config_cancelled)
                 }
                 pendingBindAppWidgetId = -1
                 pendingBindWidget = null
@@ -162,21 +147,9 @@ class WidgetHostController(private val activity: Activity) {
         }
     }
 
-    private fun placeWidget(id: Int, info: AppWidgetProviderInfo) {
-        // v289: non creo la view qui - WidgetContainerView.mountWidget la crea con createView
-        // Creare due AppWidgetHostView per lo stesso id può rompere il binding
-        // v306: chiamato con success=true → addWidget. Failure path chiama con false.
-        // v312: forza host.startListening prima del mount per evitare "Aggiunta widget non riuscita"
-        try { host.startListening() } catch (_: Throwable) {}
-        // v314: invia broadcast update esplicito al provider, indipendente dal flow di mount.
-        // Anche se onUpdate non parte auto dopo bind, questo lo forza.
-        try {
-            val updateIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-                component = info.provider
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(id))
-            }
-            activity.sendBroadcast(updateIntent)
-        } catch (_: Throwable) {}
+        private fun placeWidget(id: Int, info: AppWidgetProviderInfo) {
+        // v320: minimale. Salva id come last + invoca callback.
+        // Listening è chiamato in mountWidget, non qui.
         lastWidgetId = id
         prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
         pendingPlaceCallback?.invoke(true)

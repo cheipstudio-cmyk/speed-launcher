@@ -176,21 +176,8 @@ class WidgetContainerView @JvmOverloads constructor(
         try {
             val info = host.appWidgetManager.getAppWidgetInfo(item.appWidgetId)
             if (info == null) {
-                // v307: NON rimuovere subito - il provider potrebbe non essere pronto.
-                // Retry una volta dopo 300ms; se ancora null allora rimuovi.
-                postDelayed({
-                    try {
-                        val retryInfo = host.appWidgetManager.getAppWidgetInfo(item.appWidgetId)
-                        if (retryInfo == null) {
-                            store.removeWidget(pageIndex, item.uuid)
-                            logWidgetError(item.appWidgetId, "getAppWidgetInfo returned null on retry")
-                        } else {
-                            mountWidgetImmediate(item, host, retryInfo)
-                        }
-                    } catch (t: Throwable) {
-                        logWidgetError(item.appWidgetId, "retry exception: ${t.message}")
-                    }
-                }, 300L)
+                // Provider non disponibile (es. widget restored ma app disinstallata)
+                store.removeWidget(pageIndex, item.uuid)
                 return
             }
             mountWidgetImmediate(item, host, info)
@@ -201,56 +188,22 @@ class WidgetContainerView @JvmOverloads constructor(
     
     private fun mountWidgetImmediate(item: WidgetItem, host: WidgetHostController, info: android.appwidget.AppWidgetProviderInfo) {
         try {
-            // v316: startListening DEVE essere chiamato prima di createView
-            // perché createView internamente fa sService.getAppWidgetViews() che ritorna null se non listening
-            try { host.startListening() } catch (_: Throwable) {}
+            // v320: host listening DEVE essere attivo prima di createView (è internamente sService.getAppWidgetViews)
+            host.startListening()
             val view = host.createView(item.appWidgetId, info)
-            // v316: NIENTE setAppWidget esplicito - createView lo fa già internamente
-            // Doppia chiamata può rompere il binding
-            try { view.setPadding(0, 0, 0, 0) } catch (_: Throwable) {}
+            // createView gia chiama setAppWidget + updateAppWidget(remoteViews) internamente.
+            // NESSUNA chiamata aggiuntiva.
+            view.setPadding(0, 0, 0, 0)
             addView(view, layoutParamsForItem(item))
             mountedViews[item.uuid] = view
-            // v317: trigger multipli per forzare il provider a mandare un update valido.
-            // Molti widget (Motorola, Revolut) falliscono il primo inflate ma se ri-trigger 
-            // update con size nuova mandano RemoteViews diverse che funzionano.
-            updateWidgetOptions(item, view)
+            // Aggiorna options con la size effettiva (provider può ricalibrare RemoteViews)
             post { updateWidgetOptions(item, view) }
-            postDelayed({
-                try {
-                    val updateIntent = android.content.Intent(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-                        component = info.provider
-                        putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(item.appWidgetId))
-                    }
-                    context.sendBroadcast(updateIntent)
-                } catch (_: Throwable) {}
-                updateWidgetOptions(item, view)
-            }, 100L)
-            postDelayed({ updateWidgetOptions(item, view) }, 500L)
-            // v317: dopo 1s e 2s, ri-trigger ancora con leggero size jiggle per forzare provider re-inflate
-            postDelayed({
-                try {
-                    val w = if (width > 0) width else context.resources.displayMetrics.widthPixels
-                    val h = if (height > 0) height else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
-                    val density = context.resources.displayMetrics.density
-                    val widthDp = ((w * item.spanX) / WidgetItem.GRID_COLS / density).toInt().coerceAtLeast(40)
-                    val heightDp = ((h * item.spanY) / WidgetItem.GRID_ROWS / density).toInt().coerceAtLeast(40)
-                    // Jiggle: cambio temporaneo di +1dp per forzare onAppWidgetOptionsChanged
-                    val opts = android.os.Bundle().apply {
-                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp + 1)
-                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp + 1)
-                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp + 1)
-                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp + 1)
-                    }
-                    android.appwidget.AppWidgetManager.getInstance(context).updateAppWidgetOptions(item.appWidgetId, opts)
-                    postDelayed({ updateWidgetOptions(item, view) }, 50L)
-                } catch (_: Throwable) {}
-            }, 1000L)
         } catch (t: Throwable) {
             logWidgetError(item.appWidgetId, "mountWidgetImmediate exception: ${t.message}")
         }
     }
     
-    private fun logWidgetError(appWidgetId: Int, msg: String) {
+        private fun logWidgetError(appWidgetId: Int, msg: String) {
         try {
             val file = java.io.File(context.cacheDir, "widget_errors.log")
             if (file.length() > 30_000) file.delete()
@@ -448,86 +401,38 @@ class WidgetContainerView @JvmOverloads constructor(
         sheet.show(activity.supportFragmentManager, "widget_picker")
     }
     
-    /** Avvia bind/configure flow per un nuovo widget. Risultato → addWidget(appWidgetId) */
+    /** Avvia bind/configure flow per un nuovo widget. v320: rewrite minimale tipo Lawnchair */
     private fun bindAndAdd(info: android.appwidget.AppWidgetProviderInfo) {
         val controller = hostController ?: return
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
-        // v311: bindAppWidgetIdIfAllowed è inaffidabile su molti vendor (ritorna true senza 
-        // bind reale, oppure ritorna false ma il dialog di bind non parte mai). Soluzione affidabile:
-        // forziamo SEMPRE il flow esplicito ACTION_APPWIDGET_BIND la prima volta. L'utente vede 
-        // il popup di sistema e clicca "Sempre" - dalla seconda volta in poi Android salta auto 
-        // il dialog. Comportamento standard di Lawnchair/Niagara/Smart Launcher.
-        val prefs = context.getSharedPreferences("widget_bind", Context.MODE_PRIVATE)
-        val alwaysAllowed = prefs.getBoolean("always_allowed", false)
-        val canBindAttempt = if (alwaysAllowed) {
-            // v314: passa le size options nel bindIfAllowed - serve a molti widget per renderizzare correttamente al primo bind
-            val density = context.resources.displayMetrics.density
-            val slotH = if (height > 0) height
-                        else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
-            val cellH = (slotH / WidgetItem.GRID_ROWS).coerceAtLeast((40f * density).toInt())
-            val cellW = (if (width > 0) width else (context.resources.displayMetrics.widthPixels - (32f * density).toInt())) / WidgetItem.GRID_COLS
-            val widthDp = ((cellW * 4) / density).toInt().coerceAtLeast(120)
-            val heightDp = ((cellH * 2) / density).toInt().coerceAtLeast(80)
-            val bindOpts = android.os.Bundle().apply {
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
-            }
-            try {
-                controller.appWidgetManager.bindAppWidgetIdIfAllowed(
-                    appWidgetId, info.profile, info.provider, bindOpts
-                )
-            } catch (_: Throwable) {
-                try {
-                    controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
-                } catch (_: Throwable) { false }
-            }
-        } else false
-        if (!canBindAttempt) {
-            // v314: calcola opzioni di size per il bind - alcuni widget (LinkedIn, Motorola, etc) 
-            // non funzionano se vengono bound senza size hint
-            val density = context.resources.displayMetrics.density
-            val slotH = if (height > 0) height
-                        else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
-            val cellH = (slotH / WidgetItem.GRID_ROWS).coerceAtLeast((40f * density).toInt())
-            val cellW = (if (width > 0) width else (context.resources.displayMetrics.widthPixels - (32f * density).toInt())) / WidgetItem.GRID_COLS
-            // default span 4x2 per dare spazio decente
-            val widthDp = ((cellW * 4) / density).toInt().coerceAtLeast(120)
-            val heightDp = ((cellH * 2) / density).toInt().coerceAtLeast(80)
-            val bindOpts = android.os.Bundle().apply {
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
-                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
-            }
+        
+        // Tentativo bind diretto (default launcher → spesso ritorna true senza dialog)
+        val canBind = try {
+            controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+        } catch (_: Throwable) { false }
+        
+        if (!canBind) {
+            // Mostra dialog di sistema
             val bindIntent = android.content.Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE, info.profile)
                 }
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, bindOpts)
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
             controller.pendingPlaceCallback = { success -> if (success) addWidget(appWidgetId) }
             try {
                 activity.startActivityForResult(bindIntent, WidgetHostController.REQ_BIND)
-            } catch (t: Throwable) {
-                // Activity bind non trovata (raro). Cleanup e Toast.
+            } catch (_: Throwable) {
                 try { controller.host.deleteAppWidgetId(appWidgetId) } catch (_: Throwable) {}
-                try {
-                    android.widget.Toast.makeText(
-                        context,
-                        context.getString(org.cheipstudio.speedlauncher.R.string.widget_bind_failed),
-                        android.widget.Toast.LENGTH_LONG
-                    ).show()
-                } catch (_: Throwable) {}
             }
             return
         }
+        
+        // Bind OK → configure se necessario
         if (info.configure != null) {
             val configIntent = android.content.Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
                 component = info.configure
@@ -538,22 +443,16 @@ class WidgetContainerView @JvmOverloads constructor(
             controller.pendingPlaceCallback = { success -> if (success) addWidget(appWidgetId) }
             try {
                 activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
-            } catch (t: Throwable) {
-                // v309: configure activity non lanciabile (es. not exported) → fallback: aggiungi direttamente
-                controller.pendingPlaceCallback = null
-                controller.pendingBindWidget = null
-                controller.pendingBindAppWidgetId = -1
-                controller.markLastWidget(appWidgetId)
+            } catch (_: Throwable) {
+                // Configure activity non lanciabile → aggiungi direttamente
                 addWidget(appWidgetId)
             }
         } else {
-            controller.markLastWidget(appWidgetId)
-            // v310: piccolo delay anche nel path canBind=true (host.createView troppo presto può fallire)
-            postDelayed({ addWidget(appWidgetId) }, 100L)
+            addWidget(appWidgetId)
         }
     }
     
-    /** Stub per compatibilità con WidgetSlotView API (ritorna false: niente edit mode in v2.4.1) */
+        /** Stub per compatibilità con WidgetSlotView API (ritorna false: niente edit mode in v2.4.1) */
     fun isInWidgetEditMode(): Boolean = false
     
     /** Numero di widget in questa pagina */
