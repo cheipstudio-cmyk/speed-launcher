@@ -636,13 +636,17 @@ class HomeView @JvmOverloads constructor(
         // v307: usa settings.widgetHeight per altezza dinamica (default 160dp, range 60-320)
         val widgetHeightDp = settings.widgetHeight.value ?: 160
         val heightPx = (widgetHeightDp * density).toInt()
+        val existing = ws.layoutParams
+        // v309: skip lavoro inutile se height non cambia (evita layout pass e flicker grid al onResume)
+        if (existing != null && existing.height == heightPx && existing.width == android.widget.LinearLayout.LayoutParams.MATCH_PARENT) {
+            return
+        }
         // v308: disabilito layoutTransition di TUTTI i parent durante il cambio height (no anim grid)
         val savedLT = layoutTransition
         layoutTransition = null
         val parentLL = ws.parent as? android.view.ViewGroup
         val parentLT = parentLL?.layoutTransition
         parentLL?.layoutTransition = null
-        val existing = ws.layoutParams
         val lp = if (existing is android.widget.LinearLayout.LayoutParams) existing
                  else android.widget.LinearLayout.LayoutParams(
                      android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heightPx

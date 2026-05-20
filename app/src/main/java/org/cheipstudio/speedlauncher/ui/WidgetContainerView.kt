@@ -469,7 +469,16 @@ class WidgetContainerView @JvmOverloads constructor(
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
             controller.pendingPlaceCallback = { success -> if (success) addWidget(appWidgetId) }
-            activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
+            try {
+                activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
+            } catch (t: Throwable) {
+                // v309: configure activity non lanciabile (es. not exported) → fallback: aggiungi direttamente
+                controller.pendingPlaceCallback = null
+                controller.pendingBindWidget = null
+                controller.pendingBindAppWidgetId = -1
+                controller.markLastWidget(appWidgetId)
+                addWidget(appWidgetId)
+            }
         } else {
             controller.markLastWidget(appWidgetId)
             addWidget(appWidgetId)

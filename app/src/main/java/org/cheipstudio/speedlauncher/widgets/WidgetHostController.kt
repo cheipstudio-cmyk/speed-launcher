@@ -86,9 +86,19 @@ class WidgetHostController(private val activity: Activity) {
                                 component = info.configure
                                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
                             }
-                            activity.startActivityForResult(configIntent, REQ_CONFIGURE)
+                            try {
+                                activity.startActivityForResult(configIntent, REQ_CONFIGURE)
+                            } catch (_: Throwable) {
+                                // configure activity inacessibile → fallback: place direttamente
+                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                                    { placeWidget(id, info) }, 100L
+                                )
+                            }
                         } else {
-                            placeWidget(id, info)
+                            // v309: piccolo delay per dare tempo al bind di registrarsi
+                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                                { placeWidget(id, info) }, 100L
+                            )
                         }
                     }
                 } else {
