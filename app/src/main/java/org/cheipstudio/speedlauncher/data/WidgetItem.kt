@@ -22,7 +22,7 @@ data class WidgetItem(
     companion object {
         // Griglia widget: 4 colonne, 4 righe (approx 1/3 della home in altezza)
         const val GRID_COLS = 4
-        const val GRID_ROWS = 4
+        const val GRID_ROWS = 2  // v311: ridotto da 4 a 2 per widget orologio/altro non tagliati
         const val MIN_SPAN = 1
         const val POS_TOP = "top"
         const val POS_MIDDLE = "middle"

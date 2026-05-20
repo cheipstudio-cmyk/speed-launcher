@@ -78,6 +78,11 @@ class WidgetHostController(private val activity: Activity) {
         when (requestCode) {
             REQ_BIND -> {
                 if (resultCode == Activity.RESULT_OK) {
+                    // v311: segno che l'utente ha già concesso il permesso, prossime volte salta dialog
+                    try {
+                        activity.getSharedPreferences("widget_bind", android.content.Context.MODE_PRIVATE)
+                            .edit().putBoolean("always_allowed", true).apply()
+                    } catch (_: Throwable) {}
                     val info = pendingBindWidget
                     val id = pendingBindAppWidgetId
                     if (info != null && id >= 0) {

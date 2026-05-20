@@ -89,22 +89,8 @@ class WidgetContainerView @JvmOverloads constructor(
         for (item in items) {
             mountWidget(item, host)
         }
-        // v307: altezza slot dinamica = maxSpanY * cellHeightDp.
-        // Cella = ~60dp così widget al minimo (spanY=1) hanno almeno 60dp visibili.
-        try {
-            val lp = layoutParams
-            if (lp != null) {
-                val density = context.resources.displayMetrics.density
-                val cellDp = 60f
-                val maxSpanY = items.maxOfOrNull { it.spanY } ?: 0
-                val targetH = if (items.isEmpty() || maxSpanY <= 0) 0
-                else (maxSpanY * cellDp * density).toInt()
-                if (lp.height != targetH) {
-                    lp.height = targetH
-                    layoutParams = lp
-                }
-            }
-        } catch (_: Throwable) {}
+        // v311: rimosso override altezza slot. L'altezza è gestita da HomeView.applyWidgetConfig
+        // basandosi su settings.widgetHeight (slider utente).
         // v241: forza layout pass dopo mount (caso width già > 0 al refresh)
         if (width > 0 && height > 0) applyLayoutToChildren()
         else post { 
@@ -116,9 +102,9 @@ class WidgetContainerView @JvmOverloads constructor(
     /** Aggiunge un nuovo widget (chiamato dopo bind+configure successo) */
     fun addWidget(appWidgetId: Int) {
         val existing = store.loadPage(pageIndex)
-        // v245: default più alto - 4x3 per dare al widget spazio decente
+        // v311: GRID_ROWS=2 ora, taglie aggiornate
         val sizesToTry = listOf(
-            4 to 3, 4 to 2, 4 to 1, 2 to 3, 2 to 2, 2 to 1, 1 to 1
+            4 to 2, 4 to 1, 2 to 2, 2 to 1, 1 to 1
         )
         for ((sx, sy) in sizesToTry) {
             val (cellX, cellY) = findFirstFreeCell(existing, sx, sy) ?: continue
@@ -234,9 +220,11 @@ class WidgetContainerView @JvmOverloads constructor(
     }
 
     private fun layoutParamsForItem(item: WidgetItem): FrameLayout.LayoutParams {
-        // v307: cellH fisso 60dp (era height/GRID_ROWS, comprimeva widget quando slot piccolo)
+        // v311: cellH proporzionato al container reale (consistente con applyLayoutToChildren)
         val density = context.resources.displayMetrics.density
-        val cellHpx = (60f * density).toInt()
+        val slotH = if (height > 0) height
+                    else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+        val cellHpx = (slotH / WidgetItem.GRID_ROWS).coerceAtLeast((40f * density).toInt())
         val lp = if (width > 0) {
             val cellW = width / WidgetItem.GRID_COLS
             FrameLayout.LayoutParams(cellW * item.spanX, cellHpx * item.spanY).apply {
@@ -426,25 +414,25 @@ class WidgetContainerView @JvmOverloads constructor(
         val controller = hostController ?: return
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
-        // v310: bindAppWidgetIdIfAllowed può ritornare TRUE su default launcher anche se il bind
-        // non avviene davvero (Xiaomi/MIUI fa così). Verifichiamo SUBITO se il bind ha avuto successo
-        // controllando se getAppWidgetInfo restituisce i dati. Se NO, forziamo il dialog.
-        val canBindAttempt = try {
-            controller.appWidgetManager.bindAppWidgetIdIfAllowed(
-                appWidgetId, info.profile, info.provider, null
-            )
-        } catch (_: Throwable) {
+        // v311: bindAppWidgetIdIfAllowed è inaffidabile su molti vendor (ritorna true senza 
+        // bind reale, oppure ritorna false ma il dialog di bind non parte mai). Soluzione affidabile:
+        // forziamo SEMPRE il flow esplicito ACTION_APPWIDGET_BIND la prima volta. L'utente vede 
+        // il popup di sistema e clicca "Sempre" - dalla seconda volta in poi Android salta auto 
+        // il dialog. Comportamento standard di Lawnchair/Niagara/Smart Launcher.
+        val prefs = context.getSharedPreferences("widget_bind", Context.MODE_PRIVATE)
+        val alwaysAllowed = prefs.getBoolean("always_allowed", false)
+        val canBindAttempt = if (alwaysAllowed) {
             try {
-                controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
-            } catch (_: Throwable) { false }
-        }
-        // Verifica vera: se l'info per il nostro id NON è disponibile, il bind in realtà NON è avvenuto
-        val verifiedBound = if (canBindAttempt) {
-            try {
-                controller.appWidgetManager.getAppWidgetInfo(appWidgetId) != null
-            } catch (_: Throwable) { false }
+                controller.appWidgetManager.bindAppWidgetIdIfAllowed(
+                    appWidgetId, info.profile, info.provider, null
+                )
+            } catch (_: Throwable) {
+                try {
+                    controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+                } catch (_: Throwable) { false }
+            }
         } else false
-        if (!verifiedBound) {
+        if (!canBindAttempt) {
             val bindIntent = android.content.Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
