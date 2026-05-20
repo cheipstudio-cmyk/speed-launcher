@@ -205,13 +205,18 @@ class WidgetContainerView @JvmOverloads constructor(
             try { host.startListening() } catch (_: Throwable) {}
             val view = host.createView(item.appWidgetId, info)
             view.setAppWidget(item.appWidgetId, info)
+            // v313: rimuovo padding default di AppWidgetHostView (su Android 12+ è 16dp da default)
+            // → previene tagli sopra/sotto su widget come l'orologio Android
+            try { view.setPadding(0, 0, 0, 0) } catch (_: Throwable) {}
             addView(view, layoutParamsForItem(item))
             mountedViews[item.uuid] = view
-            // v312: aggiorna subito le options (size) per triggerare update remoto
+            // v313: aggiorna options subito + ripeti per provider lenti
             updateWidgetOptions(item, view)
-            // v312: forza update remoto del widget - alcuni provider non si attivano senza broadcast
-            post { 
-                updateWidgetOptions(item, view)
+            post { updateWidgetOptions(item, view) }
+            // v313: forza update del widget tramite broadcast esplicito al provider
+            // Documentazione Android: onUpdate NON viene chiamato dopo bind se c'è configure activity
+            // (e a volte nemmeno senza). Quindi forziamo manualmente.
+            postDelayed({
                 try {
                     val updateIntent = android.content.Intent(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
                         component = info.provider
@@ -219,7 +224,9 @@ class WidgetContainerView @JvmOverloads constructor(
                     }
                     context.sendBroadcast(updateIntent)
                 } catch (_: Throwable) {}
-            }
+                updateWidgetOptions(item, view)
+            }, 100L)
+            postDelayed({ updateWidgetOptions(item, view) }, 500L)
         } catch (t: Throwable) {
             logWidgetError(item.appWidgetId, "mountWidgetImmediate exception: ${t.message}")
         }

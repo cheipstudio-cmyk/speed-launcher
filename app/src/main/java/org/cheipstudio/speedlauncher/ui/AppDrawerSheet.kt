@@ -578,34 +578,14 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
      * - viewDragHelper: tramite questo posso accorciare la duration
      */
     private fun applyFastSheet(behavior: com.google.android.material.bottomsheet.BottomSheetBehavior<View>) {
-        // 1. Aumento hideFriction (più alto = chiude più facilmente con poco drag)
+        // v313: hideFriction moderato. Più alto di default ma non così aggressivo da chiudere lo scroll.
         try {
             val f = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
                 .getDeclaredField("hideFriction")
             f.isAccessible = true
-            f.setFloat(behavior, 0.9f)  // v312: ancora più aggressivo, default 0.1f
+            f.setFloat(behavior, 0.3f)  // v313: ridotto da 0.9 a 0.3 - non sovrasta scroll
         } catch (_: Throwable) {}
-        // v312: drag helper interno - riduco il settle duration max (default 600ms → 150ms)
-        try {
-            val dhField = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
-                .getDeclaredField("viewDragHelper")
-            dhField.isAccessible = true
-            val dragHelper = dhField.get(behavior)
-            if (dragHelper != null) {
-                // ViewDragHelper.MAX_SETTLE_DURATION_MS è 600
-                val durField = dragHelper.javaClass.getDeclaredField("mMaxVelocity")
-                durField.isAccessible = true
-                // Aumento maxVelocity → settle più rapido
-                durField.setFloat(dragHelper, durField.getFloat(dragHelper) * 3f)
-            }
-        } catch (_: Throwable) {}
-        // v312: velocità minimum threshold per il fling (più basso = più reattivo)
-        try {
-            val mfField = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
-                .getDeclaredField("significantVelocityThreshold")
-            mfField.isAccessible = true
-            mfField.setInt(behavior, 100)  // default 500
-        } catch (_: Throwable) {}
+        // v313: rimossi gli hack su maxVelocity e significantVelocityThreshold che rompevano lo scroll
     }
 
     /**

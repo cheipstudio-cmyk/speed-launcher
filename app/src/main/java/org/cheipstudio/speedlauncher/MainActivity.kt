@@ -691,11 +691,11 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             sheet.onDismissCallback = { 
                 drawerSheet = null
                 animateHomeBlur(false)
-                // v307: reset scale home più veloce (era 320ms, ora 180ms)
+                // v313: 120ms più snappy
                 try {
                     binding.homeView.animate()
                         .scaleX(1f).scaleY(1f)
-                        .setDuration(180)
+                        .setDuration(120)
                         .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 } catch (_: Throwable) {}
@@ -703,11 +703,11 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
             animateHomeBlur(true)
-            // v307: scale-down della home più rapido (era 280ms, ora 160ms) per drawer percepito più veloce
+            // v313: scale-down home 100ms - quasi istantaneo
             try {
                 binding.homeView.animate()
-                    .scaleX(0.96f).scaleY(0.96f)
-                    .setDuration((160 * animMul()).toLong())
+                    .scaleX(0.97f).scaleY(0.97f)
+                    .setDuration((100 * animMul()).toLong())
                     .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                     .start()
             } catch (_: Throwable) {}
