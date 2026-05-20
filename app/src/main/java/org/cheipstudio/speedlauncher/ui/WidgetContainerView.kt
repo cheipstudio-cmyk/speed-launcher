@@ -426,16 +426,39 @@ class WidgetContainerView @JvmOverloads constructor(
         val controller = hostController ?: return
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
-        val canBind = controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+        // v308: passa SEMPRE il bind tramite ACTION_APPWIDGET_BIND con profile, evita falsi positivi di bindIfAllowed
+        // L'utente vede il dialog "Consenti a Speed Launcher di aggiungere widget?"
+        val canBind = try {
+            controller.appWidgetManager.bindAppWidgetIdIfAllowed(
+                appWidgetId, info.profile, info.provider, null
+            )
+        } catch (_: Throwable) {
+            controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+        }
         if (!canBind) {
             val bindIntent = android.content.Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE, info.profile)
+                }
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
             controller.pendingPlaceCallback = { success -> if (success) addWidget(appWidgetId) }
-            activity.startActivityForResult(bindIntent, WidgetHostController.REQ_BIND)
+            try {
+                activity.startActivityForResult(bindIntent, WidgetHostController.REQ_BIND)
+            } catch (t: Throwable) {
+                // Activity bind non trovata (raro). Cleanup e Toast.
+                try { controller.host.deleteAppWidgetId(appWidgetId) } catch (_: Throwable) {}
+                try {
+                    android.widget.Toast.makeText(
+                        context,
+                        context.getString(org.cheipstudio.speedlauncher.R.string.widget_bind_failed),
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                } catch (_: Throwable) {}
+            }
             return
         }
         if (info.configure != null) {

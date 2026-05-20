@@ -69,9 +69,7 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         val widgetMinH = try {
             manager.getAppWidgetOptions(id)?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 130) ?: 130
         } catch (_: Throwable) { 130 }
-        val showSubtitle = widgetMinH >= 130
-        val showLabel = widgetMinH >= 90
-        applyVisibility(views, showLabel, showSubtitle)
+        applyVisibility(views, widgetMinH)
 
         // RAM
         try {
@@ -132,16 +130,29 @@ class SpeedStatsWidgetProvider : AppWidgetProvider() {
         manager.updateAppWidget(id, views)
     }
 
-    private fun applyVisibility(views: RemoteViews, showLabel: Boolean, showSubtitle: Boolean) {
+    private fun applyVisibility(views: RemoteViews, widgetMinH: Int) {
         try {
-            val labelVis = if (showLabel) android.view.View.VISIBLE else android.view.View.GONE
-            val subVis = if (showSubtitle) android.view.View.VISIBLE else android.view.View.GONE
-            views.setViewVisibility(R.id.col1_label, labelVis)
-            views.setViewVisibility(R.id.col2_label, labelVis)
-            views.setViewVisibility(R.id.col3_label, labelVis)
-            views.setViewVisibility(R.id.col1_subtitle, subVis)
-            views.setViewVisibility(R.id.col2_subtitle, subVis)
-            views.setViewVisibility(R.id.col3_subtitle, subVis)
+            // < 60dp: solo valore grande (no icon, no progress, no label, no subtitle)
+            // 60-89: icon + value (no progress, no label, no subtitle)
+            // 90-129: icon + value + progress + label (no subtitle)
+            // 130+: tutto
+            val showIcon = widgetMinH >= 60
+            val showProgress = widgetMinH >= 90
+            val showLabel = widgetMinH >= 90
+            val showSubtitle = widgetMinH >= 130
+            val vis = { v: Boolean -> if (v) android.view.View.VISIBLE else android.view.View.GONE }
+            views.setViewVisibility(R.id.col1_icon, vis(showIcon))
+            views.setViewVisibility(R.id.col2_icon, vis(showIcon))
+            views.setViewVisibility(R.id.col3_icon, vis(showIcon))
+            views.setViewVisibility(R.id.col1_progress, vis(showProgress))
+            views.setViewVisibility(R.id.col2_progress, vis(showProgress))
+            views.setViewVisibility(R.id.col3_progress, vis(showProgress))
+            views.setViewVisibility(R.id.col1_label, vis(showLabel))
+            views.setViewVisibility(R.id.col2_label, vis(showLabel))
+            views.setViewVisibility(R.id.col3_label, vis(showLabel))
+            views.setViewVisibility(R.id.col1_subtitle, vis(showSubtitle))
+            views.setViewVisibility(R.id.col2_subtitle, vis(showSubtitle))
+            views.setViewVisibility(R.id.col3_subtitle, vis(showSubtitle))
         } catch (_: Throwable) {}
     }
     

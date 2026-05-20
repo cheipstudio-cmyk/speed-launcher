@@ -636,6 +636,12 @@ class HomeView @JvmOverloads constructor(
         // v307: usa settings.widgetHeight per altezza dinamica (default 160dp, range 60-320)
         val widgetHeightDp = settings.widgetHeight.value ?: 160
         val heightPx = (widgetHeightDp * density).toInt()
+        // v308: disabilito layoutTransition di TUTTI i parent durante il cambio height (no anim grid)
+        val savedLT = layoutTransition
+        layoutTransition = null
+        val parentLL = ws.parent as? android.view.ViewGroup
+        val parentLT = parentLL?.layoutTransition
+        parentLL?.layoutTransition = null
         val existing = ws.layoutParams
         val lp = if (existing is android.widget.LinearLayout.LayoutParams) existing
                  else android.widget.LinearLayout.LayoutParams(
@@ -644,8 +650,12 @@ class HomeView @JvmOverloads constructor(
         lp.height = heightPx
         lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
         ws.layoutParams = lp
-        // Forzo refresh del contenitore widget per ricalcolare cellH coi nuovi span
-        ws.post { ws.refresh() }
+        // Ripristino layout transition dopo il prossimo frame
+        ws.post { 
+            layoutTransition = savedLT
+            parentLL?.layoutTransition = parentLT
+            ws.refresh() 
+        }
     }
 
     fun reapplySettings() {
