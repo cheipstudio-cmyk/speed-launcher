@@ -700,25 +700,21 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             sheet.onDismissCallback = { 
                 drawerSheet = null
                 animateHomeBlur(false)
-                // v313: 120ms più snappy
+                // v315: niente animazione home reset, istantaneo
                 try {
-                    binding.homeView.animate()
-                        .scaleX(1f).scaleY(1f)
-                        .setDuration(120)
-                        .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
-                        .start()
+                    binding.homeView.animate().cancel()
+                    binding.homeView.scaleX = 1f
+                    binding.homeView.scaleY = 1f
                 } catch (_: Throwable) {}
             }
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
             animateHomeBlur(true)
-            // v313: scale-down home 100ms - quasi istantaneo
+            // v315: niente scale-down home all'apertura drawer, drawer copre comunque
             try {
-                binding.homeView.animate()
-                    .scaleX(0.97f).scaleY(0.97f)
-                    .setDuration((100 * animMul()).toLong())
-                    .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
-                    .start()
+                binding.homeView.animate().cancel()
+                binding.homeView.scaleX = 1f
+                binding.homeView.scaleY = 1f
             } catch (_: Throwable) {}
         } catch (t: Throwable) {
             android.util.Log.e("MainActivity", "doShowDrawer failed", t)
@@ -737,7 +733,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         val from = if (open) 0f else 24f
         val to = if (open) 24f else 0f
         val anim = android.animation.ValueAnimator.ofFloat(from, to)
-        anim.duration = if (open) 140 else 120  // v307: blur più rapido
+        anim.duration = if (open) 80L else 60L  // v315: blur quasi istantaneo
         anim.interpolator = android.view.animation.DecelerateInterpolator()
         anim.addUpdateListener { v ->
             try {

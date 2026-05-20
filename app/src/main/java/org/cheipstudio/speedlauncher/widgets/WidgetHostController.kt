@@ -10,7 +10,7 @@ import android.content.Intent
 class WidgetHostController(private val activity: Activity) {
 
     val appWidgetManager: AppWidgetManager = AppWidgetManager.getInstance(activity)
-    val host: AppWidgetHost = AppWidgetHost(activity, HOST_ID)
+    val host: AppWidgetHost = SpeedAppWidgetHost(activity, HOST_ID)
 
     private val prefs = activity.getSharedPreferences("speed_widget_host", android.content.Context.MODE_PRIVATE)
 

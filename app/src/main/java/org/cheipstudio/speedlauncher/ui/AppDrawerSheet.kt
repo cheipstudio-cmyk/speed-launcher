@@ -578,14 +578,8 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
      * - viewDragHelper: tramite questo posso accorciare la duration
      */
     private fun applyFastSheet(behavior: com.google.android.material.bottomsheet.BottomSheetBehavior<View>) {
-        // v313: hideFriction moderato. Più alto di default ma non così aggressivo da chiudere lo scroll.
-        try {
-            val f = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
-                .getDeclaredField("hideFriction")
-            f.isAccessible = true
-            f.setFloat(behavior, 0.3f)  // v313: ridotto da 0.9 a 0.3 - non sovrasta scroll
-        } catch (_: Throwable) {}
-        // v313: rimossi gli hack su maxVelocity e significantVelocityThreshold che rompevano lo scroll
+        // v315: tutti gli override rimossi. Default Material rispetta lo scroll del RecyclerView interno.
+        // Per velocità ci si affida a setStateInternal in apertura e chiusura.
     }
 
     /**
