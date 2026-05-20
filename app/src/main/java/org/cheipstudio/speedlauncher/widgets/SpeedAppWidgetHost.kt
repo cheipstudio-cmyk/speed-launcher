@@ -70,15 +70,22 @@ class SpeedAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
     }
     
     override fun getDefaultView(): android.view.View {
-        // Override per evitare il default view "Aggiunta widget non riuscita".
-        // Restituisce una view trasparente vuota - lasciamo che il widget si carichi
-        // quando arriva il prossimo update dal provider.
-        try {
-            val empty = android.view.View(context)
-            empty.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-            return empty
-        } catch (_: Throwable) {
-            return super.getDefaultView()
+        // Override per evitare il default view di sistema.
+        // Restituisce una view trasparente - widget si caricherà al prossimo update.
+        return android.view.View(context).apply {
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        }
+    }
+    
+    /**
+     * v317: override getErrorView (@hide method nell'API SDK pubblica).
+     * Il vero "Aggiunta widget non riuscita" viene mostrato dal default getErrorView di AOSP.
+     * Restituiamo una view vuota - widget si aggiornerà al prossimo broadcast del provider.
+     */
+    @Suppress("ProtectedInFinal")
+    protected fun getErrorView(): android.view.View {
+        return android.view.View(context).apply {
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
     }
 }

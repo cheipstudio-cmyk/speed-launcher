@@ -210,12 +210,11 @@ class WidgetContainerView @JvmOverloads constructor(
             try { view.setPadding(0, 0, 0, 0) } catch (_: Throwable) {}
             addView(view, layoutParamsForItem(item))
             mountedViews[item.uuid] = view
-            // v313: aggiorna options subito + ripeti per provider lenti
+            // v317: trigger multipli per forzare il provider a mandare un update valido.
+            // Molti widget (Motorola, Revolut) falliscono il primo inflate ma se ri-trigger 
+            // update con size nuova mandano RemoteViews diverse che funzionano.
             updateWidgetOptions(item, view)
             post { updateWidgetOptions(item, view) }
-            // v313: forza update del widget tramite broadcast esplicito al provider
-            // Documentazione Android: onUpdate NON viene chiamato dopo bind se c'è configure activity
-            // (e a volte nemmeno senza). Quindi forziamo manualmente.
             postDelayed({
                 try {
                     val updateIntent = android.content.Intent(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
@@ -227,6 +226,25 @@ class WidgetContainerView @JvmOverloads constructor(
                 updateWidgetOptions(item, view)
             }, 100L)
             postDelayed({ updateWidgetOptions(item, view) }, 500L)
+            // v317: dopo 1s e 2s, ri-trigger ancora con leggero size jiggle per forzare provider re-inflate
+            postDelayed({
+                try {
+                    val w = if (width > 0) width else context.resources.displayMetrics.widthPixels
+                    val h = if (height > 0) height else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+                    val density = context.resources.displayMetrics.density
+                    val widthDp = ((w * item.spanX) / WidgetItem.GRID_COLS / density).toInt().coerceAtLeast(40)
+                    val heightDp = ((h * item.spanY) / WidgetItem.GRID_ROWS / density).toInt().coerceAtLeast(40)
+                    // Jiggle: cambio temporaneo di +1dp per forzare onAppWidgetOptionsChanged
+                    val opts = android.os.Bundle().apply {
+                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp + 1)
+                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp + 1)
+                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp + 1)
+                        putInt(android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp + 1)
+                    }
+                    android.appwidget.AppWidgetManager.getInstance(context).updateAppWidgetOptions(item.appWidgetId, opts)
+                    postDelayed({ updateWidgetOptions(item, view) }, 50L)
+                } catch (_: Throwable) {}
+            }, 1000L)
         } catch (t: Throwable) {
             logWidgetError(item.appWidgetId, "mountWidgetImmediate exception: ${t.message}")
         }
