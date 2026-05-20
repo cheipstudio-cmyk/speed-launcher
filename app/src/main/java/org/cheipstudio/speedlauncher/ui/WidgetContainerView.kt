@@ -443,9 +443,23 @@ class WidgetContainerView @JvmOverloads constructor(
         val prefs = context.getSharedPreferences("widget_bind", Context.MODE_PRIVATE)
         val alwaysAllowed = prefs.getBoolean("always_allowed", false)
         val canBindAttempt = if (alwaysAllowed) {
+            // v314: passa le size options nel bindIfAllowed - serve a molti widget per renderizzare correttamente al primo bind
+            val density = context.resources.displayMetrics.density
+            val slotH = if (height > 0) height
+                        else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+            val cellH = (slotH / WidgetItem.GRID_ROWS).coerceAtLeast((40f * density).toInt())
+            val cellW = (if (width > 0) width else (context.resources.displayMetrics.widthPixels - (32f * density).toInt())) / WidgetItem.GRID_COLS
+            val widthDp = ((cellW * 4) / density).toInt().coerceAtLeast(120)
+            val heightDp = ((cellH * 2) / density).toInt().coerceAtLeast(80)
+            val bindOpts = android.os.Bundle().apply {
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
+            }
             try {
                 controller.appWidgetManager.bindAppWidgetIdIfAllowed(
-                    appWidgetId, info.profile, info.provider, null
+                    appWidgetId, info.profile, info.provider, bindOpts
                 )
             } catch (_: Throwable) {
                 try {
@@ -454,12 +468,29 @@ class WidgetContainerView @JvmOverloads constructor(
             }
         } else false
         if (!canBindAttempt) {
+            // v314: calcola opzioni di size per il bind - alcuni widget (LinkedIn, Motorola, etc) 
+            // non funzionano se vengono bound senza size hint
+            val density = context.resources.displayMetrics.density
+            val slotH = if (height > 0) height
+                        else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+            val cellH = (slotH / WidgetItem.GRID_ROWS).coerceAtLeast((40f * density).toInt())
+            val cellW = (if (width > 0) width else (context.resources.displayMetrics.widthPixels - (32f * density).toInt())) / WidgetItem.GRID_COLS
+            // default span 4x2 per dare spazio decente
+            val widthDp = ((cellW * 4) / density).toInt().coerceAtLeast(120)
+            val heightDp = ((cellH * 2) / density).toInt().coerceAtLeast(80)
+            val bindOpts = android.os.Bundle().apply {
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp)
+                putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
+            }
             val bindIntent = android.content.Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE, info.profile)
                 }
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, bindOpts)
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId

@@ -168,6 +168,15 @@ class WidgetHostController(private val activity: Activity) {
         // v306: chiamato con success=true → addWidget. Failure path chiama con false.
         // v312: forza host.startListening prima del mount per evitare "Aggiunta widget non riuscita"
         try { host.startListening() } catch (_: Throwable) {}
+        // v314: invia broadcast update esplicito al provider, indipendente dal flow di mount.
+        // Anche se onUpdate non parte auto dopo bind, questo lo forza.
+        try {
+            val updateIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                component = info.provider
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(id))
+            }
+            activity.sendBroadcast(updateIntent)
+        } catch (_: Throwable) {}
         lastWidgetId = id
         prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
         pendingPlaceCallback?.invoke(true)

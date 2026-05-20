@@ -285,6 +285,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         widgetHostController = WidgetHostController(this).also { it.start() }
+        // v314: warm-up layout cache del drawer per ridurre delay alla prima apertura
+        try {
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                try {
+                    val inflater = androidx.asynclayoutinflater.view.AsyncLayoutInflater(this)
+                    inflater.inflate(R.layout.sheet_app_drawer, null) { _, _, _ -> }
+                } catch (_: Throwable) {}
+            }, 800L)
+        } catch (_: Throwable) {}
         // v240: migrazione one-time dal vecchio sistema single-widget
         try {
             org.cheipstudio.speedlauncher.data.WidgetStore(this).migrateFromLegacyIfNeeded(this)
