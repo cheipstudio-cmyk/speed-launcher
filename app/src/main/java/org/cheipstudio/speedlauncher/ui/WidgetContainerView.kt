@@ -426,16 +426,25 @@ class WidgetContainerView @JvmOverloads constructor(
         val controller = hostController ?: return
         val activity = context as? Activity ?: return
         val appWidgetId = controller.host.allocateAppWidgetId()
-        // v308: passa SEMPRE il bind tramite ACTION_APPWIDGET_BIND con profile, evita falsi positivi di bindIfAllowed
-        // L'utente vede il dialog "Consenti a Speed Launcher di aggiungere widget?"
-        val canBind = try {
+        // v310: bindAppWidgetIdIfAllowed può ritornare TRUE su default launcher anche se il bind
+        // non avviene davvero (Xiaomi/MIUI fa così). Verifichiamo SUBITO se il bind ha avuto successo
+        // controllando se getAppWidgetInfo restituisce i dati. Se NO, forziamo il dialog.
+        val canBindAttempt = try {
             controller.appWidgetManager.bindAppWidgetIdIfAllowed(
                 appWidgetId, info.profile, info.provider, null
             )
         } catch (_: Throwable) {
-            controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+            try {
+                controller.appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, info.provider)
+            } catch (_: Throwable) { false }
         }
-        if (!canBind) {
+        // Verifica vera: se l'info per il nostro id NON è disponibile, il bind in realtà NON è avvenuto
+        val verifiedBound = if (canBindAttempt) {
+            try {
+                controller.appWidgetManager.getAppWidgetInfo(appWidgetId) != null
+            } catch (_: Throwable) { false }
+        } else false
+        if (!verifiedBound) {
             val bindIntent = android.content.Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
@@ -481,7 +490,8 @@ class WidgetContainerView @JvmOverloads constructor(
             }
         } else {
             controller.markLastWidget(appWidgetId)
-            addWidget(appWidgetId)
+            // v310: piccolo delay anche nel path canBind=true (host.createView troppo presto può fallire)
+            postDelayed({ addWidget(appWidgetId) }, 100L)
         }
     }
     

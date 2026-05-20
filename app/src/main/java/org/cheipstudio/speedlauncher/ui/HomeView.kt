@@ -664,8 +664,8 @@ class HomeView @JvmOverloads constructor(
 
     fun reapplySettings() {
         refreshRecommended()
-        applySettings()
-        applyWidgetConfig()  // v206: deve girare anche al rotation change
+        // v310: applySettings/applyWidgetConfig rimossi - già gestiti dagli observer dei singoli setting.
+        // Eseguirli a ogni onResume causava layout pass extra e flicker animazione.
         val cols = settings.gridCols.value ?: 4
         val rows = settings.gridRows.value ?: 4
         for (page in pages) {
