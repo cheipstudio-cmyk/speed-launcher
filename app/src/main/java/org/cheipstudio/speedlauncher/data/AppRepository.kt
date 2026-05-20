@@ -176,10 +176,10 @@ class AppRepository(private val context: Context) {
                 sourceView.animate().cancel()
                 sourceView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                 sourceView.animate()
-                    .scaleX(1.8f).scaleY(1.8f)
+                    .scaleX(2.2f).scaleY(2.2f)
                     .alpha(0f)
-                    .setDuration((180 * mul).toLong())
-                    .setInterpolator(android.view.animation.AccelerateInterpolator(1.8f))
+                    .setDuration((220 * mul).toLong())
+                    .setInterpolator(android.view.animation.PathInterpolator(0.4f, 0f, 0.6f, 1f))  // v316: ease più cinematico
                     .withEndAction {
                         try { doLaunch(app, sourceView) }
                         catch (_: Throwable) {}

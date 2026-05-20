@@ -102,7 +102,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         binding.recycler.setItemViewCacheSize(20)
         binding.recycler.recycledViewPool.setMaxRecycledViews(0, 30)
         binding.recycler.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
-        binding.recycler.isNestedScrollingEnabled = false
+        binding.recycler.isNestedScrollingEnabled = true  // v316: necessario, false impediva al sheet di sapere che recycler ha scroll
         binding.recycler.itemAnimator = null  // niente animazioni costose
         binding.recycler.adapter = adapter
 

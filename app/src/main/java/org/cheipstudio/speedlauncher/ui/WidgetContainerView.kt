@@ -201,12 +201,12 @@ class WidgetContainerView @JvmOverloads constructor(
     
     private fun mountWidgetImmediate(item: WidgetItem, host: WidgetHostController, info: android.appwidget.AppWidgetProviderInfo) {
         try {
-            // v312: assicura host listening attivo prima del mount
+            // v316: startListening DEVE essere chiamato prima di createView
+            // perché createView internamente fa sService.getAppWidgetViews() che ritorna null se non listening
             try { host.startListening() } catch (_: Throwable) {}
             val view = host.createView(item.appWidgetId, info)
-            view.setAppWidget(item.appWidgetId, info)
-            // v313: rimuovo padding default di AppWidgetHostView (su Android 12+ è 16dp da default)
-            // → previene tagli sopra/sotto su widget come l'orologio Android
+            // v316: NIENTE setAppWidget esplicito - createView lo fa già internamente
+            // Doppia chiamata può rompere il binding
             try { view.setPadding(0, 0, 0, 0) } catch (_: Throwable) {}
             addView(view, layoutParamsForItem(item))
             mountedViews[item.uuid] = view
