@@ -19,7 +19,7 @@ class WidgetHostController(private val activity: Activity) {
         private set
 
     /** Chi ha avviato il flusso bind/configure può aspettarsi una callback */
-    var pendingPlaceCallback: ((AppWidgetHostView?) -> Unit)? = null
+    var pendingPlaceCallback: ((Boolean) -> Unit)? = null
     var pendingBindWidget: AppWidgetProviderInfo? = null
     var pendingBindAppWidgetId: Int = -1
 
@@ -58,7 +58,7 @@ class WidgetHostController(private val activity: Activity) {
     }
 
     /** Vecchio flusso ACTION_APPWIDGET_PICK - mantengo per compatibilità ma non usato dalla v12 */
-    fun pickAndAddWidget(onPicked: (AppWidgetHostView?) -> Unit) {
+    fun pickAndAddWidget(onPicked: (Boolean) -> Unit) {
         pendingPlaceCallback = onPicked
         val appWidgetId = host.allocateAppWidgetId()
         val pickIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_PICK).apply {
@@ -67,6 +67,13 @@ class WidgetHostController(private val activity: Activity) {
         activity.startActivityForResult(pickIntent, REQ_PICK)
     }
 
+
+    private fun showError(msgRes: Int) {
+        try {
+            android.widget.Toast.makeText(activity, msgRes, android.widget.Toast.LENGTH_LONG).show()
+        } catch (_: Throwable) {}
+    }
+    
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             REQ_BIND -> {
@@ -86,10 +93,11 @@ class WidgetHostController(private val activity: Activity) {
                     }
                 } else {
                     if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
-                    pendingPlaceCallback?.invoke(null)
+                    pendingPlaceCallback?.invoke(false)
                     pendingPlaceCallback = null
                     pendingBindWidget = null
                     pendingBindAppWidgetId = -1
+                    showError(org.cheipstudio.speedlauncher.R.string.widget_bind_failed)
                 }
             }
             REQ_CONFIGURE -> {
@@ -106,13 +114,14 @@ class WidgetHostController(private val activity: Activity) {
                         placeWidget(resolvedId, info)
                     } else {
                         if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
-                        pendingPlaceCallback?.invoke(null)
+                        pendingPlaceCallback?.invoke(false)
                         pendingPlaceCallback = null
                     }
                 } else {
                     if (pendingBindAppWidgetId >= 0) host.deleteAppWidgetId(pendingBindAppWidgetId)
-                    pendingPlaceCallback?.invoke(null)
+                    pendingPlaceCallback?.invoke(false)
                     pendingPlaceCallback = null
+                    showError(org.cheipstudio.speedlauncher.R.string.widget_config_cancelled)
                 }
                 pendingBindAppWidgetId = -1
                 pendingBindWidget = null
@@ -127,11 +136,11 @@ class WidgetHostController(private val activity: Activity) {
                     if (id != AppWidgetManager.INVALID_APPWIDGET_ID && info != null) {
                         placeWidget(id, info)
                     } else {
-                        pendingPlaceCallback?.invoke(null)
+                        pendingPlaceCallback?.invoke(false)
                         pendingPlaceCallback = null
                     }
                 } else {
-                    pendingPlaceCallback?.invoke(null)
+                    pendingPlaceCallback?.invoke(false)
                     pendingPlaceCallback = null
                 }
             }
@@ -141,9 +150,10 @@ class WidgetHostController(private val activity: Activity) {
     private fun placeWidget(id: Int, info: AppWidgetProviderInfo) {
         // v289: non creo la view qui - WidgetContainerView.mountWidget la crea con createView
         // Creare due AppWidgetHostView per lo stesso id può rompere il binding
+        // v306: chiamato con success=true → addWidget. Failure path chiama con false.
         lastWidgetId = id
         prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
-        pendingPlaceCallback?.invoke(null)
+        pendingPlaceCallback?.invoke(true)
         pendingPlaceCallback = null
         pendingBindWidget = null
         pendingBindAppWidgetId = -1

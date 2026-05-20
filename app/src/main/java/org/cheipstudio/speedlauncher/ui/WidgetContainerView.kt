@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
+import org.cheipstudio.speedlauncher.R
 import org.cheipstudio.speedlauncher.SpeedApp
 import org.cheipstudio.speedlauncher.data.WidgetItem
 import org.cheipstudio.speedlauncher.data.WidgetStore
@@ -88,6 +89,22 @@ class WidgetContainerView @JvmOverloads constructor(
         for (item in items) {
             mountWidget(item, host)
         }
+        // v307: altezza slot dinamica = maxSpanY * cellHeightDp.
+        // Cella = ~60dp così widget al minimo (spanY=1) hanno almeno 60dp visibili.
+        try {
+            val lp = layoutParams
+            if (lp != null) {
+                val density = context.resources.displayMetrics.density
+                val cellDp = 60f
+                val maxSpanY = items.maxOfOrNull { it.spanY } ?: 0
+                val targetH = if (items.isEmpty() || maxSpanY <= 0) 0
+                else (maxSpanY * cellDp * density).toInt()
+                if (lp.height != targetH) {
+                    lp.height = targetH
+                    layoutParams = lp
+                }
+            }
+        } catch (_: Throwable) {}
         // v241: forza layout pass dopo mount (caso width già > 0 al refresh)
         if (width > 0 && height > 0) applyLayoutToChildren()
         else post { 
@@ -173,34 +190,64 @@ class WidgetContainerView @JvmOverloads constructor(
         try {
             val info = host.appWidgetManager.getAppWidgetInfo(item.appWidgetId)
             if (info == null) {
-                // Provider rimosso, pulisco da store
-                store.removeWidget(pageIndex, item.uuid)
+                // v307: NON rimuovere subito - il provider potrebbe non essere pronto.
+                // Retry una volta dopo 300ms; se ancora null allora rimuovi.
+                postDelayed({
+                    try {
+                        val retryInfo = host.appWidgetManager.getAppWidgetInfo(item.appWidgetId)
+                        if (retryInfo == null) {
+                            store.removeWidget(pageIndex, item.uuid)
+                            logWidgetError(item.appWidgetId, "getAppWidgetInfo returned null on retry")
+                        } else {
+                            mountWidgetImmediate(item, host, retryInfo)
+                        }
+                    } catch (t: Throwable) {
+                        logWidgetError(item.appWidgetId, "retry exception: ${t.message}")
+                    }
+                }, 300L)
                 return
             }
+            mountWidgetImmediate(item, host, info)
+        } catch (t: Throwable) {
+            logWidgetError(item.appWidgetId, "mountWidget exception: ${t.message}")
+        }
+    }
+    
+    private fun mountWidgetImmediate(item: WidgetItem, host: WidgetHostController, info: android.appwidget.AppWidgetProviderInfo) {
+        try {
             val view = host.createView(item.appWidgetId, info)
             view.setAppWidget(item.appWidgetId, info)
-            // Aggiungo come child con LayoutParams calcolati al layout pass
             addView(view, layoutParamsForItem(item))
             mountedViews[item.uuid] = view
-            // Forza updateAppWidgetOptions con dimensioni calcolate per dare al widget min/max
             post { updateWidgetOptions(item, view) }
+        } catch (t: Throwable) {
+            logWidgetError(item.appWidgetId, "mountWidgetImmediate exception: ${t.message}")
+        }
+    }
+    
+    private fun logWidgetError(appWidgetId: Int, msg: String) {
+        try {
+            val file = java.io.File(context.cacheDir, "widget_errors.log")
+            if (file.length() > 30_000) file.delete()
+            file.appendText("[${System.currentTimeMillis()}] id=$appWidgetId: $msg\n")
         } catch (_: Throwable) {}
     }
 
     private fun layoutParamsForItem(item: WidgetItem): FrameLayout.LayoutParams {
-        // v241: dimensioni iniziali calcolate al volo se width disponibile
-        val lp = if (width > 0 && height > 0) {
+        // v307: cellH fisso 60dp (era height/GRID_ROWS, comprimeva widget quando slot piccolo)
+        val density = context.resources.displayMetrics.density
+        val cellHpx = (60f * density).toInt()
+        val lp = if (width > 0) {
             val cellW = width / WidgetItem.GRID_COLS
-            val cellH = height / WidgetItem.GRID_ROWS
-            FrameLayout.LayoutParams(cellW * item.spanX, cellH * item.spanY).apply {
+            FrameLayout.LayoutParams(cellW * item.spanX, cellHpx * item.spanY).apply {
                 leftMargin = cellW * item.cellX
-                topMargin = cellH * item.cellY
+                topMargin = cellHpx * item.cellY
             }
         } else {
-            // Fallback: match_parent così il widget non è 0x0 mentre aspettiamo onSizeChanged
+            // Fallback prima della prima misura
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
+                cellHpx * item.spanY
             )
         }
         return lp
@@ -219,16 +266,18 @@ class WidgetContainerView @JvmOverloads constructor(
 
     private fun applyLayoutToChildren() {
         val cols = WidgetItem.GRID_COLS
-        val rows = WidgetItem.GRID_ROWS
-        if (width <= 0 || height <= 0) return
+        if (width <= 0) return
         val cellW = width / cols
-        val cellH = height / rows
+        // v307: cellH dipende dall'altezza reale del container, fallback a widget_slot_height/GRID_ROWS
+        // Se il container è auto-collassato (height=0), uso il default dal dimens.
+        val density = context.resources.displayMetrics.density
+        val slotH = if (height > 0) height 
+                    else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+        val cellH = (slotH / WidgetItem.GRID_ROWS).coerceAtLeast((40f * density).toInt())
         val items = store.loadPage(pageIndex)
         for (item in items) {
             val view = mountedViews[item.uuid] ?: continue
             val lp = view.layoutParams as? FrameLayout.LayoutParams ?: continue
-            // v281: spanY rispetta item (personalizzabile), container mantiene altezza fissa
-            // → griglia icone non si sposta tra pagine
             lp.width = cellW * item.spanX
             lp.height = cellH * item.spanY.coerceAtLeast(1)
             lp.leftMargin = (width - lp.width) / 2
@@ -241,7 +290,11 @@ class WidgetContainerView @JvmOverloads constructor(
     private fun updateWidgetOptions(item: WidgetItem, view: View) {
         try {
             val cellW = width / WidgetItem.GRID_COLS
-            val cellH = height / WidgetItem.GRID_ROWS
+            // v307: cellH coerente con applyLayoutToChildren
+            val slotH = if (height > 0) height 
+                        else context.resources.getDimensionPixelSize(R.dimen.widget_slot_height)
+            val cellH = (slotH / WidgetItem.GRID_ROWS)
+                .coerceAtLeast((40f * resources.displayMetrics.density).toInt())
             val widthDp = ((cellW * item.spanX) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
             val heightDp = ((cellH * item.spanY) / resources.displayMetrics.density).toInt().coerceAtLeast(40)
             val opts = Bundle().apply {
@@ -381,7 +434,7 @@ class WidgetContainerView @JvmOverloads constructor(
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
-            controller.pendingPlaceCallback = { _ -> addWidget(appWidgetId) }
+            controller.pendingPlaceCallback = { success -> if (success) addWidget(appWidgetId) }
             activity.startActivityForResult(bindIntent, WidgetHostController.REQ_BIND)
             return
         }
@@ -392,7 +445,7 @@ class WidgetContainerView @JvmOverloads constructor(
             }
             controller.pendingBindWidget = info
             controller.pendingBindAppWidgetId = appWidgetId
-            controller.pendingPlaceCallback = { _ -> addWidget(appWidgetId) }
+            controller.pendingPlaceCallback = { success -> if (success) addWidget(appWidgetId) }
             activity.startActivityForResult(configIntent, WidgetHostController.REQ_CONFIGURE)
         } else {
             controller.markLastWidget(appWidgetId)

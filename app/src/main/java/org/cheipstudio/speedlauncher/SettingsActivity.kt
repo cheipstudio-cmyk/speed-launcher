@@ -80,12 +80,18 @@ class SettingsActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
         
         // v203: fade-in immediato del content per percezione di apertura veloce
+        // v306: safety net per device dove l'animazione non parte (es. Motorola My UX) → resta nero
         binding.root.alpha = 0f
         binding.root.animate()
             .alpha(1f)
             .setDuration(180)
             .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .withEndAction { binding.root.alpha = 1f }
             .start()
+        // Safety: forzo alpha=1 dopo 500ms se l'animazione non è scattata
+        binding.root.postDelayed({
+            try { if (binding.root.alpha < 0.99f) binding.root.alpha = 1f } catch (_: Throwable) {}
+        }, 500L)
         
         // Trovo CollapsingToolbarLayout (parent diretto del toolbar)
         val ctl = binding.toolbar.parent as? com.google.android.material.appbar.CollapsingToolbarLayout

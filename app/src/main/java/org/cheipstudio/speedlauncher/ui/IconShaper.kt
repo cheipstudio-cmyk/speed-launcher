@@ -43,10 +43,18 @@ object IconShaper {
     }
 
     fun shape(drawable: Drawable, shape: String): Drawable {
-        if (shape == SettingsRepository.SHAPE_ORIGINAL) return drawable
+        if (shape == SettingsRepository.SHAPE_ORIGINAL) return cloneSafe(drawable)
         val bmp = renderToBitmap(drawable, ICON_SIZE)
         val masked = applyMask(bmp, shape)
         return BitmapDrawable(null, masked)
+    }
+    
+    /** v306: ritorna un clone "fresh" del drawable per evitare stato residuo (bounds, alpha, ecc) */
+    private fun cloneSafe(drawable: Drawable): Drawable {
+        return try {
+            val cs = drawable.constantState
+            cs?.newDrawable()?.mutate() ?: drawable
+        } catch (_: Throwable) { drawable }
     }
 
     /**
@@ -65,7 +73,7 @@ object IconShaper {
         val effectiveDrawable = if (mgr != null) {
             mgr.getIconForComponent(packageName, activityName) ?: drawable
         } else drawable
-        if (shape == SettingsRepository.SHAPE_ORIGINAL) return effectiveDrawable
+        if (shape == SettingsRepository.SHAPE_ORIGINAL) return cloneSafe(effectiveDrawable)
         val bmp = renderToBitmap(effectiveDrawable, ICON_SIZE)
         val masked = applyMask(bmp, shape)
         return BitmapDrawable(null, masked)

@@ -389,4 +389,6 @@ Télécharger maintenant ?</string>
     <string name="speed_widget_section_storage_subtitle">%1$d Go</string>
     <string name="speed_widget_section_battery_subtitle">%1$d mAh</string>
     <string name="speed_widget_no_wifi">Non connecté</string>
+    <string name="widget_bind_failed">Could not add widget. Try again or check permissions.</string>
+    <string name="widget_config_cancelled">Widget configuration cancelled</string>
 </resources>

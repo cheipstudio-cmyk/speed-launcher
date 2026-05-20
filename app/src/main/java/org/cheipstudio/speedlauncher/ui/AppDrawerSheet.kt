@@ -605,6 +605,42 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         super.onDismiss(dialog)
         try { onDismissCallback?.invoke() } catch (_: Throwable) {}
     }
+    
+    /** v306: dismiss istantaneo - skippa lo slide-down animato di BottomSheetBehavior */
+    override fun dismiss() {
+        try {
+            dialog?.window?.setWindowAnimations(0)
+            val sheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            if (sheet != null) {
+                val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(sheet)
+                // setStateInternal salta ViewDragHelper smooth slide
+                try {
+                    val m = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
+                        .getDeclaredMethod("setStateInternal", Int::class.javaPrimitiveType)
+                    m.isAccessible = true
+                    m.invoke(behavior, com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN)
+                } catch (_: Throwable) {}
+            }
+        } catch (_: Throwable) {}
+        super.dismiss()
+    }
+    
+    override fun dismissAllowingStateLoss() {
+        try {
+            dialog?.window?.setWindowAnimations(0)
+            val sheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            if (sheet != null) {
+                val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(sheet)
+                try {
+                    val m = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
+                        .getDeclaredMethod("setStateInternal", Int::class.javaPrimitiveType)
+                    m.isAccessible = true
+                    m.invoke(behavior, com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN)
+                } catch (_: Throwable) {}
+            }
+        } catch (_: Throwable) {}
+        super.dismissAllowingStateLoss()
+    }
 
     companion object {
         private const val ARG_FOCUS_SEARCH = "focus_search"

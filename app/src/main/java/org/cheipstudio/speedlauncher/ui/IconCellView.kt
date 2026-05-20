@@ -305,6 +305,11 @@ class IconCellView(context: Context) : LinearLayout(context) {
         this.app = app
         val s = SpeedApp.instance.settingsRepository
         val shape = s.iconShape.value ?: SettingsRepository.SHAPE_ORIGINAL
+        // v306: clear drawable + invalidate prima di re-set per evitare cache visual stale dopo cambio shape
+        try {
+            iconView.setImageDrawable(null)
+            iconView.invalidate()
+        } catch (_: Throwable) {}
         iconView.setImageDrawable(IconShaper.shape(app.icon, shape, context, app.packageName, app.componentName))
         labelView.text = app.label
         // v139: toggle label home

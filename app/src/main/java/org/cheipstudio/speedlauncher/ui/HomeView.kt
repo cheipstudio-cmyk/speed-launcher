@@ -633,8 +633,9 @@ class HomeView @JvmOverloads constructor(
             return
         }
         ws.visibility = android.view.View.VISIBLE
-        // Altezza fissa: 4 righe × 60dp = 240dp (= 4 celle widget verticali)
-        val heightPx = (240 * density).toInt()
+        // v307: usa settings.widgetHeight per altezza dinamica (default 160dp, range 60-320)
+        val widgetHeightDp = settings.widgetHeight.value ?: 160
+        val heightPx = (widgetHeightDp * density).toInt()
         val existing = ws.layoutParams
         val lp = if (existing is android.widget.LinearLayout.LayoutParams) existing
                  else android.widget.LinearLayout.LayoutParams(
@@ -643,6 +644,8 @@ class HomeView @JvmOverloads constructor(
         lp.height = heightPx
         lp.width = android.widget.LinearLayout.LayoutParams.MATCH_PARENT
         ws.layoutParams = lp
+        // Forzo refresh del contenitore widget per ricalcolare cellH coi nuovi span
+        ws.post { ws.refresh() }
     }
 
     fun reapplySettings() {

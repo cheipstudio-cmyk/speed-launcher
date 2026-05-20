@@ -691,11 +691,11 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             sheet.onDismissCallback = { 
                 drawerSheet = null
                 animateHomeBlur(false)
-                // v200: reset scale home al chiudere drawer
+                // v307: reset scale home più veloce (era 320ms, ora 180ms)
                 try {
                     binding.homeView.animate()
                         .scaleX(1f).scaleY(1f)
-                        .setDuration(320)
+                        .setDuration(180)
                         .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 } catch (_: Throwable) {}
@@ -703,11 +703,11 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
             sheet.show(supportFragmentManager, "drawer")
             drawerSheet = sheet
             animateHomeBlur(true)
-            // v200: scale-down sottile della home all'apertura drawer  
+            // v307: scale-down della home più rapido (era 280ms, ora 160ms) per drawer percepito più veloce
             try {
                 binding.homeView.animate()
                     .scaleX(0.96f).scaleY(0.96f)
-                    .setDuration((280 * animMul()).toLong())
+                    .setDuration((160 * animMul()).toLong())
                     .setInterpolator(android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f))
                     .start()
             } catch (_: Throwable) {}
@@ -728,7 +728,7 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
         val from = if (open) 0f else 24f
         val to = if (open) 24f else 0f
         val anim = android.animation.ValueAnimator.ofFloat(from, to)
-        anim.duration = if (open) 220 else 180
+        anim.duration = if (open) 140 else 120  // v307: blur più rapido
         anim.interpolator = android.view.animation.DecelerateInterpolator()
         anim.addUpdateListener { v ->
             try {
