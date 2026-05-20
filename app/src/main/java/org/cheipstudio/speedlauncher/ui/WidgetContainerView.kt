@@ -47,6 +47,7 @@ class WidgetContainerView @JvmOverloads constructor(
     private var horizSwipeDetected = false
     private var hostController: WidgetHostController? = null
     private val mountedViews = mutableMapOf<String, View>()  // uuid → view montata
+    private var shownWidgetErrorWarning = false  // v321: mostro Toast errore widget una sola volta
     
     // v244: callback long press su area vuota (no widget sotto) → apre HomeMenuSheet
     var onEmptyLongPress: (() -> Unit)? = null

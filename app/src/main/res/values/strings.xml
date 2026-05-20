@@ -410,4 +410,8 @@ Vuoi scaricarla?</string>
     <string name="speed_widget_no_wifi">Non connesso</string>
     <string name="widget_bind_failed">Impossibile aggiungere il widget. Riprova o controlla i permessi.</string>
     <string name="widget_config_cancelled">Configurazione widget annullata</string>
+    <string name="widget_troubleshoot_title">Problemi con i widget?</string>
+    <string name="widget_troubleshoot_body">Se il widget mostra \"Aggiunta widget non riuscita\" è un bug noto di Android (presente anche in Lawnchair, Niagara e altri launcher di terze parti) che impedisce ad alcuni widget di funzionare quando un launcher diverso da quello di sistema è impostato come predefinito.\n\nSoluzione:\n1. Impostazioni Android → App → App predefinite\n2. Imposta il launcher di sistema come predefinito\n3. Apri Speed Launcher\n4. Aggiungi il widget che desideri\n5. Re-imposta Speed Launcher come launcher predefinito\n\nIl widget continuerà a funzionare. Da Android 14 in poi questo bug è risolto.</string>
+    <string name="widget_troubleshoot_action">Aiuto widget</string>
+    <string name="widget_load_failed_hint">Il widget non si è caricato. Vai in Impostazioni → Sistema → Aiuto widget per la soluzione.</string>
 </resources>
