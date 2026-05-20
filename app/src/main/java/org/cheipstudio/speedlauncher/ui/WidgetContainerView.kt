@@ -201,11 +201,25 @@ class WidgetContainerView @JvmOverloads constructor(
     
     private fun mountWidgetImmediate(item: WidgetItem, host: WidgetHostController, info: android.appwidget.AppWidgetProviderInfo) {
         try {
+            // v312: assicura host listening attivo prima del mount
+            try { host.startListening() } catch (_: Throwable) {}
             val view = host.createView(item.appWidgetId, info)
             view.setAppWidget(item.appWidgetId, info)
             addView(view, layoutParamsForItem(item))
             mountedViews[item.uuid] = view
-            post { updateWidgetOptions(item, view) }
+            // v312: aggiorna subito le options (size) per triggerare update remoto
+            updateWidgetOptions(item, view)
+            // v312: forza update remoto del widget - alcuni provider non si attivano senza broadcast
+            post { 
+                updateWidgetOptions(item, view)
+                try {
+                    val updateIntent = android.content.Intent(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                        component = info.provider
+                        putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(item.appWidgetId))
+                    }
+                    context.sendBroadcast(updateIntent)
+                } catch (_: Throwable) {}
+            }
         } catch (t: Throwable) {
             logWidgetError(item.appWidgetId, "mountWidgetImmediate exception: ${t.message}")
         }

@@ -166,6 +166,8 @@ class WidgetHostController(private val activity: Activity) {
         // v289: non creo la view qui - WidgetContainerView.mountWidget la crea con createView
         // Creare due AppWidgetHostView per lo stesso id può rompere il binding
         // v306: chiamato con success=true → addWidget. Failure path chiama con false.
+        // v312: forza host.startListening prima del mount per evitare "Aggiunta widget non riuscita"
+        try { host.startListening() } catch (_: Throwable) {}
         lastWidgetId = id
         prefs.edit().putInt(KEY_LAST_WIDGET_ID, id).apply()
         pendingPlaceCallback?.invoke(true)

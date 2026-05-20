@@ -1343,22 +1343,19 @@ class HomeView @JvmOverloads constructor(
      */
     private fun performHapticFeedbackLight() {
         if (settings.hapticEnabled.value != true) return
-        val viewSucceeded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
-        } else {
-            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-        }
+        // v312: CLOCK_TICK su tutti i SDK (più leggero di GESTURE_START)
+        val viewSucceeded = performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
         if (!viewSucceeded) {
             try {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                     val vm = context.getSystemService(android.os.VibratorManager::class.java)
                     val vib = vm?.defaultVibrator
-                    // v77: ampiezza 60/255 (era DEFAULT_AMPLITUDE = ~150) → vibrazione gentile
-                    vib?.vibrate(android.os.VibrationEffect.createOneShot(12L, 60))
+                    // v312: ampiezza 30/255 e durata 8ms (ulteriore riduzione)
+                    vib?.vibrate(android.os.VibrationEffect.createOneShot(8L, 30))
                 } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     @Suppress("DEPRECATION")
                     val vib = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
-                    vib?.vibrate(android.os.VibrationEffect.createOneShot(12L, 60))
+                    vib?.vibrate(android.os.VibrationEffect.createOneShot(8L, 30))
                 } else {
                     @Suppress("DEPRECATION")
                     val vib = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator

@@ -98,6 +98,11 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         SpeedApp.instance.settingsRepository.recommendedCount.observe(viewLifecycleOwner) { setupRecommendedDrawer() }
         // v62: optimization recycler — fixed size + no overdraw
         binding.recycler.setHasFixedSize(true)
+        // v312: ottimizzazioni scroll fluido (specialmente in grid)
+        binding.recycler.setItemViewCacheSize(20)
+        binding.recycler.recycledViewPool.setMaxRecycledViews(0, 30)
+        binding.recycler.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        binding.recycler.isNestedScrollingEnabled = false
         binding.recycler.itemAnimator = null  // niente animazioni costose
         binding.recycler.adapter = adapter
 
@@ -175,19 +180,19 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
         when (layout) {
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID3 -> {
                 adapter.listMode = false
-                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 3 + landscapeBoost)
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 3 + landscapeBoost).apply { initialPrefetchItemCount = 8; isItemPrefetchEnabled = true }
                 _binding?.alphaScrollBar?.visibility = View.GONE
             }
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_GRID5 -> {
                 adapter.listMode = false
-                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 5 + landscapeBoost)
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 5 + landscapeBoost).apply { initialPrefetchItemCount = 8; isItemPrefetchEnabled = true }
                 _binding?.alphaScrollBar?.visibility = View.GONE
             }
             org.cheipstudio.speedlauncher.data.SettingsRepository.DRAWER_LIST -> {
                 adapter.listMode = true
                 if (isLandscape) {
                     // v198: in landscape la lista verticale spreca spazio - uso griglia 6 colonne
-                    binding.recycler.layoutManager = GridLayoutManager(requireContext(), 6)
+                    binding.recycler.layoutManager = GridLayoutManager(requireContext(), 6).apply { initialPrefetchItemCount = 8; isItemPrefetchEnabled = true }
                     adapter.listMode = false
                     _binding?.alphaScrollBar?.visibility = View.GONE
                 } else {
@@ -198,7 +203,7 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             }
             else -> {
                 adapter.listMode = false
-                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4 + landscapeBoost)
+                binding.recycler.layoutManager = GridLayoutManager(requireContext(), 4 + landscapeBoost).apply { initialPrefetchItemCount = 8; isItemPrefetchEnabled = true }
                 _binding?.alphaScrollBar?.visibility = View.GONE
             }
         }
@@ -578,7 +583,28 @@ class AppDrawerSheet : BottomSheetDialogFragment() {
             val f = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
                 .getDeclaredField("hideFriction")
             f.isAccessible = true
-            f.setFloat(behavior, 0.7f)  // v76: ancora più aggressivo, default 0.1f
+            f.setFloat(behavior, 0.9f)  // v312: ancora più aggressivo, default 0.1f
+        } catch (_: Throwable) {}
+        // v312: drag helper interno - riduco il settle duration max (default 600ms → 150ms)
+        try {
+            val dhField = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
+                .getDeclaredField("viewDragHelper")
+            dhField.isAccessible = true
+            val dragHelper = dhField.get(behavior)
+            if (dragHelper != null) {
+                // ViewDragHelper.MAX_SETTLE_DURATION_MS è 600
+                val durField = dragHelper.javaClass.getDeclaredField("mMaxVelocity")
+                durField.isAccessible = true
+                // Aumento maxVelocity → settle più rapido
+                durField.setFloat(dragHelper, durField.getFloat(dragHelper) * 3f)
+            }
+        } catch (_: Throwable) {}
+        // v312: velocità minimum threshold per il fling (più basso = più reattivo)
+        try {
+            val mfField = com.google.android.material.bottomsheet.BottomSheetBehavior::class.java
+                .getDeclaredField("significantVelocityThreshold")
+            mfField.isAccessible = true
+            mfField.setInt(behavior, 100)  // default 500
         } catch (_: Throwable) {}
     }
 
