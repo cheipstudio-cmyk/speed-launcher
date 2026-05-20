@@ -82,8 +82,7 @@ class SpeedAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
      * Il vero "Aggiunta widget non riuscita" viene mostrato dal default getErrorView di AOSP.
      * Restituiamo una view vuota - widget si aggiornerà al prossimo broadcast del provider.
      */
-    @Suppress("ProtectedInFinal")
-    protected fun getErrorView(): android.view.View {
+    override fun getErrorView(): android.view.View {
         return android.view.View(context).apply {
             setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
