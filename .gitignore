@@ -14,3 +14,9 @@ local.properties
 # Le chiavi RELEASE vere NON vanno qui - usare GitHub Secrets
 *.jks
 release.keystore
+
+
+# v322: release signing
+keystore.properties
+release.keystore
+*.jks

@@ -11,8 +11,8 @@ android {
         applicationId "org.cheipstudio.speedlauncher"
         minSdk 31
         targetSdk 34
-        versionCode 310
-        versionName "3.2.1"
+        versionCode 311
+        versionName "3.2.2"
         resourceConfigurations += ['en', 'it', 'fr', 'es', 'tr', 'ar', 'ja']
     }
 
@@ -23,6 +23,23 @@ android {
             keyAlias "androiddebugkey"
             keyPassword "android"
         }
+        release {
+            // v322: signing config release. Valori da keystore.properties o ENV in CI.
+            def keystorePropsFile = rootProject.file("keystore.properties")
+            if (keystorePropsFile.exists()) {
+                def props = new Properties()
+                keystorePropsFile.withInputStream { props.load(it) }
+                storeFile file(props['storeFile'])
+                storePassword props['storePassword']
+                keyAlias props['keyAlias']
+                keyPassword props['keyPassword']
+            } else if (System.getenv("KEYSTORE_FILE") != null) {
+                storeFile file(System.getenv("KEYSTORE_FILE"))
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -30,6 +47,11 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // v322: firma con keystore release (se configurata via keystore.properties o ENV)
+            def keystorePropsFile = rootProject.file("keystore.properties")
+            if (keystorePropsFile.exists() || System.getenv("KEYSTORE_FILE") != null) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             signingConfig signingConfigs.debug

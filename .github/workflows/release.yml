@@ -1,4 +1,4 @@
-name: Release APK
+name: Release APK + AAB
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -32,74 +32,63 @@ jobs:
           unzip -q /tmp/gradle.zip -d /opt/gradle-install
           export PATH="/opt/gradle-install/gradle-8.4/bin:$PATH"
           gradle wrapper --gradle-version=8.4 --distribution-type=bin
-          ls -la gradle/wrapper/
-          cat gradle/wrapper/gradle-wrapper.properties
 
-      # v102: genera debug.keystore (referenziato da app/build.gradle)
       - name: Generate debug keystore (only if missing)
         run: |
           if [ ! -f debug.keystore ]; then
-            echo "Generating new debug.keystore"
             keytool -genkey -v -keystore debug.keystore \
               -storepass android -alias androiddebugkey \
               -keypass android -keyalg RSA -keysize 2048 \
               -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
-          else
-            echo "Using existing debug.keystore from repo"
           fi
-          ls -la debug.keystore
 
-      - name: Grant execute permission
+      - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Verify Gradle version via wrapper
-        run: ./gradlew --version
+      # v322: setup release signing
+      - name: Decode release keystore
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > ${{ github.workspace }}/release.keystore
+          ls -la ${{ github.workspace }}/release.keystore
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Rename APK
+      - name: Build release APK + AAB (signed)
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_FILE: ${{ github.workspace }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          mkdir -p release
-          # v112: il file ha nome custom (SpeedLauncher-VERSION-debug.apk), uso wildcard
-          APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" -type f | head -1)
-          echo "APK trovato: $APK_PATH"
-          cp "$APK_PATH" release/SpeedLauncher-${{ github.ref_name }}.apk
-          ls -la release/
+          ./gradlew assembleRelease bundleRelease --no-daemon --stacktrace
+
+      - name: Find artifacts
+        id: artifacts
+        run: |
+          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
+          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -1)
+          RELEASE_AAB=$(find app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -1)
+          echo "debug_apk=$DEBUG_APK" >> $GITHUB_OUTPUT
+          echo "release_apk=$RELEASE_APK" >> $GITHUB_OUTPUT
+          echo "release_aab=$RELEASE_AAB" >> $GITHUB_OUTPUT
+          echo "Found: debug=$DEBUG_APK release_apk=$RELEASE_APK release_aab=$RELEASE_AAB"
 
       - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          TAG="${{ github.ref_name }}"
-          APK_FILE="release/SpeedLauncher-${TAG}.apk"
-          
-          # v120: trasformo TUTTE le prerelease passate in release normali
-          # (così l'API releases/latest non si confonde)
-          echo "=== Convertendo prerelease vecchie in release normali ==="
-          gh release list --limit 50 --json tagName,isPrerelease | \
-            jq -r '.[] | select(.isPrerelease == true) | .tagName' | \
-            while read OLD_TAG; do
-              echo "Converting $OLD_TAG to non-prerelease..."
-              gh release edit "$OLD_TAG" --prerelease=false 2>&1 || true
-            done
-          
-          # Se la release esiste già, la elimino e ricreo
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists, deleting..."
-            gh release delete "$TAG" --yes --cleanup-tag=false
-          fi
-          
-          # Crea release nuova: latest, NON prerelease
-          echo "Creating new release $TAG as latest..."
-          gh release create "$TAG" \
-            --title "Speed Launcher $TAG" \
-            --notes "Speed Launcher beta build. Scarica l\'APK qui sotto. Se Android blocca, abilita Sorgenti sconosciute. Aggiornabile in-app: Impostazioni → Controlla aggiornamenti." \
-            --latest \
-            "$APK_FILE"
-          
-          # Verifica
-          echo "=== Verifica finale ==="
-          gh release view "$TAG"
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{ steps.artifacts.outputs.debug_apk }}
+            ${{ steps.artifacts.outputs.release_apk }}
+            ${{ steps.artifacts.outputs.release_aab }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: false
