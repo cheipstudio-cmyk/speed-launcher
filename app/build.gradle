@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace 'org.cheipstudio.speedlauncher'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "org.cheipstudio.speedlauncher"
         minSdk 31
-        targetSdk 34
-        versionCode 312
-        versionName "3.2.3"
+        targetSdk 35
+        versionCode 313
+        versionName "3.2.4"
         resourceConfigurations += ['en', 'it', 'fr', 'es', 'tr', 'ar', 'ja']
     }
 
